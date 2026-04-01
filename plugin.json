@@ -1,0 +1,142 @@
+{
+  "name": "hybrid-mobile-architecture",
+  "displayName": "Hybrid Mobile Architecture",
+  "version": "1.0.0",
+  "description": "Scaffold, extend, and maintain applications built on the Prometheus AGS hybrid mobile architecture: Flutter + Rust FFI for iOS/Android, Tauri + React 19 for desktop, sharing a single gen_ui_core Rust crate. Covers environment setup, feature-based clean architecture, Riverpod/Zustand+TanStack state management, Ory Kratos/Supabase auth, A2UI/AG-UI protocols, local inference, MCP tool use, SurrealDB integration, and UAR embedding.",
+  "author": {
+    "name": "Travis James",
+    "email": "travis@prometheusags.ai",
+    "url": "https://travisjames.ai"
+  },
+  "organization": "Prometheus Agentic Growth Solutions",
+  "license": "MIT",
+  "homepage": "https://travisjames.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prometheusags/hybrid-mobile-skill"
+  },
+  "keywords": [
+    "flutter", "tauri", "rust", "mobile", "desktop", "hybrid",
+    "riverpod", "zustand", "tanstack", "react", "gen_ui",
+    "a2ui", "ag-ui", "mcp", "surrealdb", "ory-kratos",
+    "supabase", "universal-agent-runtime", "candle", "inference",
+    "knowme", "prometheus-ags", "travisjames"
+  ],
+  "categories": [
+    "architecture",
+    "scaffolding",
+    "mobile",
+    "desktop",
+    "ai-agent",
+    "rust",
+    "flutter",
+    "react"
+  ],
+  "engines": {
+    "claude": ">=3.5"
+  },
+  "compatibility": {
+    "flutter": ">=3.29.0",
+    "rust": ">=1.80.0",
+    "node": ">=22.0.0",
+    "tauri": ">=2.10.3",
+    "dart": ">=3.4.0"
+  },
+  "commands": [
+    {
+      "name": "scaffold-hybrid",
+      "description": "Scaffold a complete hybrid project (Flutter mobile + Tauri desktop + shared Rust core)",
+      "script": "scripts/scaffold-hybrid.sh"
+    },
+    {
+      "name": "scaffold-flutter",
+      "description": "Scaffold a Flutter + Rust FFI mobile application",
+      "script": "scripts/scaffold-flutter.sh"
+    },
+    {
+      "name": "scaffold-tauri",
+      "description": "Scaffold a Tauri + React 19 desktop application",
+      "script": "scripts/scaffold-tauri.sh"
+    },
+    {
+      "name": "scaffold-rust-core",
+      "description": "Scaffold the gen_ui_core shared Rust crate",
+      "script": "scripts/scaffold-rust-core.sh"
+    },
+    {
+      "name": "check-env",
+      "description": "Check and install all required tools and dependencies",
+      "script": "scripts/check-env.sh"
+    },
+    {
+      "name": "new-feature",
+      "description": "Scaffold a new feature module in Flutter or Tauri project",
+      "script": "scripts/new-feature.sh"
+    },
+    {
+      "name": "add-auth",
+      "description": "Add Ory Kratos or Supabase authentication to a project",
+      "script": "scripts/add-auth.sh"
+    },
+    {
+      "name": "audit",
+      "description": "Audit codebase for TJ-ARCH-MOB-001 compliance",
+      "script": "scripts/audit.sh"
+    }
+  ],
+  "resources": [
+    {
+      "name": "Architectural Standard",
+      "path": "docs/tj-arch-mob-001.html",
+      "type": "documentation",
+      "mimeType": "text/html"
+    },
+    {
+      "name": "Architecture Reference",
+      "path": "references/arch-standard.md",
+      "type": "reference"
+    },
+    {
+      "name": "Flutter Patterns",
+      "path": "references/flutter/patterns.md",
+      "type": "reference"
+    },
+    {
+      "name": "Tauri/React Patterns",
+      "path": "references/tauri/patterns.md",
+      "type": "reference"
+    },
+    {
+      "name": "Rust Core Patterns",
+      "path": "references/rust/patterns.md",
+      "type": "reference"
+    },
+    {
+      "name": "Auth Patterns",
+      "path": "references/auth/patterns.md",
+      "type": "reference"
+    }
+  ],
+  "templates": [
+    {
+      "name": "flutter-feature-module",
+      "path": "assets/templates/flutter-feature/",
+      "description": "Feature module scaffold for Flutter clean architecture"
+    },
+    {
+      "name": "tauri-feature-module",
+      "path": "assets/templates/tauri-feature/",
+      "description": "Feature module scaffold for Tauri/React clean architecture"
+    },
+    {
+      "name": "rust-core",
+      "path": "assets/templates/rust-core/",
+      "description": "gen_ui_core Rust crate template"
+    },
+    {
+      "name": "content-block",
+      "path": "assets/templates/content-block/",
+      "description": "New ContentBlock variant — full stack (Rust + Dart + Flutter widget)"
+    }
+  ]
+}

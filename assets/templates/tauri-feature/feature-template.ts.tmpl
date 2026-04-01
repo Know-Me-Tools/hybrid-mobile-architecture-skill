@@ -1,0 +1,221 @@
+// TJ-ARCH-MOB-001 compliant
+// Tauri/React Feature Module Template — {FeatureName}
+// Replace {FeatureName} with PascalCase feature name
+// Replace {featureName} with camelCase feature name
+// Replace {feature-name} with kebab-case feature name
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE: src/features/{featureName}/types.ts
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface {FeatureName}Entity {
+  id:         string
+  name:       string
+  createdAt:  string
+  updatedAt?: string
+  isActive:   boolean
+}
+
+export interface Create{FeatureName}Input {
+  name:     string
+  isActive?: boolean
+}
+
+export interface Update{FeatureName}Input {
+  id:        string
+  name?:     string
+  isActive?: boolean
+}
+
+export interface {FeatureName}Filters {
+  query:    string
+  isActive: boolean | null
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE: src/features/{featureName}/api/{featureName}Api.ts
+// (Only stores import this — never components or hooks)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { invoke } from '@tauri-apps/api/core'
+import type { {FeatureName}Entity, Create{FeatureName}Input, Update{FeatureName}Input } from '../types'
+
+export const {featureName}Api = {
+  getAll:   ()                               => invoke<{FeatureName}Entity[]>('{featureName}_get_all'),
+  getById:  (id: string)                     => invoke<{FeatureName}Entity>('{featureName}_get_by_id', { id }),
+  create:   (input: Create{FeatureName}Input)  => invoke<{FeatureName}Entity>('{featureName}_create',  { input }),
+  update:   (input: Update{FeatureName}Input)  => invoke<{FeatureName}Entity>('{featureName}_update',  { input }),
+  delete:   (id: string)                     => invoke<void>('{featureName}_delete', { id }),
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE: src/features/{featureName}/stores/{featureName}Store.ts
+// (Client-side state: selection, filters, UI state)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { create } from 'zustand'
+import { immer } from 'zustand/middleware/immer'
+import { subscribeWithSelector } from 'zustand/middleware'
+import type { {FeatureName}Filters } from '../types'
+
+// This store owns CLIENT-SIDE state only.
+// Server-side data (lists, details) lives in TanStack Query via queries/{featureName}Queries.ts
+
+interface {FeatureName}ClientState {
+  selectedId: string | null
+  filters:    {FeatureName}Filters
+  isCreating: boolean
+}
+
+interface {FeatureName}ClientActions {
+  selectItem:    (id: string | null) => void
+  setFilter:     (key: keyof {FeatureName}Filters, value: unknown) => void
+  resetFilters:  () => void
+  setIsCreating: (v: boolean) => void
+}
+
+const defaultFilters: {FeatureName}Filters = { query: '', isActive: null }
+
+export const use{FeatureName}Store = create<{FeatureName}ClientState & {FeatureName}ClientActions>()(
+  subscribeWithSelector(
+    immer((set) => ({
+      selectedId: null,
+      filters:    defaultFilters,
+      isCreating: false,
+
+      selectItem:    (id)     => set((s) => { s.selectedId = id }),
+      setFilter:     (key, v) => set((s) => { (s.filters as Record<string, unknown>)[key] = v }),
+      resetFilters:  ()       => set((s) => { s.filters = defaultFilters }),
+      setIsCreating: (v)      => set((s) => { s.isCreating = v }),
+    }))
+  )
+)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE: src/features/{featureName}/queries/{featureName}Queries.ts
+// (Server-side state: TanStack Query)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { {featureName}Api } from '../api/{featureName}Api'
+import type { Create{FeatureName}Input, Update{FeatureName}Input } from '../types'
+
+export const {featureName}Keys = {
+  all:    ['{featureName}'] as const,
+  lists:  ()         => [...{featureName}Keys.all, 'list'] as const,
+  detail: (id: string) => [...{featureName}Keys.all, 'detail', id] as const,
+}
+
+export function use{FeatureName}List() {
+  return useQuery({
+    queryKey: {featureName}Keys.lists(),
+    queryFn:  {featureName}Api.getAll,
+    staleTime: 30_000,
+  })
+}
+
+export function use{FeatureName}Detail(id: string) {
+  return useQuery({
+    queryKey: {featureName}Keys.detail(id),
+    queryFn:  () => {featureName}Api.getById(id),
+    enabled:  !!id,
+    staleTime: 60_000,
+  })
+}
+
+export function useCreate{FeatureName}() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: Create{FeatureName}Input) => {featureName}Api.create(input),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: {featureName}Keys.lists() }),
+  })
+}
+
+export function useUpdate{FeatureName}() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (input: Update{FeatureName}Input) => {featureName}Api.update(input),
+    onSuccess:  (data) => {
+      qc.invalidateQueries({ queryKey: {featureName}Keys.lists() })
+      qc.setQueryData({featureName}Keys.detail(data.id), data)
+    },
+  })
+}
+
+export function useDelete{FeatureName}() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => {featureName}Api.delete(id),
+    onSuccess:  () => qc.invalidateQueries({ queryKey: {featureName}Keys.all }),
+  })
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE: src/features/{featureName}/hooks/use{FeatureName}.ts
+// (What components ACTUALLY import — never stores or queries directly)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { useMemo } from 'react'
+import { use{FeatureName}Store } from '../stores/{featureName}Store'
+import {
+  use{FeatureName}List, use{FeatureName}Detail,
+  useCreate{FeatureName}, useUpdate{FeatureName}, useDelete{FeatureName},
+} from '../queries/{featureName}Queries'
+
+export function use{FeatureName}() {
+  const { data: items = [], isLoading, isError } = use{FeatureName}List()
+  const { mutateAsync: create, isPending: isCreating } = useCreate{FeatureName}()
+  const { mutateAsync: update, isPending: isUpdating } = useUpdate{FeatureName}()
+  const { mutateAsync: remove }                        = useDelete{FeatureName}()
+
+  // Client state from Zustand (accessed via selector for performance)
+  const selectedId   = use{FeatureName}Store((s) => s.selectedId)
+  const filters      = use{FeatureName}Store((s) => s.filters)
+  const selectItem   = use{FeatureName}Store((s) => s.selectItem)
+  const setFilter    = use{FeatureName}Store((s) => s.setFilter)
+  const resetFilters = use{FeatureName}Store((s) => s.resetFilters)
+
+  // Client-side filtering (no server round-trip for simple filters)
+  const filteredItems = useMemo(() => {
+    let result = items
+    if (filters.query) {
+      const q = filters.query.toLowerCase()
+      result = result.filter((i) => i.name.toLowerCase().includes(q))
+    }
+    if (filters.isActive !== null) {
+      result = result.filter((i) => i.isActive === filters.isActive)
+    }
+    return result
+  }, [items, filters])
+
+  const selectedItem = items.find((i) => i.id === selectedId) ?? null
+
+  return {
+    // Data
+    items: filteredItems,
+    allItems: items,
+    selectedItem,
+    selectedId,
+    isLoading,
+    isError,
+    isCreating,
+    isUpdating,
+    // Filters
+    filters,
+    setFilter,
+    resetFilters,
+    // Actions
+    selectItem,
+    create,
+    update,
+    remove,
+  }
+}
+
+// Detailed view hook (separate for performance — only mounts when detail is needed)
+export function use{FeatureName}Detail(id: string) {
+  const { data: item, isLoading, isError } = use{FeatureName}Detail(id)
+  const { mutateAsync: update } = useUpdate{FeatureName}()
+  const { mutateAsync: remove } = useDelete{FeatureName}()
+  return { item, isLoading, isError, update, remove }
+}

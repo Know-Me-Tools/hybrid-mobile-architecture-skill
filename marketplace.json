@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "skill": {
+    "id": "hybrid-mobile-architecture",
+    "name": "Hybrid Mobile Architecture",
+    "slug": "hybrid-mobile-architecture",
+    "version": "1.0.0",
+    "status": "published",
+    "visibility": "public",
+    "tier": "professional",
+    "author": {
+      "handle": "travisjames",
+      "name": "Travis James",
+      "url": "https://travisjames.ai",
+      "verified": true,
+      "organization": "Prometheus AGS"
+    },
+    "summary": "Production-grade hybrid mobile/desktop architecture: Flutter + Rust FFI for iOS/Android, Tauri + React 19 for desktop. Shared gen_ui_core infrastructure. Includes AI agent patterns, A2UI/AG-UI protocols, local LLM inference, MCP tool use, SurrealDB, and auth.",
+    "description": "A comprehensive architecture skill for building production applications across mobile and desktop platforms using a shared Rust infrastructure core.\n\n**What it does:**\n- Scaffolds complete hybrid projects (Flutter mobile + Tauri desktop + shared Rust)\n- Installs and configures all required tools (Flutter 3.29+, Rust 1.80+, Tauri 2.10+, Node 22+)\n- Enforces feature-based clean architecture in both Flutter and React codebases\n- Sets up Riverpod 2.x (Flutter) and Zustand 5 + TanStack Query/Router/Table (React)\n- Integrates Ory Kratos and/or Supabase authentication with best-practice patterns\n- Wires the gen_ui_core Rust crate: Anthropic API, local candle inference, MCP clients, SurrealDB, A2UI/AG-UI protocols, Universal Agent Runtime\n- Generates feature modules, ContentBlock variants, MCP integrations, and auth flows\n- Audits existing codebases for architectural compliance\n\n**Standards enforced:**\n- TJ-ARCH-MOB-001: Mobile Platform Architecture Standard\n- Strict layer boundaries: Component → Hook → Store → Rust/API\n- shadcn/ui (React) and shadcn_flutter (Flutter) component systems\n- Zustand owns client-side state; TanStack Query owns server-side state\n- Visual components never import stores directly; always via hooks\n\n**Products supported:** KnowMe, LLC · Prometheus AGS · TribeHealth.ai",
+    "categories": [
+      "architecture",
+      "mobile-development",
+      "desktop-development",
+      "ai-agents",
+      "rust",
+      "flutter",
+      "react"
+    ],
+    "tags": [
+      "flutter", "tauri", "rust", "riverpod", "zustand", "tanstack",
+      "react-19", "gen-ui", "a2ui", "ag-ui", "mcp", "surrealdb",
+      "candle", "local-inference", "ory-kratos", "supabase",
+      "clean-architecture", "hybrid-app", "ios", "android",
+      "macos", "windows", "universal-agent-runtime"
+    ],
+    "documentation": {
+      "readme": "README.md",
+      "architectural_standard": "docs/tj-arch-mob-001.html",
+      "changelog": "CHANGELOG.md"
+    },
+    "stats": {
+      "downloads": 0,
+      "rating": null,
+      "reviews": 0
+    },
+    "pricing": {
+      "model": "free",
+      "price": 0
+    },
+    "requirements": {
+      "platform": ["macos", "linux", "windows"],
+      "min_claude_version": "3.5",
+      "tools": ["bash", "git"]
+    },
+    "frameworks": {
+      "flutter": ">=3.29.0",
+      "rust": ">=1.80.0",
+      "tauri": ">=2.10.3",
+      "node": ">=22.0.0",
+      "react": ">=19.0.0"
+    },
+    "screenshots": [],
+    "demo_prompts": [
+      "Scaffold a new hybrid mobile app called knowme-mobile with Flutter for iOS/Android and Tauri for desktop",
+      "Add the gen_ui_core Rust crate to my existing Flutter project and wire up the A2UI streaming pipeline",
+      "Create a new feature module called 'memory-browser' in my Flutter app following clean architecture",
+      "Add Ory Kratos authentication to my Tauri + React application using the standard patterns",
+      "Check my Flutter app for compliance with the hybrid mobile architecture standard",
+      "Wire up local candle inference to my Flutter app using the gen_ui_core InferenceEngine",
+      "Scaffold a new ContentBlock type for displaying database query results with full Rust + Dart + widget stack",
+      "Set up Supabase authentication in my React/Tauri desktop app with RLS policies and TanStack Query integration"
+    ],
+    "published_at": "2026-03-25",
+    "updated_at": "2026-03-25"
+  }
+}
