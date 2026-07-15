@@ -7,6 +7,9 @@ directory (e.g. `CLAUDE.md`, `.kbd-orchestrator/constraints.md`). Do NOT use abs
 `/Users/...` paths to the main repo — the sandbox blocks reads outside this worktree.
 
 AUTHORITY — read these first, in order (all relative to your working directory):
+0. AGENT_BASE_RULES.md (repo root) — the 40 Prometheus Base Rules. BINDING for all
+   reasoning, coding, file modification, and human interaction. Code you generate and
+   scaffolds you edit must also propagate these rules (see CLAUDE.md).
 1. CLAUDE.md (repo root) — Development Philosophy section is BINDING:
    FEATURES FIRST, code first, test later. Inner loop = `cargo clippy` only (never
    alternate with bare check). No unit tests of internals; no mocks of internal code.

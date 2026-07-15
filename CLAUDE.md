@@ -18,7 +18,19 @@ The actual application code lives in projects scaffolded _from_ this repository,
 
 ## Prometheus Base Rules
 
-This repository follows the Prometheus Base Rules (Rules 1–40 provided in the session context). Key invariants:
+This repository follows the Prometheus Base Rules 1–40. **The canonical, complete rule
+text lives in [AGENT_BASE_RULES.md](AGENT_BASE_RULES.md) at the repo root — read it
+before substantial work.** Three binding requirements layered on top:
+
+1. **Our own work in this repo follows all 40 rules.**
+2. **Code generators must propagate the rules**: every scaffolded project receives a
+   copy of `AGENT_BASE_RULES.md` at its root, and its generated CLAUDE.md/AGENTS.md
+   must reference it as binding (scaffold-hybrid.sh emits this).
+3. **Skills must follow the rules when activated**: every skill authored in this repo
+   (templates/project-skills/*, .claude/skills/*, and the parallel harness skill dirs)
+   operates under these rules; skill templates reference AGENT_BASE_RULES.md explicitly.
+
+Key invariants (summary — the file is authoritative):
 
 - **Rule 2 (Simplicity First):** Write minimum code. No speculative abstractions.
 - **Rule 3 (Surgical Changes):** Touch only what is necessary. Match existing conventions.

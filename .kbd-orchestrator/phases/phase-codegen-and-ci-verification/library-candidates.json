@@ -1,0 +1,51 @@
+{
+  "phase": "phase-codegen-and-ci-verification",
+  "generated": "2026-07-15",
+  "candidates": [
+    {
+      "gap": "bootstrap-skill-system",
+      "verdict": "adopt",
+      "name": "Prometheus-AGS/prometheus-skill-system",
+      "version": "main (2026-07-13)",
+      "registry": "github (public)",
+      "notes": "FULL instance: 8 skill domains, 4-layer pipeline, self-improving loops, 7 Rust binaries to ~/.local/bin, MCP services, hooks. Install: clone --recurse-submodules -> check-prerequisites.sh --install --build-tools -> install-skills-flat.sh -> install-mcp-services.sh -> configure-mcp-all-tools.sh -> services load -> surreal docker. Verify: pk doctor --json + check-mcp-health.sh + required binaries. GOTCHA: docs say skill-pack, slug is skill-system. Expects but does not install: rust toolchain, wasm32-unknown-unknown target, node>=18, docker.",
+      "confidence": "high"
+    },
+    {
+      "gap": "bootstrap-spec-engine",
+      "verdict": "adopt",
+      "name": "@fission-ai/openspec",
+      "version": "1.6.0",
+      "registry": "npm (scoped name MANDATORY - bare 'openspec' is squatted 0.0.0 garbage)",
+      "notes": "Detect existing channel via binary symlink (this machine: npm-global at /opt/homebrew/bin); upgrade through same channel; never mix brew+npm.",
+      "confidence": "high"
+    },
+    {
+      "gap": "bootstrap-flutter-beta",
+      "verdict": "adopt",
+      "name": "Flutter beta channel",
+      "version": "3.47.0-0.1.pre (Dart 3.13.0-282.1.beta)",
+      "registry": "git clone -b beta (NON-shallow) / flutter channel beta && flutter upgrade",
+      "notes": "Dart MCP server ships in any 2026 beta; gate = 'dart mcp-server --help' exit 0. Currency check vs releases_macos.json feed. OUR install-flutter.sh is wrong (shallow stable clone) - must fix. Post-bump: re-verify frb codegen compat.",
+      "confidence": "high"
+    },
+    {
+      "gap": "bootstrap-js-ecosystem",
+      "verdict": "adopt",
+      "name": "node@24 (pinned, Active LTS) + bun 1.3.x + pnpm 11.x + typescript@latest (7.x)",
+      "version": "node 24.x / bun 1.3.14 / pnpm 11.13.0 / ts 7.0.2",
+      "registry": "fnm install 24 (NOT --lts) / bun.sh / npm -g pnpm / npm -g typescript@latest",
+      "notes": "USER-REVISED: TypeScript pillar is 7.0.2+ (latest, Go-native compiler) - no version pin. Machine has 6.0.3 global, bootstrap upgrades. Scaffold pins updated ^5.x->^7.0.0. Verify TS7 ecosystem compat (vite/vitest/frb .d.ts) at PoC build time. Prefer npm/standalone pnpm over corepack.",
+      "confidence": "high"
+    },
+    {
+      "gap": "bootstrap-implementation",
+      "verdict": "build (extend own)",
+      "name": "scripts/check-env.sh pillar restructure + install-flutter.sh fix",
+      "version": "n/a",
+      "registry": "in-repo",
+      "notes": "Extend existing installer (documented entry point, already invoked by scaffold-hybrid.sh) into 4-pillar model with operational gates. 7-item delta in analysis.md. Long remediations (flutter upgrade, skill-system full install) behind --install/--full flags.",
+      "confidence": "high"
+    }
+  ]
+}

@@ -63,7 +63,7 @@ cat > "$REACT_DIR/package.json" << 'EOF'
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
-    "typescript": "^5.6.0"
+    "typescript": "^7.0.0"
   },
   "publishConfig": {
     "access": "public"
@@ -255,7 +255,7 @@ cat > "$WASM_PKG_DIR/package.json" << 'EOF'
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.6.0"
+    "typescript": "^7.0.0"
   },
   "publishConfig": {
     "access": "public"
@@ -344,7 +344,7 @@ cat > "$GUEST_DIR/package.json" << 'EOF'
     "@tauri-apps/api": "^2.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.0"
+    "typescript": "^7.0.0"
   },
   "publishConfig": {
     "access": "public"

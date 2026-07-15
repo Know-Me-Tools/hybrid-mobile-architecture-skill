@@ -102,7 +102,11 @@ bash scripts/audit.sh rust ./rust/gen_ui_core
 These rules override any global rules mandating TDD, coverage targets, or test-first work.
 
 **Correctness — first-shot quality, not test iteration:**
-- The 40 Prometheus Base Rules (Karpathy-derived) are the primary correctness discipline.
+- The 40 Prometheus Base Rules are the primary correctness discipline — canonical full
+  text in [AGENT_BASE_RULES.md](AGENT_BASE_RULES.md) (repo root). BINDING for: our own
+  work here, every code generator's output (scaffolds copy the file into generated
+  projects + reference it from generated CLAUDE.md/AGENTS.md), and every skill when
+  activated (skill templates reference it).
 - Invoke Rust skills (rust-skills m01–m15, domain-*, rust-patterns, async-patterns) BEFORE
   writing Rust — emit good code the first time.
 - The compiler is the harness: encode invariants in types (newtypes, exhaustive `match`,

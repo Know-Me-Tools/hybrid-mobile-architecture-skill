@@ -1,9 +1,11 @@
 {
   "phase": "phase-codegen-and-ci-verification",
-  "status": "assessment_ready",
+  "status": "analysis_complete",
   "changes": [],
   "completedChanges": 0,
   "totalChanges": 0,
   "previousPhase": "scaffold-full-hybrid-project",
-  "startedAt": "2026-07-15T22:04:11Z"
+  "startedAt": "2026-07-15T22:04:11Z",
+  "assessment_complete": true,
+  "analysis_complete": true
 }

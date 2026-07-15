@@ -1,0 +1,7 @@
+{
+  "stage": "assess",
+  "status": "complete",
+  "artifact": "assessment.md",
+  "summary": "Goal revised (user): build PoC app apps/knowme-poc from KnowMe reference docs, showcasing broadest capability range. Web research verdict: one coherent narrative (Wonderous/Linearlite pattern), MoSCoW set covering every headline crate except vision (explicitly skipped: candle Metal broken on iOS; mobile cron Hands dishonest per iOS BGTaskScheduler limits). 8 gaps: frb 2.11/2.12 mismatch, codegen never run, PEM workspace blocker (3 options, decide at plan), UnimplementedError intent stubs to wire, whisper-rs dep, no CI. Open questions: Flint services live vs docker vs stub for sync; PEM option; API-key degradation.",
+  "timestamp": "2026-07-15T22:30:00Z"
+}

@@ -4,6 +4,11 @@ description: ALWAYS invoke after building or changing any React/Tauri UI surface
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
+> **Binding:** this skill operates under the 40 Prometheus Base Rules
+> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md) at the project root). Simplicity
+> first, surgical changes, strict layering, strong typing, verified versions — the
+> rules apply to every line this skill helps generate.
+
 # Tauri / React UI Review Loop
 
 A React/Tauri surface is not done until it has passed a screenshot-driven review at every

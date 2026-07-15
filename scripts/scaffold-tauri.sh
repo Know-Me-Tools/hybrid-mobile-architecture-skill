@@ -76,7 +76,7 @@ cat > package.json << PKGEOF
     "@tauri-apps/cli":        "^2.10.3",
     "vite":                   "^8.0.0",
     "@vitejs/plugin-react":   "^6.0.0",
-    "typescript":             "^5.9.0",
+    "typescript":             "^7.0.0",
     "@types/react":           "^19.0.0",
     "@types/react-dom":       "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",

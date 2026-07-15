@@ -1,14 +1,28 @@
 # Goals
 
-- Wire a CI pipeline that runs `cargo clippy --workspace`, `audit.sh all`, and the
-  boundary test suites (Rust + Dart + Vitest) automatically on every push.
-- Unblock the PEM (`@prometheus-ags/prometheus-entity-management`) end-to-end install:
-  resolve the `@prometheus-ags/entity-graph-core@workspace:*` dependency that currently
-  fails outside the PEM monorepo (either upstream publish, or a pre-resolve step in
-  scaffold-packages.sh).
-- Run a real codegen pass on a fully scaffolded project: `flutter_rust_bridge_codegen
-  generate`, `dart run build_runner build`, full `flutter pub get` / `pnpm install`,
-  and confirm the pre-codegen warnings (379 dart analyze issues, override_on_non_overriding_member,
-  path_does_not_exist) clear as expected once generated code and sibling packages exist.
-- Verify the full stack builds and runs end-to-end on at least one real target
-  (e.g. macOS Tauri desktop or an iOS/Android simulator) rather than scaffold-only checks.
+> Revised 2026-07-15 (user-directed at assess time): the phase's end result is a
+> working proof-of-concept application, not just pipeline verification. The original
+> codegen/CI goals below become supporting objectives that the PoC proves in passing.
+
+## Primary goal
+
+- **Build a proof-of-concept app in `apps/<name>/`** using the scaffolds and skills in
+  this repository, based on the KnowMe reference documentation in `docs/reference-app/`
+  (functional spec + moodboard/user journeys). The PoC must prove the skill package
+  works end-to-end and showcase the broadest practical range of supported capabilities
+  (streaming ContentBlock chat, PEM entity management, SurrealDB graph-RAG memory,
+  local-first sync, cross-platform Flutter/Tauri/web from one Rust core). Feature
+  subset selected via web research (showcase-app best practices + 2026 on-device AI
+  feasibility).
+
+## Supporting goals (from the original phase scope — proven via the PoC)
+
+- Run the real codegen pipeline on the PoC: `flutter_rust_bridge_codegen generate`,
+  `dart run build_runner build`, full `flutter pub get` / `pnpm install`; confirm the
+  pre-codegen warnings clear once generated code and sibling packages exist.
+- Resolve or work around the PEM install blocker
+  (`@prometheus-ags/entity-graph-core@workspace:*` unresolvable outside the PEM monorepo).
+- Verify the PoC builds and runs on at least one real target per surface
+  (macOS Tauri desktop; iOS simulator or Android emulator for Flutter).
+- Wire CI to run `cargo clippy --workspace`, `audit.sh all`, and the boundary test
+  suites against the PoC on every push.

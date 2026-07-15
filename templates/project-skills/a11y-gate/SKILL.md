@@ -4,6 +4,11 @@ description: ALWAYS invoke when building or changing UI on ANY surface (React/Ta
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
+> **Binding:** this skill operates under the 40 Prometheus Base Rules
+> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md) at the project root). Simplicity
+> first, surgical changes, strict layering, strong typing, verified versions — the
+> rules apply to every line this skill helps generate.
+
 # Accessibility Gate (WCAG 2.2 AA)
 
 Accessibility is half of "done" on every UI surface. This gate is the cross-surface WCAG

@@ -4,6 +4,11 @@ description: ALWAYS invoke when rendering, adding, or editing a ContentBlock var
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
+> **Binding:** this skill operates under the 40 Prometheus Base Rules
+> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md) at the project root). Simplicity
+> first, surgical changes, strict layering, strong typing, verified versions — the
+> rules apply to every line this skill helps generate.
+
 # ContentBlock UI Contract
 
 `ContentBlock` is the single cross-platform UI contract between `gen_ui_core` (Rust) and

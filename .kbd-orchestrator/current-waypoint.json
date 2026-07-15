@@ -1,6 +1,6 @@
 {
   "phase": "phase-codegen-and-ci-verification",
-  "status": "assessment_ready",
+  "status": "analysis_complete",
   "previousPhase": "scaffold-full-hybrid-project",
   "changes": [],
   "completedChanges": 0,
