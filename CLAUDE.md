@@ -425,6 +425,7 @@ All generated files must include `// TJ-ARCH-MOB-001 compliant` at the top.
 | `references/rust/patterns.md` | gen_ui_core module structure, FFI rules, Tauri commands, UAR modes |
 | `references/rust/new-block-type.md` | 7-step guide for adding a new ContentBlock variant |
 | `references/rust/testing.md` | cargo test, tokio::test, wiremock, SurrealDB integration tests |
+| `references/rust/wasm-targets.md` | Any web/WASM work — SurrealDB kv-indxdb, fetch/EventSource, PGlite interop, wasm MSRV (C-002 spike findings) |
 | `references/auth/patterns.md` | Auth strategy selection, full Kratos + Supabase examples |
 | `docs/pglite-oxide-tauri-hybrid.md` | Embedded PostgreSQL via pglite-oxide (alternative to SurrealDB for relational needs) |
 | `docs/tj-arch-mob-001.html` | Full architectural standard |

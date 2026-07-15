@@ -1,0 +1,23 @@
+# TJ-ARCH-MOB-001 compliant
+# THROWAWAY spike crate (c002). Probes SurrealDB kv-indxdb wasm32 compilability.
+# NOT part of the real workspace; findings feed C-004. Delete after spike.
+[package]
+name = "db_wasm_spike"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# indxdb engine is the wasm32 KV backend per analysis §1.2/§1.3.
+surrealdb = { workspace = true, features = ["kv-indxdb"] }
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+serde.workspace = true
+serde_json.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.2", features = ["js"] }
