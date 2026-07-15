@@ -1,16 +1,17 @@
 # Flutter Patterns Reference
-> Flutter 3.29+ · Dart 3.4+ · Riverpod 2.6+ · flutter_rust_bridge 2.3+
+> Flutter 3.29+ · Dart 3.4+ · **Riverpod 3.3** · flutter_rust_bridge 2.12+
 
 ## Dependency versions (always use latest)
 
 ```yaml
-# pubspec.yaml (current as of March 2026)
+# pubspec.yaml (current as of July 2026)
 dependencies:
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
+  flutter_riverpod: ^3.3.2
+  riverpod_annotation: ^4.0.3
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
-  flutter_rust_bridge: ^2.3.0
+  flutter_rust_bridge: ^2.12.0
+  riverpod_sqflite: ^0.2.0     # offline provider-cache persistence (Riverpod 3)
   shadcn_flutter: ^0.1.6       # shadcn/ui equivalent for Flutter
   go_router: ^15.0.0           # routing
   markdown_widget: ^2.3.2+6
@@ -24,11 +25,27 @@ dev_dependencies:
   build_runner: ^2.4.13
   freezed: ^2.5.7
   json_serializable: ^6.8.0
-  riverpod_generator: ^2.6.3
+  riverpod_generator: ^4.0.4
   custom_lint: ^0.7.5
-  riverpod_lint: ^2.6.3
+  riverpod_lint: ^4.0.0
   flutter_lints: ^4.0.0
 ```
+
+## Riverpod 3 migration notes (from the repo's old 2.6 references)
+
+Riverpod 3 is a mostly-mechanical migration, but a few changes are load-bearing for this
+architecture:
+
+- **Unified `Ref`** — the typed `FooRef` parameters are gone; every provider/notifier takes a
+  plain `Ref`. Notifier supertypes are fused: no more `AutoDisposeAsyncNotifier` — use
+  `AsyncNotifier` (auto-dispose is the default for codegen providers).
+- **`AsyncValue` is now sealed**; errors surface wrapped in `ProviderException`.
+- **`ref.mounted` guard** exists — check it after every `await` inside a notifier before
+  touching state. Providers now **pause** when their widgets are not visible.
+- **Automatic retry is ON by default** (200ms → 6.4s backoff). This is the one that bites FFI
+  providers — see the next section.
+- New sanctioned APIs: the **Mutations API** for send/submit flows, and `riverpod_sqflite`
+  for offline provider-cache persistence.
 
 ## Feature-based clean architecture
 
@@ -113,16 +130,62 @@ class MessageRepository extends _$MessageRepository {
 }
 ```
 
+### FFI providers MUST opt out of automatic retry (CRITICAL)
+
+Riverpod 3 retries a failed provider automatically (200ms → 6.4s backoff). For providers that
+call into `gen_ui_core` over the FFI boundary, a Rust **domain error** (e.g. "model not
+found", "auth rejected") is a real, terminal result — not a transient failure. If retry is
+left on, Riverpod silently re-invokes the FFI call, re-running the whole Rust operation. Every
+FFI-backed provider must disable retry:
+
+```dart
+// ✓ Correct: opt out of retry on FFI-backed providers.
+// Return null from retry to make failures terminal.
+@Riverpod(retry: _noRetry)
+Future<AgentReply> agentReply(Ref ref, AgentRequest req) async {
+  return await streamAgentOnce(req); // gen_ui_core FFI call
+}
+
+Duration? _noRetry(int retryCount, Object error) => null;
+```
+
+Apply this to any provider whose body reaches `gen_ui_core`. UI-only providers may keep the
+default retry. This rule ships in the scaffold templates.
+
 ### autoDispose for streaming providers
 
 ```dart
-// Always autoDispose streaming providers to prevent memory leaks
+// Codegen providers are auto-dispose by default in Riverpod 3.
+// Still cancel the underlying subscription on disposal.
 @riverpod
 Stream<String> inferenceStream(Ref ref, InferenceRequest req) async* {
   final sub = localGenerate(req).listen(null);
   ref.onDispose(sub.cancel);
   yield* localGenerate(req);
 }
+```
+
+### Mutations API for send/submit flows
+
+Use the Riverpod 3 **Mutations API** for imperative send/submit actions (chat send, form
+submit) instead of hand-rolled loading booleans — it gives a first-class pending/error/success
+state the UI can render:
+
+```dart
+// Declare a mutation alongside the notifier
+final sendMessage = Mutation<void>();
+
+// In the widget: run it and read its state
+final sendState = ref.watch(sendMessage);
+ElevatedButton(
+  onPressed: sendState.isPending
+      ? null
+      : () => sendMessage.run(ref, (tsx) async {
+            // guarded FFI send; terminal on Rust domain error
+            await tsx.get(chatNotifierProvider.notifier).sendMessage(text);
+          }),
+  child: sendState.isPending ? const CircularProgressIndicator() : const Text('Send'),
+);
 ```
 
 ### Watch vs read patterns
@@ -139,11 +202,18 @@ void onTap() {
 
 ## ContentBlock integration (Riverpod side)
 
+The `ChatNotifier.streamBlock()` folding pattern survives the Riverpod 3 migration with one
+edit: guard with `ref.mounted` after every `await`, because the provider can pause/dispose
+while a stream is in flight.
+
 ```dart
 // ChatNotifier owns all ContentBlock mutations
 @riverpod
 class ChatNotifier extends _$ChatNotifier {
-  // A2uiContentDriver calls these:
+  @override
+  ChatState build() => const ChatState.initial();
+
+  // A2uiContentDriver calls these (sync — no await, safe):
   void streamBlock({
     required String messageId,
     int? blockIndex,
@@ -151,6 +221,14 @@ class ChatNotifier extends _$ChatNotifier {
   }) { ... }
 
   void finalizeMessage(String messageId, {MessageUsage? usage}) { ... }
+
+  // When folding an async stream, re-check ref.mounted after each await:
+  Future<void> foldStream(Stream<A2uiEvent> stream) async {
+    await for (final ev in stream) {
+      if (!ref.mounted) return; // provider paused/disposed — stop touching state
+      _apply(ev);
+    }
+  }
 }
 ```
 

@@ -1,234 +1,155 @@
-# Rust Testing Reference
-> cargo test · tokio::test · mockall · proptest
+# Rust Testing Reference — features-first
+> `cargo test` · `tokio::test` · **insta / expect-test snapshots** · wiremock / tempdir fakes only
 
-## Cargo.toml test dependencies
+> **Read CLAUDE.md "Testing: features first, tests later" — it overrides any global TDD /
+> 80%-coverage rule.** This file states how that policy is applied to `gen_ui_core` and the
+> workspace crates. The short version: build the feature, get it clean under `cargo clippy`,
+> exercise it end-to-end once, *then* add 3–5 behavior tests at the public boundary.
+
+## Principles (binding)
+
+- **Features first. Code first. Test later.** Do not write tests until a feature is complete,
+  compiles clean under clippy, and has been run end-to-end once.
+- **No mocks of internal code — ever.** Trait-injection ceremony to mock internal types
+  distorts the design and bloats compile time. `mockall` is **not** a dependency here.
+- **Fakes only at real IO boundaries:** `wiremock` for HTTP (the Anthropic API), `tempdir` /
+  in-memory engines for the DB. Nothing else gets faked.
+- **Test USEFUL COMBINATIONS at public API boundaries** — the FFI surface, Tauri commands,
+  the protocol pipeline — behavior a user can observe. Unit tests of internal helpers are the
+  lowest-value form and prove nothing about the system working.
+- **Prefer snapshot tests** (`insta` / `expect-test`): input in, snapshot out. A behavior
+  change costs one `cargo insta accept`, not a test rewrite.
+- **One integration-test binary per crate:** put behavior tests in `tests/it/` with modules,
+  not many `tests/*.rs` files. Every separate `tests/*.rs` links a separate binary and linking
+  dominates the cycle.
+- **Budget: 3–5 behavior tests per completed feature.** Coverage percentage is **not** a goal.
+  There is no tarpaulin gate.
+- **If you fail to fix the same test twice, STOP** and report the discrepancy. Never
+  `#[ignore]`, delete, or edit a failing test to escape red without explicit approval.
+
+## Dev-dependencies
 
 ```toml
 [dev-dependencies]
-tokio-test  = "0.4"
-mockall     = "0.13"
-proptest    = "1.5"
-wiremock    = "0.6"
-rstest      = "0.23"
+insta       = { version = "1.40", features = ["json", "redactions"] }
+expect-test = "1.5"
+wiremock    = "0.6"     # fake at the HTTP boundary only
+tempfile    = "3.12"    # tempdir DB at the IO boundary only
+tokio       = { version = "1.40", features = ["macros", "rt-multi-thread", "test-util"] }
+# NOTE: no mockall, no proptest-by-default, no tarpaulin. Add proptest only for a specific
+# parser/fuzz need, and justify it in the test module.
 ```
 
-## Testing the A2UI adapter
+## Boundary test: the protocol pipeline (snapshot)
+
+Drive a real `StreamEvent` sequence through the real `A2uiAdapter` and snapshot the emitted
+A2UI events. No mocks — the adapter is internal, so we exercise it, not fake it.
 
 ```rust
-// src/protocol/a2ui_tests.rs (or inline #[cfg(test)] in a2ui.rs)
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::streaming::StreamEvent;
+// tests/it/protocol.rs  (one binary: tests/it/main.rs declares `mod protocol;`)
+use gen_ui_protocol::{A2uiAdapter, StreamEvent, ContentBlockType};
 
-    #[test]
-    fn text_delta_produces_a2ui_text_delta() {
-        let mut adapter = A2uiAdapter::new("run-001");
-        let events = adapter.ingest(&StreamEvent::TextDelta {
-            index: 0,
-            delta: "Hello".into(),
-        });
-        assert_eq!(events.len(), 1);
-        matches!(events[0], A2uiEvent::TextDelta { ref delta, is_final: false, .. }
-            if delta == "Hello");
-    }
+#[test]
+fn text_block_folds_to_final_a2ui_event() {
+    let mut adapter = A2uiAdapter::new("run-001");
+    let mut out = Vec::new();
+    out.extend(adapter.ingest(&StreamEvent::ContentBlockStart {
+        index: 0, block_type: ContentBlockType::Text,
+        tool_use_id: None, tool_name: None, language: None,
+    }));
+    out.extend(adapter.ingest(&StreamEvent::TextDelta { index: 0, delta: "Hello ".into() }));
+    out.extend(adapter.ingest(&StreamEvent::TextDelta { index: 0, delta: "world".into() }));
+    out.extend(adapter.ingest(&StreamEvent::ContentBlockStop { index: 0 }));
 
-    #[test]
-    fn content_block_stop_finalizes_text_block() {
-        let mut adapter = A2uiAdapter::new("run-001");
-        // Start block
-        adapter.ingest(&StreamEvent::ContentBlockStart {
-            index: 0,
-            block_type: crate::streaming::ContentBlockType::Text,
-            tool_use_id: None, tool_name: None, language: None,
-        });
-        // Accumulate text
-        adapter.ingest(&StreamEvent::TextDelta { index: 0, delta: "Hello ".into() });
-        adapter.ingest(&StreamEvent::TextDelta { index: 0, delta: "world".into() });
-        // Stop — should emit final text event
-        let events = adapter.ingest(&StreamEvent::ContentBlockStop { index: 0 });
-        assert!(events.iter().any(|e| matches!(e, A2uiEvent::TextDelta { is_final: true, .. })));
-    }
-
-    #[test]
-    fn skill_activated_produces_skill_event() {
-        let mut adapter = A2uiAdapter::new("run-001");
-        let events = adapter.ingest(&StreamEvent::SkillActivated {
-            skill_id:       "rag-001".into(),
-            skill_name:     "RAG Pipeline".into(),
-            description:    Some("Retrieval-augmented generation".into()),
-            parameters_json: r#"{"top_k": 5}"#.into(),
-        });
-        assert_eq!(events.len(), 1);
-        assert!(matches!(events[0], A2uiEvent::SkillActivated { ref skill_id, .. }
-            if skill_id == "rag-001"));
-    }
+    // Snapshot the whole emitted sequence — behavior changes cost one `cargo insta accept`.
+    insta::assert_json_snapshot!(out);
 }
 ```
 
-## Testing the agent loop (async)
+## Boundary test: the agent loop against a faked Anthropic API (wiremock)
+
+`wiremock` fakes the **real IO boundary** (HTTP), not any internal type. The agent, protocol
+pipeline, and client are all real.
 
 ```rust
-#[cfg(test)]
-mod agent_tests {
-    use super::*;
-    use tokio::sync::mpsc;
-    use wiremock::{MockServer, Mock, ResponseTemplate};
-    use wiremock::matchers::{method, path};
+// tests/it/agent.rs
+use gen_ui_agent::{AgentRuntime, AgentConfig};
+use gen_ui_client::AnthropicClient;
+use tokio::sync::mpsc;
+use wiremock::{MockServer, Mock, ResponseTemplate};
+use wiremock::matchers::{method, path};
 
-    #[tokio::test]
-    async fn agent_emits_done_on_tool_use_then_end_turn() {
-        // Start a WireMock server simulating Anthropic API
-        let server = MockServer::start().await;
+#[tokio::test]
+async fn agent_reaches_end_turn_after_tool_use() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST")).and(path("/v1/messages"))
+        .respond_with(ResponseTemplate::new(200)
+            .set_body_string(include_str!("fixtures/tool_use_response.sse")))
+        .up_to_n_times(1).mount(&server).await;
+    Mock::given(method("POST")).and(path("/v1/messages"))
+        .respond_with(ResponseTemplate::new(200)
+            .set_body_string(include_str!("fixtures/end_turn_response.sse")))
+        .mount(&server).await;
 
-        // First response: tool_use
-        Mock::given(method("POST")).and(path("/v1/messages"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_string(sse_tool_use_response()))
-            .up_to_n_times(1)
-            .mount(&server).await;
+    let (tx, mut rx) = mpsc::channel(64);
+    let client = AnthropicClient::new_with_base_url("test-key", server.uri());
+    let mut agent = AgentRuntime::new(
+        AgentConfig { model: "claude-opus-4-8".into(), max_turns: 5, ..Default::default() },
+        client, None, None, None,
+    );
+    agent.register_tool("test_tool", "A test tool", serde_json::json!({}),
+        |_| Ok("tool result".into()));
 
-        // Second response: end_turn after tool result
-        Mock::given(method("POST")).and(path("/v1/messages"))
-            .respond_with(ResponseTemplate::new(200)
-                .set_body_string(sse_end_turn_response()))
-            .mount(&server).await;
+    agent.run(vec![], "test message".into(), tx).await.unwrap();
 
-        let (raw_tx, raw_rx) = mpsc::channel::<StreamEvent>(64);
-        let client = AnthropicClient::new_with_base_url("test-key", server.uri());
-        let mut agent = AgentRuntime::new(
-            AgentConfig { model: "claude-opus-4-5".into(), max_turns: 5, ..Default::default() },
-            client, None, None, None,
-        );
-        agent.register_tool(
-            "test_tool", "A test tool", serde_json::json!({}),
-            |_| Ok("tool result".into()),
-        );
-
-        agent.run(vec![], "test message".into(), raw_tx).await.unwrap();
-
-        let mut events = vec![];
-        let mut receiver = raw_rx;
-        while let Ok(ev) = receiver.try_recv() { events.push(ev); }
-
-        assert!(events.iter().any(|e| matches!(e, StreamEvent::Done)));
-    }
-
-    fn sse_tool_use_response() -> String {
-        // Minimal valid Anthropic SSE with tool_use stop_reason
-        include_str!("../test-fixtures/tool_use_response.sse")
-    }
-
-    fn sse_end_turn_response() -> String {
-        include_str!("../test-fixtures/end_turn_response.sse")
-    }
+    let mut events = Vec::new();
+    while let Ok(ev) = rx.try_recv() { events.push(ev); }
+    assert!(events.iter().any(|e| matches!(e, gen_ui_protocol::StreamEvent::Done)));
 }
 ```
 
-## Testing SurrealDB stores
+## Boundary test: the DB intent API against a tempdir engine
+
+Test the **intent functions** (`memory_search`, `upsert_entity`, `graph_expand`) — the public
+surface the UI actually calls — against a real SurrealDB `kv-rocksdb` in a `tempdir`. Never
+mock the store; never assert against raw SurrealQL.
 
 ```rust
-#[cfg(test)]
-mod db_tests {
-    use super::*;
-    use tempfile::TempDir;
+// tests/it/db.rs
+use gen_ui_db::Db;
+use tempfile::TempDir;
 
-    async fn test_db() -> (Arc<surrealdb::Surreal<surrealdb::engine::local::Db>>, TempDir) {
-        let dir = TempDir::new().unwrap();
-        let db = crate::db::init(dir.path()).await.unwrap();
-        (db, dir)
-    }
-
-    #[tokio::test]
-    async fn memory_write_and_read_roundtrip() {
-        let (db, _dir) = test_db().await;
-        let mem = MemoryStore::new(db);
-
-        mem.write("test_key", "test_value", "semantic", "test_ns", None)
-            .await.unwrap();
-
-        let record = mem.read("test_key", "test_ns").await.unwrap();
-        assert!(record.is_some());
-        let r = record.unwrap();
-        assert_eq!(r.value, "test_value");
-        assert_eq!(r.memory_type, "semantic");
-    }
-
-    #[tokio::test]
-    async fn tool_cache_respects_ttl() {
-        let (db, _dir) = test_db().await;
-        let cache = ToolCache::new(db);
-
-        cache.set("my_tool", "abc123", r#"{"result": 42}"#, Some(1)).await.unwrap();
-
-        // Should be present immediately
-        let cached = cache.get("my_tool", "abc123").await.unwrap();
-        assert!(cached.is_some());
-
-        // After TTL expires (in a real test, use fake_time)
-        // assert_eq!(cache.get("my_tool", "abc123").await.unwrap(), None);
-    }
-
-    #[tokio::test]
-    async fn entity_graph_relate_and_neighbors() {
-        let (db, _dir) = test_db().await;
-        let graph = EntityGraph::new(db);
-
-        graph.upsert_entity("Rust", "language", serde_json::json!({}), None).await.unwrap();
-        graph.upsert_entity("Flutter", "framework", serde_json::json!({}), None).await.unwrap();
-        graph.relate("Flutter", "uses", "Rust", 1.0).await.unwrap();
-
-        let neighbors = graph.neighbors("Flutter", 1).await.unwrap();
-        // neighbors should include Rust
-        let names: Vec<String> = neighbors.iter()
-            .filter_map(|n| n.get("name").and_then(|v| v.as_str()).map(String::from))
-            .collect();
-        // Exact assertion depends on SurrealDB FETCH behavior
-        assert!(!neighbors.is_empty() || names.contains(&"Rust".to_string()));
-    }
+async fn tmp_db() -> (Db, TempDir) {
+    let dir = TempDir::new().unwrap();
+    (Db::open(dir.path()).await.unwrap(), dir)
 }
-```
 
-## Property-based testing for the SSE parser
+#[tokio::test]
+async fn upsert_then_graph_expand_returns_neighbor() {
+    let (db, _dir) = tmp_db().await;
+    let flutter = db.upsert_entity("Flutter", "framework", vec![0.0; 384]).await.unwrap();
+    let rust    = db.upsert_entity("Rust", "language", vec![0.0; 384]).await.unwrap();
+    db.relate(&flutter, "uses", &rust).await.unwrap();
 
-```rust
-#[cfg(test)]
-mod streaming_tests {
-    use super::*;
-    use proptest::prelude::*;
-
-    proptest! {
-        #[test]
-        fn parse_text_delta_handles_any_string(s in ".*") {
-            let data = serde_json::json!({
-                "index": 0,
-                "delta": { "type": "text_delta", "text": s }
-            }).to_string();
-            let result = parse_anthropic_event("content_block_delta", &data);
-            // Should not panic, and if it parses, should be a TextDelta
-            if let Some(ev) = result {
-                assert!(matches!(ev, StreamEvent::TextDelta { .. }));
-            }
-        }
-    }
+    let hits = db.graph_expand(&flutter, 1).await.unwrap();
+    assert!(hits.iter().any(|h| h.name == "Rust"));
 }
 ```
 
 ## Running tests
 
 ```bash
-# All tests
-cargo test
+# Inner loop is clippy, NOT test — see references/rust/compile-speed.md
+cargo clippy --workspace -- -D warnings
 
-# With output (useful for debugging)
-cargo test -- --nocapture
+# Behavior tests (once a feature is complete)
+cargo test -p gen_ui_protocol
+cargo test --test it              # the single per-crate integration binary
 
-# Specific module
-cargo test protocol::a2ui_tests
-
-# Integration tests only
-cargo test --test integration
-
-# With coverage (cargo-tarpaulin)
-cargo tarpaulin --out Html --output-dir coverage/
+# Review / accept snapshot changes
+cargo insta review
+cargo insta accept
 ```
+
+There is intentionally no coverage command here. Coverage percentage is not a completion
+criterion in this repo or its scaffolded projects.

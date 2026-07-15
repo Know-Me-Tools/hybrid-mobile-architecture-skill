@@ -395,7 +395,7 @@ Enable RLS on every Supabase table. Never expose the service role key to clients
 
 | Tool | Minimum |
 |---|---|
-| Rust + Cargo | 1.80+ |
+| Rust + Cargo | 1.93+ |
 | Flutter SDK | 3.29+ |
 | Dart | 3.4+ |
 | Node.js | 22+ LTS |
