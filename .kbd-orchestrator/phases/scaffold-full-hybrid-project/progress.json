@@ -4,7 +4,7 @@
   "changes": [
     {
       "id": "2026-07-15-c001-layered-workspace",
-      "status": "in_progress",
+      "status": "done",
       "wave": 0
     },
     {
@@ -63,7 +63,7 @@
       "wave": 2
     }
   ],
-  "completedChanges": 0,
+  "completedChanges": 1,
   "totalChanges": 12,
   "previousPhase": null,
   "startedAt": "2026-07-15T16:28:38Z",

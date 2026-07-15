@@ -20,49 +20,15 @@ step "Creating workspace: $PROJECT"
 mkdir -p "$PROJECT"/{rust,mobile,desktop,docs}
 cd "$PROJECT"
 
-# ── Root workspace config ──────────────────────────────────────────────────
-cat > Cargo.toml << EOF
-[workspace]
-members = ["rust/gen_ui_core"]
-resolver = "2"
-
-[workspace.package]
-version = "0.1.0"
-edition = "2021"
-rust-version = "1.80"
-
-[workspace.dependencies]
-tokio             = { version = "1.40", features = ["full"] }
-tokio-stream      = { version = "0.1",  features = ["sync"] }
-futures           = "0.3"
-flutter_rust_bridge = { version = "2.3", features = ["dart-opaque", "anyhow"] }
-reqwest           = { version = "0.12", features = ["json", "stream", "rustls-tls"], default-features = false }
-reqwest-eventsource = "0.6"
-serde             = { version = "1.0",  features = ["derive"] }
-serde_json        = "1.0"
-candle-core       = { version = "0.7",  features = ["metal", "accelerate"] }
-candle-nn         = "0.7"
-candle-transformers = "0.7"
-hf-hub            = { version = "0.3",  features = ["tokio"] }
-tokenizers        = { version = "0.20", features = ["http"] }
-surrealdb         = { version = "2.0",  features = ["kv-rocksdb"] }
-rayon             = "1.10"
-dashmap           = "6.1"
-parking_lot       = "0.12"
-tracing           = "0.1"
-anyhow            = "1.0"
-thiserror         = "1.0"
-uuid              = { version = "1.10", features = ["v4", "fast-rng"] }
-chrono            = { version = "0.4",  features = ["serde"] }
-once_cell         = "1.20"
-async-trait       = "0.1"
-EOF
-ok "Rust workspace Cargo.toml"
-
-# ── Scaffold Rust core ─────────────────────────────────────────────────────
-step "Scaffolding gen_ui_core Rust crate"
-bash "$(dirname "$0")/scaffold-rust-core.sh" "rust/gen_ui_core" "$UAR_MODE"
-ok "gen_ui_core scaffolded"
+# ── Scaffold the layered gen_ui Rust workspace ─────────────────────────────
+# The workspace Cargo.toml (root, profiles, workspace.dependencies) and all 12
+# crates are emitted by scaffold-rust-core.sh — it owns the layered layout,
+# compile-speed profiles (panic=unwind for FFI, wasm-release), and .cargo/bacon
+# config. Do NOT inline a workspace manifest here; that duplicated the source of
+# truth and drifted (old single-crate layout, surrealdb 2.0, panic=abort bug).
+step "Scaffolding layered gen_ui workspace"
+bash "$(dirname "$0")/scaffold-rust-core.sh" "rust" "$UAR_MODE"
+ok "gen_ui workspace scaffolded (12 crates, layered)"
 
 # ── Scaffold Flutter app ───────────────────────────────────────────────────
 step "Scaffolding Flutter mobile app"
