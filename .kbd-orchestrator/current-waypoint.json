@@ -1,9 +1,62 @@
 {
   "phase": "phase-codegen-and-ci-verification",
-  "status": "analysis_complete",
+  "status": "execute_ready",
   "previousPhase": "scaffold-full-hybrid-project",
-  "changes": [],
+  "changes": [
+    {
+      "id": "2026-07-15-c101-bootstrap-pillars",
+      "status": "pending",
+      "wave": 0
+    },
+    {
+      "id": "2026-07-15-c102-poc-scaffold-first-codegen",
+      "status": "pending",
+      "wave": 0
+    },
+    {
+      "id": "2026-07-15-c103-chat-live-e2e",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c104-memory-graph-rag",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c105-local-model-desktop",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c106-sync-local-first",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c107-whisper-scribe",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c110-ci",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c108-mcp-skill-and-agent",
+      "status": "pending",
+      "wave": 2
+    },
+    {
+      "id": "2026-07-15-c109-settings-mobile-model",
+      "status": "pending",
+      "wave": 2
+    }
+  ],
   "completedChanges": 0,
-  "totalChanges": 0,
-  "startedAt": "2026-07-15T22:04:29Z"
+  "totalChanges": 10,
+  "startedAt": "2026-07-15T22:04:29Z",
+  "nextCommand": "/kbd-execute",
+  "firstChange": "2026-07-15-c101-bootstrap-pillars"
 }

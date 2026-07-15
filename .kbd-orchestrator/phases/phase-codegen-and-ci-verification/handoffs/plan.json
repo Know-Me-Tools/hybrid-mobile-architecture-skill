@@ -1,0 +1,7 @@
+{
+  "stage": "plan",
+  "status": "complete",
+  "artifacts": ["plan.md"],
+  "summary": "10 changes, 3 waves. W0 serial: c101 bootstrap (4 pillars + live run on this box) then c102 PoC scaffold + first-ever full codegen pipeline (highest-information). W1: chat->memory->local-model->sync sequential on the app; whisper (codex) + CI (codex) parallel. W2: mcp+agent, settings+mobile-model. Decisions resolved: PEM local-tarball pre-resolve (prebuilt dist verified) w/ fallback; sync via local docker compose w/ stub fallback; bootstrap check/--install/--full tiers. Success = demo narrative runs live on macOS+iOS-sim+web, CI green. First change: c101.",
+  "timestamp": "2026-07-15T23:45:00Z"
+}
