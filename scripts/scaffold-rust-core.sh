@@ -10,8 +10,8 @@
 #   L0  gen_ui_types      pure types + ALL cross-crate traits (frozen seams). wasm-safe.
 #   L1  gen_ui_runtime    native Tokio / wasm spawn_local abstraction
 #   L1  gen_ui_protocol   A2UI/AG-UI adapters over futures channels. wasm-safe.
-#   L2  gen_ui_client     Anthropic + Flint HTTP/SSE behind Transport trait
-#   L2  gen_ui_mcp        MCP client (sse wasm-safe; stdio native-only)
+#   L2  gen_ui_client     Flint gate(auth)/forge(Quarry+MCP+AG-UI)/frf(spine, feat)
+#   L2  gen_ui_mcp        MCP client registry (JSON-RPC 2.0 + HTTP/SSE; forge a2ui seam)
 #   L2  gen_ui_db         relational (pg/sqlite) + graph (surreal) + sync
 #   L2  gen_ui_inference  candle GGUF (native accel; wasm feature-gated off)
 #   L3  gen_ui_agent      PMPO loop over L0-L2 abstractions
@@ -44,6 +44,7 @@ members = [
     "crates/gen_ui_client",
     "crates/gen_ui_mcp",
     "crates/gen_ui_db",
+    "crates/gen_ui_db_graph",
     "crates/gen_ui_inference",
     "crates/gen_ui_agent",
     "crates/gen_ui_ffi",
@@ -78,6 +79,21 @@ tokio             = { version = "1.40", default-features = false }
 tokio-stream      = { version = "0.1",  features = ["sync"] }
 reqwest           = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
 reqwest-eventsource = "0.6"
+# --- Flint platform SDK (FRF realtime spine). Nothing is published to crates.io —
+#     all FRF inter-crate deps are PATH deps in-repo, and the repo is private, so a
+#     fresh scaffold cannot resolve them. They are therefore left COMMENTED here (as
+#     C-001 leaves `tauri` commented for C-007): the default gate+forge build has NO
+#     FRF dependency and stays wasm-safe + offline-resolvable. To enable the `frf` /
+#     `peer-crdt` features, UNCOMMENT below and point at your vendored checkout —
+#     a `git`+`rev` pin (reproducible) or a `path` to a local clone:
+#       frf-sdk-rust = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b" }
+#     ── VERIFIED HEAD (2026-07-15): 9ba04ae6ce41be796ae149609414b17a0d0d376b ──
+# frf-sdk-rust      = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+# frf-crdt          = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+# frf-store-redb    = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+# JWT decode (inspect exp/role/tenant_id from gate-minted tokens; no local verify —
+# gate/forge own verification via JWKS). validation disabled for pure claim reads.
+jsonwebtoken      = { version = "9", default-features = false }
 surrealdb         = { version = "3.2",  default-features = false }
 sqlx              = { version = "0.8",  default-features = false, features = ["runtime-tokio-rustls", "macros"] }
 candle-core       = "0.7"
@@ -617,14 +633,1974 @@ $MARK
 //! IMPLEMENTATION OWNER: $owner (see plan.md). This is the C-001 seam stub.
 EOF
 }
-emit_crate gen_ui_client ""
-emit_l2_stub gen_ui_client "Anthropic + Flint HTTP/SSE behind a Transport trait (native reqwest / wasm fetch)." "C-006 flint-integration"
+
+# ── C-006 emitters (gen_ui_mcp real seam + gen_ui_client flint integration) ──
+# Defined here (after emit_l2_stub) and invoked below in place of the stub calls.
+
+emit_flint_mcp() {
+  cat >> "$OUT/crates/gen_ui_mcp/Cargo.toml" << 'EOF'
+gen_ui_types   = { path = "../gen_ui_types" }
+gen_ui_runtime = { path = "../gen_ui_runtime" }
+async-trait.workspace = true
+serde.workspace       = true
+serde_json.workspace  = true
+futures.workspace     = true
+parking_lot.workspace = true
+reqwest.workspace     = true
+tracing.workspace     = true
+reqwest-eventsource.workspace = true
+
+[features]
+default = []
+# stdio transport spawns a child process — native-only, opt-in (Claude Desktop etc.).
+stdio = []
+EOF
+  cat > "$OUT/crates/gen_ui_mcp/src/lib.rs" << EOF
+$MARK
+//! gen_ui_mcp (L2) — MCP (Model Context Protocol) client registry.
+//! JSON-RPC 2.0 over HTTP POST + an SSE event channel (open standard, Rule 12).
+//! flint-forge exposes its A2UI registry AS an MCP server at \`/mcp/v1/a2ui\`;
+//! the flint client (gen_ui_client) registers that server into [\`McpRegistry\`].
+//!
+//! The registry + JSON-RPC envelopes are pure and cross-target. The HTTP+SSE
+//! transport uses reqwest, whose wasm \`Response\` future is NOT \`Send\`; because the
+//! MCP transport seam is object-safe with \`Send\` futures (registry holds
+//! \`Box<dyn McpTransport>\` across threads on native), the concrete [\`SseTransport\`]
+//! is native-only. On the browser the A2UI/MCP surface is driven from JS
+//! (Connect-web / \`@flint/react\`) per the layer contract, not this crate.
+#![cfg_attr(target_arch = "wasm32", allow(dead_code))]
+
+pub mod jsonrpc;
+pub mod registry;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod sse_transport;
+
+pub use registry::{McpRegistry, McpServerHandle, McpTool, McpTransport};
+#[cfg(not(target_arch = "wasm32"))]
+pub use sse_transport::SseTransport;
+EOF
+  cat > "$OUT/crates/gen_ui_mcp/src/jsonrpc.rs" << EOF
+$MARK
+//! Minimal JSON-RPC 2.0 request/response envelopes for MCP.
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize)]
+pub struct JsonRpcRequest {
+    pub jsonrpc: &'static str,
+    pub id: u64,
+    pub method: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub params: Option<serde_json::Value>,
+}
+
+impl JsonRpcRequest {
+    pub fn new(id: u64, method: impl Into<String>, params: Option<serde_json::Value>) -> Self {
+        Self { jsonrpc: "2.0", id, method: method.into(), params }
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct JsonRpcResponse {
+    #[allow(dead_code)]
+    pub jsonrpc: String,
+    pub id: u64,
+    #[serde(default)]
+    pub result: Option<serde_json::Value>,
+    #[serde(default)]
+    pub error: Option<JsonRpcError>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct JsonRpcError {
+    pub code: i64,
+    pub message: String,
+}
+EOF
+  cat > "$OUT/crates/gen_ui_mcp/src/registry.rs" << EOF
+$MARK
+//! MCP server registry. One [\`McpRegistry\`] per process holds the connected
+//! servers keyed by name; \`tools/list\` results are cached per server so the agent
+//! loop can enumerate available tools without a round-trip on every turn.
+use async_trait::async_trait;
+use gen_ui_types::CoreResult;
+use parking_lot::RwLock;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::Arc;
+
+/// The transport seam a registered MCP server speaks over. Object-safe so the
+/// registry holds \`Box<dyn McpTransport>\`. The HTTP+SSE impl ([\`super::SseTransport\`])
+/// is native-only (reqwest wasm response is !Send); a wasm build registers no
+/// concrete transport (the browser drives MCP from JS).
+#[async_trait]
+pub trait McpTransport: Send + Sync {
+    async fn request(&self, method: &str, params: Option<serde_json::Value>) -> CoreResult<serde_json::Value>;
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct McpTool {
+    pub name: String,
+    #[serde(default)]
+    pub description: Option<String>,
+    /// JSON-Schema of the tool's input (\`inputSchema\` in the MCP spec).
+    #[serde(default, rename = "inputSchema")]
+    pub input_schema: serde_json::Value,
+}
+
+/// A connected MCP server: the transport plus its last-known tool inventory.
+pub struct McpServerHandle {
+    pub name: String,
+    transport: Box<dyn McpTransport>,
+    tools: RwLock<Vec<McpTool>>,
+}
+
+impl McpServerHandle {
+    pub fn new(name: impl Into<String>, transport: Box<dyn McpTransport>) -> Self {
+        Self { name: name.into(), transport, tools: RwLock::new(Vec::new()) }
+    }
+
+    /// Refresh the cached tool inventory via \`tools/list\`.
+    pub async fn refresh_tools(&self) -> CoreResult<Vec<McpTool>> {
+        let value = self.transport.request("tools/list", None).await?;
+        let tools: Vec<McpTool> = value
+            .get("tools")
+            .and_then(|t| serde_json::from_value(t.clone()).ok())
+            .unwrap_or_default();
+        *self.tools.write() = tools.clone();
+        Ok(tools)
+    }
+
+    /// Invoke a tool via \`tools/call\`.
+    pub async fn call_tool(&self, name: &str, arguments: serde_json::Value) -> CoreResult<serde_json::Value> {
+        self.transport
+            .request("tools/call", Some(serde_json::json!({ "name": name, "arguments": arguments })))
+            .await
+    }
+
+    pub fn cached_tools(&self) -> Vec<McpTool> { self.tools.read().clone() }
+}
+
+#[derive(Default, Clone)]
+pub struct McpRegistry {
+    servers: Arc<RwLock<HashMap<String, Arc<McpServerHandle>>>>,
+}
+
+impl McpRegistry {
+    pub fn new() -> Self { Self::default() }
+
+    /// Register a server (e.g. flint-forge's \`/mcp/v1/a2ui\`) under its name.
+    pub fn register(&self, handle: McpServerHandle) -> Arc<McpServerHandle> {
+        let handle = Arc::new(handle);
+        self.servers.write().insert(handle.name.clone(), handle.clone());
+        handle
+    }
+
+    pub fn get(&self, name: &str) -> Option<Arc<McpServerHandle>> {
+        self.servers.read().get(name).cloned()
+    }
+
+    pub fn server_names(&self) -> Vec<String> {
+        self.servers.read().keys().cloned().collect()
+    }
+}
+EOF
+  cat > "$OUT/crates/gen_ui_mcp/src/sse_transport.rs" << EOF
+$MARK
+//! HTTP+SSE implementation of [\`crate::registry::McpTransport\`]. The SSE channel
+//! carries server→client notifications; requests are JSON-RPC 2.0 over HTTP POST.
+//! Bearer auth is supplied by the caller (the flint client injects the gate JWT).
+//! Native-only: reqwest's wasm \`Response\` future is not \`Send\`.
+use crate::jsonrpc::{JsonRpcRequest, JsonRpcResponse};
+use crate::registry::McpTransport;
+use async_trait::async_trait;
+use gen_ui_types::{CoreError, CoreResult};
+use std::sync::atomic::{AtomicU64, Ordering};
+
+pub struct SseTransport {
+    http: reqwest::Client,
+    endpoint: String,
+    bearer: Option<String>,
+    next_id: AtomicU64,
+}
+
+impl SseTransport {
+    /// \`endpoint\` is the JSON-RPC POST URL (e.g. \`https://forge/mcp/v1/a2ui\`).
+    pub fn new(http: reqwest::Client, endpoint: impl Into<String>, bearer: Option<String>) -> Self {
+        Self { http, endpoint: endpoint.into(), bearer, next_id: AtomicU64::new(1) }
+    }
+}
+
+#[async_trait]
+impl McpTransport for SseTransport {
+    async fn request(&self, method: &str, params: Option<serde_json::Value>) -> CoreResult<serde_json::Value> {
+        let id = self.next_id.fetch_add(1, Ordering::Relaxed);
+        let body = JsonRpcRequest::new(id, method, params);
+        let mut req = self.http.post(&self.endpoint).json(&body);
+        if let Some(token) = &self.bearer {
+            req = req.bearer_auth(token);
+        }
+        let resp = req.send().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+        if !resp.status().is_success() {
+            return Err(CoreError::Terminal(format!("mcp http {}", resp.status())));
+        }
+        let parsed: JsonRpcResponse = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
+        if let Some(err) = parsed.error {
+            return Err(CoreError::Terminal(format!("jsonrpc {}: {}", err.code, err.message)));
+        }
+        parsed.result.ok_or_else(|| CoreError::Terminal("jsonrpc: empty result".into()))
+    }
+}
+EOF
+  ok "gen_ui_mcp: JSON-RPC 2.0 + HTTP/SSE transport + registry (forge /mcp/v1/a2ui seam)"
+}
+
+emit_flint_client() {
+  # ── Cargo.toml ──────────────────────────────────────────────────────────────
+  cat >> "$OUT/crates/gen_ui_client/Cargo.toml" << 'EOF'
+gen_ui_types    = { path = "../gen_ui_types" }
+gen_ui_runtime  = { path = "../gen_ui_runtime" }
+gen_ui_protocol = { path = "../gen_ui_protocol" }
+gen_ui_mcp      = { path = "../gen_ui_mcp" }
+async-trait.workspace = true
+serde.workspace       = true
+serde_json.workspace  = true
+futures.workspace     = true
+parking_lot.workspace = true
+tracing.workspace     = true
+reqwest.workspace     = true
+reqwest-eventsource.workspace = true
+jsonwebtoken.workspace = true
+
+[features]
+default = []
+# FRF peer-sync spine (tonic gRPC over HTTP/2). Native-only — tonic's transport does
+# not build for wasm32-unknown-unknown. The browser surface uses frf-wasm/Connect-web
+# from the JS side (see references), NOT this crate. Off by default so the common
+# gate+forge path stays wasm-safe and fast to compile.
+#
+# The feature FLAGS are declared (so `cfg(feature = "frf")` is a known cfg and the
+# offline gate+forge build is clippy-clean) but activate NO deps here, because the
+# FRF crates are private/unpublished (see workspace Cargo.toml). To actually enable
+# the spine: uncomment the three FRF workspace deps + the optional-dep block below,
+# then change these two lines to pull them in:
+#     frf = ["dep:frf-sdk-rust"]
+#     peer-crdt = ["frf", "dep:frf-crdt", "dep:frf-store-redb"]
+frf = []
+peer-crdt = ["frf"]
+
+# [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# frf-sdk-rust   = { workspace = true, optional = true }
+# frf-crdt       = { workspace = true, optional = true }
+# frf-store-redb = { workspace = true, optional = true }
+
+[dev-dependencies]
+jsonwebtoken.workspace = true
+serde_json.workspace   = true
+EOF
+
+  # ── lib.rs ──────────────────────────────────────────────────────────────────
+  { echo "$MARK"; cat << 'RUST'; } > "$OUT/crates/gen_ui_client/src/lib.rs"
+//! gen_ui_client (L2) — Flint platform integration for gen_ui_core.
+//!
+//! Owns ALL outbound connections (TJ-ARCH-MOB-001: networking lives only here, never
+//! in Dart/TS). Three planes, one façade [`flint::FlintClient`]:
+//!   * gate   — Kratos/JWT auth, token lifecycle, Cedar `@require_approval` polling.
+//!   * forge  — Quarry REST (`EntityTransport`), A2UI-registry MCP server, AG-UI runs.
+//!   * frf    — realtime spine (Spine subscribe/ack, EntityService watch) [feature = "frf"].
+//!
+//! Verified against flint-gate/forge/FRF HEADs 2026-07-15 (see the C-006 done log for
+//! SHAs). gate + forge are plain HTTP/SSE/JSON-RPC (reqwest); FRF is tonic gRPC and is
+//! therefore native-only + feature-gated so the default build stays wasm-safe.
+#![cfg_attr(target_arch = "wasm32", allow(dead_code))]
+
+pub mod flint;
+
+// The FlintClient façade is native-only (reqwest/tonic IO); the browser reaches the
+// same planes from JS per the layer contract. Token types are cross-target.
+#[cfg(not(target_arch = "wasm32"))]
+pub use flint::{FlintClient, FlintConfig};
+pub use flint::token;
+RUST
+
+  mkdir -p "$OUT/crates/gen_ui_client/src/flint"
+
+  emit_flint_token
+  emit_flint_gate
+  emit_flint_forge
+  emit_flint_frf
+  emit_flint_mod
+  emit_flint_tests
+
+  ok "gen_ui_client/flint: gate (auth+token+approval) · forge (Quarry/MCP/AG-UI) · frf (Spine, feat)"
+}
+
+emit_flint_token() {
+  { echo "$MARK"; cat << 'RUST'; } > "$OUT/crates/gen_ui_client/src/flint/token.rs"
+//! Token lifecycle for the gate auth flow.
+//!
+//! The gate mints short-lived (default 300s) JWTs; there is no refresh endpoint, so
+//! "refresh" means re-authenticating from the held credential (anon key or Kratos
+//! session). We model the ladder as a state enum so the caller cannot, e.g., call an
+//! agent-scoped endpoint while still on the anon boot token.
+//!
+//! Claims mirror flint-forge `forge-identity::Claims` EXACTLY: only `sub`/`role`/
+//! `tenant_id` are first-class; everything else (`act`, `agent_id`, `workflow_id`,
+//! `principal_type`, `scope`) rides the untyped `extra` map — the platform itself
+//! keeps them untyped, so typing them here would be a fiction that drifts.
+use gen_ui_types::{CoreError, CoreResult};
+use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
+
+/// The role ladder. `service_role` bypasses Postgres RLS and never rides a client.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Role {
+    Anon,
+    Authenticated,
+    Agent,
+    ServiceRole,
+}
+
+impl Role {
+    fn from_claim(s: Option<&str>) -> Self {
+        match s {
+            Some("authenticated") => Role::Authenticated,
+            Some("agent") => Role::Agent,
+            Some("service_role") => Role::ServiceRole,
+            // forge-identity coerces an absent/unknown role to "anon".
+            _ => Role::Anon,
+        }
+    }
+}
+
+/// Decoded gate/forge JWT claims. Only the three typed fields are guaranteed; the
+/// rest are read out of `extra` by key when a caller needs them (e.g. `agent_id`).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: String,
+    #[serde(default)]
+    pub role: Option<String>,
+    #[serde(default)]
+    pub tenant_id: Option<String>,
+    #[serde(default)]
+    pub exp: Option<i64>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, serde_json::Value>,
+}
+
+impl Claims {
+    pub fn role(&self) -> Role {
+        Role::from_claim(self.role.as_deref())
+    }
+    /// An untyped extra claim by key (`act`, `agent_id`, `workflow_id`, ...).
+    pub fn extra_str(&self, key: &str) -> Option<&str> {
+        self.extra.get(key).and_then(|v| v.as_str())
+    }
+    /// Decode WITHOUT signature verification — gate/forge own verification (JWKS).
+    /// We only need to read `exp`/`role`/`tenant_id` to drive the client state.
+    pub fn decode_unverified(jwt: &str) -> CoreResult<Self> {
+        let mut validation = jsonwebtoken::Validation::default();
+        validation.insecure_disable_signature_validation();
+        validation.validate_exp = false;
+        validation.required_spec_claims.clear();
+        let key = jsonwebtoken::DecodingKey::from_secret(&[]);
+        jsonwebtoken::decode::<Claims>(jwt, &key, &validation)
+            .map(|d| d.claims)
+            .map_err(|e| CoreError::Terminal(format!("jwt decode: {e}")))
+    }
+}
+
+/// A token plus its decoded claims. `is_expired` uses `exp` with a small skew.
+#[derive(Debug, Clone)]
+pub struct Token {
+    pub raw: String,
+    pub claims: Claims,
+}
+
+impl Token {
+    const SKEW_SECS: i64 = 10;
+
+    pub fn parse(raw: impl Into<String>) -> CoreResult<Self> {
+        let raw = raw.into();
+        let claims = Claims::decode_unverified(&raw)?;
+        Ok(Self { raw, claims })
+    }
+
+    /// Expired relative to `now_unix` (caller supplies time — this crate does no IO
+    /// and stays wasm-safe; the runtime layer provides the clock).
+    pub fn is_expired(&self, now_unix: i64) -> bool {
+        match self.claims.exp {
+            Some(exp) => now_unix + Self::SKEW_SECS >= exp,
+            None => false,
+        }
+    }
+
+    pub fn role(&self) -> Role {
+        self.claims.role()
+    }
+}
+
+/// The auth state machine. Illegal transitions (agent call while Anon) are
+/// unrepresentable: a caller pattern-matches to get the active token.
+#[derive(Debug, Clone, Default)]
+pub enum AuthState {
+    /// No credential yet.
+    #[default]
+    Unauthenticated,
+    /// Booted with the static publishable anon key.
+    Anon { token: Token },
+    /// Exchanged a Kratos session for an authenticated/agent JWT.
+    Authenticated { token: Token },
+}
+
+impl AuthState {
+    /// The Bearer token to attach to an outbound request, if any.
+    pub fn bearer(&self) -> Option<&str> {
+        match self {
+            AuthState::Unauthenticated => None,
+            AuthState::Anon { token } | AuthState::Authenticated { token } => Some(&token.raw),
+        }
+    }
+
+    pub fn role(&self) -> Role {
+        match self {
+            AuthState::Unauthenticated | AuthState::Anon { .. } => Role::Anon,
+            AuthState::Authenticated { token } => token.role(),
+        }
+    }
+
+    /// True when the active token has expired and a re-auth is due.
+    pub fn needs_refresh(&self, now_unix: i64) -> bool {
+        match self {
+            AuthState::Unauthenticated => false,
+            AuthState::Anon { token } | AuthState::Authenticated { token } => token.is_expired(now_unix),
+        }
+    }
+}
+RUST
+  ok "flint/token.rs: Role ladder · Claims (forge-identity mirror) · AuthState machine"
+}
+
+emit_flint_gate() {
+  { echo "$MARK"; cat << 'RUST'; } > "$OUT/crates/gen_ui_client/src/flint/gate.rs"
+//! flint-gate client — auth boot, Kratos session exchange, Cedar approval polling.
+//!
+//! VERIFIED contract (gate HEAD 2026-07-15):
+//!  * There is NO anon-token issuance endpoint. `FLINT_ANON_KEY` is a static,
+//!    pre-shared publishable JWT — boot = hold it and send `Authorization: Bearer`.
+//!  * Kratos is proxied: gate resolves a session via `GET /sessions/whoami` with the
+//!    `ory_kratos_session` cookie; the authenticated/agent JWT is then minted by gate
+//!    per-request. No mint endpoint, no refresh endpoint (refresh = re-auth).
+//!  * `@require_approval` (human-in-the-loop) surfaces via the ADMIN approvals API
+//!    (`/approvals/:id` → `decision` field, null = pending). No `isApprovalRequired`
+//!    boolean and no per-request status/header at this HEAD.
+use crate::flint::token::{AuthState, Token};
+use gen_ui_types::{CoreError, CoreResult};
+use serde::Deserialize;
+
+/// Gate endpoints. Proxy (:4456) carries app traffic; admin (:4457) is private and
+/// only reachable from trusted backends — the approvals poll is an admin call.
+#[derive(Debug, Clone)]
+pub struct GateConfig {
+    pub proxy_base: String,
+    pub admin_base: Option<String>,
+    /// Static publishable anon key (FLINT_ANON_KEY).
+    pub anon_key: Option<String>,
+}
+
+pub struct GateClient {
+    http: reqwest::Client,
+    config: GateConfig,
+}
+
+/// A pending Cedar approval as surfaced by the admin API. `decision` is `None` while
+/// pending; a caller polls until it flips to approved/rejected.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ApprovalStatus {
+    pub id: String,
+    /// "approved" | "rejected" | null(pending).
+    #[serde(default)]
+    pub decision: Option<String>,
+    #[serde(default)]
+    pub reason: Option<String>,
+}
+
+impl ApprovalStatus {
+    pub fn is_pending(&self) -> bool {
+        self.decision.is_none()
+    }
+    pub fn is_approved(&self) -> bool {
+        self.decision.as_deref() == Some("approved")
+    }
+}
+
+impl GateClient {
+    pub fn new(http: reqwest::Client, config: GateConfig) -> Self {
+        Self { http, config }
+    }
+
+    /// Boot with the static anon key. Errors if none is configured — a client with no
+    /// credential cannot reach RLS-guarded planes.
+    pub fn boot_anon(&self) -> CoreResult<AuthState> {
+        let key = self
+            .config
+            .anon_key
+            .as_deref()
+            .ok_or_else(|| CoreError::Terminal("flint: no FLINT_ANON_KEY configured".into()))?;
+        let token = Token::parse(key)?;
+        Ok(AuthState::Anon { token })
+    }
+
+    /// Exchange a Kratos session cookie for an authenticated/agent JWT.
+    ///
+    /// Gate resolves the session (`/sessions/whoami`) and mints the outbound JWT via
+    /// its `claims_enhancement` hook; we read the minted token from the response. The
+    /// exact carrier (body field vs `Authorization` on the response) is route-config
+    /// dependent — we accept both shapes.
+    pub async fn exchange_kratos_session(&self, kratos_cookie: &str) -> CoreResult<AuthState> {
+        let url = format!("{}/sessions/whoami", self.config.proxy_base.trim_end_matches('/'));
+        let resp = self
+            .http
+            .get(&url)
+            .header(reqwest::header::COOKIE, format!("ory_kratos_session={kratos_cookie}"))
+            .send()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
+
+        if resp.status() == reqwest::StatusCode::UNAUTHORIZED
+            || resp.status() == reqwest::StatusCode::FORBIDDEN
+        {
+            return Err(CoreError::Terminal("flint: kratos session invalid".into()));
+        }
+        if !resp.status().is_success() {
+            return Err(CoreError::Transient(format!("flint gate whoami http {}", resp.status())));
+        }
+
+        // Preferred: minted JWT echoed on a response header.
+        if let Some(hv) = resp.headers().get(reqwest::header::AUTHORIZATION) {
+            if let Ok(s) = hv.to_str() {
+                let raw = s.strip_prefix("Bearer ").unwrap_or(s);
+                let token = Token::parse(raw)?;
+                return Ok(AuthState::Authenticated { token });
+            }
+        }
+        // Fallback: JSON body { "token": "..." } or { "jwt": "..." }.
+        #[derive(Deserialize)]
+        struct MintBody {
+            #[serde(alias = "jwt")]
+            token: Option<String>,
+        }
+        let body: MintBody = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
+        let raw = body
+            .token
+            .ok_or_else(|| CoreError::Terminal("flint: gate returned no minted token".into()))?;
+        Ok(AuthState::Authenticated { token: Token::parse(raw)? })
+    }
+
+    /// Poll a Cedar approval by id (admin API). One shot — the caller drives the wait
+    /// loop with the runtime's timer so this stays IO-only and testable.
+    pub async fn approval_status(&self, approval_id: &str) -> CoreResult<ApprovalStatus> {
+        let admin = self
+            .config
+            .admin_base
+            .as_deref()
+            .ok_or_else(|| CoreError::Terminal("flint: no gate admin_base for approvals".into()))?;
+        let url = format!("{}/approvals/{approval_id}", admin.trim_end_matches('/'));
+        let resp = self
+            .http
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
+        if resp.status() == reqwest::StatusCode::NOT_FOUND {
+            return Err(CoreError::NotFound(format!("approval {approval_id}")));
+        }
+        if !resp.status().is_success() {
+            return Err(CoreError::Transient(format!("flint approval http {}", resp.status())));
+        }
+        resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))
+    }
+}
+RUST
+  ok "flint/gate.rs: anon boot · Kratos exchange · approval polling"
+}
+
+emit_flint_forge() {
+  { echo "$MARK"; cat << 'RUST'; } > "$OUT/crates/gen_ui_client/src/flint/forge.rs"
+//! flint-forge client — Quarry data plane, A2UI-registry MCP server, AG-UI runs.
+//!
+//! VERIFIED contract (forge HEAD 2026-07-15, binary `fdb-gateway`, default :8080):
+//!  * Quarry REST paths are `/<schema>/<table>` (PostgREST grammar), NOT `/rest/v1`.
+//!    RLS tenant scoping rides the Bearer JWT ONLY (no X-Tenant header).
+//!  * A2UI registry is an MCP server at `POST /mcp/v1/a2ui` (JSON-RPC 2.0) with a
+//!    keep-alive SSE at `/mcp/v1/a2ui/sse`. We register it into gen_ui_mcp::McpRegistry.
+//!  * AG-UI runs: `POST /agents/v1/runs` → `GET /agents/v1/{run_id}/events` (SSE).
+//!    Event frames are `event:<name>` + `data:<AgUiEvent json>` tagged by `type`.
+use crate::flint::token::AuthState;
+use gen_ui_mcp::{McpRegistry, McpServerHandle, SseTransport};
+use gen_ui_types::content_block::ContentBlock;
+use gen_ui_types::events::A2uiEvent;
+use gen_ui_types::transport::{EntityRecord, EntityTransport, ListResult};
+use gen_ui_types::view::{FilterOp, ViewDescriptor};
+use gen_ui_types::{CoreError, CoreResult};
+use serde::Deserialize;
+use std::sync::Arc;
+
+#[derive(Debug, Clone)]
+pub struct ForgeConfig {
+    /// e.g. `http://localhost:8080`.
+    pub base: String,
+    /// Postgres schema the entity tables live in (default `public`).
+    pub schema: String,
+}
+
+impl Default for ForgeConfig {
+    fn default() -> Self {
+        Self { base: "http://localhost:8080".into(), schema: "public".into() }
+    }
+}
+
+/// Shared auth handle so a refreshed token is seen by every request without rebuilding
+/// the client. The gate/agent layer swaps the inner state; forge reads the Bearer.
+pub type SharedAuth = Arc<parking_lot::RwLock<AuthState>>;
+
+pub struct ForgeClient {
+    http: reqwest::Client,
+    config: ForgeConfig,
+    auth: SharedAuth,
+}
+
+impl ForgeClient {
+    pub fn new(http: reqwest::Client, config: ForgeConfig, auth: SharedAuth) -> Self {
+        Self { http, config, auth }
+    }
+
+    fn bearer(&self) -> Option<String> {
+        self.auth.read().bearer().map(str::to_owned)
+    }
+
+    /// Register forge's A2UI registry as an MCP server into the shared registry.
+    /// The gate JWT is snapshotted at registration; callers re-register after a
+    /// long-lived token rotation (tokens are short-lived — see token.rs).
+    pub fn register_a2ui_mcp(&self, registry: &McpRegistry) -> Arc<McpServerHandle> {
+        let endpoint = format!("{}/mcp/v1/a2ui", self.config.base.trim_end_matches('/'));
+        let transport = SseTransport::new(self.http.clone(), endpoint, self.bearer());
+        registry.register(McpServerHandle::new("flint-a2ui-registry", Box::new(transport)))
+    }
+
+    fn table_url(&self, entity_type: &str) -> String {
+        format!("{}/{}/{}", self.config.base.trim_end_matches('/'), self.config.schema, entity_type)
+    }
+
+    fn apply_bearer(&self, req: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+        match self.bearer() {
+            Some(token) => req.bearer_auth(token),
+            None => req,
+        }
+    }
+}
+
+/// PostgREST operator string for a FilterOp (`?field=eq.value`).
+fn postgrest_op(op: FilterOp) -> &'static str {
+    match op {
+        FilterOp::Eq => "eq",
+        FilterOp::Ne => "neq",
+        FilterOp::Lt => "lt",
+        FilterOp::Lte => "lte",
+        FilterOp::Gt => "gt",
+        FilterOp::Gte => "gte",
+        FilterOp::In => "in",
+        FilterOp::Like => "like",
+    }
+}
+
+#[async_trait::async_trait]
+impl EntityTransport for ForgeClient {
+    async fn list(&self, view: &ViewDescriptor) -> CoreResult<ListResult> {
+        let mut req = self.apply_bearer(self.http.get(self.table_url(&view.entity_type)));
+        // PostgREST filter grammar: one query pair per filter.
+        for f in &view.filters {
+            let raw: serde_json::Value =
+                serde_json::from_str(&f.value_json).unwrap_or(serde_json::Value::String(f.value_json.clone()));
+            let val = raw.as_str().map(str::to_owned).unwrap_or_else(|| raw.to_string());
+            req = req.query(&[(f.field.as_str(), format!("{}.{}", postgrest_op(f.op), val))]);
+        }
+        if !view.sorts.is_empty() {
+            let order = view
+                .sorts
+                .iter()
+                .map(|s| format!("{}.{}", s.field, if s.descending { "desc" } else { "asc" }))
+                .collect::<Vec<_>>()
+                .join(",");
+            req = req.query(&[("order", order)]);
+        }
+        if let Some(limit) = view.limit {
+            req = req.query(&[("limit", limit.to_string())]);
+        }
+        let resp = req.send().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+        if !resp.status().is_success() {
+            return Err(map_status(resp.status()));
+        }
+        let rows: Vec<serde_json::Value> = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
+        let items = rows.into_iter().map(|row| row_to_record(&view.entity_type, row)).collect();
+        Ok(ListResult { items, next_cursor: None })
+    }
+
+    async fn get(&self, entity_type: &str, id: &str) -> CoreResult<Option<EntityRecord>> {
+        let req = self
+            .apply_bearer(self.http.get(self.table_url(entity_type)))
+            .query(&[("id", format!("eq.{id}")), ("limit", "1".into())]);
+        let resp = req.send().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+        if !resp.status().is_success() {
+            return Err(map_status(resp.status()));
+        }
+        let mut rows: Vec<serde_json::Value> = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
+        Ok(rows.pop().map(|row| row_to_record(entity_type, row)))
+    }
+
+    async fn create(&self, record: &EntityRecord) -> CoreResult<EntityRecord> {
+        let value: serde_json::Value =
+            serde_json::from_str(&record.data_json).map_err(|e| CoreError::Serde(e.to_string()))?;
+        let resp = self
+            .apply_bearer(self.http.post(self.table_url(&record.entity_type)))
+            .header("Prefer", "return=representation")
+            .json(&value)
+            .send()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
+        if !resp.status().is_success() {
+            return Err(map_status(resp.status()));
+        }
+        let mut rows: Vec<serde_json::Value> = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
+        let row = rows.pop().ok_or_else(|| CoreError::Terminal("forge create: empty representation".into()))?;
+        Ok(row_to_record(&record.entity_type, row))
+    }
+
+    async fn update(&self, record: &EntityRecord) -> CoreResult<EntityRecord> {
+        let value: serde_json::Value =
+            serde_json::from_str(&record.data_json).map_err(|e| CoreError::Serde(e.to_string()))?;
+        let url = format!("{}/{}", self.table_url(&record.entity_type), record.id);
+        let resp = self
+            .apply_bearer(self.http.patch(url))
+            .header("Prefer", "return=representation")
+            .json(&value)
+            .send()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
+        if !resp.status().is_success() {
+            return Err(map_status(resp.status()));
+        }
+        let mut rows: Vec<serde_json::Value> = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
+        let row = rows.pop().ok_or_else(|| CoreError::Terminal("forge update: empty representation".into()))?;
+        Ok(row_to_record(&record.entity_type, row))
+    }
+
+    async fn delete(&self, entity_type: &str, id: &str) -> CoreResult<()> {
+        let url = format!("{}/{}", self.table_url(entity_type), id);
+        let resp = self
+            .apply_bearer(self.http.delete(url))
+            .send()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
+        if !resp.status().is_success() {
+            return Err(map_status(resp.status()));
+        }
+        Ok(())
+    }
+}
+
+fn row_to_record(entity_type: &str, row: serde_json::Value) -> EntityRecord {
+    let id = row
+        .get("id")
+        .map(|v| v.as_str().map(str::to_owned).unwrap_or_else(|| v.to_string()))
+        .unwrap_or_default();
+    EntityRecord { id, entity_type: entity_type.to_owned(), data_json: row.to_string() }
+}
+
+fn map_status(status: reqwest::StatusCode) -> CoreError {
+    use reqwest::StatusCode;
+    match status {
+        StatusCode::NOT_FOUND => CoreError::NotFound(status.to_string()),
+        StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => CoreError::Terminal(format!("forge auth: {status}")),
+        s if s.is_server_error() || s == StatusCode::TOO_MANY_REQUESTS => CoreError::Transient(s.to_string()),
+        s => CoreError::Terminal(format!("forge http {s}")),
+    }
+}
+
+// ── AG-UI event mapping ─────────────────────────────────────────────────────
+// forge emits internally-tagged `AgUiEvent` (`{"type":"TextMessageContent",...}`).
+// We translate the subset the ContentBlock contract needs into our A2uiEvent surface
+// so the ProtocolPipeline (gen_ui_protocol) folds them into ContentBlocks unchanged.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(tag = "type")]
+pub enum AgUiEvent {
+    RunStarted { #[serde(default)] run_id: String },
+    TextMessageContent { #[serde(default)] delta: String },
+    ToolCallStart { #[serde(default)] tool_call_id: String, #[serde(default)] tool_name: String },
+    RunFinished { #[serde(default)] run_id: String },
+    RunError { #[serde(default)] message: String },
+    #[serde(other)]
+    Other,
+}
+
+/// Map a forge AG-UI event to zero or more of our A2UI events. Unhandled variants
+/// (state deltas, custom surfaces) yield nothing here and are handled by the A2UI
+/// surface layer directly — this path only feeds the streaming ContentBlock fold.
+pub fn agui_to_a2ui(ev: &AgUiEvent) -> Vec<A2uiEvent> {
+    match ev {
+        AgUiEvent::RunStarted { run_id } => vec![A2uiEvent::RunStarted { run_id: run_id.clone() }],
+        AgUiEvent::TextMessageContent { delta } => {
+            vec![A2uiEvent::Block { block: ContentBlock::Text { text: delta.clone() } }]
+        }
+        AgUiEvent::ToolCallStart { tool_call_id, tool_name } => vec![A2uiEvent::Block {
+            block: ContentBlock::ToolUse { id: tool_call_id.clone(), name: tool_name.clone(), input_json: "{}".into() },
+        }],
+        AgUiEvent::RunFinished { run_id } => vec![A2uiEvent::RunFinished { run_id: run_id.clone() }],
+        AgUiEvent::RunError { message } => vec![A2uiEvent::RunError { message: message.clone() }],
+        AgUiEvent::Other => vec![],
+    }
+}
+
+/// Parse one SSE `data:` payload (a JSON AgUiEvent) into A2UI events. Returns an empty
+/// vec for keep-alives / unparseable frames rather than erroring the whole stream.
+pub fn parse_agui_frame(data: &str) -> Vec<A2uiEvent> {
+    match serde_json::from_str::<AgUiEvent>(data) {
+        Ok(ev) => agui_to_a2ui(&ev),
+        Err(_) => vec![],
+    }
+}
+RUST
+  ok "flint/forge.rs: Quarry EntityTransport · MCP registration · AG-UI→A2UI mapping"
+}
+
+emit_flint_frf() {
+  { echo "$MARK"; cat << 'RUST'; } > "$OUT/crates/gen_ui_client/src/flint/frf.rs"
+//! flint-realtime-fabric (FRF) Spine wrapper — feature = "frf", native-only.
+//!
+//! FRF is tonic gRPC over HTTP/2, which does not build for wasm32-unknown-unknown;
+//! the browser surface uses frf-wasm / Connect-web from the JS side instead. This
+//! module is compiled only when the `frf` feature is on AND the target is not wasm.
+//!
+//! VERIFIED (FRF HEAD 2026-07-15): SDK crate `frf-sdk-rust`, entry `FrfClient::connect
+//! (endpoint, token)`; `SpineService` publish/subscribe(channel_id,consumer_id,from)/
+//! ack over `EventEnvelope`; `EntityService::WatchEntity` streams `EntityChange`.
+//! Peer-sync (feature = "peer-crdt") layers `frf-crdt` (Loro) + `frf-store-redb`.
+//!
+//! We keep this to a thin façade over the SDK so a `SyncTransport` impl (gen_ui_db::
+//! sync, C-005) or the agent loop can drive the spine without re-learning proto types.
+
+use gen_ui_types::sync::SyncStatus;
+
+/// FRF connection parameters. `token` is the gate-minted Bearer the SDK's
+/// `AuthInterceptor` injects on every RPC.
+#[derive(Debug, Clone)]
+pub struct FrfConfig {
+    pub endpoint: String,
+    pub token: Option<String>,
+    pub tenant_id: String,
+}
+
+/// Thin handle around `frf_sdk_rust::FrfClient`. Constructed lazily by the façade so
+/// a build without a reachable spine (offline-first boot) does not fail at startup.
+pub struct FrfSpine {
+    config: FrfConfig,
+    #[cfg(feature = "frf")]
+    client: parking_lot::Mutex<Option<frf_sdk_rust::FrfClient>>,
+    status: parking_lot::RwLock<SyncStatus>,
+}
+
+impl FrfSpine {
+    pub fn new(config: FrfConfig) -> Self {
+        Self {
+            config,
+            #[cfg(feature = "frf")]
+            client: parking_lot::Mutex::new(None),
+            status: parking_lot::RwLock::new(SyncStatus::Offline),
+        }
+    }
+
+    pub fn status(&self) -> SyncStatus {
+        self.status.read().clone()
+    }
+
+    pub fn tenant_id(&self) -> &str {
+        &self.config.tenant_id
+    }
+
+    /// Connect (or reconnect) the Spine client. Only compiled with `frf`.
+    #[cfg(feature = "frf")]
+    pub async fn connect(&self) -> gen_ui_types::CoreResult<()> {
+        use gen_ui_types::CoreError;
+        let client = frf_sdk_rust::FrfClient::connect(self.config.endpoint.clone(), self.config.token.clone())
+            .await
+            .map_err(|e| CoreError::Transient(format!("frf connect: {e}")))?;
+        *self.client.lock() = Some(client);
+        *self.status.write() = SyncStatus::Live;
+        Ok(())
+    }
+
+    /// Placeholder connect for builds without the `frf` feature — the offline path.
+    #[cfg(not(feature = "frf"))]
+    pub async fn connect(&self) -> gen_ui_types::CoreResult<()> {
+        Err(gen_ui_types::CoreError::Terminal(
+            "frf feature not enabled (native-only spine)".into(),
+        ))
+    }
+}
+
+// Peer CRDT op-log lane (feature = "peer-crdt"): re-export the on-device store + Loro
+// applier so gen_ui_db::sync (C-005) can build the OFP-style peer path without adding
+// FRF as a direct dependency. Kept behind the feature so redb never enters the default
+// dependency graph.
+#[cfg(feature = "peer-crdt")]
+pub mod peer {
+    pub use frf_crdt::LoroDeltaApplier;
+    pub use frf_store_redb::RedbOpStore;
+}
+RUST
+  ok "flint/frf.rs: Spine façade (feature=frf, native-only) · peer-crdt re-exports"
+}
+
+emit_flint_mod() {
+  { echo "$MARK"; cat << 'RUST'; } > "$OUT/crates/gen_ui_client/src/flint/mod.rs"
+//! Flint integration façade. One [`FlintClient`] wires the three planes together and
+//! shares a single auth handle (a refreshed token is seen everywhere at once).
+//!
+//! `token` (JWT claims/lifecycle) is pure and cross-target. The IO planes (`gate`,
+//! `forge`, `frf`) and the `FlintClient` façade are reqwest/tonic-driven and native-
+//! only — on the browser the same planes are reached from JS (Connect-web / PGlite /
+//! `@flint/react`) per the TJ-ARCH-MOB-001 layer contract.
+pub mod token;
+
+pub use token::{AuthState as FlintAuthState, Claims, Role, Token};
+
+#[cfg(not(target_arch = "wasm32"))]
+pub mod gate;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod forge;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod frf;
+
+#[cfg(not(target_arch = "wasm32"))]
+pub use client_impl::{FlintClient, FlintConfig};
+
+#[cfg(not(target_arch = "wasm32"))]
+mod client_impl {
+use super::forge::{ForgeClient, ForgeConfig, SharedAuth};
+use super::gate::{GateClient, GateConfig};
+use super::frf;
+use super::token::{AuthState, Role};
+use gen_ui_mcp::McpRegistry;
+use gen_ui_types::CoreResult;
+use std::sync::Arc;
+
+/// Everything needed to talk to a Flint deployment. Ports/paths carry verified
+/// defaults (gate :4456/:4457, forge :8080) — override per environment.
+#[derive(Debug, Clone)]
+pub struct FlintConfig {
+    pub gate: GateConfig,
+    pub forge: ForgeConfig,
+    pub frf: Option<frf::FrfConfig>,
+}
+
+/// The single entry point the agent loop / db-sync lane depends on. Owns the shared
+/// auth state; `gate()`/`forge()` hand out plane clients bound to it.
+pub struct FlintClient {
+    http: reqwest::Client,
+    config: FlintConfig,
+    auth: SharedAuth,
+    registry: McpRegistry,
+}
+
+impl FlintClient {
+    pub fn new(config: FlintConfig) -> Self {
+        Self {
+            http: reqwest::Client::new(),
+            config,
+            auth: Arc::new(parking_lot::RwLock::new(AuthState::Unauthenticated)),
+            registry: McpRegistry::new(),
+        }
+    }
+
+    pub fn gate(&self) -> GateClient {
+        GateClient::new(self.http.clone(), self.config.gate.clone())
+    }
+
+    pub fn forge(&self) -> ForgeClient {
+        ForgeClient::new(self.http.clone(), self.config.forge.clone(), self.auth.clone())
+    }
+
+    pub fn registry(&self) -> &McpRegistry {
+        &self.registry
+    }
+
+    /// Boot with the static anon key so unauthenticated (public) surfaces work
+    /// immediately; a later Kratos exchange upgrades the same shared auth handle.
+    pub fn boot_anon(&self) -> CoreResult<()> {
+        let state = self.gate().boot_anon()?;
+        *self.auth.write() = state;
+        Ok(())
+    }
+
+    /// Exchange a Kratos session for an authenticated/agent JWT and store it.
+    pub async fn login_with_kratos(&self, kratos_cookie: &str) -> CoreResult<Role> {
+        let state = self.gate().exchange_kratos_session(kratos_cookie).await?;
+        let role = state.role();
+        *self.auth.write() = state;
+        Ok(role)
+    }
+
+    /// Register forge's A2UI registry as an MCP server into this client's registry.
+    pub fn register_forge_mcp(&self) -> Arc<gen_ui_mcp::McpServerHandle> {
+        self.forge().register_a2ui_mcp(&self.registry)
+    }
+
+    pub fn auth_role(&self) -> Role {
+        self.auth.read().role()
+    }
+}
+} // mod client_impl (native-only)
+RUST
+  ok "flint/mod.rs: FlintClient façade (shared auth · gate/forge/registry wiring)"
+}
+
+emit_flint_tests() {
+  # Behavior tests at the crate's PUBLIC boundary (CLAUDE.md philosophy: features
+  # first, 3-5 boundary tests at completion, no internal mocks, pure I/O-free).
+  # One integration binary per crate (tests/it.rs) — separate files link separately.
+  mkdir -p "$OUT/crates/gen_ui_client/tests"
+  { echo "$MARK"; cat << 'RUST'; } > "$OUT/crates/gen_ui_client/tests/it.rs"
+//! Boundary tests for the flint client. No network, no mocks — the observable
+//! behavior is: (1) a gate JWT decodes to the right role/tenant and expiry drives the
+//! AuthState machine; (2) forge AG-UI SSE frames fold into the ContentBlock contract.
+#![cfg(not(target_arch = "wasm32"))]
+
+use gen_ui_client::flint::token::{AuthState, Role, Token};
+use gen_ui_client::flint::forge::{parse_agui_frame, AgUiEvent, agui_to_a2ui};
+use gen_ui_types::content_block::ContentBlock;
+use gen_ui_types::events::A2uiEvent;
+
+/// Mint an unsigned-payload HS256 JWT for the given claims (test-only; the client
+/// decodes WITHOUT verification, mirroring the real "gate/forge own verification").
+fn mint(claims: serde_json::Value) -> String {
+    use jsonwebtoken::{encode, EncodingKey, Header};
+    encode(&Header::default(), &claims, &EncodingKey::from_secret(b"test")).expect("encode")
+}
+
+#[test]
+fn token_decodes_role_and_tenant_from_gate_claims() {
+    // Mirrors forge-identity::Claims: typed sub/role/tenant_id + untyped extra.
+    let jwt = mint(serde_json::json!({
+        "sub": "user-42", "role": "agent", "tenant_id": "acme",
+        "exp": 9_999_999_999i64, "agent_id": "planner", "act": "user-42",
+    }));
+    let token = Token::parse(&jwt).expect("parse");
+    assert_eq!(token.role(), Role::Agent);
+    assert_eq!(token.claims.tenant_id.as_deref(), Some("acme"));
+    // `act`/`agent_id` are untyped per the platform contract — read from `extra`.
+    assert_eq!(token.claims.extra_str("agent_id"), Some("planner"));
+    assert_eq!(token.claims.extra_str("act"), Some("user-42"));
+}
+
+#[test]
+fn absent_role_coerces_to_anon() {
+    let jwt = mint(serde_json::json!({ "sub": "x", "exp": 9_999_999_999i64 }));
+    let token = Token::parse(&jwt).expect("parse");
+    assert_eq!(token.role(), Role::Anon);
+}
+
+#[test]
+fn auth_state_machine_tracks_bearer_and_refresh() {
+    let fresh = mint(serde_json::json!({ "sub": "a", "role": "authenticated", "exp": 9_999_999_999i64 }));
+    let state = AuthState::Authenticated { token: Token::parse(&fresh).unwrap() };
+    assert_eq!(state.role(), Role::Authenticated);
+    assert!(state.bearer().is_some());
+    assert!(!state.needs_refresh(1_000)); // far from exp
+    assert!(state.needs_refresh(9_999_999_999)); // at/after exp (with skew)
+
+    // Unauthenticated carries no bearer and is never "refreshable".
+    let empty = AuthState::Unauthenticated;
+    assert!(empty.bearer().is_none());
+    assert!(!empty.needs_refresh(9_999_999_999));
+}
+
+#[test]
+fn agui_text_delta_folds_to_content_block_text() {
+    let frame = r#"{"type":"TextMessageContent","delta":"hello"}"#;
+    let events = parse_agui_frame(frame);
+    assert_eq!(events.len(), 1);
+    match &events[0] {
+        A2uiEvent::Block { block: ContentBlock::Text { text } } => assert_eq!(text, "hello"),
+        other => panic!("expected Text block, got {other:?}"),
+    }
+}
+
+#[test]
+fn agui_run_lifecycle_and_toolcall_map_to_a2ui() {
+    // RunStarted → A2uiEvent::RunStarted.
+    let started = agui_to_a2ui(&AgUiEvent::RunStarted { run_id: "r1".into() });
+    assert!(matches!(started.as_slice(), [A2uiEvent::RunStarted { run_id }] if run_id == "r1"));
+
+    // ToolCallStart → a ToolUse ContentBlock (name + id preserved).
+    let tool = parse_agui_frame(r#"{"type":"ToolCallStart","tool_call_id":"t9","tool_name":"search"}"#);
+    match tool.as_slice() {
+        [A2uiEvent::Block { block: ContentBlock::ToolUse { id, name, .. } }] => {
+            assert_eq!(id, "t9");
+            assert_eq!(name, "search");
+        }
+        other => panic!("expected ToolUse block, got {other:?}"),
+    }
+
+    // Unknown/keepalive frames yield nothing rather than erroring the stream.
+    assert!(parse_agui_frame(":keep-alive").is_empty());
+    assert!(parse_agui_frame(r#"{"type":"StateDelta","delta":[]}"#).is_empty());
+}
+RUST
+  ok "flint tests: token lifecycle · AuthState machine · AG-UI→ContentBlock folding"
+}
+
+# ── L2 gen_ui_mcp — MCP client registry (C-006) ─────────────────────────────
+# Minimal MCP (Model Context Protocol) client: JSON-RPC 2.0 over HTTP POST with an
+# SSE event channel. This is the seam flint-forge's A2UI-registry-as-MCP-server
+# (/mcp/v1/a2ui) registers into. SSE transport is wasm-safe (fetch/EventSource);
+# stdio transport is native-only and feature-gated off by default.
+
+# emit_graph_rag_crate — C-004. Full gen_ui_db_graph crate: SurrealDB 3.2 embedded
+# hybrid graph-RAG. All Rust bodies use quoted heredocs (<< 'RUST') so SurrealQL
+# $bind placeholders and Rust expressions are written verbatim; the compliance
+# marker is inlined literally rather than via $MARK for the same reason.
+emit_graph_rag_crate() {
+  emit_crate gen_ui_db_graph ""
+  local d="$OUT/crates/gen_ui_db_graph"
+  mkdir -p "$d/src" "$d/tests/it"
+
+  cat >> "$d/Cargo.toml" << 'EOF'
+gen_ui_types   = { path = "../gen_ui_types" }
+gen_ui_runtime = { path = "../gen_ui_runtime" }
+workspace-hack = { path = "../workspace-hack" }
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+futures.workspace = true
+
+# SurrealDB engine is target-split so the native build gets RocksDB (persistent,
+# incl. iOS/Android) and wasm gets IndexedDB — the only embedded KV that links on
+# wasm32. Both share the same SurrealQL surface, so store.rs is target-agnostic.
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+surrealdb = { workspace = true, features = ["kv-rocksdb", "kv-mem"] }
+# fastembed pulls ONNX Runtime — native only. On wasm the embedder is supplied by
+# the host (JS transformers.js) through the Embedder trait, so fastembed is absent.
+fastembed = { workspace = true, optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+surrealdb = { workspace = true, features = ["kv-indxdb"] }
+
+[features]
+# `embed-native` wires the on-device fastembed model. Off by default so the crate
+# (and its boundary tests) build without downloading an ONNX model; leaves that
+# ship inference enable it. wasm never gets it.
+default = []
+embed-native = ["dep:fastembed"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt", "macros"] }
+
+# One integration-test binary (tests/it/main.rs) — every extra tests/*.rs is a
+# separately linked binary and linking dominates the SurrealDB compile cycle.
+[[test]]
+name = "it"
+path = "tests/it/main.rs"
+EOF
+
+  # ── lib.rs ──────────────────────────────────────────────────────────────────
+  cat > "$d/src/lib.rs" << 'RUST'
+// TJ-ARCH-MOB-001 compliant
+//! gen_ui_db_graph (L2) — SurrealDB 3.2 embedded hybrid graph-RAG store.
+//!
+//! Owns the knowledge-graph half of the data layer (relational + sync live in
+//! `gen_ui_db`). SurrealDB is isolated here on purpose: surrealdb-core's build.rs
+//! re-runs on any downstream change (surrealdb#6954), so keeping it in its own
+//! crate keeps the rest of the workspace off that slow recompile path.
+//!
+//! Engines: `kv-rocksdb` on native (persistent, incl. iOS/Android), `kv-indxdb`
+//! on wasm32 (the only embedded KV that links in the browser).
+//!
+//! The public surface is INTENT-LEVEL, never raw SurrealQL — there is no official
+//! Dart SurrealDB SDK, so `gen_ui_ffi` re-exports these functions and Dart calls
+//! `memory_search` / `graph_expand` / `memory_ingest`, not queries. Keeping SurrealQL
+//! private also means the schema can change without breaking the FFI contract.
+//!
+//! Hybrid retrieval pipeline (`memory_search`):
+//!   1. HNSW vector recall  — semantic nearest neighbours (384-dim embeddings)
+//!   2. BM25 full-text lane — lexical matches the vector lane misses
+//!   3. `search::rrf()`     — reciprocal-rank fusion of (1) and (2) IN the DB
+//!   4. graph expansion     — RELATE-edge neighbours of the fused hits, re-fused
+//!      in Rust (`rrf`) because it is not one SurrealQL statement
+#![forbid(unsafe_code)]
+
+mod embed;
+mod error;
+mod rrf;
+mod schema;
+mod store;
+
+pub use embed::{Embedder, EmbeddingModelInfo, EMBED_DIM};
+pub use error::GraphError;
+pub use rrf::{rrf_fuse, RrfConfig};
+pub use store::{GraphStore, GraphStoreConfig, MemoryHit, MemoryRecord, RelatedEntity};
+
+#[cfg(feature = "embed-native")]
+pub use embed::FastEmbedder;
+
+/// Result alias for graph-store operations. `GraphError` maps cleanly into the
+/// workspace-wide `gen_ui_types::CoreError` via `From`, so callers at the FFI
+/// boundary propagate one error taxonomy.
+pub type GraphResult<T> = Result<T, GraphError>;
+RUST
+
+  # ── error.rs ────────────────────────────────────────────────────────────────
+  cat > "$d/src/error.rs" << 'RUST'
+// TJ-ARCH-MOB-001 compliant
+//! Error taxonomy for the graph store, with a lossless map into the shared
+//! `gen_ui_types::CoreError` so the FFI boundary sees one error type.
+use gen_ui_types::CoreError;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum GraphError {
+    #[error("surreal: {0}")]
+    Surreal(String),
+    #[error("embedding: {0}")]
+    Embedding(String),
+    #[error("serialize: {0}")]
+    Serialize(String),
+    #[error("invalid input: {0}")]
+    Invalid(String),
+    #[error("not found: {0}")]
+    NotFound(String),
+}
+
+impl From<surrealdb::Error> for GraphError {
+    fn from(e: surrealdb::Error) -> Self {
+        GraphError::Surreal(e.to_string())
+    }
+}
+
+impl From<serde_json::Error> for GraphError {
+    fn from(e: serde_json::Error) -> Self {
+        GraphError::Serialize(e.to_string())
+    }
+}
+
+impl From<GraphError> for CoreError {
+    fn from(e: GraphError) -> Self {
+        match e {
+            // A dead embedded DB / locked file is worth a retry; a bad query is not.
+            GraphError::Surreal(m) => CoreError::Transient(m),
+            GraphError::Embedding(m) => CoreError::Transient(m),
+            GraphError::Serialize(m) => CoreError::Serde(m),
+            GraphError::Invalid(m) => CoreError::Terminal(m),
+            GraphError::NotFound(m) => CoreError::NotFound(m),
+        }
+    }
+}
+RUST
+
+  # ── embed.rs ────────────────────────────────────────────────────────────────
+  cat > "$d/src/embed.rs" << 'RUST'
+// TJ-ARCH-MOB-001 compliant
+//! On-device text embedding behind a trait, so the store depends on the
+//! *capability* not on fastembed. Native leaves enable `embed-native` for the
+//! real ONNX model; wasm hosts inject a JS-backed embedder; tests inject a
+//! deterministic fake and never touch the network.
+use crate::error::GraphError;
+
+/// Embedding width. 384 = all-MiniLM-L6-v2 / bge-small class. Standardised across
+/// every engine (SQLite-vec, pgvector, SurrealDB HNSW) so vectors replicate cleanly
+/// — the HNSW index in `schema.rs` is defined `DIMENSION 384` to match.
+pub const EMBED_DIM: usize = 384;
+
+/// Model provenance, surfaced so a store can refuse to mix embeddings from
+/// different models in one index (silent dimension/space drift is a classic RAG bug).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EmbeddingModelInfo {
+    pub name: String,
+    pub dim: usize,
+}
+
+/// The embedding capability the store needs. `embed` is batch-oriented because
+/// fastembed and every ONNX backend amortise best over a batch; a single string
+/// is just a one-element batch.
+///
+/// Implementors run CPU-bound inference — callers on the async path must invoke
+/// them inside `gen_ui_runtime::spawn_blocking` (see `store::GraphStore::embed_blocking`).
+pub trait Embedder: Send + Sync {
+    fn model_info(&self) -> EmbeddingModelInfo;
+    fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, GraphError>;
+}
+
+#[cfg(feature = "embed-native")]
+mod native {
+    use super::*;
+    use fastembed::{EmbeddingModel, TextEmbedding, TextInitOptions};
+    use std::sync::Mutex;
+
+    /// fastembed-backed embedder (all-MiniLM-L6-v2, 384-dim). Downloads the ONNX
+    /// model to `FASTEMBED_CACHE_DIR` on first use, then runs fully offline.
+    /// `TextEmbedding` is not `Sync`, so it sits behind a `Mutex`; embedding is
+    /// short and always called off the async runtime via `spawn_blocking`.
+    pub struct FastEmbedder {
+        inner: Mutex<TextEmbedding>,
+    }
+
+    impl FastEmbedder {
+        /// Load the default 384-dim model. Blocking (may download) — construct at
+        /// startup off the async runtime.
+        pub fn new() -> Result<Self, GraphError> {
+            let model = TextEmbedding::try_new(
+                TextInitOptions::new(EmbeddingModel::AllMiniLML6V2),
+            )
+            .map_err(|e| GraphError::Embedding(e.to_string()))?;
+            Ok(Self { inner: Mutex::new(model) })
+        }
+    }
+
+    impl Embedder for FastEmbedder {
+        fn model_info(&self) -> EmbeddingModelInfo {
+            EmbeddingModelInfo { name: "all-MiniLM-L6-v2".into(), dim: EMBED_DIM }
+        }
+
+        fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, GraphError> {
+            let mut model = self
+                .inner
+                .lock()
+                .map_err(|_| GraphError::Embedding("embedder mutex poisoned".into()))?;
+            let out = model
+                .embed(texts.to_vec(), None)
+                .map_err(|e| GraphError::Embedding(e.to_string()))?;
+            for v in &out {
+                if v.len() != EMBED_DIM {
+                    return Err(GraphError::Embedding(format!(
+                        "model returned dim {}, expected {EMBED_DIM}",
+                        v.len()
+                    )));
+                }
+            }
+            Ok(out)
+        }
+    }
+}
+
+#[cfg(feature = "embed-native")]
+pub use native::FastEmbedder;
+RUST
+
+  # ── schema.rs ───────────────────────────────────────────────────────────────
+  cat > "$d/src/schema.rs" << 'RUST'
+// TJ-ARCH-MOB-001 compliant
+//! SurrealDB 3.2 schema DDL. Kept as `OVERWRITE`/`IF NOT EXISTS` statements so
+//! `GraphStore::init` is idempotent — safe to run on every boot (greenfield; no
+//! in-place 2.x→3.x migration path per the analysis, which is fine for new stores).
+//!
+//! 3.x syntax notes (breaking vs 2.x, verified against SurrealDB 3.2 docs):
+//!   * vector index is `HNSW DIMENSION n DIST COSINE` (MTREE was removed in 3.0)
+//!   * full-text index is `FULLTEXT ANALYZER <a> BM25` (was `SEARCH ANALYZER`)
+//!   * `search::rrf([...], k, limit)` fuses ranked lists natively (added in 3.0)
+
+/// Analyzer + entity/memory tables + HNSW and BM25 indexes + the RELATE edge table.
+/// One string so `init` runs it in a single `.query()` round-trip.
+pub const SCHEMA_DDL: &str = r#"
+-- Full-text analyzer: whitespace + class + camelCase splitting, English stemming.
+DEFINE ANALYZER OVERWRITE gu_simple
+    TOKENIZERS blank, class, camel, punct
+    FILTERS lowercase, snowball(english);
+
+-- entity: nodes in the knowledge graph (projects, notes, people, ...).
+DEFINE TABLE IF NOT EXISTS entity SCHEMALESS;
+DEFINE FIELD IF NOT EXISTS entity_type ON entity TYPE string;
+DEFINE FIELD IF NOT EXISTS label       ON entity TYPE string;
+DEFINE FIELD IF NOT EXISTS data        ON entity FLEXIBLE TYPE option<object>;
+
+-- memory: retrievable text with its embedding; optionally linked to an entity.
+DEFINE TABLE IF NOT EXISTS memory SCHEMALESS;
+DEFINE FIELD IF NOT EXISTS text      ON memory TYPE string;
+DEFINE FIELD IF NOT EXISTS kind      ON memory TYPE string DEFAULT 'note';
+DEFINE FIELD IF NOT EXISTS entity    ON memory TYPE option<record<entity>>;
+DEFINE FIELD IF NOT EXISTS embedding ON memory TYPE array<float>;
+DEFINE FIELD IF NOT EXISTS created   ON memory TYPE datetime DEFAULT time::now();
+
+-- HNSW vector index — semantic recall. 384 dims to match all-MiniLM-L6-v2 / bge-small.
+DEFINE INDEX OVERWRITE memory_hnsw ON memory
+    FIELDS embedding HNSW DIMENSION 384 DIST COSINE;
+
+-- BM25 full-text index — lexical recall the vector lane misses.
+DEFINE INDEX OVERWRITE memory_ft ON memory
+    FIELDS text FULLTEXT ANALYZER gu_simple BM25;
+
+-- relates_to: typed graph edges between entities, traversed by graph_expand.
+DEFINE TABLE IF NOT EXISTS relates_to SCHEMALESS TYPE RELATION FROM entity TO entity;
+DEFINE FIELD IF NOT EXISTS rel ON relates_to TYPE string DEFAULT 'related';
+"#;
+
+/// Hybrid recall: vector lane + BM25 lane, fused by native `search::rrf`.
+/// Binds: `$qvec` (query embedding), `$q` (query text), `$k` (neighbours).
+/// Returns one ranked list of `{ id, text, kind, entity, score }`.
+///
+/// `<|$k,64|>` = return `$k` HNSW neighbours exploring up to 64 candidates.
+/// RRF k=60 is the standard smoothing constant; limit 128 caps fusion input.
+pub const HYBRID_SEARCH_QUERY: &str = r#"
+LET $vs = SELECT id, text, kind, entity, vector::distance::knn() AS distance
+    FROM memory WHERE embedding <|$k,64|> $qvec
+    ORDER BY distance ASC LIMIT 64;
+LET $ft = SELECT id, text, kind, entity, search::score(0) AS ft_score
+    FROM memory WHERE text @0@ $q
+    ORDER BY ft_score DESC LIMIT 64;
+SELECT meta::id(id) AS id, text, kind, rrf_score AS score
+    FROM search::rrf([$vs, $ft], 60, 128)
+    LIMIT $k;
+"#;
+RUST
+
+  # ── rrf.rs ──────────────────────────────────────────────────────────────────
+  cat > "$d/src/rrf.rs" << 'RUST'
+// TJ-ARCH-MOB-001 compliant
+//! Reciprocal-Rank Fusion in Rust — used for the graph-expansion lane, which
+//! cannot be expressed as one SurrealQL statement (the DB's `search::rrf` fuses
+//! the vector+BM25 lanes; the RELATE-neighbour lane is fused here).
+//!
+//! RRF score for an item = Σ over lists of `1 / (k + rank)`, rank 0-based. `k`
+//! damps the contribution of low-ranked items; 60 is the canonical default.
+
+/// Fusion tuning. `k` is the RRF smoothing constant; `limit` caps the output.
+#[derive(Debug, Clone, Copy)]
+pub struct RrfConfig {
+    pub k: f32,
+    pub limit: usize,
+}
+
+impl Default for RrfConfig {
+    fn default() -> Self {
+        Self { k: 60.0, limit: 20 }
+    }
+}
+
+/// Fuse several ranked lists of ids into one, highest RRF score first.
+/// Each inner slice is one lane already in rank order (best first). Ids may repeat
+/// across lanes; their contributions sum. Ties break on id for determinism (so
+/// snapshot tests are stable).
+pub fn rrf_fuse(lanes: &[Vec<String>], cfg: RrfConfig) -> Vec<(String, f32)> {
+    use std::collections::HashMap;
+    let mut scores: HashMap<&str, f32> = HashMap::new();
+    for lane in lanes {
+        for (rank, id) in lane.iter().enumerate() {
+            *scores.entry(id.as_str()).or_insert(0.0) += 1.0 / (cfg.k + rank as f32);
+        }
+    }
+    let mut fused: Vec<(String, f32)> =
+        scores.into_iter().map(|(id, s)| (id.to_string(), s)).collect();
+    fused.sort_by(|a, b| {
+        b.1.partial_cmp(&a.1)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then_with(|| a.0.cmp(&b.0))
+    });
+    fused.truncate(cfg.limit);
+    fused
+}
+RUST
+
+  # ── store.rs ────────────────────────────────────────────────────────────────
+  cat > "$d/src/store.rs" << 'RUST'
+// TJ-ARCH-MOB-001 compliant
+//! `GraphStore` — the intent-level API over SurrealDB. Callers (FFI, agent) use
+//! `memory_ingest` / `memory_search` / `graph_expand`; SurrealQL never leaves this
+//! module.
+use crate::embed::{Embedder, EMBED_DIM};
+use crate::error::GraphError;
+use crate::rrf::{rrf_fuse, RrfConfig};
+use crate::schema::{HYBRID_SEARCH_QUERY, SCHEMA_DDL};
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use surrealdb::engine::any::{connect, Any};
+use surrealdb::types::SurrealValue;
+use surrealdb::Surreal;
+
+/// Where the embedded store lives and how it is embedded.
+pub struct GraphStoreConfig {
+    /// SurrealDB connection endpoint. Native persistent: `rocksdb://<path>`.
+    /// Tests / ephemeral: `memory`. wasm: `indxdb://<name>`.
+    pub endpoint: String,
+    pub namespace: String,
+    pub database: String,
+    /// Embedding backend. Behind `Arc` so it can be shared across concurrent calls.
+    pub embedder: Arc<dyn Embedder>,
+}
+
+/// A memory row as ingested. `id` is `None` on the way in (DB assigns it).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct MemoryRecord {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    pub text: String,
+    #[serde(default = "default_kind")]
+    pub kind: String,
+    /// Optional owning entity record id (e.g. `entity:project_x`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub entity: Option<String>,
+}
+
+fn default_kind() -> String {
+    "note".to_string()
+}
+
+/// One hybrid-search hit. `score` is the fused RRF score (higher = better).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct MemoryHit {
+    pub id: String,
+    pub text: String,
+    pub kind: String,
+    pub score: f32,
+}
+
+/// A neighbour reached by graph expansion, with the RRF score from re-fusing the
+/// expansion lanes.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct RelatedEntity {
+    pub id: String,
+    pub label: String,
+    pub entity_type: String,
+    pub score: f32,
+}
+
+impl GraphStore {
+    /// Open (or create) the embedded store, select ns/db, and apply the schema.
+    /// Idempotent: safe on every boot.
+    pub async fn open(cfg: GraphStoreConfig) -> Result<Self, GraphError> {
+        let model = cfg.embedder.model_info();
+        if model.dim != EMBED_DIM {
+            return Err(GraphError::Invalid(format!(
+                "embedder dim {} != index dim {EMBED_DIM} ({})",
+                model.dim, model.name
+            )));
+        }
+        let db = connect(&cfg.endpoint).await?;
+        db.use_ns(&cfg.namespace).use_db(&cfg.database).await?;
+        let store = Self { db, embedder: cfg.embedder };
+        store.init().await?;
+        Ok(store)
+    }
+
+    async fn init(&self) -> Result<(), GraphError> {
+        let mut res = self.db.query(SCHEMA_DDL).await?;
+        // DDL errors surface per-statement, not as a query-level Err — surface the
+        // first so a bad schema fails loudly at boot instead of at first search.
+        if let Some((idx, err)) = res.take_errors().into_iter().next() {
+            return Err(GraphError::Surreal(format!("schema stmt {idx}: {err}")));
+        }
+        Ok(())
+    }
+
+    /// Run the (synchronous, CPU-bound) embedder off the async runtime.
+    async fn embed_blocking(&self, texts: Vec<String>) -> Result<Vec<Vec<f32>>, GraphError> {
+        let embedder = Arc::clone(&self.embedder);
+        gen_ui_runtime::spawn_blocking(move || embedder.embed(&texts))
+            .await
+            .map_err(|e| GraphError::Embedding(format!("embed task join: {e}")))?
+    }
+
+    /// INTENT: ingest a memory. Embeds `text`, stores row + vector, returns the id.
+    pub async fn memory_ingest(&self, record: MemoryRecord) -> Result<String, GraphError> {
+        if record.text.trim().is_empty() {
+            return Err(GraphError::Invalid("memory text is empty".into()));
+        }
+        let embedding = self
+            .embed_blocking(vec![record.text.clone()])
+            .await?
+            .into_iter()
+            .next()
+            .ok_or_else(|| GraphError::Embedding("embedder returned no vector".into()))?;
+
+        let mut res = self
+            .db
+            .query(
+                "CREATE memory SET text = $text, kind = $kind, embedding = $embedding, \
+                 entity = IF $entity != NONE THEN type::record($entity) ELSE NONE END \
+                 RETURN meta::id(id) AS id;",
+            )
+            .bind(("text", record.text))
+            .bind(("kind", record.kind))
+            .bind(("embedding", embedding))
+            .bind(("entity", record.entity))
+            .await?;
+        let ids: Vec<IdRow> = res.take(0)?;
+        ids.into_iter()
+            .next()
+            .map(|r| r.id)
+            .ok_or_else(|| GraphError::Surreal("ingest returned no id".into()))
+    }
+
+    /// INTENT: create (or upsert) a graph entity node. `id` is the record key
+    /// (e.g. `project_x`); `label`/`entity_type` are indexed graph metadata.
+    pub async fn create_entity(
+        &self,
+        id: &str,
+        entity_type: &str,
+        label: &str,
+    ) -> Result<String, GraphError> {
+        if id.trim().is_empty() {
+            return Err(GraphError::Invalid("entity id is empty".into()));
+        }
+        let mut res = self
+            .db
+            .query(
+                "UPSERT type::thing('entity', $id) \
+                 SET entity_type = $etype, label = $label \
+                 RETURN meta::id(id) AS id;",
+            )
+            .bind(("id", id.to_string()))
+            .bind(("etype", entity_type.to_string()))
+            .bind(("label", label.to_string()))
+            .await?;
+        let ids: Vec<IdRow> = res.take(0)?;
+        ids.into_iter()
+            .next()
+            .map(|r| r.id)
+            .ok_or_else(|| GraphError::Surreal("create_entity returned no id".into()))
+    }
+
+    /// INTENT: create a directed RELATE edge `from -> to` with a relation label.
+    /// Edges are what `graph_expand` traverses.
+    pub async fn relate(&self, from: &str, to: &str, rel: &str) -> Result<(), GraphError> {
+        if from.trim().is_empty() || to.trim().is_empty() {
+            return Err(GraphError::Invalid("relate endpoints must be non-empty".into()));
+        }
+        self.db
+            .query(
+                "RELATE type::thing('entity', $from)->relates_to->type::thing('entity', $to) \
+                 SET rel = $rel;",
+            )
+            .bind(("from", from.to_string()))
+            .bind(("to", to.to_string()))
+            .bind(("rel", rel.to_string()))
+            .await?;
+        Ok(())
+    }
+
+    /// INTENT: hybrid semantic + lexical search. Embeds `query`, runs the vector
+    /// and BM25 lanes, fuses them with native `search::rrf`, returns top-`k`.
+    pub async fn memory_search(&self, query: &str, k: usize) -> Result<Vec<MemoryHit>, GraphError> {
+        if query.trim().is_empty() {
+            return Err(GraphError::Invalid("search query is empty".into()));
+        }
+        let qvec = self
+            .embed_blocking(vec![query.to_string()])
+            .await?
+            .into_iter()
+            .next()
+            .ok_or_else(|| GraphError::Embedding("embedder returned no vector".into()))?;
+
+        let mut res = self
+            .db
+            .query(HYBRID_SEARCH_QUERY)
+            .bind(("qvec", qvec))
+            .bind(("q", query.to_string()))
+            .bind(("k", k as i64))
+            .await?;
+        // The SELECT is the last statement in the multi-statement query. Bind the
+        // index first — `take(&mut self)` and `num_statements(&self)` can't borrow
+        // `res` in the same expression.
+        let last = res.num_statements().saturating_sub(1);
+        let rows: Vec<HitRow> = res.take(last)?;
+        Ok(rows.into_iter().map(HitRow::into_hit).collect())
+    }
+
+    /// INTENT: expand the graph outward from `entity_id` up to `depth` RELATE hops,
+    /// fusing per-depth neighbour lists with Rust RRF (nearer hops rank higher).
+    pub async fn graph_expand(
+        &self,
+        entity_id: &str,
+        depth: u8,
+    ) -> Result<Vec<RelatedEntity>, GraphError> {
+        if depth == 0 {
+            return Err(GraphError::Invalid("depth must be >= 1".into()));
+        }
+        // One lane per hop distance; closer hops fuse to higher RRF scores.
+        let mut lanes: Vec<Vec<String>> = Vec::with_capacity(depth as usize);
+        let mut frontier = vec![entity_id.to_string()];
+        let mut seen = std::collections::HashSet::new();
+        seen.insert(entity_id.to_string());
+
+        for _ in 0..depth {
+            let mut res = self
+                .db
+                .query(
+                    "SELECT VALUE ->relates_to->entity.map(|$e| meta::id($e)) \
+                     FROM $frontier.map(|$id| type::thing('entity', $id));",
+                )
+                .bind(("frontier", frontier.clone()))
+                .await?;
+            let hops: Vec<Vec<String>> = res.take(0)?;
+            let next: Vec<String> = hops
+                .into_iter()
+                .flatten()
+                .filter(|id| seen.insert(id.clone()))
+                .collect();
+            if next.is_empty() {
+                break;
+            }
+            lanes.push(next.clone());
+            frontier = next;
+        }
+
+        let fused = rrf_fuse(&lanes, RrfConfig::default());
+        if fused.is_empty() {
+            return Ok(vec![]);
+        }
+        // Hydrate the fused ids into labelled entities, preserving fusion order.
+        let ids: Vec<String> = fused.iter().map(|(id, _)| id.clone()).collect();
+        let mut res = self
+            .db
+            .query(
+                "SELECT meta::id(id) AS id, label, entity_type \
+                 FROM entity WHERE meta::id(id) IN $ids;",
+            )
+            .bind(("ids", ids))
+            .await?;
+        let rows: Vec<EntityRow> = res.take(0)?;
+        let by_id: std::collections::HashMap<String, EntityRow> =
+            rows.into_iter().map(|r| (r.id.clone(), r)).collect();
+        Ok(fused
+            .into_iter()
+            .filter_map(|(id, score)| {
+                by_id.get(&id).map(|r| RelatedEntity {
+                    id: id.clone(),
+                    label: r.label.clone(),
+                    entity_type: r.entity_type.clone(),
+                    score,
+                })
+            })
+            .collect())
+    }
+}
+
+/// Handle to the embedded SurrealDB plus the shared embedder.
+pub struct GraphStore {
+    db: Surreal<Any>,
+    embedder: Arc<dyn Embedder>,
+}
+
+// SurrealDB 3.2's `IndexedResults::take` deserializes into `SurrealValue`, not
+// serde — so the row structs read back from `.query()` derive `SurrealValue`.
+// (The public API types — MemoryRecord/MemoryHit/RelatedEntity — stay serde-based
+// because they cross the FFI boundary as JSON.) Every field is projected as a
+// primitive (`meta::id(id)` → String) so no RecordId handling is needed here.
+#[derive(SurrealValue)]
+struct IdRow {
+    id: String,
+}
+
+#[derive(SurrealValue)]
+struct HitRow {
+    id: String,
+    text: String,
+    kind: String,
+    score: f32,
+}
+
+impl HitRow {
+    fn into_hit(self) -> MemoryHit {
+        MemoryHit { id: self.id, text: self.text, kind: self.kind, score: self.score }
+    }
+}
+
+#[derive(SurrealValue)]
+struct EntityRow {
+    id: String,
+    label: String,
+    entity_type: String,
+}
+RUST
+
+  # ── tests/it/main.rs (boundary tests, features-first) ────────────────────────
+  cat > "$d/tests/it/main.rs" << 'RUST'
+// TJ-ARCH-MOB-001 compliant
+//! Boundary tests for gen_ui_db_graph — exercised at the public intent API over a
+//! real in-memory SurrealDB (`memory` engine) with a deterministic fake embedder,
+//! so no ONNX download and no flakiness. Per CLAUDE.md: 3–5 behaviour tests at the
+//! API surface, no internal mocks, features-first.
+mod fake_embedder;
+
+use fake_embedder::HashEmbedder;
+use gen_ui_db_graph::{GraphStore, GraphStoreConfig, MemoryRecord};
+use std::sync::Arc;
+
+async fn open_store() -> GraphStore {
+    GraphStore::open(GraphStoreConfig {
+        endpoint: "memory".into(),
+        namespace: "test".into(),
+        database: "graph".into(),
+        embedder: Arc::new(HashEmbedder),
+    })
+    .await
+    .expect("store opens and applies schema")
+}
+
+/// Ingest → hybrid search returns the ingested memory ranked first for its own text.
+#[tokio::test]
+async fn ingest_then_search_finds_the_memory() {
+    let store = open_store().await;
+    let id = store
+        .memory_ingest(MemoryRecord {
+            id: None,
+            text: "the octopus is a highly intelligent cephalopod".into(),
+            kind: "note".into(),
+            entity: None,
+        })
+        .await
+        .expect("ingest succeeds");
+    assert!(!id.is_empty());
+
+    let hits = store
+        .memory_search("octopus intelligent cephalopod", 5)
+        .await
+        .expect("search succeeds");
+    assert!(!hits.is_empty(), "expected at least one hit");
+    assert!(
+        hits[0].text.contains("octopus"),
+        "top hit should be the ingested memory, got {:?}",
+        hits[0].text
+    );
+}
+
+/// BM25 lexical lane finds an exact-term match even when semantics are thin.
+#[tokio::test]
+async fn lexical_lane_matches_rare_term() {
+    let store = open_store().await;
+    for text in [
+        "quarterly revenue grew in the fiscal report",
+        "the platypus lays eggs despite being a mammal",
+    ] {
+        store
+            .memory_ingest(MemoryRecord {
+                id: None,
+                text: text.into(),
+                kind: "note".into(),
+                entity: None,
+            })
+            .await
+            .expect("ingest");
+    }
+    let hits = store.memory_search("platypus", 5).await.expect("search");
+    assert!(
+        hits.iter().any(|h| h.text.contains("platypus")),
+        "BM25 lane should surface the platypus memory"
+    );
+}
+
+/// Empty inputs are rejected at the boundary (terminal, not a silent empty result).
+#[tokio::test]
+async fn empty_inputs_are_rejected() {
+    let store = open_store().await;
+    assert!(store
+        .memory_ingest(MemoryRecord {
+            id: None,
+            text: "   ".into(),
+            kind: "note".into(),
+            entity: None,
+        })
+        .await
+        .is_err());
+    assert!(store.memory_search("", 5).await.is_err());
+    // depth 0 is a caller error, not an empty traversal.
+    assert!(store.graph_expand("entity:anything", 0).await.is_err());
+}
+
+/// RELATE edges are traversed and fused by graph_expand, nearer hops ranking higher.
+#[tokio::test]
+async fn graph_expand_traverses_relate_edges() {
+    let store = open_store().await;
+    // Seed a small graph: a -> b -> c, plus a -> d directly.
+    for (id, label) in [("a", "Alpha"), ("b", "Beta"), ("c", "Gamma"), ("d", "Delta")] {
+        store.create_entity(id, "node", label).await.expect("create entity");
+    }
+    for (from, to) in [("a", "b"), ("b", "c"), ("a", "d")] {
+        store.relate(from, to, "related").await.expect("relate");
+    }
+    let related = store
+        .graph_expand("a", 2)
+        .await
+        .expect("graph_expand succeeds");
+    let ids: Vec<&str> = related.iter().map(|r| r.id.as_str()).collect();
+    assert!(ids.contains(&"b"), "1-hop neighbour b should be present: {ids:?}");
+    assert!(ids.contains(&"d"), "1-hop neighbour d should be present: {ids:?}");
+    assert!(ids.contains(&"c"), "2-hop neighbour c should be present: {ids:?}");
+    // b (1 hop) must outrank c (2 hops) under RRF.
+    let rank = |want: &str| related.iter().position(|r| r.id == want).unwrap();
+    assert!(rank("b") < rank("c"), "nearer hop b should outrank farther hop c");
+}
+RUST
+
+  cat > "$d/tests/it/fake_embedder.rs" << 'RUST'
+// TJ-ARCH-MOB-001 compliant
+//! Deterministic, network-free embedder for boundary tests. Hashes each token into
+//! a 384-dim bag-of-words vector and L2-normalises it, so texts that share words
+//! land near each other under cosine distance — enough to exercise the HNSW lane
+//! without an ONNX model.
+use gen_ui_db_graph::{Embedder, EmbeddingModelInfo, EMBED_DIM};
+
+pub struct HashEmbedder;
+
+impl Embedder for HashEmbedder {
+    fn model_info(&self) -> EmbeddingModelInfo {
+        EmbeddingModelInfo { name: "test-hash".into(), dim: EMBED_DIM }
+    }
+
+    fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, gen_ui_db_graph::GraphError> {
+        Ok(texts.iter().map(|t| embed_one(t)).collect())
+    }
+}
+
+fn embed_one(text: &str) -> Vec<f32> {
+    let mut v = vec![0.0f32; EMBED_DIM];
+    for token in text.to_lowercase().split_whitespace() {
+        let mut h: u64 = 1469598103934665603; // FNV-1a offset basis
+        for b in token.bytes() {
+            h ^= b as u64;
+            h = h.wrapping_mul(1099511628211);
+        }
+        v[(h as usize) % EMBED_DIM] += 1.0;
+    }
+    let norm = v.iter().map(|x| x * x).sum::<f32>().sqrt();
+    if norm > 0.0 {
+        for x in &mut v {
+            *x /= norm;
+        }
+    }
+    v
+}
+RUST
+
+  ok "gen_ui_db_graph: SurrealDB 3.2 hybrid graph-RAG (HNSW+BM25+RRF, intent API)"
+}
+
 emit_crate gen_ui_mcp ""
-emit_l2_stub gen_ui_mcp "MCP client registry (SSE wasm-safe; stdio native-only)." "C-006 flint-integration"
+emit_flint_mcp
+
+# ── L2 gen_ui_client — Anthropic + Flint (gate/forge/FRF) (C-006) ────────────
+emit_crate gen_ui_client ""
+emit_flint_client
+
 emit_crate gen_ui_db ""
-emit_l2_stub gen_ui_db "relational (pg/sqlite) + graph (surreal) + sync + startup orchestrator." "C-003/C-004/C-005"
+emit_l2_stub gen_ui_db "relational (pg/sqlite) + sync + startup orchestrator. Graph RAG lives in gen_ui_db_graph." "C-003/C-005"
 emit_crate gen_ui_inference ""
 emit_l2_stub gen_ui_inference "candle GGUF engine (native accel; wasm feature-gated off)." "future inference lane"
+
+# ── gen_ui_db_graph (C-004): SurrealDB 3.2 embedded hybrid graph-RAG ──────────
+# Own crate (not a gen_ui_db submodule) on purpose: surrealdb-core's build.rs
+# re-runs on every downstream touch (surrealdb#6954), so isolating it here keeps
+# the rest of the workspace off SurrealDB's slow recompile path.
+emit_graph_rag_crate
 
 # ── L3 gen_ui_agent ──────────────────────────────────────────────────────────
 emit_crate gen_ui_agent ""
@@ -729,7 +2705,7 @@ ok "workspace-hack: hakari pin"
 step "Verifying workspace metadata"
 if command -v cargo >/dev/null 2>&1; then
   (cd "$OUT" && cargo metadata --no-deps --format-version 1 >/dev/null 2>&1 \
-    && echo "  cargo metadata OK (12 crates)" \
+    && echo "  cargo metadata OK (13 crates)" \
     || echo "  (cargo metadata reported issues — run 'cargo check' in $OUT)")
 else
   echo "  (cargo not found — install Rust to verify)"
@@ -741,6 +2717,7 @@ echo ""
 echo "  Layers: types → runtime/protocol → client/mcp/db/inference → agent → ffi/tauri/wasm"
 echo "  Inner loop:   cd $OUT && bacon        (clippy driver)"
 echo "  Cross-target: bacon check-wasm | check-ios"
-echo "  Wave-1 lanes implement: gen_ui_db (C-003/004/005), gen_ui_client+mcp (C-006), leaves (C-007)"
+echo "  Wave-1 lanes implement: gen_ui_db (C-003/004/005), leaves (C-007)"
+echo "  C-006 DONE: gen_ui_client/flint (gate+forge+frf) + gen_ui_mcp (JSON-RPC/SSE)"
 echo ""
 echo "  ⚠ gen_ui_types trait seams are FROZEN after C-001 review — changes need cross-lane sign-off."
