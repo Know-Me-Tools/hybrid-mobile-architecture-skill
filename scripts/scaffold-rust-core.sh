@@ -59,8 +59,11 @@ edition = "2021"
 # MSRV floor. 1.80 (the original TJ-ARCH-MOB-001 minimum) can no longer resolve the
 # current dependency graph — transitive crates (e.g. chacha20 ≥0.10) now require the
 # edition2024 Cargo feature, unparseable before Cargo 1.85. 1.93 is the realistic
-# mid-2026 floor. Keep in sync with rust-toolchain.toml and CLAUDE.md tool versions.
-rust-version = "1.93"
+# mid-2026 floor. 1.93 can no longer build the SurrealDB 3.2 graph crate (C-004):
+# its transitive fastnum ≥0.7.5 requires rustc 1.94+, so the floor moves to 1.95
+# (the mid-2026 stable that satisfies it). Keep in sync with rust-toolchain.toml
+# and CLAUDE.md tool versions.
+rust-version = "1.95"
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
@@ -95,7 +98,12 @@ reqwest-eventsource = "0.6"
 # gate/forge own verification via JWKS). validation disabled for pure claim reads.
 jsonwebtoken      = { version = "9", default-features = false }
 surrealdb         = { version = "3.2",  default-features = false }
-sqlx              = { version = "0.8",  default-features = false, features = ["runtime-tokio-rustls", "macros"] }
+sqlx              = { version = "0.8",  default-features = false, features = ["runtime-tokio-rustls", "macros", "migrate"] }
+pglite-oxide       = { version = "0.5.1", default-features = false }
+refinery           = { version = "0.8", default-features = false }
+sqlite-vec         = "0.1"
+libsqlite3-sys     = "0.30"
+virtual-net        = "=0.702.0-alpha.3"
 candle-core       = "0.7"
 candle-nn         = "0.7"
 candle-transformers = "0.7"
@@ -190,7 +198,10 @@ ok ".cargo/config.toml"
 # ── rust-toolchain.toml ──────────────────────────────────────────────────────
 cat > "$OUT/rust-toolchain.toml" << 'EOF'
 [toolchain]
-channel = "1.93"
+# 1.95 floor: SurrealDB 3.2 (gen_ui_db_graph, C-004) pulls fastnum ≥0.7.5 which
+# requires rustc 1.94+. 1.95 is the mid-2026 stable that satisfies it. Keep in
+# sync with the workspace rust-version in Cargo.toml.
+channel = "1.95"
 components = ["rustfmt", "clippy", "rust-src"]
 targets = [
     "aarch64-apple-ios",
@@ -2591,8 +2602,1247 @@ emit_flint_mcp
 emit_crate gen_ui_client ""
 emit_flint_client
 
+# ── gen_ui_db (L2) — UNIFIED emitter: C-003 relational + C-005 sync ───────────
+# Two parallel worktree lanes each rewrote this crate from the same base. This
+# integrator composes both into ONE crate:
+#   relational → C-003 (sqlx pg/sqlite + migrations + typestate startup orchestrator)
+#   sync       → C-005 (Electric shape consumer + DIY write queue + SyncTransport)
+# Graph RAG stays in its own crate (gen_ui_db_graph, C-004). Every heredoc body is
+# preserved verbatim from the lane that authored and verified it.
+emit_gen_ui_db() {
+  local dir="$OUT/crates/gen_ui_db"
+
+  # ── Unioned Cargo.toml ──────────────────────────────────────────────────────
+  # Shared deps (both lanes): gen_ui_types/gen_ui_runtime paths + async-trait,
+  # serde, serde_json, tracing. C-003 adds anyhow/thiserror/sqlx/refinery/reqwest +
+  # the sqlite-vec/pglite-oxide optional stack and the pg/sqlite/pglite features.
+  # C-005 adds futures + a native-only (cfg(not(wasm32))) tokio/tokio-stream block;
+  # its reqwest need is already covered by C-003's unconditional reqwest, so the
+  # target block carries only tokio + tokio-stream (reqwest dedup'd).
+  cat >> "$dir/Cargo.toml" << 'EOF'
+gen_ui_types   = { path = "../gen_ui_types" }
+gen_ui_runtime = { path = "../gen_ui_runtime" }
+async-trait.workspace = true
+anyhow.workspace      = true
+serde.workspace       = true
+serde_json.workspace  = true
+thiserror.workspace   = true
+futures.workspace     = true
+tracing.workspace     = true
+sqlx.workspace        = true
+refinery.workspace    = true
+reqwest.workspace     = true
+sqlite-vec = { workspace = true, optional = true }
+libsqlite3-sys = { workspace = true, optional = true }
+pglite-oxide = { workspace = true, optional = true }
+virtual-net = { workspace = true, optional = true }
+
+[features]
+default = []
+pg = ["sqlx/postgres"]
+sqlite = ["sqlx/sqlite", "dep:sqlite-vec", "dep:libsqlite3-sys"]
+pglite = ["pg", "dep:pglite-oxide", "dep:virtual-net"]
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio        = { workspace = true, features = ["rt", "sync", "time", "macros"] }
+tokio-stream = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { workspace = true, features = ["macros", "rt"] }
+EOF
+
+  mkdir -p "$dir/src/relational" \
+    "$dir/src/sync" \
+    "$dir/migrations/postgres" \
+    "$dir/migrations/sqlite" \
+    "$dir/tests"
+
+  # ── lib.rs — both module trees (C-005 doc comment, both `pub mod`s) ──────────
+  cat > "$dir/src/lib.rs" << EOF
+$MARK
+//! gen_ui_db (L2) — relational (pg/sqlite) + sync + startup orchestrator.
+//! Graph RAG lives in the sibling gen_ui_db_graph crate (C-004).
+//! Trait seams (EntityTransport / SyncTransport) are defined in gen_ui_types.
+//!
+//! Module ownership (parallel worktree lanes, see plan.md):
+//!   relational  → C-003 (sqlx pg/sqlite + migrations + typestate startup)
+//!   sync        → C-005 (Electric shape consumer + DIY write queue)
+//!
+//! The sync engine writes read-path rows into a \`sync::LocalStore\` and flushes the
+//! local write queue through a \`sync::WriteSink\` (forge Quarry API). Both are trait
+//! seams so C-003's concrete store and C-006's forge client wire in without sync
+//! depending on their crates — and a future prometheus-entity-sync (PES / PSyncV1)
+//! client can replace the whole engine behind the same \`SyncTransport\` seam.
+
+pub mod relational;
+pub mod sync;
+EOF
+
+  # ══════════════════════════════════════════════════════════════════════════════
+  # C-003 relational modules (verbatim) — src/relational/*.rs + migrations/
+  # ══════════════════════════════════════════════════════════════════════════════
+  cat > "$dir/src/relational/mod.rs" << EOF
+$MARK
+//! Feature-gated relational storage and ordered application startup.
+//! Enable exactly one of \`pg\` or \`sqlite\`; add \`pglite\` for embedded desktop PG.
+
+mod error;
+mod seed;
+mod startup;
+
+#[cfg(feature = "pg")]
+mod postgres;
+#[cfg(feature = "sqlite")]
+mod sqlite;
+
+pub use error::{RelationalError, RelationalResult};
+#[cfg(feature = "pglite")]
+pub use postgres::PgliteStore;
+#[cfg(feature = "pg")]
+pub use postgres::PostgresStore;
+pub use seed::{SeedBundle, SeedSource};
+#[cfg(feature = "sqlite")]
+pub use sqlite::SqliteStore;
+pub use startup::{Migrated, Ready, Startup, Uninitialized};
+
+#[cfg(all(feature = "pg", feature = "sqlite"))]
+compile_error!("gen_ui_db relational dialect features are mutually exclusive");
+EOF
+  cat > "$dir/src/relational/error.rs" << EOF
+$MARK
+//! Typed errors for the relational library boundary.
+
+#[derive(Debug, thiserror::Error)]
+pub enum RelationalError {
+    #[error("database operation failed: {0}")]
+    Database(#[from] sqlx::Error),
+    #[error("migration failed: {0}")]
+    Migration(#[from] sqlx::migrate::MigrateError),
+    #[error("seed bundle {name} could not be fetched: {source}")]
+    SeedFetch { name: String, source: reqwest::Error },
+    #[error("seed bundle {name} has invalid UTF-8: {source}")]
+    SeedEncoding { name: String, source: std::str::Utf8Error },
+    #[error("seed bundle {name} has an empty IPFS CID")]
+    EmptyCid { name: String },
+    #[error("sync attach failed: {0}")]
+    Sync(String),
+    #[cfg(feature = "pglite")]
+    #[error("embedded PGlite server failed: {0}")]
+    PgliteServer(#[from] anyhow::Error),
+}
+
+pub type RelationalResult<T> = Result<T, RelationalError>;
+EOF
+  cat > "$dir/src/relational/seed.rs" << EOF
+$MARK
+//! Versioned seed/lookup bundles. Network retrieval stays in the shared Rust core.
+
+use super::{RelationalError, RelationalResult};
+
+#[derive(Debug, Clone)]
+pub enum SeedSource {
+    Bundled(&'static str),
+    Http { url: String },
+    Ipfs { cid: String, gateway: String },
+}
+
+#[derive(Debug, Clone)]
+pub struct SeedBundle {
+    pub name: String,
+    pub version: u32,
+    pub source: SeedSource,
+}
+
+impl SeedBundle {
+    pub async fn sql(&self, client: &reqwest::Client) -> RelationalResult<String> {
+        match &self.source {
+            SeedSource::Bundled(sql) => Ok((*sql).to_owned()),
+            SeedSource::Http { url } => self.fetch(client, url).await,
+            SeedSource::Ipfs { cid, gateway } => {
+                if cid.trim().is_empty() {
+                    return Err(RelationalError::EmptyCid { name: self.name.clone() });
+                }
+                let url = format!("{}/{cid}", gateway.trim_end_matches('/'));
+                self.fetch(client, &url).await
+            }
+        }
+    }
+
+    async fn fetch(&self, client: &reqwest::Client, url: &str) -> RelationalResult<String> {
+        let bytes = client
+            .get(url)
+            .header(reqwest::header::IF_NONE_MATCH, format!("\"{}-{}\"", self.name, self.version))
+            .send()
+            .await
+            .and_then(reqwest::Response::error_for_status)
+            .map_err(|source| RelationalError::SeedFetch { name: self.name.clone(), source })?
+            .bytes()
+            .await
+            .map_err(|source| RelationalError::SeedFetch { name: self.name.clone(), source })?;
+        std::str::from_utf8(&bytes)
+            .map(str::to_owned)
+            .map_err(|source| RelationalError::SeedEncoding { name: self.name.clone(), source })
+    }
+}
+EOF
+  cat > "$dir/src/relational/startup.rs" << EOF
+$MARK
+//! Typestate startup orchestration: migrations -> seeds -> sync attach.
+
+use std::{marker::PhantomData, sync::Arc};
+
+use gen_ui_types::sync::SyncTransport;
+
+use super::{RelationalResult, SeedBundle};
+
+pub struct Uninitialized;
+pub struct Migrated;
+pub struct Ready;
+
+#[async_trait::async_trait]
+pub trait StartupStore: Send + Sync {
+    async fn migrate(&self) -> RelationalResult<()>;
+    async fn execute_seed(&self, sql: &str) -> RelationalResult<()>;
+}
+
+pub struct Startup<S, State> {
+    store: S,
+    http: reqwest::Client,
+    _state: PhantomData<State>,
+}
+
+impl<S> Startup<S, Uninitialized>
+where
+    S: StartupStore,
+{
+    pub fn new(store: S) -> Self {
+        Self { store, http: reqwest::Client::new(), _state: PhantomData }
+    }
+
+    pub async fn migrate(self) -> RelationalResult<Startup<S, Migrated>> {
+        self.store.migrate().await?;
+        Ok(Startup { store: self.store, http: self.http, _state: PhantomData })
+    }
+}
+
+impl<S> Startup<S, Migrated>
+where
+    S: StartupStore,
+{
+    pub async fn seed_and_attach(
+        self,
+        bundles: &[SeedBundle],
+        sync: Arc<dyn SyncTransport>,
+    ) -> RelationalResult<Startup<S, Ready>> {
+        for bundle in bundles {
+            let sql = bundle.sql(&self.http).await?;
+            self.store.execute_seed(&sql).await?;
+        }
+        sync.start().await.map_err(|error| super::RelationalError::Sync(error.to_string()))?;
+        Ok(Startup { store: self.store, http: self.http, _state: PhantomData })
+    }
+}
+
+impl<S> Startup<S, Ready> {
+    pub fn into_store(self) -> S { self.store }
+}
+EOF
+  cat > "$dir/src/relational/postgres.rs" << EOF
+$MARK
+//! PostgreSQL store for cloud Postgres and pglite-oxide's local wire server.
+
+// \`Path\` is only used by the pglite embedded-server constructor below; gating the
+// import keeps a plain \`pg\` build (no \`pglite\`) warning-free under the clippy gate.
+#[cfg(feature = "pglite")]
+use std::path::Path;
+
+use sqlx::{PgPool, postgres::PgPoolOptions};
+
+use super::{RelationalResult, startup::StartupStore};
+
+static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("./migrations/postgres");
+
+#[derive(Clone)]
+pub struct PostgresStore { pool: PgPool }
+
+impl PostgresStore {
+    pub async fn connect(url: &str) -> RelationalResult<Self> {
+        let pool = PgPoolOptions::new().max_connections(5).connect(url).await?;
+        Ok(Self { pool })
+    }
+
+    pub fn pool(&self) -> &PgPool { &self.pool }
+}
+
+#[async_trait::async_trait]
+impl StartupStore for PostgresStore {
+    async fn migrate(&self) -> RelationalResult<()> { MIGRATOR.run(&self.pool).await.map_err(Into::into) }
+    async fn execute_seed(&self, sql: &str) -> RelationalResult<()> {
+        sqlx::raw_sql(sql).execute(&self.pool).await?;
+        Ok(())
+    }
+}
+
+#[cfg(feature = "pglite")]
+pub struct PgliteStore {
+    store: PostgresStore,
+    _server: pglite_oxide::PgliteServer,
+}
+
+#[cfg(feature = "pglite")]
+impl PgliteStore {
+    pub async fn open(path: impl AsRef<Path>) -> RelationalResult<Self> {
+        let server = pglite_oxide::PgliteServer::builder().path(path.as_ref()).start()?;
+        let url = server.database_url();
+        let store = PostgresStore::connect(&url).await?;
+        Ok(Self { store, _server: server })
+    }
+
+    pub fn store(&self) -> &PostgresStore { &self.store }
+}
+EOF
+  cat > "$dir/src/relational/sqlite.rs" << EOF
+$MARK
+//! Mobile SQLite store. sqlite-vec is registered before any SQLx connection opens.
+
+use std::{path::Path, str::FromStr, sync::Once};
+
+use sqlx::{SqlitePool, sqlite::{SqliteConnectOptions, SqlitePoolOptions}};
+
+use super::{RelationalResult, startup::StartupStore};
+
+static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("./migrations/sqlite");
+static REGISTER_VEC: Once = Once::new();
+
+#[derive(Clone)]
+pub struct SqliteStore { pool: SqlitePool }
+
+impl SqliteStore {
+    pub async fn open(path: impl AsRef<Path>) -> RelationalResult<Self> {
+        REGISTER_VEC.call_once(|| {
+            // SAFETY: sqlite-vec exposes SQLite's documented extension entry point.
+            // Register it once, before SQLx opens any connection; both crates link
+            // the same libsqlite3-sys version through Cargo feature unification.
+            unsafe {
+                libsqlite3_sys::sqlite3_auto_extension(Some(std::mem::transmute::<
+                    *const (),
+                    unsafe extern "C" fn(
+                        *mut libsqlite3_sys::sqlite3,
+                        *mut *mut std::ffi::c_char,
+                        *const libsqlite3_sys::sqlite3_api_routines,
+                    ) -> std::ffi::c_int,
+                >(
+                    sqlite_vec::sqlite3_vec_init as *const (),
+                )));
+            }
+        });
+        let options = SqliteConnectOptions::from_str(&format!("sqlite://{}", path.as_ref().display()))?
+            .create_if_missing(true)
+            .foreign_keys(true);
+        let pool = SqlitePoolOptions::new().max_connections(1).connect_with(options).await?;
+        Ok(Self { pool })
+    }
+
+    pub fn pool(&self) -> &SqlitePool { &self.pool }
+}
+
+#[async_trait::async_trait]
+impl StartupStore for SqliteStore {
+    async fn migrate(&self) -> RelationalResult<()> { MIGRATOR.run(&self.pool).await.map_err(Into::into) }
+    async fn execute_seed(&self, sql: &str) -> RelationalResult<()> {
+        sqlx::raw_sql(sql).execute(&self.pool).await?;
+        Ok(())
+    }
+}
+EOF
+  cat > "$dir/migrations/postgres/0001_relational.sql" << 'EOF'
+-- TJ-ARCH-MOB-001 compliant
+CREATE TABLE IF NOT EXISTS app_seed_versions (
+    name TEXT PRIMARY KEY,
+    version BIGINT NOT NULL CHECK (version >= 0),
+    applied_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+EOF
+  cat > "$dir/migrations/sqlite/0001_relational.sql" << 'EOF'
+-- TJ-ARCH-MOB-001 compliant
+CREATE TABLE IF NOT EXISTS app_seed_versions (
+    name TEXT PRIMARY KEY,
+    version INTEGER NOT NULL CHECK (version >= 0),
+    applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+) STRICT;
+EOF
+
+  # ══════════════════════════════════════════════════════════════════════════════
+  # C-005 sync modules (verbatim) — src/sync/*.rs + README
+  # ══════════════════════════════════════════════════════════════════════════════
+  # ── sync/mod.rs — engine assembly + public re-exports ──────────────────────
+  cat > "$dir/src/sync/mod.rs" << EOF
+$MARK
+//! Local-first sync engine (C-005).
+//!
+//! Native path (desktop/mobile): a Rust Electric **shape consumer** long-polls the
+//! Electric HTTP API and writes rows into a [\`LocalStore\`]; a DIY **write queue**
+//! replays local mutations through a [\`WriteSink\`] (forge Quarry API) with idempotent
+//! keys, exponential backoff, and a poison handler. A [\`SyncStatus\`] broadcast drives
+//! the UI sync chip.
+//!
+//! Web path: the browser uses \`@electric-sql/pglite-sync\` (JS side) — see
+//! \`sync/README.md\`. This module compiles to a documented no-op on \`wasm32\` so the
+//! workspace still builds for the browser leaf.
+//!
+//! Everything sits behind the frozen [\`gen_ui_types::sync::SyncTransport\`] seam, so
+//! PES (PSyncV1) can replace the engine later without touching callers.
+
+mod status;
+
+#[cfg(not(target_arch = "wasm32"))]
+mod config;
+#[cfg(not(target_arch = "wasm32"))]
+mod seam;
+#[cfg(not(target_arch = "wasm32"))]
+mod shapes;
+#[cfg(not(target_arch = "wasm32"))]
+mod write_queue;
+#[cfg(not(target_arch = "wasm32"))]
+mod engine;
+
+pub use status::{SyncStatusHandle, SyncStatusStream};
+// Re-export the frozen seam types so callers use one import path.
+pub use gen_ui_types::sync::{SyncStatus, SyncTransport};
+
+#[cfg(not(target_arch = "wasm32"))]
+pub use config::{ShapeSpec, SyncConfig};
+#[cfg(not(target_arch = "wasm32"))]
+pub use engine::SyncEngine;
+#[cfg(not(target_arch = "wasm32"))]
+pub use seam::{LocalStore, PendingWrite, RowChange, RowOp, WriteOutcome, WriteSink};
+
+/// wasm32 stub. The browser sync path is \`pglite-sync\` (JS); no Rust engine runs
+/// in-browser. Kept so \`cargo check --target wasm32-unknown-unknown -p gen_ui_wasm\`
+/// stays green and callers get a clear compile error if they try to build the
+/// native engine for the web.
+#[cfg(target_arch = "wasm32")]
+pub mod web_note {
+    //! Browser sync is configured JS-side via \`@electric-sql/pglite-sync\`.
+    //! See \`crates/gen_ui_db/src/sync/README.md\`.
+}
+EOF
+
+  # ── sync/README.md — the web (pglite-sync) configuration, JS side ──────────
+  cat > "$dir/src/sync/README.md" << 'EOF'
+# gen_ui_db::sync — read-path + write-path local-first sync (C-005)
+
+Native (desktop/mobile) uses the Rust engine in this module. Web uses
+`@electric-sql/pglite-sync` on the JS side — the Rust engine is compiled out on
+`wasm32` (see `mod.rs`).
+
+## Web path — `@electric-sql/pglite-sync` (JS)
+
+The browser holds a PGlite database and subscribes to the same Electric shapes the
+Rust consumer reads. Configure it in the web app (NOT in Rust):
+
+```ts
+import { PGlite } from '@electric-sql/pglite'
+import { electricSync } from '@electric-sql/pglite-sync'
+
+const pg = await PGlite.create({
+  dataDir: 'idb://gen-ui',        // relaxedDurability + multi-tab worker per analysis §2
+  extensions: { electric: electricSync() },
+})
+
+// One syncShapeToTable per synced table. Table/columns MUST already exist
+// (boot order invariant: migrations → seeds → shapes attach).
+const sub = await pg.electric.syncShapeToTable({
+  shape: { url: `${ELECTRIC_URL}/v1/shape`, params: { table: 'entities' } },
+  table: 'entities',
+  primaryKey: ['id'],
+  shapeKey: 'entities',           // persisted so a reload resumes from the stored offset
+})
+
+// Writes go through the app API (forge Quarry), never straight to Electric —
+// Electric is read-path only. Mirror the Rust write-queue contract:
+//   idempotent key per mutation, retry with backoff, surface poison to the UI.
+```
+
+Keep the web shape list identical to `SyncConfig::shapes` on native so both surfaces
+converge on the same rows. The write-path API (forge Quarry) and its idempotency
+contract are shared across surfaces.
+EOF
+
+  # ── sync/config.rs — engine configuration ─────────────────────────────────
+  cat > "$dir/src/sync/config.rs" << EOF
+$MARK
+//! Sync engine configuration. Pure data; no IO.
+
+/// One Electric shape to consume. Kept minimal — the shape \`where\`/\`columns\`
+/// filters that enforce tenant RLS at the shape factory are added when C-006 wires
+/// the authenticated Electric URL. Keep this list identical to the web app's
+/// \`pglite-sync\` shape list so both surfaces converge on the same rows.
+#[derive(Debug, Clone)]
+pub struct ShapeSpec {
+    /// Local table the shape rows are written into (must exist before attach).
+    pub table: String,
+    /// Optional Postgres \`where\` filter forwarded to the shape factory.
+    pub where_clause: Option<String>,
+}
+
+impl ShapeSpec {
+    pub fn new(table: impl Into<String>) -> Self {
+        Self { table: table.into(), where_clause: None }
+    }
+
+    #[must_use]
+    pub fn with_where(mut self, clause: impl Into<String>) -> Self {
+        self.where_clause = Some(clause.into());
+        self
+    }
+}
+
+/// Full sync configuration.
+#[derive(Debug, Clone)]
+pub struct SyncConfig {
+    /// Base URL of the Electric HTTP API (e.g. \`https://gate.example/electric\`).
+    /// Through flint-gate this is the tenant-scoped, authenticated shape endpoint.
+    pub electric_url: String,
+    /// Shapes to consume on the read path.
+    pub shapes: Vec<ShapeSpec>,
+    /// Max local writes to flush per drain pass before yielding.
+    pub write_batch: usize,
+    /// After this many failed replays a write is quarantined (poison handler).
+    pub max_write_attempts: u32,
+}
+
+impl SyncConfig {
+    pub fn new(electric_url: impl Into<String>) -> Self {
+        Self {
+            electric_url: electric_url.into(),
+            shapes: Vec::new(),
+            write_batch: 64,
+            max_write_attempts: 8,
+        }
+    }
+
+    #[must_use]
+    pub fn with_shape(mut self, shape: ShapeSpec) -> Self {
+        self.shapes.push(shape);
+        self
+    }
+}
+EOF
+
+  # ── sync/seam.rs — LocalStore / WriteSink trait seams (PES-compatible) ─────
+  cat > "$dir/src/sync/seam.rs" << EOF
+$MARK
+//! Seams the sync engine writes through — so it depends on neither the concrete
+//! relational store (C-003) nor the forge client (C-006), and PES can reuse them.
+use async_trait::async_trait;
+use gen_ui_types::error::CoreResult;
+use serde::{Deserialize, Serialize};
+
+/// A single row change decoded from an Electric shape message.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RowChange {
+    pub table: String,
+    pub op: RowOp,
+    /// Primary-key value(s) as JSON (the shape's \`key\`).
+    pub key: String,
+    /// Full row value as a JSON object (empty for deletes).
+    pub value_json: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RowOp {
+    Insert,
+    Update,
+    Delete,
+}
+
+/// Read-path sink: the shape consumer applies decoded rows here. C-003's sqlx store
+/// implements this against SQLite (mobile) / pglite-oxide (desktop). A single
+/// \`apply_batch\` per transaction keeps the local DB consistent with a shape
+/// message boundary.
+#[async_trait]
+pub trait LocalStore: Send + Sync {
+    /// Apply a batch of row changes atomically (one local transaction).
+    async fn apply_batch(&self, changes: &[RowChange]) -> CoreResult<()>;
+
+    /// Wipe a table's synced rows — used on \`must-refetch\` (shape rotation) so the
+    /// consumer can re-materialise the shape from offset \`-1\` without duplicates.
+    async fn truncate_shape(&self, table: &str) -> CoreResult<()>;
+}
+
+/// One durable, idempotent local mutation awaiting replay to the server.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PendingWrite {
+    /// Idempotency key — the server dedupes retries on this. Stable across replays.
+    pub idempotency_key: String,
+    /// Target table / entity type.
+    pub table: String,
+    /// The mutation as JSON (op + payload); opaque to the queue, meaningful to the sink.
+    pub change_json: String,
+    /// How many replay attempts have already failed.
+    pub attempts: u32,
+}
+
+/// The result of attempting to replay one write through the server.
+#[derive(Debug, Clone, PartialEq)]
+pub enum WriteOutcome {
+    /// Server accepted (or idempotently deduped) the write — drop it from the queue.
+    Applied,
+    /// Transient failure (network / 5xx / conflict-retryable) — keep and back off.
+    Retry,
+    /// Terminal rejection (4xx validation) — quarantine as poison, stop retrying.
+    Poison { reason: String },
+}
+
+/// Write-path sink: the queue flushes pending writes here. C-006's forge client
+/// implements this against the Quarry REST/GraphQL API under RLS. The impl MUST
+/// forward \`idempotency_key\` so server-side dedup makes replay safe.
+#[async_trait]
+pub trait WriteSink: Send + Sync {
+    async fn send(&self, write: &PendingWrite) -> WriteOutcome;
+}
+EOF
+
+  # ── sync/status.rs — SyncStatus broadcast for the UI chip ──────────────────
+  cat > "$dir/src/sync/status.rs" << EOF
+$MARK
+//! [\`SyncStatus\`] broadcast — the UI sync chip subscribes to this stream.
+use gen_ui_types::sync::SyncStatus;
+
+#[cfg(not(target_arch = "wasm32"))]
+mod imp {
+    use super::SyncStatus;
+    use std::sync::{
+        atomic::{AtomicU32, Ordering},
+        Arc,
+    };
+    use tokio::sync::watch;
+
+    /// Publishes [\`SyncStatus\`] transitions. Cheap to clone (\`Arc\`-backed). A
+    /// \`watch\` channel (not \`broadcast\`) because status is last-value-wins: a late
+    /// subscriber wants the current state, not a replay of every past transition.
+    #[derive(Clone)]
+    pub struct SyncStatusHandle {
+        tx: Arc<watch::Sender<SyncStatus>>,
+        pending: Arc<AtomicU32>,
+    }
+
+    /// A live subscription to status transitions (\`watch::Receiver\`).
+    pub type SyncStatusStream = watch::Receiver<SyncStatus>;
+
+    impl SyncStatusHandle {
+        pub fn new() -> Self {
+            let (tx, _rx) = watch::channel(SyncStatus::Offline);
+            Self { tx: Arc::new(tx), pending: Arc::new(AtomicU32::new(0)) }
+        }
+
+        /// Subscribe to status transitions (drives one UI chip).
+        pub fn subscribe(&self) -> SyncStatusStream {
+            self.tx.subscribe()
+        }
+
+        /// Current status snapshot.
+        pub fn current(&self) -> SyncStatus {
+            self.tx.borrow().clone()
+        }
+
+        pub(crate) fn set(&self, status: SyncStatus) {
+            // send_replace ignores the "no receivers" error — status is still
+            // readable via \`borrow\`/\`current\` even with nobody subscribed.
+            let _ = self.tx.send_replace(status);
+        }
+
+        pub(crate) fn set_pending(&self, n: u32) {
+            self.pending.store(n, Ordering::Relaxed);
+            if n > 0 {
+                self.set(SyncStatus::Syncing { pending_writes: n });
+            }
+        }
+
+        pub(crate) fn pending(&self) -> u32 {
+            self.pending.load(Ordering::Relaxed)
+        }
+    }
+
+    impl Default for SyncStatusHandle {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+mod imp {
+    use super::SyncStatus;
+    use std::{cell::RefCell, rc::Rc};
+
+    /// wasm stub — browser sync status comes from the JS \`pglite-sync\` subscription,
+    /// surfaced to the UI on that side. Kept so the type name resolves on wasm32.
+    /// (No \`#[derive(Default)]\`: \`SyncStatus\` is a frozen seam with no \`Default\`.)
+    #[derive(Clone)]
+    pub struct SyncStatusHandle(Rc<RefCell<SyncStatus>>);
+
+    /// No stream on wasm (the JS side owns status). Alias keeps signatures uniform.
+    pub type SyncStatusStream = ();
+
+    impl SyncStatusHandle {
+        pub fn new() -> Self {
+            Self(Rc::new(RefCell::new(SyncStatus::Offline)))
+        }
+        pub fn subscribe(&self) -> SyncStatusStream {}
+        pub fn current(&self) -> SyncStatus {
+            self.0.borrow().clone()
+        }
+    }
+
+    impl Default for SyncStatusHandle {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+}
+
+pub use imp::{SyncStatusHandle, SyncStatusStream};
+EOF
+
+  # ── sync/shapes.rs — Electric HTTP shape consumer ──────────────────────────
+  cat > "$dir/src/sync/shapes.rs" << EOF
+$MARK
+//! Electric HTTP shape consumer. Long-polls the Electric \`/v1/shape\` endpoint,
+//! tracks \`(handle, offset)\`, and applies decoded rows to a [\`LocalStore\`].
+//!
+//! Wire protocol (Electric v1.x): the initial request uses \`offset=-1\`; responses
+//! carry \`electric-handle\` + \`electric-offset\` headers and a JSON array of change
+//! messages (\`{ headers.operation, key, value }\`) interleaved with control
+//! messages (\`{ headers.control: "up-to-date" | "must-refetch" }\`). Subsequent
+//! requests add \`handle=<h>&offset=<o>&live=true\` to long-poll. A \`must-refetch\`
+//! control message (or HTTP 409) means the shape rotated: truncate locally and
+//! restart from \`offset=-1\` with the fresh handle.
+use super::config::ShapeSpec;
+use super::seam::{LocalStore, RowChange, RowOp};
+use super::status::SyncStatusHandle;
+use gen_ui_types::error::{CoreError, CoreResult};
+use gen_ui_types::sync::SyncStatus;
+use serde::Deserialize;
+use std::sync::Arc;
+
+/// A shape message: either a row operation or a control frame.
+#[derive(Debug, Deserialize)]
+struct ShapeMessage {
+    #[serde(default)]
+    headers: MsgHeaders,
+    #[serde(default)]
+    key: Option<String>,
+    #[serde(default)]
+    value: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+struct MsgHeaders {
+    #[serde(default)]
+    operation: Option<String>,
+    #[serde(default)]
+    control: Option<String>,
+}
+
+/// Tracks position within one shape's log.
+struct ShapeCursor {
+    handle: Option<String>,
+    offset: String,
+}
+
+impl ShapeCursor {
+    /// Fresh cursor — Electric's initial-sync sentinel offset is \`-1\`.
+    fn initial() -> Self {
+        Self { handle: None, offset: "-1".to_string() }
+    }
+}
+
+pub(crate) struct ShapeConsumer {
+    client: reqwest::Client,
+    electric_url: String,
+    shape: ShapeSpec,
+    store: Arc<dyn LocalStore>,
+    status: SyncStatusHandle,
+}
+
+impl ShapeConsumer {
+    pub(crate) fn new(
+        client: reqwest::Client,
+        electric_url: String,
+        shape: ShapeSpec,
+        store: Arc<dyn LocalStore>,
+        status: SyncStatusHandle,
+    ) -> Self {
+        Self { client, electric_url, shape, store, status }
+    }
+
+    /// Consume the shape until the task is cancelled (drop of the join handle) or a
+    /// terminal error. Loops: catch up → long-poll live → apply → repeat, handling
+    /// \`must-refetch\` by truncating and resetting the cursor.
+    pub(crate) async fn run(&self) -> CoreResult<()> {
+        let mut cursor = ShapeCursor::initial();
+        loop {
+            let live = cursor.handle.is_some(); // only long-poll once we have a handle
+            let (messages, next) = self.poll(&cursor, live).await?;
+
+            let mut changes = Vec::new();
+            let mut must_refetch = false;
+            for msg in &messages {
+                if let Some(control) = &msg.headers.control {
+                    match control.as_str() {
+                        "up-to-date" => self.status.set(SyncStatus::Live),
+                        "must-refetch" => {
+                            must_refetch = true;
+                            break;
+                        }
+                        _ => {} // unknown control frame — ignore forward-compatibly
+                    }
+                    continue;
+                }
+                if let Some(change) = decode_row(&self.shape.table, msg) {
+                    changes.push(change);
+                }
+            }
+
+            if must_refetch {
+                tracing::warn!(table = %self.shape.table, "shape rotated; refetching");
+                self.store.truncate_shape(&self.shape.table).await?;
+                cursor = ShapeCursor::initial();
+                continue;
+            }
+
+            if !changes.is_empty() {
+                self.store.apply_batch(&changes).await?;
+            }
+            cursor = next;
+        }
+    }
+
+    /// One HTTP request against the shape endpoint. Returns decoded messages and the
+    /// advanced cursor. HTTP 409 is Electric's shape-rotation signal → surface it as
+    /// an empty batch with a reset cursor so \`run\` re-materialises.
+    async fn poll(
+        &self,
+        cursor: &ShapeCursor,
+        live: bool,
+    ) -> CoreResult<(Vec<ShapeMessage>, ShapeCursor)> {
+        let mut req = self
+            .client
+            .get(format!("{}/v1/shape", self.electric_url))
+            .query(&[("table", self.shape.table.as_str()), ("offset", cursor.offset.as_str())]);
+        if let Some(handle) = &cursor.handle {
+            req = req.query(&[("handle", handle.as_str())]);
+        }
+        if let Some(where_clause) = &self.shape.where_clause {
+            req = req.query(&[("where", where_clause.as_str())]);
+        }
+        if live {
+            req = req.query(&[("live", "true")]);
+        }
+
+        let resp = req.send().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+
+        // 409 = shape handle rotated: reset to initial and let run() refetch.
+        if resp.status().as_u16() == 409 {
+            return Ok((Vec::new(), ShapeCursor::initial()));
+        }
+        if !resp.status().is_success() {
+            return Err(CoreError::Transient(format!("shape http {}", resp.status())));
+        }
+
+        let handle = header(&resp, "electric-handle").or_else(|| cursor.handle.clone());
+        let offset = header(&resp, "electric-offset").unwrap_or_else(|| cursor.offset.clone());
+
+        let body = resp.text().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+        // Empty body on a live long-poll timeout = no new data; keep the cursor.
+        let messages: Vec<ShapeMessage> = if body.trim().is_empty() {
+            Vec::new()
+        } else {
+            serde_json::from_str(&body).map_err(|e| CoreError::Serde(e.to_string()))?
+        };
+
+        Ok((messages, ShapeCursor { handle, offset }))
+    }
+}
+
+fn header(resp: &reqwest::Response, name: &str) -> Option<String> {
+    resp.headers().get(name).and_then(|v| v.to_str().ok()).map(str::to_string)
+}
+
+/// Decode one shape row message into a [\`RowChange\`]. Returns \`None\` for messages
+/// without a usable operation (already filtered control frames upstream).
+fn decode_row(table: &str, msg: &ShapeMessage) -> Option<RowChange> {
+    let op = match msg.headers.operation.as_deref()? {
+        "insert" => RowOp::Insert,
+        "update" => RowOp::Update,
+        "delete" => RowOp::Delete,
+        _ => return None,
+    };
+    let key = msg.key.clone().unwrap_or_default();
+    let value_json = msg
+        .value
+        .as_ref()
+        .map(|v| v.to_string())
+        .unwrap_or_else(|| "{}".to_string());
+    Some(RowChange { table: table.to_string(), op, key, value_json })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Boundary behavior: an Electric change message decodes to the right RowOp;
+    // a control frame (no operation) decodes to None so run() skips it as a row.
+    #[test]
+    fn decodes_insert_and_skips_control_frames() {
+        let insert: ShapeMessage = serde_json::from_str(
+            r#"{"headers":{"operation":"insert"},"key":"\"e1\"","value":{"id":"e1"}}"#,
+        )
+        .expect("insert message parses");
+        let row = decode_row("entities", &insert).expect("insert decodes to a row");
+        assert_eq!(row.op, RowOp::Insert);
+        assert_eq!(row.table, "entities");
+
+        let up_to_date: ShapeMessage =
+            serde_json::from_str(r#"{"headers":{"control":"up-to-date"}}"#)
+                .expect("control message parses");
+        assert!(decode_row("entities", &up_to_date).is_none());
+    }
+}
+EOF
+
+  # ── sync/write_queue.rs — DIY write queue (backoff + poison) ───────────────
+  cat > "$dir/src/sync/write_queue.rs" << EOF
+$MARK
+//! DIY write queue: durable local action log replayed through a [\`WriteSink\`]
+//! (forge Quarry API) with idempotent keys, exponential backoff, and a poison
+//! handler. Read-path is Electric; this is the write-path half of local-first.
+//!
+//! The in-memory queue here is the replay engine; durability (survive restart) is
+//! delegated to the same [\`LocalStore\`]-backed action-log table C-003 owns — this
+//! module keeps the seam so persistence wires in without changing the replay logic.
+use super::config::SyncConfig;
+use super::seam::{PendingWrite, WriteOutcome, WriteSink};
+use super::status::SyncStatusHandle;
+use std::collections::VecDeque;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::sync::Mutex;
+
+/// Backoff schedule for transient write failures (capped exponential).
+const BACKOFF_BASE: Duration = Duration::from_millis(200);
+const BACKOFF_MAX: Duration = Duration::from_secs(30);
+
+fn backoff_for(attempt: u32) -> Duration {
+    // 200ms, 400ms, 800ms, … capped at 30s. saturating shift avoids overflow panics.
+    let factor = 1u64.checked_shl(attempt.min(20)).unwrap_or(u64::MAX);
+    BACKOFF_BASE.saturating_mul(factor.min(u32::MAX as u64) as u32).min(BACKOFF_MAX)
+}
+
+pub(crate) struct WriteQueue {
+    sink: Arc<dyn WriteSink>,
+    status: SyncStatusHandle,
+    max_attempts: u32,
+    batch: usize,
+    // tokio::Mutex: guard is held across the sink \`.await\`, so a std/parking_lot
+    // mutex would be !Send here. Contention is low (one drain task + enqueues).
+    pending: Mutex<VecDeque<PendingWrite>>,
+    poison: Mutex<Vec<PendingWrite>>,
+}
+
+impl WriteQueue {
+    pub(crate) fn new(cfg: &SyncConfig, sink: Arc<dyn WriteSink>, status: SyncStatusHandle) -> Self {
+        Self {
+            sink,
+            status,
+            max_attempts: cfg.max_write_attempts,
+            batch: cfg.write_batch,
+            pending: Mutex::new(VecDeque::new()),
+            poison: Mutex::new(Vec::new()),
+        }
+    }
+
+    /// Enqueue a local mutation for replay. Idempotency-keyed so retries dedupe
+    /// server-side. Updates the pending-writes count that drives the UI chip.
+    pub(crate) async fn enqueue(&self, write: PendingWrite) {
+        let len = {
+            let mut q = self.pending.lock().await;
+            q.push_back(write);
+            q.len() as u32
+        };
+        self.status.set_pending(len);
+    }
+
+    /// Drain up to \`batch\` writes, replaying each through the sink. Transient
+    /// failures are re-queued (front) after a backoff sleep; poison writes are moved
+    /// to the poison list and surfaced. Returns how many writes remain pending.
+    pub(crate) async fn drain(&self) -> u32 {
+        for _ in 0..self.batch {
+            let Some(mut write) = ({ self.pending.lock().await.pop_front() }) else {
+                break; // queue empty
+            };
+
+            match self.sink.send(&write).await {
+                WriteOutcome::Applied => {
+                    // dropped — the write succeeded (or idempotently deduped).
+                }
+                WriteOutcome::Retry => {
+                    write.attempts += 1;
+                    if write.attempts >= self.max_attempts {
+                        self.quarantine(write, "max attempts exceeded").await;
+                    } else {
+                        let delay = backoff_for(write.attempts);
+                        tracing::warn!(
+                            key = %write.idempotency_key,
+                            attempt = write.attempts,
+                            ?delay,
+                            "write retry scheduled"
+                        );
+                        tokio::time::sleep(delay).await;
+                        self.pending.lock().await.push_front(write);
+                    }
+                }
+                WriteOutcome::Poison { reason } => self.quarantine(write, &reason).await,
+            }
+        }
+
+        let remaining = self.pending.lock().await.len() as u32;
+        self.status.set_pending(remaining);
+        remaining
+    }
+
+    async fn quarantine(&self, write: PendingWrite, reason: &str) {
+        tracing::error!(
+            key = %write.idempotency_key,
+            table = %write.table,
+            reason,
+            "write quarantined (poison)"
+        );
+        self.poison.lock().await.push(write);
+    }
+
+    /// Snapshot of quarantined writes for UI surfacing / manual retry tooling.
+    pub(crate) async fn poison_writes(&self) -> Vec<PendingWrite> {
+        self.poison.lock().await.clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Boundary behavior: backoff grows exponentially from the base and never
+    // exceeds the cap, even at absurd attempt counts (no overflow panic).
+    #[test]
+    fn backoff_is_exponential_and_capped() {
+        assert_eq!(backoff_for(0), BACKOFF_BASE);
+        assert_eq!(backoff_for(1), BACKOFF_BASE * 2);
+        assert_eq!(backoff_for(2), BACKOFF_BASE * 4);
+        assert_eq!(backoff_for(1000), BACKOFF_MAX);
+        assert!(backoff_for(50) <= BACKOFF_MAX);
+    }
+}
+EOF
+
+  # ── sync/engine.rs — SyncEngine wiring + SyncTransport impl ─────────────────
+  cat > "$dir/src/sync/engine.rs" << EOF
+$MARK
+//! [\`SyncEngine\`] — assembles the shape consumers + write queue behind the frozen
+//! [\`SyncTransport\`] seam.
+use super::config::SyncConfig;
+use super::seam::{LocalStore, PendingWrite, WriteSink};
+use super::shapes::ShapeConsumer;
+use super::status::SyncStatusHandle;
+use super::write_queue::WriteQueue;
+use async_trait::async_trait;
+use gen_ui_types::error::{CoreError, CoreResult};
+use gen_ui_types::sync::{SyncStatus, SyncTransport};
+use std::sync::Arc;
+
+/// The C-005 local-first sync engine. Construct with a [\`LocalStore\`] (read-path
+/// sink, C-003) and a [\`WriteSink\`] (write-path, C-006 forge client), then drive it
+/// through the [\`SyncTransport\`] seam.
+pub struct SyncEngine {
+    cfg: SyncConfig,
+    client: reqwest::Client,
+    store: Arc<dyn LocalStore>,
+    queue: Arc<WriteQueue>,
+    status: SyncStatusHandle,
+}
+
+impl SyncEngine {
+    pub fn new(cfg: SyncConfig, store: Arc<dyn LocalStore>, sink: Arc<dyn WriteSink>) -> Self {
+        let status = SyncStatusHandle::new();
+        let queue = Arc::new(WriteQueue::new(&cfg, sink, status.clone()));
+        Self { cfg, client: reqwest::Client::new(), store, queue, status }
+    }
+
+    /// Subscribe to [\`SyncStatus\`] transitions for the UI sync chip.
+    pub fn status_stream(&self) -> super::status::SyncStatusStream {
+        self.status.subscribe()
+    }
+
+    /// Quarantined (poison) writes — for UI surfacing and manual retry tooling.
+    pub async fn poison_writes(&self) -> Vec<PendingWrite> {
+        self.queue.poison_writes().await
+    }
+}
+
+#[async_trait]
+impl SyncTransport for SyncEngine {
+    /// Start read-path sync: spawn one shape consumer per configured shape and a
+    /// write-queue drain loop. Tasks run on the global runtime; they stop when the
+    /// engine (and thus the \`Arc\`s they hold) is dropped.
+    async fn start(&self) -> CoreResult<()> {
+        if self.cfg.shapes.is_empty() {
+            return Err(CoreError::Terminal("sync: no shapes configured".into()));
+        }
+        self.status.set(SyncStatus::Syncing { pending_writes: self.status.pending() });
+
+        for shape in &self.cfg.shapes {
+            let consumer = ShapeConsumer::new(
+                self.client.clone(),
+                self.cfg.electric_url.clone(),
+                shape.clone(),
+                Arc::clone(&self.store),
+                self.status.clone(),
+            );
+            gen_ui_runtime::spawn(async move {
+                if let Err(e) = consumer.run().await {
+                    tracing::error!(error = %e, "shape consumer stopped");
+                }
+            });
+        }
+
+        // Write-queue drain loop: replay pending writes, idle-poll when empty.
+        let queue = Arc::clone(&self.queue);
+        gen_ui_runtime::spawn(async move {
+            loop {
+                let remaining = queue.drain().await;
+                if remaining == 0 {
+                    tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+                }
+            }
+        });
+
+        Ok(())
+    }
+
+    /// Enqueue a local write for durable replay through the forge Quarry API.
+    /// \`change_json\` carries the mutation; the idempotency key is derived from it so
+    /// server-side dedup makes replay safe. The action-log persistence seam (C-003)
+    /// makes this survive restarts.
+    async fn enqueue_write(&self, change_json: &str) -> CoreResult<()> {
+        let parsed: serde_json::Value =
+            serde_json::from_str(change_json).map_err(|e| CoreError::Serde(e.to_string()))?;
+        let table = parsed
+            .get("table")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| CoreError::Terminal("write: missing \"table\"".into()))?
+            .to_string();
+        // Prefer a caller-supplied key; else derive a stable one from the payload.
+        let idempotency_key = parsed
+            .get("idempotency_key")
+            .and_then(|v| v.as_str())
+            .map(str::to_string)
+            .unwrap_or_else(|| derive_key(change_json));
+
+        self.queue
+            .enqueue(PendingWrite { idempotency_key, table, change_json: change_json.to_string(), attempts: 0 })
+            .await;
+        Ok(())
+    }
+
+    fn status(&self) -> SyncStatus {
+        self.status.current()
+    }
+}
+
+/// Derive a stable idempotency key from a write payload (FNV-1a over the bytes).
+/// Deterministic so an identical retried write dedupes server-side.
+fn derive_key(payload: &str) -> String {
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    for b in payload.as_bytes() {
+        hash ^= u64::from(*b);
+        hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
+    }
+    format!("wq-{hash:016x}")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Boundary behavior: the same payload derives the same idempotency key (so a
+    // retried write dedupes server-side) and different payloads diverge.
+    #[test]
+    fn derive_key_is_deterministic_and_distinct() {
+        let a = r#"{"table":"entities","op":"upsert","id":"e1"}"#;
+        let b = r#"{"table":"entities","op":"upsert","id":"e2"}"#;
+        assert_eq!(derive_key(a), derive_key(a));
+        assert_ne!(derive_key(a), derive_key(b));
+        assert!(derive_key(a).starts_with("wq-"));
+    }
+}
+EOF
+
+  # ══════════════════════════════════════════════════════════════════════════════
+  # Combined integration test binary (tests/it.rs) — C-003 relational boundary
+  # tests. C-005's boundary tests live inline in its sync/*.rs #[cfg(test)] modules
+  # (unit-adjacent, exercising private decode/backoff/key-derivation seams), so both
+  # lanes' tests coexist: one integration binary + the inline sync module tests.
+  # ══════════════════════════════════════════════════════════════════════════════
+  cat > "$dir/tests/it.rs" << EOF
+$MARK
+//! Public-boundary behavior tests for relational startup inputs and SQLite+vec.
+
+use gen_ui_db::relational::{RelationalError, SeedBundle, SeedSource};
+
+#[tokio::test]
+async fn bundled_seed_resolves_without_io() {
+    let bundle = SeedBundle {
+        name: "lookups".to_owned(),
+        version: 1,
+        source: SeedSource::Bundled("INSERT INTO lookup VALUES (1);"),
+    };
+    let sql = bundle.sql(&reqwest::Client::new()).await.unwrap();
+    assert_eq!(sql, "INSERT INTO lookup VALUES (1);");
+}
+
+#[tokio::test]
+async fn empty_ipfs_cid_is_rejected_before_network_io() {
+    let bundle = SeedBundle {
+        name: "lookups".to_owned(),
+        version: 1,
+        source: SeedSource::Ipfs { cid: " ".to_owned(), gateway: "https://ipfs.io/ipfs".to_owned() },
+    };
+    let error = bundle.sql(&reqwest::Client::new()).await.unwrap_err();
+    assert!(matches!(error, RelationalError::EmptyCid { .. }));
+}
+
+#[cfg(feature = "sqlite")]
+#[tokio::test]
+async fn sqlite_store_loads_vec_extension() {
+    use gen_ui_db::relational::SqliteStore;
+
+    let directory = tempfile::tempdir().unwrap();
+    let store = SqliteStore::open(directory.path().join("app.sqlite")).await.unwrap();
+    let version: String = sqlx::query_scalar("SELECT vec_version()")
+        .fetch_one(store.pool())
+        .await
+        .unwrap();
+    assert!(version.starts_with('v'));
+}
+EOF
+
+  ok "gen_ui_db: relational (pg/sqlite + migrations + startup) [C-003] + sync (Electric consumer + write queue + SyncTransport) [C-005]"
+}
+
 emit_crate gen_ui_db ""
-emit_l2_stub gen_ui_db "relational (pg/sqlite) + sync + startup orchestrator. Graph RAG lives in gen_ui_db_graph." "C-003/C-005"
+emit_gen_ui_db
 emit_crate gen_ui_inference ""
 emit_l2_stub gen_ui_inference "candle GGUF engine (native accel; wasm feature-gated off)." "future inference lane"
 
