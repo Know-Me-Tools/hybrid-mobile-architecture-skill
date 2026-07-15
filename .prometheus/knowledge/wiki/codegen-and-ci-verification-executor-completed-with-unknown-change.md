@@ -9,14 +9,15 @@ tags:
 - unknown-change
 - build-validation
 links:
+- codegen-and-ci-verification-executor-completed-with-unknown-change
 - executor-scaffold-full-hybrid-project-completed-with-unknown-change
 - scaffold-full-hybrid-executor-completion-with-unknown-change
 sources:
 - stdin
-timestamp: 2026-07-15T22:05:33.437300+00:00
-created_at: 2026-07-15T22:05:33.437300+00:00
-updated_at: 2026-07-15T22:05:33.437300+00:00
-revision: 0
+timestamp: 2026-07-15T22:50:11.847620+00:00
+created_at: 2026-07-15T22:50:11.847545+00:00
+updated_at: 2026-07-15T22:50:11.847620+00:00
+revision: 1
 ---
 
 ## Context
@@ -27,19 +28,19 @@ revision: 0
 
 ## Record
 
-The executor session for `phase-codegen-and-ci-verification` completed. The source record does not identify concrete file changes, generated artifacts, CI results, or repository state transitions.
+The executor session for `phase-codegen-and-ci-verification` completed. The raw source does not identify concrete file changes, generated artifacts, CI workflow results, or repository state transitions.
 
-This is a completion-only executor metadata record. Treat it consistently with other completion records that have unknown changes, such as [Executor scaffold-full-hybrid-project completed with unknown change](/executor-scaffold-full-hybrid-project-completed-with-unknown-change.md) and [Scaffold full hybrid executor completion with unknown change](/scaffold-full-hybrid-executor-completion-with-unknown-change.md).
+This is a completion-only executor metadata record. Treat it consistently with the existing [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md) record and adjacent unknown-change executor completion records such as [Executor scaffold-full-hybrid-project completed with unknown change](/executor-scaffold-full-hybrid-project-completed-with-unknown-change.md) and [Scaffold full hybrid executor completion with unknown change](/scaffold-full-hybrid-executor-completion-with-unknown-change.md).
 
 ## Verification requirements
 
 Because the recorded change is `unknown`, do not treat code generation or CI verification as validated until later evidence identifies and confirms:
 
 - Generated code artifacts, if any.
-- Formatting or regeneration commands that were executed.
-- CI workflow invocations and their pass/fail status.
-- Test, lint, build, or type-check results.
-- Repository diffs or committed changes attributable to this phase.
+- Formatting, regeneration, or codegen commands that were executed.
+- CI jobs or local verification commands that were run.
+- Pass/fail status and logs for build, test, lint, and generated-code consistency checks.
+- Repository state transitions, commits, or file diffs associated with the executor session.
 
 # Citations
 
