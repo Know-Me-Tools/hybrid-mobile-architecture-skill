@@ -1,5 +1,5 @@
 # Rust Core Patterns Reference
-> gen_ui_core · Rust 1.93+ · Tokio 1.40 · candle 0.7 · **SurrealDB 3.2** · flutter_rust_bridge 2.12 · Tauri 2.x
+> gen_ui_core · Rust 1.95+ · Tokio 1.40 · candle 0.7 · **SurrealDB 3.2** · flutter_rust_bridge 2.12 · Tauri 2.x
 
 ## Workspace layout (layered — compile-cache friendly)
 
@@ -44,7 +44,7 @@ resolver = "2"
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.93"
+rust-version = "1.95"
 
 [workspace.dependencies]
 tokio          = { version = "1.40",  features = ["full"] }

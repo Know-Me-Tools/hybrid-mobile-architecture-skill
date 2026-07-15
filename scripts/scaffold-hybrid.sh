@@ -40,6 +40,19 @@ step "Scaffolding Tauri desktop app"
 bash "$(dirname "$0")/scaffold-tauri.sh" "desktop" "$PROJECT"
 ok "Tauri app scaffolded in desktop/"
 
+# ── Scaffold publishable packages (C-007) ──────────────────────────────────
+# npm (gen-ui-react, gen-ui-wasm, tauri-plugin-gen-ui guest-js) + pub.dev
+# (gen_ui_flutter, gen_ui_widgets). Structured for publication from day one.
+step "Scaffolding publishable packages"
+bash "$(dirname "$0")/scaffold-packages.sh" "."
+ok "Package skeletons scaffolded (npm + pub.dev)"
+
+# ── Project-local UI/UX skills + activation hook (C-009) ───────────────────
+# Emits templates/project-skills into the new project's .claude/skills + a
+# UserPromptSubmit activation hook (raises skill hit-rate ~50% -> ~84-100%).
+step "Installing project-local UI/UX skills"
+bash "$(dirname "$0")/add-project-skills.sh" "." || echo "  (skills step skipped)"
+
 # ── Copy documentation ─────────────────────────────────────────────────────
 step "Copying architecture documentation"
 SKILL_DIR="$(dirname "$(dirname "$0")")"
@@ -59,9 +72,11 @@ Built on the [Prometheus AGS Hybrid Mobile Architecture](docs/tj-arch-mob-001.ht
 
 \`\`\`
 $PROJECT/
-├── rust/gen_ui_core/   ← Shared Rust infrastructure (Tokio, Anthropic, inference, MCP, SurrealDB, UAR)
+├── rust/               ← Shared layered Rust workspace (gen_ui_core + leaves: ffi, tauri-plugin, wasm)
 ├── mobile/             ← Flutter iOS/Android application (Riverpod, gen_ui widgets)
 ├── desktop/            ← Tauri macOS/Windows/Linux application (React 19, Zustand, TanStack)
+├── packages/           ← Publishable npm packages (@prometheus-ags/gen-ui-react, gen-ui-wasm)
+├── flutter_packages/   ← Publishable pub.dev packages (gen_ui_flutter FFI plugin, gen_ui_widgets)
 └── docs/               ← Architecture documentation
 \`\`\`
 
@@ -114,6 +129,15 @@ mobile/ios/Frameworks/
 desktop/node_modules/
 desktop/src-tauri/target/
 desktop/dist/
+
+# Publishable packages (C-007)
+packages/*/node_modules/
+packages/*/dist/
+packages/gen-ui-wasm/pkg/
+rust/crates/tauri-plugin-gen-ui/guest-js/node_modules/
+rust/crates/tauri-plugin-gen-ui/guest-js/dist/
+flutter_packages/*/.dart_tool/
+flutter_packages/*/build/
 
 # Environment
 .env
