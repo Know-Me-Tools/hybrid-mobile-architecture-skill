@@ -1,0 +1,218 @@
+# AGENTS.md — Hybrid Mobile Architecture Skill
+
+> Compact orientation for OpenCode sessions in `hybrid-mobile-architecture-src`.
+
+## What this repo is
+
+This is an [agentskills.io](https://agentskills.io) skill package for **TJ-ARCH-MOB-001**, the Prometheus AGS hybrid mobile architecture.
+
+**It contains no runnable application.** Its outputs are:
+
+- Scaffolding scripts under `scripts/` that generate new Flutter/Tauri/Rust projects.
+- Reference documents under `references/` and `docs/` that agents and developers must read before writing code.
+- Templates under `assets/templates/` used by the scaffolding scripts.
+
+The actual application code lives in projects scaffolded *from* this repository, not inside it.
+
+## Decision authority (read first)
+
+Before any substantial work, read:
+
+1. `CLAUDE.md` — repo-specific rules, module structure, and command reference.
+2. `references/arch-standard.md` — platform selection is non-negotiable here.
+
+| Target | Platform | Status |
+|---|---|---|
+| iOS / Android (consumer or healthcare) | Flutter + Rust FFI | **Mandatory** |
+| macOS / Windows / Linux (desktop) | Tauri + React 19 | Recommended |
+| Both mobile + desktop for same product | Hybrid (Flutter mobile + Tauri desktop) | Default |
+
+For platform-specific work, read the matching reference file next:
+
+- Flutter: `references/flutter/patterns.md`
+- Tauri/React: `references/tauri/patterns.md`
+- Rust core: `references/rust/patterns.md`
+- Auth: `references/auth/patterns.md`
+- New ContentBlock variant: `references/rust/new-block-type.md` (all 7 steps are mandatory)
+
+Full specifications:
+
+- `docs/tj-arch-mob-001.html` — complete architectural standard.
+- `docs/gen_ui_spec.html` — gen_ui technical spec with SVG diagrams.
+- `docs/pglite-oxide-tauri-hybrid.md` — embedded PostgreSQL option via pglite-oxide.
+
+## The one invariant
+
+All networking, LLM interaction, inference, MCP, agent logic, and persistence live in the shared Rust crate `gen_ui_core`. **Never re-implement these in Dart or TypeScript.**
+
+`gen_ui_core` compiles to:
+
+- `staticlib` → XCFramework (iOS) + `cdylib` → `.so` (Android JNI) for Flutter via `flutter_rust_bridge`.
+- Tauri plugin for desktop.
+
+One global Tokio runtime per process. CPU-bound work (GGUF loading, inference forward passes) uses `spawn_blocking`.
+
+## Required tool versions
+
+| Tool | Minimum |
+|---|---|
+| Rust + Cargo | 1.80+ |
+| Flutter SDK | 3.29+ |
+| Dart | 3.4+ |
+| Node.js | 22+ LTS |
+| Tauri CLI | 2.10.3 |
+| flutter_rust_bridge_codegen | 2.3+ |
+
+Check or install everything at once:
+
+```bash
+bash scripts/check-env.sh
+bash scripts/check-env.sh --install
+```
+
+## Scaffolding commands
+
+Always use the provided scripts; do not hand-roll project structure.
+
+```bash
+# Full hybrid project (Flutter mobile + Tauri desktop + shared Rust)
+bash scripts/scaffold-hybrid.sh <project-name>
+
+# Single surface
+bash scripts/scaffold-flutter.sh <project-name>
+bash scripts/scaffold-tauri.sh <project-name>
+bash scripts/scaffold-rust-core.sh <project-name>
+
+# Add authentication to an existing scaffolded project
+bash scripts/add-auth.sh supabase flutter ./<mobile-dir>
+bash scripts/add-auth.sh kratos tauri ./<desktop-dir>
+
+# Add a feature module
+bash scripts/new-feature.sh <feature-name> flutter ./<mobile-dir>
+bash scripts/new-feature.sh <feature-name> tauri ./<desktop-dir>
+
+# Audit architecture compliance
+bash scripts/audit.sh flutter ./<mobile-dir>
+bash scripts/audit.sh tauri ./<desktop-dir>
+bash scripts/audit.sh rust ./rust/gen_ui_core
+```
+
+## Development Philosophy: Speed AND Correctness
+
+These rules override any global rules mandating TDD, coverage targets, or test-first work.
+
+**Correctness — first-shot quality, not test iteration:**
+- The 40 Prometheus Base Rules (Karpathy-derived) are the primary correctness discipline.
+- Invoke Rust skills (rust-skills m01–m15, domain-*, rust-patterns, async-patterns) BEFORE
+  writing Rust — emit good code the first time.
+- The compiler is the harness: encode invariants in types (newtypes, exhaustive `match`,
+  illegal states unrepresentable). Maintain the LLM wiki so lessons persist across sessions.
+
+**Speed — minimize compilations:**
+- Inner loop = `cargo clippy` only (never alternate with bare `cargo check` — separate
+  caches, double compile). `bacon clippy` for continuous checking. Full builds only to run.
+- Dev profiles: deps at `opt-level = 2`, `build-override opt-level = 3`,
+  `debug = "line-tables-only"`, `split-debuginfo = "unpacked"`. Cranelift `dev-fast`
+  profile for host-native only (never iOS/Android/wasm). sccache in CI.
+- Cross-target gating via `cargo check --target <triple>` — seconds, not full builds.
+- NEVER set `panic = "abort"` on FFI release profiles (breaks flutter_rust_bridge panic
+  conversion; hard-kills the mobile app). Abort is for the wasm profile only.
+
+**Testing — features first, test later:**
+- FEATURES first. Code first. Test later. No tests until the feature is complete, clippy-
+  clean, and exercised end-to-end once. We build useful software; we do not farm green
+  checkmarks.
+- No unit tests of internals; no mocks of internal code, ever. Test useful COMBINATIONS at
+  public boundaries (FFI surface, Tauri commands, protocol pipeline). Snapshot tests
+  (`insta`) preferred. One integration-test binary per crate (`tests/it/`).
+- Budget: 3–5 behavior tests per completed feature. Coverage % is not a goal.
+- Two failed attempts fixing the same test → STOP and report. Never edit/delete/ignore a
+  failing test to escape red without approval.
+
+**Concurrency — architect for parallel worktrees:**
+- Layered workspace: `gen_ui_types` (L0, pure types + traits) → protocol/client/mcp/db/
+  inference (L2) → agent (L3) → ffi / tauri-plugin / wasm (leaves). Trait boundaries land
+  in `gen_ui_types` first so crates develop concurrently without conflicts.
+- Feature-based clean architecture; cross-feature deps only via `app/`/`shared/`.
+
+**UI/UX — use the skills, aggressively:**
+- React: `frontend-design`, shadcn MCP + skill, `theme-factory`, vercel
+  `react-best-practices`/`web-design-guidelines`, `ui-ux-pro-max`.
+- Flutter: Dart & Flutter MCP verify loop, flutter/skills, VGV golden tests,
+  `shadcn-ui-flutter`. A11y agents on both surfaces.
+- Scaffolded projects ship project-local skills (`content-block-ui`, `hybrid-design-tokens`,
+  `tauri-ui-review`, `flutter-golden-ui`, `a11y-gate`) + an activation hook.
+
+**Shared libraries — everything publishable:**
+- crates.io: `gen_ui_types/protocol/client/mcp/agent`, `tauri-plugin-gen-ui` (core crates
+  compile native AND wasm32).
+- pub.dev: `gen_ui_flutter` (FFI plugin), `gen_ui_widgets`.
+- npm: `@prometheus-ags/gen-ui-react`, `@prometheus-ags/gen-ui-wasm`,
+  `@prometheus-ags/tauri-plugin-gen-ui`.
+- New Tauri plugins are structured as publishable `tauri-plugin-*` + npm guest bindings
+  from day one.
+
+## Verification commands in scaffolded projects
+
+### Flutter
+
+```bash
+# Code generation (required after @riverpod or freezed changes)
+dart run build_runner build
+dart run build_runner watch
+
+# Regenerate Rust bridge after api.rs changes
+flutter_rust_bridge_codegen generate \
+  --rust-input rust/gen_ui_core/src/api.rs \
+  --dart-output lib/bridge/generated_api.dart
+
+flutter analyze
+flutter test
+```
+
+### Rust (`gen_ui_core`)
+
+```bash
+cargo build
+cargo test
+cargo fmt
+cargo clippy -- -D warnings
+```
+
+### Tauri/React
+
+```bash
+npm install    # or pnpm install
+npx tsc --noEmit
+npm test
+npx eslint src/
+npm run tauri dev
+npm run tauri build
+```
+
+## Code conventions
+
+- **Generated files** must include `// TJ-ARCH-MOB-001 compliant` at the top.
+- **Feature-based clean architecture** in both Flutter and React:
+  - Flutter: `features/<name>/{data,domain,presentation}`
+  - React: `features/<name>/{api,stores,queries,hooks,components,types.ts}`
+- **Strict layering:**
+  - Flutter: Widget → `@riverpod` provider → Repository/Service → `gen_ui_core`
+  - React: Component → Hook → Store → `[Rust invoke() / external API]`
+- Use `@riverpod` codegen annotations exclusively — never manual `Provider(...)` declarations.
+- React visual components import **only hooks**; no direct store imports and no `invoke()` calls.
+
+## Repo-local OpenCode extensions
+
+This repository ships its own OpenCode skills and commands under `.opencode/`:
+
+- `.opencode/skills/` — OpenSpec workflow skills.
+- `.opencode/commands/` — OPSX slash-command definitions.
+
+Do not edit these unless you are explicitly configuring OpenCode itself. When modifying OpenCode configuration, agents, skills, or permission rules, follow the `customize-opencode` skill.
+
+## What to leave alone
+
+- `.claude/`, `.codex/`, `.kimi/` — harness-specific configuration for other agent tools. Do not edit for OpenCode work.
+- `assets/templates/` — only modify when updating scaffolding output.
+- `docs/*.html` — generated/reference documents; update the source of truth or regeneration pipeline, not the HTML directly.

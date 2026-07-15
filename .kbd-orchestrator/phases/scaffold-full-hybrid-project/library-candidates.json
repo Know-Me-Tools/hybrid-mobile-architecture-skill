@@ -1,0 +1,135 @@
+{
+  "phase": "scaffold-full-hybrid-project",
+  "generated": "2026-07-15",
+  "candidates": [
+    {
+      "gap": "web-relational-vector",
+      "verdict": "adopt",
+      "name": "@electric-sql/pglite",
+      "version": "0.5.4",
+      "registry": "npm",
+      "notes": "idb:// + relaxedDurability, multi-tab worker mandatory, extensions: live, vector (HNSW works in WASM), electric sync",
+      "confidence": "high"
+    },
+    {
+      "gap": "desktop-relational-vector",
+      "verdict": "adopt",
+      "name": "pglite-oxide",
+      "version": "0.5.1",
+      "registry": "crates.io",
+      "notes": "PGlite WASI build in WASM runtime (NOT native binary — repo doc correction). PG 17.5, PgliteServer wire protocol -> sqlx. Desktop only: linux x64/arm64, macOS arm64, win x64. Watch successor 'Oliphaunt' for mobile.",
+      "confidence": "medium-high",
+      "risks": ["young crate, single maintainer", "macOS Intel absent"]
+    },
+    {
+      "gap": "mobile-relational-vector",
+      "verdict": "adopt",
+      "name": "sqlx (sqlite) + sqlite-vec",
+      "version": "sqlite-vec 0.1.x",
+      "registry": "crates.io / prebuilt mobile libs",
+      "notes": "iOS/Android cannot run embedded Postgres (no fork, no JIT). sqlite-vec vec0 virtual tables, brute-force KNN fine to ~100k vectors, 384-dim standard.",
+      "confidence": "high"
+    },
+    {
+      "gap": "graph-rag-all-platforms",
+      "verdict": "adopt",
+      "name": "surrealdb",
+      "version": "3.2",
+      "registry": "crates.io",
+      "notes": "kv-rocksdb native (incl. iOS/Android), kv-indxdb wasm32. HNSW (MTREE removed), FULLTEXT ANALYZER, KNN <|K,EF|>, RELATE + recursive traversal. Isolate in own crate (build.rs recompile issue #6954).",
+      "confidence": "high",
+      "risks": ["heavy compile times", "2.x->3.x SurrealQL migration in references"]
+    },
+    {
+      "gap": "read-path-sync",
+      "verdict": "adopt",
+      "name": "ElectricSQL shapes",
+      "version": "sync-service 1.7.x / pglite-sync",
+      "registry": "npm / DIY Rust consumer",
+      "notes": "Read-path only (post-rewrite). Web: pglite-sync. Native: Rust shape consumer in gen_ui_core (offset tracking + must-refetch DIY). Writes via own API.",
+      "confidence": "high"
+    },
+    {
+      "gap": "write-path-sync",
+      "verdict": "contested",
+      "options": [
+        {"name": "DIY write queue via flint-forge API + Electric read path", "score": 80, "notes": "RECOMMENDED. Smallest, proves architecture, PES-compatible trait seams"},
+        {"name": "PowerSync", "score": 72, "notes": "Mature bidirectional Flutter+web, but FSL license + SQLite-shaped clients + parallel stack"},
+        {"name": "prometheus-entity-sync (PES) wave-1 now", "score": 55, "notes": "Ecosystem's declared v4 direction (reuses frf-postgres-cdc) but unbuilt; large scope"}
+      ],
+      "escalation": "flagged in analysis.md Open Questions #1 per contested-choice protocol"
+    },
+    {
+      "gap": "react-entity-management",
+      "verdict": "adopt",
+      "name": "@prometheus-ags/prometheus-entity-management",
+      "version": "3.0.0-alpha.0",
+      "registry": "unpublished (git/path dep)",
+      "notes": "Single root export. Peers: zustand 5, immer; optional @tanstack/react-table, loro-crdt. shadcn-token-compatible UI. Wire registerEntityTransport -> forge Quarry REST + tenant-scoped Electric adapter.",
+      "confidence": "high"
+    },
+    {
+      "gap": "flutter-entity-management",
+      "verdict": "build",
+      "name": "prometheus_entity_management (Dart) + Rust transport/store layer",
+      "version": "new",
+      "registry": "pub.dev (future)",
+      "notes": "Canonical store in Rust; Riverpod provider families = normalization map; EntityTransport trait in Rust over frb + ChangeEvent stream; ViewDescriptor mirrored freezed<->Rust enums; CRUD controller as @riverpod class; cascade invalidation via Rust events.",
+      "confidence": "high (design), medium (effort)"
+    },
+    {
+      "gap": "peer-crdt-sync",
+      "verdict": "adopt",
+      "name": "frf-crdt (Loro) + frf-store-redb + FRF SyncService",
+      "version": "flint-realtime-fabric main (git dep)",
+      "registry": "unpublished",
+      "notes": "OFP-style peer sync per KnowMe spec. Consume frf-sdk-rust inside gen_ui_core; frf-wasm/Connect-web for browser; ignore broken UniFFI Dart bindings.",
+      "confidence": "medium-high"
+    },
+    {
+      "gap": "auth-gateway",
+      "verdict": "adopt",
+      "name": "flint-gate",
+      "version": "main (git dep)",
+      "registry": "unpublished",
+      "notes": "anon/authenticated/agent/service_role keys (spec Draft 2026-07-15), Kratos sessions, Cedar @require_approval human-in-the-loop, AG-UI/A2UI stream filtering. Token lifecycle in Rust core.",
+      "confidence": "high (most mature of the three)"
+    },
+    {
+      "gap": "server-data-plane",
+      "verdict": "adopt",
+      "name": "flint-forge (Quarry/Anvil/Kiln)",
+      "version": "p16 release-closure (git dep)",
+      "registry": "unpublished",
+      "notes": "REST/GraphQL under RLS, /mcp/v1/a2ui registers directly into gen_ui_core McpClient, /agents/v1 AG-UI streams -> ProtocolPipeline, Kiln signed-WASM functions. @flint/react + flint_genui for A2UI presentation (transports bypassed).",
+      "confidence": "medium-high"
+    },
+    {
+      "gap": "on-device-embeddings",
+      "verdict": "adopt",
+      "name": "fastembed-rs",
+      "version": "5.x",
+      "registry": "crates.io",
+      "notes": "384-dim (bge-small/MiniLM class) standard across platforms; candle backend optional.",
+      "confidence": "medium-high"
+    },
+    {
+      "gap": "flutter-state",
+      "verdict": "adopt",
+      "name": "riverpod / flutter_riverpod",
+      "version": "3.3.2 (annotation 4.0.3, generator 4.0.4)",
+      "registry": "pub.dev",
+      "notes": "Unified Ref, Notifier fusion, sealed AsyncValue, ProviderException. CRITICAL: automatic retry ON by default -> FFI providers need retry opt-out. Mutations API for send flows. flutter_rust_bridge 2.12.0.",
+      "confidence": "high"
+    },
+    {
+      "gap": "migrations",
+      "verdict": "adopt",
+      "name": "sqlx migrate! / refinery (Rust) + drizzle-kit bundled (web)",
+      "version": "current stable",
+      "registry": "crates.io / npm",
+      "notes": "One schema source -> per-dialect sets. Additive-only. Boot order: migrations -> seeds -> shapes. pgroll server-side.",
+      "confidence": "high"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "phase": "scaffold-full-hybrid-project",
+  "status": "executing",
+  "changes": [
+    {
+      "id": "2026-07-15-c001-layered-workspace",
+      "status": "in_progress",
+      "wave": 0
+    },
+    {
+      "id": "2026-07-15-c002-wasm32-spike",
+      "status": "pending",
+      "wave": 0
+    },
+    {
+      "id": "2026-07-15-c003-relational-store",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c004-graph-rag-store",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c005-sync-engine",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c006-flint-integration",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c007-ffi-leaves-packaging",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c008-docs-refs-correction",
+      "status": "dispatched",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c009-project-skills",
+      "status": "dispatched",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-15-c010-flutter-surface",
+      "status": "pending",
+      "wave": 2
+    },
+    {
+      "id": "2026-07-15-c011-react-surface",
+      "status": "pending",
+      "wave": 2
+    },
+    {
+      "id": "2026-07-15-c012-vertical-slice",
+      "status": "pending",
+      "wave": 2
+    }
+  ],
+  "completedChanges": 0,
+  "totalChanges": 12,
+  "previousPhase": null,
+  "startedAt": "2026-07-15T16:28:38Z",
+  "assessment_complete": true,
+  "analysis_complete": true,
+  "plan_complete": true
+}

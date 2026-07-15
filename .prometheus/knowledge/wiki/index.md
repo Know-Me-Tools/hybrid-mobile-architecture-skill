@@ -1,0 +1,27 @@
+# Wiki Index
+
+## Reference
+
+* [Claude Code model access divergence caused by org login context](/claude-code-model-access-divergence-caused-by-org-login-context.md)
+* [Claude Code model restrictions from managed organization policies](/claude-code-model-restrictions-from-managed-organization-policies.md)
+* [Diagnosing Claude Code model list restrictions without managed settings](/diagnosing-claude-code-model-list-restrictions-without-managed-settings.md)
+* [flint-gate SDK Ecosystem and Documentation Phase Goals](/flint-gate-sdk-ecosystem-and-documentation-phase-goals.md)
+* [Hybrid Mobile Architecture Scaffold Phase Initialization](/hybrid-mobile-architecture-scaffold-phase-initialization.md)
+* [Hybrid Mobile scaffold assessment identifies WASM and packaging gaps](/hybrid-mobile-scaffold-assessment-identifies-wasm-and-packaging-gaps.md)
+* [Hybrid Mobile scaffold phase assessment readiness](/hybrid-mobile-scaffold-phase-assessment-readiness.md)
+* [Hybrid Mobile scaffold phase executor completion](/hybrid-mobile-scaffold-phase-executor-completion.md)
+* [Hybrid scaffold analysis completes with mobile SQLite decision](/hybrid-scaffold-analysis-completes-with-mobile-sqlite-decision.md)
+* [Hybrid scaffold analysis corrects pglite-oxide mobile claims](/hybrid-scaffold-analysis-corrects-pglite-oxide-mobile-claims.md)
+* [Hybrid scaffold analysis integrates Flint platform report](/hybrid-scaffold-analysis-integrates-flint-platform-report.md)
+* [Hybrid scaffold analysis integrates PEM and PES sync findings](/hybrid-scaffold-analysis-integrates-pem-and-pes-sync-findings.md)
+* [Hybrid scaffold assessment completes with 11-crate Rust workspace plan](/hybrid-scaffold-assessment-completes-with-11-crate-rust-workspace-plan.md)
+* [Hybrid scaffold assessment receives testing policy research](/hybrid-scaffold-assessment-receives-testing-policy-research.md)
+* [Hybrid scaffold assessment waits on remaining research agents](/hybrid-scaffold-assessment-waits-on-remaining-research-agents.md)
+* [Hybrid scaffold executor completed with unknown change](/hybrid-scaffold-executor-completed-with-unknown-change.md)
+* [Hybrid scaffold executor completion with unspecified change](/hybrid-scaffold-executor-completion-with-unspecified-change.md)
+* [Hybrid scaffold executor session completed with unknown change](/hybrid-scaffold-executor-session-completed-with-unknown-change.md)
+* [Hybrid scaffold phase runs four architecture research agents](/hybrid-scaffold-phase-runs-four-architecture-research-agents.md)
+* [Hybrid scaffold plan ready with 12 OpenSpec changes](/hybrid-scaffold-plan-ready-with-12-openspec-changes.md)
+* [Hybrid scaffold session completed with unknown artifact changes](/hybrid-scaffold-session-completed-with-unknown-artifact-changes.md)
+* [pglite-oxide Hybrid Tauri Architecture for Mobile PostgreSQL](/pglite-oxide-hybrid-tauri-architecture-for-mobile-postgresql.md)
+* [Scaffold full hybrid project executor completed with unknown change](/scaffold-full-hybrid-project-executor-completed-with-unknown-change.md)
