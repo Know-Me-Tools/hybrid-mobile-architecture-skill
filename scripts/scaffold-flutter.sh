@@ -147,7 +147,9 @@ step "Creating feature-based clean architecture"
 mkdir -p lib/{app,core/{theme,errors,extensions},shared/{widgets,providers},bridge/{a2ui,agui}}
 mkdir -p lib/features/chat/{data/{repositories,datasources,models},domain/{entities,repositories,usecases},presentation/{providers,screens,widgets}}
 mkdir -p lib/features/notes/{data,domain,presentation/{providers,screens}}
-mkdir -p test/features/chat test/features/notes
+mkdir -p lib/features/memory/{data,domain/entities,presentation/{providers,screens}}
+mkdir -p lib/features/startup/{data,domain,presentation/{providers,screens}}
+mkdir -p test/features/chat test/features/notes test/features/memory test/features/startup
 
 # ═══════════════════════════════════════════════════════════════════════════
 # core/theme — design tokens
@@ -255,6 +257,69 @@ Future<EntityRecord> entityUpdate(EntityRecord record) async =>
     throw UnimplementedError('run flutter_rust_bridge_codegen generate');
 Future<void> entityDelete(String entityType, String id) async =>
     throw UnimplementedError('run flutter_rust_bridge_codegen generate');
+
+// ── Memory / graph-RAG intents (gen_ui_db::graph — never raw SurrealQL in Dart) ─
+// memory_search / memory_ingest / graph_expand are the ONLY graph surface the UI
+// sees. Fusion (vector recall → graph expansion → BM25 → RRF) happens in Rust.
+
+/// memory_ingest(text) -> id. Embeds on-device (fastembed) + upserts in Rust.
+Future<String> memoryIngest(String text) async {
+  // return await ffi.memoryIngest(text: text);
+  throw UnimplementedError('run flutter_rust_bridge_codegen generate');
+}
+
+/// memory_search(query, k) -> ranked hits (hybrid vector+graph+BM25 fusion).
+Future<List<MemoryHit>> memorySearch(String query, int k) async {
+  // return await ffi.memorySearch(query: query, k: k);
+  throw UnimplementedError('run flutter_rust_bridge_codegen generate');
+}
+
+/// graph_expand(entity_id, depth) -> neighbourhood hits (recursive RELATE walk).
+Future<List<MemoryHit>> graphExpand(String entityId, int depth) async {
+  // return await ffi.graphExpand(entityId: entityId, depth: depth);
+  throw UnimplementedError('run flutter_rust_bridge_codegen generate');
+}
+
+/// MemoryHit — Dart mirror of gen_ui_db::graph::EntityHit. `score` is the fused
+/// RRF rank; `snippet` is the BM25/context excerpt. In the built app this is the
+/// frb-generated type; this plain class lets the memory feature compile/run
+/// standalone. serde snake_case at the wire.
+class MemoryHit {
+  const MemoryHit({
+    required this.id,
+    required this.name,
+    required this.score,
+    this.snippet,
+  });
+
+  final String id;
+  final String name;
+  final double score;
+  final String? snippet;
+}
+
+// ── Startup orchestrator intents (gen_ui_db startup — analysis §1.8) ─────────
+// Boot-order invariant: migrations → seeds → shapes. Each step runs in Rust;
+// the startup feature sequences these in order and gates the app until ready.
+
+/// run_migrations() — apply the additive schema migration set for this dialect.
+Future<void> runMigrations() async {
+  // await ffi.runMigrations();
+  throw UnimplementedError('run flutter_rust_bridge_codegen generate');
+}
+
+/// load_seeds() — copy bundled seed/lookup data on first run (idempotent).
+Future<void> loadSeeds() async {
+  // await ffi.loadSeeds();
+  throw UnimplementedError('run flutter_rust_bridge_codegen generate');
+}
+
+/// attach_sync_shapes() — subscribe Electric shapes AFTER migrations+seeds
+/// (shapes fail on unknown columns, so this must run last).
+Future<void> attachSyncShapes() async {
+  // await ffi.attachSyncShapes();
+  throw UnimplementedError('run flutter_rust_bridge_codegen generate');
+}
 EOF
 ok "lib/bridge/rust_bridge_provider.dart"
 
@@ -760,6 +825,335 @@ EOF
 ok "features/notes (PEM entity CRUD demo)"
 
 # ═══════════════════════════════════════════════════════════════════════════
+# features/memory — memory / graph-RAG panel. Ingest text → hybrid search over
+# the Rust gen_ui_db graph (vector + graph + BM25 → RRF fusion, all in Rust).
+# The provider reaches the FFI, so retry stays OFF (Rust domain errors are
+# terminal); search runs through the Mutations API for pending/error UI state.
+# ═══════════════════════════════════════════════════════════════════════════
+cat > lib/features/memory/domain/entities/memory_query.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import '../../../../bridge/rust_bridge_provider.dart' show MemoryHit;
+
+export '../../../../bridge/rust_bridge_provider.dart' show MemoryHit;
+
+/// Immutable result of one hybrid-search run: the query and its ranked hits.
+class MemoryResult {
+  const MemoryResult({required this.query, required this.hits});
+  const MemoryResult.empty() : query = '', hits = const [];
+
+  final String query;
+  final List<MemoryHit> hits;
+}
+EOF
+
+cat > lib/features/memory/presentation/providers/memory_notifier.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+// MemoryNotifier owns the memory-panel state. It calls the FFI memory intents
+// (ingest / hybrid search) via the bridge facade — never SurrealQL, never a
+// second data path. build() is synchronous and never throws, so provider-level
+// retry does not apply; the async FFI work runs inside Mutations in the screen,
+// whose own error handling is terminal (Rust domain errors don't auto-retry).
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../../bridge/rust_bridge_provider.dart' as bridge;
+import '../../domain/entities/memory_query.dart';
+
+part 'memory_notifier.g.dart';
+
+/// Default recall breadth for the hybrid search (k in memory_search).
+const int kMemoryRecallK = 8;
+
+@riverpod
+class MemoryNotifier extends _$MemoryNotifier {
+  @override
+  MemoryResult build() => const MemoryResult.empty();
+
+  /// Ingest a note into the graph store (embed on-device + upsert, in Rust).
+  /// Returns the new record id. Terminal on Rust domain error.
+  Future<String> ingest(String text) => bridge.memoryIngest(text);
+
+  /// Run a hybrid search and fold the ranked hits into state. Terminal on error.
+  Future<void> search(String query) async {
+    final hits = await bridge.memorySearch(query, kMemoryRecallK);
+    if (!ref.mounted) return; // provider paused/disposed while awaiting
+    applyHits(query, hits);
+  }
+
+  /// Fold an already-fetched hit list into state (sync — no await, no FFI).
+  /// The boundary seam: search() awaits the FFI, then delegates here. The test
+  /// drives real MemoryHits straight through this fold path — nothing internal
+  /// is mocked; the only fake is the Rust-shaped hit list.
+  void applyHits(String query, List<MemoryHit> hits) {
+    state = MemoryResult(query: query, hits: hits);
+  }
+}
+EOF
+
+cat > lib/features/memory/presentation/screens/memory_screen.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+// Memory / graph-RAG panel: ingest arbitrary text into the on-device graph,
+// then run a hybrid search and render the ranked hits. Both actions flow through
+// MemoryNotifier → bridge facade → Rust gen_ui_db. Presentation only; no query
+// logic lives here. Ingest and search each use the Riverpod 3 Mutations API for
+// first-class pending/error state (FFI errors are terminal — no silent retry).
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../shared/widgets/sync_chip.dart';
+import '../../../../core/theme/tokens.dart';
+import '../providers/memory_notifier.dart';
+
+final ingestMemoryMutation = Mutation<String>();
+final searchMemoryMutation = Mutation<void>();
+
+class MemoryScreen extends ConsumerStatefulWidget {
+  const MemoryScreen({super.key});
+  @override
+  ConsumerState<MemoryScreen> createState() => _MemoryScreenState();
+}
+
+class _MemoryScreenState extends ConsumerState<MemoryScreen> {
+  final _ingestController = TextEditingController();
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _ingestController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final result = ref.watch(memoryNotifierProvider);
+    final ingestState = ref.watch(ingestMemoryMutation);
+    final searchState = ref.watch(searchMemoryMutation);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Memory'),
+        actions: const [Padding(padding: EdgeInsets.only(right: 12), child: Center(child: SyncChip()))],
+      ),
+      body: Column(children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Ingest', style: T.uiMd.copyWith(color: T.textSecondary)),
+            const SizedBox(height: 6),
+            Row(children: [
+              Expanded(
+                child: TextField(
+                  controller: _ingestController,
+                  decoration: const InputDecoration(hintText: 'Add a memory…', border: OutlineInputBorder()),
+                  onSubmitted: ingestState.isPending ? null : (_) => _ingest(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: ingestState.isPending ? null : _ingest,
+                child: ingestState.isPending
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Text('Ingest'),
+              ),
+            ]),
+            const SizedBox(height: 16),
+            Text('Search', style: T.uiMd.copyWith(color: T.textSecondary)),
+            const SizedBox(height: 6),
+            Row(children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(hintText: 'Hybrid graph-RAG search…', border: OutlineInputBorder()),
+                  onSubmitted: searchState.isPending ? null : (_) => _search(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filled(
+                onPressed: searchState.isPending ? null : _search,
+                icon: searchState.isPending
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.search),
+              ),
+            ]),
+          ]),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: result.hits.isEmpty
+              ? Center(child: Text(result.query.isEmpty ? 'No search yet' : 'No hits for "${result.query}"', style: T.uiMd.copyWith(color: T.textTertiary)))
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: result.hits.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, i) {
+                    final hit = result.hits[i];
+                    return ListTile(
+                      leading: const Icon(Icons.memory),
+                      title: Text(hit.name),
+                      subtitle: hit.snippet == null ? null : Text(hit.snippet!),
+                      trailing: Text(hit.score.toStringAsFixed(3), style: T.uiMd.copyWith(color: T.textTertiary)),
+                    );
+                  },
+                ),
+        ),
+      ]),
+    );
+  }
+
+  void _ingest() {
+    final text = _ingestController.text.trim();
+    if (text.isEmpty) return;
+    _ingestController.clear();
+    ingestMemoryMutation.run(ref, (tsx) async {
+      return tsx.get(memoryNotifierProvider.notifier).ingest(text);
+    });
+  }
+
+  void _search() {
+    final query = _searchController.text.trim();
+    if (query.isEmpty) return;
+    searchMemoryMutation.run(ref, (tsx) async {
+      await tsx.get(memoryNotifierProvider.notifier).search(query);
+    });
+  }
+}
+EOF
+ok "features/memory (ingest → hybrid graph-RAG search)"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# features/startup — first-run boot flow demo. Makes the boot-order invariant
+# VISIBLE: migrations → seeds → shapes (see analysis §1.8). The actual steps run
+# in Rust (gen_ui_db startup orchestrator); this feature drives them via the FFI
+# facade and streams progress into a gate that blocks the app until ready.
+# ═══════════════════════════════════════════════════════════════════════════
+cat > lib/features/startup/domain/startup_phase.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+/// The three ordered boot phases (analysis §1.8). Shapes fail on unknown
+/// columns, so the order is an invariant: migrate first, seed second, attach
+/// sync shapes last. Kept as an enum so the UI switch is exhaustive.
+enum StartupPhase { migrations, seeds, shapes, ready }
+
+extension StartupPhaseLabel on StartupPhase {
+  String get label => switch (this) {
+        StartupPhase.migrations => 'Applying migrations',
+        StartupPhase.seeds => 'Loading seed data',
+        StartupPhase.shapes => 'Attaching sync shapes',
+        StartupPhase.ready => 'Ready',
+      };
+  double get progress => switch (this) {
+        StartupPhase.migrations => 0.25,
+        StartupPhase.seeds => 0.5,
+        StartupPhase.shapes => 0.85,
+        StartupPhase.ready => 1.0,
+      };
+}
+EOF
+
+cat > lib/features/startup/presentation/providers/startup_notifier.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+// StartupNotifier drives the first-run boot sequence and exposes the current
+// phase to a gate widget. The real work (schema migrations, seed bundles, sync
+// shape attach) runs in Rust's gen_ui_db startup orchestrator over the FFI
+// facade; here we sequence the intents in the invariant order and surface
+// progress. FFI-backed → retry OFF: a failed migration is terminal, not
+// transient, and must be shown, not silently retried.
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../../bridge/rust_bridge_provider.dart' as bridge;
+import '../../domain/startup_phase.dart';
+
+part 'startup_notifier.g.dart';
+
+Duration? _noRetry(int retryCount, Object error) => null;
+
+/// Runs migrations → seeds → shapes once, yielding each phase as it begins and
+/// [StartupPhase.ready] when the store is usable. A stream provider so the gate
+/// rebuilds per phase; auto-dispose by default. Retry is off — see file header.
+@Riverpod(retry: _noRetry)
+Stream<StartupPhase> startup(Ref ref) async* {
+  yield StartupPhase.migrations;
+  await bridge.runMigrations();
+  yield StartupPhase.seeds;
+  await bridge.loadSeeds();
+  yield StartupPhase.shapes;
+  await bridge.attachSyncShapes();
+  yield StartupPhase.ready;
+}
+EOF
+
+cat > lib/features/startup/presentation/screens/startup_gate.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+// StartupGate blocks the app shell until the first-run boot sequence reaches
+// StartupPhase.ready, rendering the current phase + progress. On error it shows
+// the failure (no silent retry — a broken migration must be visible). Once
+// ready, it renders [child]. Presentation only.
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/theme/tokens.dart';
+import '../../domain/startup_phase.dart';
+import '../providers/startup_notifier.dart';
+
+class StartupGate extends ConsumerWidget {
+  const StartupGate({required this.child, super.key});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final phase = ref.watch(startupProvider);
+    return phase.when(
+      data: (p) => p == StartupPhase.ready
+          ? child
+          : _BootScreen(phase: p),
+      loading: () => const _BootScreen(phase: StartupPhase.migrations),
+      error: (e, _) => _BootError(message: '$e'),
+    );
+  }
+}
+
+class _BootScreen extends StatelessWidget {
+  const _BootScreen({required this.phase});
+  final StartupPhase phase;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            SizedBox(
+              width: 200,
+              child: LinearProgressIndicator(value: phase.progress),
+            ),
+            const SizedBox(height: 16),
+            Text(phase.label, style: T.uiMd.copyWith(color: T.textSecondary)),
+          ]),
+        ),
+      );
+}
+
+class _BootError extends StatelessWidget {
+  const _BootError({required this.message});
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Icon(Icons.error_outline, color: T.red, size: 40),
+              const SizedBox(height: 12),
+              Text('Startup failed', style: T.uiMd.copyWith(color: T.red)),
+              const SizedBox(height: 8),
+              Text(message, textAlign: TextAlign.center, style: T.uiMd.copyWith(color: T.textTertiary)),
+            ]),
+          ),
+        ),
+      );
+}
+EOF
+ok "features/startup (first-run migrations → seeds → shapes gate)"
+
+# ═══════════════════════════════════════════════════════════════════════════
 # app/ — router + root
 # ═══════════════════════════════════════════════════════════════════════════
 cat > lib/app/router.dart << 'EOF'
@@ -769,6 +1163,15 @@ import 'package:go_router/go_router.dart';
 
 import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/notes/presentation/screens/notes_screen.dart';
+import '../features/memory/presentation/screens/memory_screen.dart';
+
+/// The four KnowMe-slice tabs, in shell order. Adding a destination here is the
+/// only edit needed to surface a feature — labels/icons/paths stay in lockstep.
+const _tabs = <(String, IconData, String)>[
+  ('/chat', Icons.chat_bubble_outline, 'Chat'),
+  ('/notes', Icons.note_outlined, 'Notes'),
+  ('/memory', Icons.memory, 'Memory'),
+];
 
 final appRouter = GoRouter(
   initialLocation: '/chat',
@@ -778,6 +1181,7 @@ final appRouter = GoRouter(
       routes: [
         GoRoute(path: '/chat', builder: (_, __) => const ChatScreen()),
         GoRoute(path: '/notes', builder: (_, __) => const NotesScreen()),
+        GoRoute(path: '/memory', builder: (_, __) => const MemoryScreen()),
       ],
     ),
   ],
@@ -790,15 +1194,15 @@ class _Shell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
-    final index = location.startsWith('/notes') ? 1 : 0;
+    final index = _tabs.indexWhere((t) => location.startsWith(t.$1));
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
-        onDestinationSelected: (i) => context.go(i == 0 ? '/chat' : '/notes'),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
-          NavigationDestination(icon: Icon(Icons.note_outlined), label: 'Notes'),
+        selectedIndex: index < 0 ? 0 : index,
+        onDestinationSelected: (i) => context.go(_tabs[i].$1),
+        destinations: [
+          for (final (_, icon, label) in _tabs)
+            NavigationDestination(icon: Icon(icon), label: label),
         ],
       ),
     );
@@ -821,6 +1225,7 @@ import 'package:prometheus_entity_management/prometheus_entity_management.dart';
 import 'app/router.dart';
 // ignore: unused_import
 import 'bridge/rust_bridge_provider.dart';
+import 'features/startup/presentation/screens/startup_gate.dart';
 import 'shared/providers/entity_transport.dart';
 
 Future<void> main() async {
@@ -851,8 +1256,19 @@ Future<void> main() async {
 class AppRoot extends StatelessWidget {
   const AppRoot({super.key});
   @override
-  Widget build(BuildContext context) => MaterialApp.router(
+  Widget build(BuildContext context) => MaterialApp(
         title: 'Prometheus Hybrid',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.dark(useMaterial3: true),
+        // StartupGate blocks the router shell until the first-run boot sequence
+        // (migrations → seeds → shapes) reaches ready. Then it renders the app.
+        home: StartupGate(child: _RouterHost()),
+      );
+}
+
+class _RouterHost extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => MaterialApp.router(
         debugShowCheckedModeBanner: false,
         theme: ThemeData.dark(useMaterial3: true),
         routerConfig: appRouter,
@@ -1035,11 +1451,78 @@ void main() {
 }
 EOF
 
-# Substitute the package name into the chat test's import paths.
+# Boundary test: MemoryNotifier folds a Rust-shaped hit list into panel state.
+# The fake is ONLY the FFI-edge List<MemoryHit>; the fold + MemoryResult are real.
+cat > test/features/memory/memory_search_test.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:MY_APP_SNAKE/bridge/rust_bridge_provider.dart' show MemoryHit;
+import 'package:MY_APP_SNAKE/features/memory/domain/entities/memory_query.dart';
+import 'package:MY_APP_SNAKE/features/memory/presentation/providers/memory_notifier.dart';
+
+void main() {
+  test('MemoryNotifier folds ranked hits into MemoryResult', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    expect(container.read(memoryNotifierProvider).hits, isEmpty);
+
+    // Rust-shaped hits at the FFI boundary — the only fake. Nothing else mocked.
+    const hits = [
+      MemoryHit(id: 'entity:1', name: 'Alpha', score: 0.91, snippet: 'first'),
+      MemoryHit(id: 'entity:2', name: 'Beta', score: 0.42),
+    ];
+    container.read(memoryNotifierProvider.notifier).applyHits('alpha', hits);
+
+    final MemoryResult result = container.read(memoryNotifierProvider);
+    expect(result.query, 'alpha');
+    expect(result.hits, hasLength(2));
+    expect(result.hits.first.name, 'Alpha');
+    expect(result.hits.first.score, greaterThan(result.hits.last.score));
+  });
+}
+EOF
+
+# Boundary test: the startup phase order is the boot invariant (migrate→seed→shapes).
+# Pure enum contract — no FFI needed; guards the ordering that shapes depend on.
+cat > test/features/startup/startup_phase_test.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:MY_APP_SNAKE/features/startup/domain/startup_phase.dart';
+
+void main() {
+  test('boot phases are ordered migrations → seeds → shapes → ready', () {
+    // The order is an invariant: sync shapes fail on unknown columns, so
+    // migrations and seeds MUST precede shape attach (analysis §1.8).
+    expect(StartupPhase.values, [
+      StartupPhase.migrations,
+      StartupPhase.seeds,
+      StartupPhase.shapes,
+      StartupPhase.ready,
+    ]);
+    // Progress is monotonic across the boot order.
+    final progresses = StartupPhase.values.map((p) => p.progress).toList();
+    for (var i = 1; i < progresses.length; i++) {
+      expect(progresses[i], greaterThan(progresses[i - 1]));
+    }
+    expect(StartupPhase.ready.progress, 1.0);
+  });
+}
+EOF
+
+# Substitute the package name into the test import paths.
 if command -v sed >/dev/null; then
-  sed -i.bak "s/MY_APP_SNAKE/${SNAKE_NAME}/g" test/features/chat/chat_flow_test.dart && rm -f test/features/chat/chat_flow_test.dart.bak
+  for tf in \
+    test/features/chat/chat_flow_test.dart \
+    test/features/memory/memory_search_test.dart \
+    test/features/startup/startup_phase_test.dart; do
+    sed -i.bak "s/MY_APP_SNAKE/${SNAKE_NAME}/g" "$tf" && rm -f "$tf.bak"
+  done
 fi
-ok "3 boundary/golden tests (chat fold · ContentBlock golden · PEM rollback)"
+ok "5 boundary/golden tests (chat fold · ContentBlock golden · PEM rollback · memory fold · boot order)"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # pub get — deferred: the path-dep packages are emitted by scaffold-packages.sh.

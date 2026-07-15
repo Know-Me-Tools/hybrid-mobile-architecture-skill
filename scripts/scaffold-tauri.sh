@@ -38,7 +38,9 @@ cat > package.json << PKGEOF
     "tauri:dev":   "tauri dev",
     "tauri:build": "tauri build",
     "lint":        "eslint src --ext .ts,.tsx",
-    "format":      "prettier --write src"
+    "format":      "prettier --write src",
+    "test":        "vitest run",
+    "test:watch":  "vitest"
   },
   "dependencies": {
     "react":                  "^19.0.0",
@@ -81,7 +83,11 @@ cat > package.json << PKGEOF
     "@typescript-eslint/parser": "^8.0.0",
     "eslint":                 "^9.0.0",
     "eslint-plugin-react-hooks": "^5.0.0",
-    "prettier":               "^3.0.0"
+    "prettier":               "^3.0.0",
+    "vitest":                 "^3.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.0.0",
+    "jsdom":                  "^25.0.0"
   }
 }
 PKGEOF
@@ -477,6 +483,243 @@ export function useEntityRuntime(tenantId: string | null): void {
 }
 EOF
 
+# ═══════════════════════════════════════════════════════════════════════════
+# features/memory — memory / graph-RAG panel. Store is the ONLY IPC layer
+# (invoke on desktop; the Rust core owns the graph store, never the browser).
+# Hooks compose the store; components import hooks only. Hybrid fusion (vector
+# recall → graph expansion → BM25 → RRF) lives entirely in Rust gen_ui_db.
+# ═══════════════════════════════════════════════════════════════════════════
+cat > src/features/memory/stores/memoryStore.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — store layer (the ONLY place invoke() is called).
+import { create } from 'zustand'
+import { immer } from 'zustand/middleware/immer'
+import { invoke, isTauri } from '@tauri-apps/api/core'
+
+/** Mirror of gen_ui_db::graph::EntityHit — the fused RRF result. snake_case wire. */
+export interface MemoryHit {
+  id: string
+  name: string
+  score: number
+  snippet?: string | null
+}
+
+interface MemoryState {
+  query: string
+  hits: MemoryHit[]
+  isIngesting: boolean
+  isSearching: boolean
+  error: string | null
+}
+
+interface MemoryActions {
+  ingest: (text: string) => Promise<void>
+  search: (query: string) => Promise<void>
+}
+
+// memory_search / memory_ingest are the ONLY graph surface the UI sees. On web
+// (no Tauri) the wasm core still owns the store; until it is wired, ingest/search
+// no-op rather than reaching into the browser for graph logic (layer contract).
+export const useMemoryStore = create<MemoryState & MemoryActions>()(
+  immer((set) => ({
+    query: '',
+    hits: [],
+    isIngesting: false,
+    isSearching: false,
+    error: null,
+
+    ingest: async (text: string) => {
+      set((s) => { s.isIngesting = true; s.error = null })
+      try {
+        if (isTauri()) await invoke<string>('memory_ingest', { text })
+      } catch (e) {
+        set((s) => { s.error = String(e) })
+      } finally {
+        set((s) => { s.isIngesting = false })
+      }
+    },
+
+    search: async (query: string) => {
+      set((s) => { s.isSearching = true; s.error = null; s.query = query })
+      try {
+        const hits = isTauri()
+          ? await invoke<MemoryHit[]>('memory_search', { query, k: 8 })
+          : []
+        set((s) => { s.hits = hits })
+      } catch (e) {
+        set((s) => { s.error = String(e); s.hits = [] })
+      } finally {
+        set((s) => { s.isSearching = false })
+      }
+    },
+  })),
+)
+EOF
+ok "src/features/memory/stores/memoryStore.ts"
+
+cat > src/features/memory/hooks/useMemory.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — hooks compose stores; no invoke() here.
+import { useMemoryStore } from '../stores/memoryStore'
+
+export function useMemory() {
+  return {
+    query: useMemoryStore((s) => s.query),
+    hits: useMemoryStore((s) => s.hits),
+    isIngesting: useMemoryStore((s) => s.isIngesting),
+    isSearching: useMemoryStore((s) => s.isSearching),
+    error: useMemoryStore((s) => s.error),
+    ingest: useMemoryStore((s) => s.ingest),
+    search: useMemoryStore((s) => s.search),
+  }
+}
+EOF
+ok "src/features/memory/hooks/useMemory.ts"
+
+cat > src/features/memory/components/MemoryPanel.tsx << 'EOF'
+// TJ-ARCH-MOB-001 compliant — component imports the hook only (no store, no invoke).
+import { useState } from 'react'
+import { useMemory } from '../hooks/useMemory'
+
+export function MemoryPanel() {
+  const { hits, query, isIngesting, isSearching, error, ingest, search } = useMemory()
+  const [ingestText, setIngestText] = useState('')
+  const [searchText, setSearchText] = useState('')
+
+  return (
+    <section aria-label="Memory graph-RAG panel">
+      <form
+        onSubmit={(e) => { e.preventDefault(); if (ingestText.trim()) { void ingest(ingestText.trim()); setIngestText('') } }}
+      >
+        <label htmlFor="mem-ingest">Ingest</label>
+        <input id="mem-ingest" value={ingestText} onChange={(e) => setIngestText(e.target.value)} placeholder="Add a memory…" />
+        <button type="submit" disabled={isIngesting}>{isIngesting ? 'Ingesting…' : 'Ingest'}</button>
+      </form>
+
+      <form
+        onSubmit={(e) => { e.preventDefault(); if (searchText.trim()) void search(searchText.trim()) }}
+      >
+        <label htmlFor="mem-search">Search</label>
+        <input id="mem-search" value={searchText} onChange={(e) => setSearchText(e.target.value)} placeholder="Hybrid graph-RAG search…" />
+        <button type="submit" disabled={isSearching}>{isSearching ? 'Searching…' : 'Search'}</button>
+      </form>
+
+      {error ? <p role="alert">{error}</p> : null}
+
+      <ol aria-label={`Results for ${query}`}>
+        {hits.map((hit) => (
+          <li key={hit.id}>
+            <strong>{hit.name}</strong>
+            <span> · {hit.score.toFixed(3)}</span>
+            {hit.snippet ? <p>{hit.snippet}</p> : null}
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+EOF
+ok "src/features/memory/components/MemoryPanel.tsx"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# features/startup — first-run boot flow demo (migrations → seeds → shapes).
+# Store owns all invoke() and sequences the boot-order invariant; the hook gates
+# rendering; the gate component blocks the app until ready. (analysis §1.8)
+# ═══════════════════════════════════════════════════════════════════════════
+mkdir -p src/features/startup/{stores,hooks,components}
+cat > src/features/startup/stores/startupStore.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — store layer (the ONLY place invoke() is called).
+import { create } from 'zustand'
+import { invoke, isTauri } from '@tauri-apps/api/core'
+
+export type StartupPhase = 'migrations' | 'seeds' | 'shapes' | 'ready'
+
+export const PHASE_ORDER: StartupPhase[] = ['migrations', 'seeds', 'shapes', 'ready']
+
+const PHASE_PROGRESS: Record<StartupPhase, number> = {
+  migrations: 0.25,
+  seeds: 0.5,
+  shapes: 0.85,
+  ready: 1,
+}
+export const phaseProgress = (p: StartupPhase): number => PHASE_PROGRESS[p]
+
+interface StartupState {
+  phase: StartupPhase
+  error: string | null
+  run: () => Promise<void>
+}
+
+// Boot-order invariant: migrations → seeds → shapes. Sync shapes fail on unknown
+// columns, so migrations+seeds MUST run first. On web the wasm core runs the same
+// sequence; until wired, the steps resolve immediately so the gate opens.
+export const useStartupStore = create<StartupState>((set) => ({
+  phase: 'migrations',
+  error: null,
+  run: async () => {
+    try {
+      set({ phase: 'migrations', error: null })
+      if (isTauri()) await invoke<void>('run_migrations')
+      set({ phase: 'seeds' })
+      if (isTauri()) await invoke<void>('load_seeds')
+      set({ phase: 'shapes' })
+      if (isTauri()) await invoke<void>('attach_sync_shapes')
+      set({ phase: 'ready' })
+    } catch (e) {
+      set({ error: String(e) })
+    }
+  },
+}))
+EOF
+ok "src/features/startup/stores/startupStore.ts"
+
+cat > src/features/startup/hooks/useStartup.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — hook composes the store; no invoke() here.
+// The hook is the layer boundary: it reads store state and derives everything
+// the component needs (label, progress) so components import ONLY this hook.
+import { useEffect } from 'react'
+import { useStartupStore, phaseProgress } from '../stores/startupStore'
+
+const PHASE_LABEL: Record<string, string> = {
+  migrations: 'Applying migrations',
+  seeds: 'Loading seed data',
+  shapes: 'Attaching sync shapes',
+  ready: 'Ready',
+}
+
+export function useStartup() {
+  const phase = useStartupStore((s) => s.phase)
+  const error = useStartupStore((s) => s.error)
+  const run = useStartupStore((s) => s.run)
+  useEffect(() => { void run() }, [run])
+  return {
+    phase,
+    error,
+    isReady: phase === 'ready',
+    label: PHASE_LABEL[phase],
+    progress: phaseProgress(phase),
+  }
+}
+EOF
+ok "src/features/startup/hooks/useStartup.ts"
+
+cat > src/features/startup/components/StartupGate.tsx << 'EOF'
+// TJ-ARCH-MOB-001 compliant — component imports the hook only.
+import type { ReactNode } from 'react'
+import { useStartup } from '../hooks/useStartup'
+
+export function StartupGate({ children }: { children: ReactNode }) {
+  const { error, isReady, label, progress } = useStartup()
+  if (error) return <div role="alert">Startup failed: {error}</div>
+  if (isReady) return <>{children}</>
+  return (
+    <div aria-live="polite" aria-busy="true">
+      <progress value={progress} max={1} />
+      <p>{label}</p>
+    </div>
+  )
+}
+EOF
+ok "src/features/startup/components/StartupGate.tsx"
+
 cat > src/features/chat/stores/flintSurfaceStore.ts << 'EOF'
 // TJ-ARCH-MOB-001 compliant — core-fed A2UI surface state; no Flint network transport.
 import { listen } from '@tauri-apps/api/event'
@@ -562,6 +805,7 @@ cat > src/main.tsx << 'EOF'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AppProviders } from './app/providers'
+import { StartupGate } from './features/startup/components/StartupGate'
 import { useChatStore } from './features/chat/stores/chatStore'
 import './index.css'
 
@@ -569,8 +813,14 @@ import './index.css'
 const cleanup = useChatStore.getState().initListeners()
 window.addEventListener('beforeunload', cleanup)
 
+// StartupGate blocks the app until the first-run boot sequence (migrations →
+// seeds → shapes) reaches ready — the boot-order invariant made visible.
 createRoot(document.getElementById('root')!).render(
-  <StrictMode><AppProviders /></StrictMode>
+  <StrictMode>
+    <StartupGate>
+      <AppProviders />
+    </StartupGate>
+  </StrictMode>
 )
 EOF
 ok "src/main.tsx"
@@ -595,6 +845,131 @@ cat > src/index.css << 'EOF'
 body { background: var(--color-background); color: var(--color-text-primary); font-family: var(--font-sans); }
 EOF
 ok "src/index.css"
+
+# ── Vitest config + boundary tests ─────────────────────────────────────────
+# Features-first testing (references/tauri/testing.md): a few behavior tests at
+# the public boundary. The ONLY thing faked is the Tauri IPC edge (@tauri-apps/
+# api/core) — a real IO boundary. Stores/hooks/components run for real.
+step "Writing Vitest config + boundary tests"
+cat > vitest.config.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: { alias: { '@': new URL('./src', import.meta.url).pathname } },
+  test: { environment: 'jsdom', globals: true, restoreMocks: true },
+})
+EOF
+
+mkdir -p src/features/memory/__tests__ src/features/startup/__tests__
+cat > src/features/memory/__tests__/memoryStore.test.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+// Fake ONLY the Tauri IPC edge — a real IO boundary. The store logic is real.
+const invoke = vi.fn()
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: (...args: unknown[]) => invoke(...args),
+  isTauri: () => true,
+}))
+
+import { useMemoryStore, type MemoryHit } from '../stores/memoryStore'
+
+const initial = useMemoryStore.getState()
+beforeEach(() => {
+  useMemoryStore.setState(initial, true)
+  invoke.mockReset()
+})
+
+describe('memoryStore', () => {
+  it('folds ranked hits from memory_search into state', async () => {
+    const hits: MemoryHit[] = [
+      { id: 'entity:1', name: 'Alpha', score: 0.91, snippet: 'first' },
+      { id: 'entity:2', name: 'Beta', score: 0.42 },
+    ]
+    invoke.mockResolvedValueOnce(hits)
+
+    await useMemoryStore.getState().search('alpha')
+
+    const s = useMemoryStore.getState()
+    expect(invoke).toHaveBeenCalledWith('memory_search', { query: 'alpha', k: 8 })
+    expect(s.query).toBe('alpha')
+    expect(s.hits).toHaveLength(2)
+    expect(s.hits[0].score).toBeGreaterThan(s.hits[1].score)
+    expect(s.isSearching).toBe(false)
+  })
+
+  it('surfaces a Rust domain error instead of throwing or retrying', async () => {
+    invoke.mockRejectedValueOnce('surreal: index not ready')
+
+    await useMemoryStore.getState().search('alpha')
+
+    const s = useMemoryStore.getState()
+    expect(s.error).toContain('index not ready')
+    expect(s.hits).toEqual([])
+    expect(s.isSearching).toBe(false)
+    expect(invoke).toHaveBeenCalledTimes(1) // terminal — no silent retry
+  })
+})
+EOF
+
+cat > src/features/startup/__tests__/startupStore.test.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+const invoke = vi.fn()
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: (...args: unknown[]) => invoke(...args),
+  isTauri: () => true,
+}))
+
+import { useStartupStore, PHASE_ORDER, phaseProgress } from '../stores/startupStore'
+
+const initial = useStartupStore.getState()
+beforeEach(() => {
+  useStartupStore.setState(initial, true)
+  invoke.mockReset()
+})
+
+describe('startupStore', () => {
+  it('runs the boot sequence in order: migrations → seeds → shapes → ready', async () => {
+    invoke.mockResolvedValue(undefined)
+
+    await useStartupStore.getState().run()
+
+    expect(useStartupStore.getState().phase).toBe('ready')
+    // The boot-order invariant: shapes come AFTER migrations and seeds.
+    expect(invoke.mock.calls.map((c) => c[0])).toEqual([
+      'run_migrations',
+      'load_seeds',
+      'attach_sync_shapes',
+    ])
+  })
+
+  it('halts on a failed migration without attaching shapes', async () => {
+    invoke.mockRejectedValueOnce('migration 003 failed')
+
+    await useStartupStore.getState().run()
+
+    const s = useStartupStore.getState()
+    expect(s.error).toContain('migration 003 failed')
+    expect(s.phase).not.toBe('ready')
+    // Shapes must never attach when migrations fail (they'd hit unknown columns).
+    expect(invoke.mock.calls.map((c) => c[0])).not.toContain('attach_sync_shapes')
+  })
+
+  it('exposes monotonic progress across the phase order', () => {
+    const progresses = PHASE_ORDER.map(phaseProgress)
+    for (let i = 1; i < progresses.length; i++) {
+      expect(progresses[i]).toBeGreaterThan(progresses[i - 1])
+    }
+    expect(phaseProgress('ready')).toBe(1)
+  })
+})
+EOF
+ok "Vitest + 5 boundary tests (memory fold · memory error · boot order · boot halt · progress)"
 
 # ── src-tauri placeholder ──────────────────────────────────────────────────
 step "Creating Tauri source skeleton"
@@ -666,8 +1041,11 @@ pub fn run() {
         // .manage(AppState::new())          // Uncomment when gen_ui_core is wired
         // .invoke_handler(tauri::generate_handler![  // Register commands
         //     commands::stream_agent_a2ui,
-        //     commands::memory_write,
-        //     commands::memory_read,
+        //     commands::entity_list, commands::entity_get,
+        //     commands::entity_create, commands::entity_update, commands::entity_delete,
+        //     commands::entity_runtime_start, commands::entity_runtime_stop,
+        //     commands::memory_ingest, commands::memory_search, commands::graph_expand,
+        //     commands::run_migrations, commands::load_seeds, commands::attach_sync_shapes,
         //     commands::mcp_call_tool,
         // ])
         .run(tauri::generate_context!())

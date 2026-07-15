@@ -1,12 +1,69 @@
 #!/usr/bin/env bash
 # scripts/audit.sh
 # Audit a codebase for TJ-ARCH-MOB-001 architectural compliance.
-# Usage: bash scripts/audit.sh <platform: flutter|tauri|rust> [project-root]
+# Usage: bash scripts/audit.sh <platform: flutter|tauri|rust|all> [project-root]
+#
+# `all` audits every surface of a hybrid project from its root, auto-detecting
+# mobile/ (Flutter), desktop/ (Tauri), and rust/gen_ui_core — and verifies the
+# KnowMe-slice layer contracts on each present surface in one pass.
 
 set -euo pipefail
 
 PLATFORM="${1:-flutter}"
 ROOT="${2:-.}"
+
+# ── all: fan out over every present surface of a hybrid project ──────────────
+if [[ "$PLATFORM" == "all" ]]; then
+  SELF="$0"
+  HYBRID_ROOT="$ROOT"
+  # The hybrid scaffold nests everything under a <project>/ dir. If the given
+  # root has no surfaces directly but a single subdir does, descend into it.
+  if [[ ! -d "$HYBRID_ROOT/mobile" && ! -d "$HYBRID_ROOT/desktop" ]]; then
+    for sub in "$HYBRID_ROOT"/*/; do
+      if [[ -d "$sub/mobile" || -d "$sub/desktop" ]]; then HYBRID_ROOT="${sub%/}"; break; fi
+    done
+  fi
+
+  RC=0
+  ran_any=0
+  # UI surfaces carry the KnowMe-slice layer contracts — audit both if present.
+  for spec in "Flutter mobile:flutter:mobile" "Tauri desktop:tauri:desktop"; do
+    label="${spec%%:*}"; rest="${spec#*:}"; plat="${rest%%:*}"; sub="${rest#*:}"
+    target="$HYBRID_ROOT/$sub"
+    if [[ -d "$target" ]]; then
+      ran_any=1
+      echo ""
+      echo -e "\033[0;36m########## $label ($target) ##########\033[0m"
+      bash "$SELF" "$plat" "$target" || RC=1
+    fi
+  done
+  # Rust: the single-crate scaffold ships rust/gen_ui_core (audits cleanly). The
+  # layered workspace (C-001) splits modules across rust/crates/* — no one crate
+  # matches the monolithic module audit, so skip it here and note the alternative.
+  if [[ -d "$HYBRID_ROOT/rust/gen_ui_core/src" ]]; then
+    ran_any=1
+    echo ""
+    echo -e "\033[0;36m########## Rust core ($HYBRID_ROOT/rust/gen_ui_core) ##########\033[0m"
+    bash "$SELF" "rust" "$HYBRID_ROOT/rust/gen_ui_core" || RC=1
+  elif [[ -d "$HYBRID_ROOT/rust/crates" ]]; then
+    echo ""
+    echo -e "\033[0;36m########## Rust workspace ($HYBRID_ROOT/rust) ##########\033[0m"
+    echo "  → layered workspace detected (rust/crates/*): module invariants are"
+    echo "    enforced per-crate at compile time; run 'cargo clippy' at the rust root."
+  fi
+
+  if [[ "$ran_any" == "0" ]]; then
+    echo "Error: no surfaces found under $HYBRID_ROOT (expected mobile/, desktop/, or rust/gen_ui_core)"
+    exit 1
+  fi
+  echo ""
+  if [[ $RC -eq 0 ]]; then
+    echo -e "\033[0;32m  ✓ All present surfaces compliant with TJ-ARCH-MOB-001\033[0m"
+  else
+    echo -e "\033[0;31m  ✗ One or more surfaces have violations — see above\033[0m"
+  fi
+  exit $RC
+fi
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
 pass()  { echo -e "    ${GREEN}✓${NC} $1"; ((PASS_COUNT++)) || true; }
@@ -117,6 +174,52 @@ if [[ "$PLATFORM" == "flutter" ]]; then
     warn "bridge/rust_bridge_provider.dart not found"
   fi
 
+  echo ""
+  echo -e "${CYAN}[07] Layer contract — FFI facade reached only through providers${NC}"
+  # The bridge facade (rust_bridge_provider) is the FFI seam. Screens/widgets must
+  # NOT import it directly — they go through providers/notifiers. (UI → provider → FFI)
+  if grep -rn "rust_bridge_provider.dart" "$LIB/features" 2>/dev/null | grep -E "presentation/(screens|widgets)/" | grep -q .; then
+    fail "bridge facade imported in a screen/widget — reach the FFI only via providers/notifiers"
+    grep -rn "rust_bridge_provider.dart" "$LIB/features" 2>/dev/null | grep -E "presentation/(screens|widgets)/" | head -5 | sed 's/^/    /'
+  else
+    pass "bridge facade not imported in screens/widgets ✓"
+  fi
+  # No raw graph/SQL query strings in Dart — the intent surface (memory_search,
+  # graph_expand) lives in Rust; Dart never sees SurrealQL/SQL. Match only inside
+  # Dart string literals ('…"…) and skip doc/line comments so keywords in prose
+  # (e.g. "recursive RELATE walk") don't false-positive.
+  dart_raw_sql() {
+    grep -rn "SELECT .*FROM\|RELATE \|DEFINE INDEX\|DEFINE TABLE" "$LIB" 2>/dev/null \
+      | grep -v ".g.dart" \
+      | sed -E 's/^[^:]+:[0-9]+://' \
+      | grep -vE '^[[:space:]]*//' \
+      | grep -E "['\"]"
+  }
+  if dart_raw_sql | grep -q .; then
+    fail "raw query strings found in Dart — graph/SQL lives in Rust, never the UI layer"
+    dart_raw_sql | head -5 | sed 's/^/    /'
+  else
+    pass "No raw SurrealQL/SQL in Dart ✓"
+  fi
+  # FFI-backed providers must opt out of Riverpod 3 auto-retry (Rust errors are
+  # terminal). Flag providers that reach the bridge without a retry override.
+  if grep -rln "rust_bridge_provider.dart" "$LIB" 2>/dev/null | grep -E "providers/|_provider.dart|_notifier.dart" | grep -q .; then
+    if grep -rn "@Riverpod(retry:" "$LIB" 2>/dev/null | grep -q .; then
+      pass "FFI providers opt out of auto-retry (@Riverpod(retry: …)) ✓"
+    else
+      warn "No @Riverpod(retry: …) override found — FFI-backed providers should disable auto-retry"
+    fi
+  fi
+
+  echo ""
+  echo -e "${CYAN}[08] KnowMe-slice features present${NC}"
+  # The vertical slice proves every seam: chat, entity CRUD, memory/graph-RAG,
+  # sync status, first-run startup. Missing any leaves a seam unproven.
+  for f in chat notes memory startup; do
+    [[ -d "$LIB/features/$f" ]] && pass "features/$f/" || fail "features/$f/ MISSING — KnowMe-slice seam unproven"
+  done
+  [[ -f "$LIB/shared/widgets/sync_chip.dart" ]] && pass "sync status chip present" || warn "shared/widgets/sync_chip.dart not found"
+
 # ── Tauri/React audit ─────────────────────────────────────────────────────
 elif [[ "$PLATFORM" == "tauri" ]]; then
   SRC="$ROOT/src"
@@ -125,18 +228,20 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
   echo -e "${CYAN}[01] Dependency checks (package.json)${NC}"
   PKG="$ROOT/package.json"
   if [[ -f "$PKG" ]]; then
-    grep -q '"zustand"'                && pass "zustand present" || fail "zustand MISSING — required"
-    grep -q '"@tanstack/react-query"'  && pass "@tanstack/react-query present" || fail "@tanstack/react-query MISSING"
-    grep -q '"@tanstack/react-router"' && pass "@tanstack/react-router present" || fail "@tanstack/react-router MISSING"
-    grep -q '"@tanstack/react-table"'  && pass "@tanstack/react-table present" || warn "@tanstack/react-table not found"
-    grep -q '"@tauri-apps/api"'        && pass "@tauri-apps/api present" || fail "@tauri-apps/api MISSING"
-    grep -q '"immer"'                  && pass "immer present" || warn "immer not found — recommended for Zustand"
-    grep -q '"redux\|@reduxjs'         && fail "Redux found — use Zustand" || pass "Redux not present ✓"
-    grep -q '"jotai\|recoil'           && fail "jotai/recoil found — use Zustand" || pass "jotai/recoil not present ✓"
-    grep -q '"react-router'            && fail "react-router found — use TanStack Router" || pass "react-router not present ✓"
+    # Pass $PKG to every grep — a single stdin redirect on the `if` would let the
+    # first grep drain it and starve the rest (they'd all read EOF and "fail").
+    grep -q '"zustand"'                "$PKG" && pass "zustand present" || fail "zustand MISSING — required"
+    grep -q '"@tanstack/react-query"'  "$PKG" && pass "@tanstack/react-query present" || fail "@tanstack/react-query MISSING"
+    grep -q '"@tanstack/react-router"' "$PKG" && pass "@tanstack/react-router present" || fail "@tanstack/react-router MISSING"
+    grep -q '"@tanstack/react-table"'  "$PKG" && pass "@tanstack/react-table present" || warn "@tanstack/react-table not found"
+    grep -q '"@tauri-apps/api"'        "$PKG" && pass "@tauri-apps/api present" || fail "@tauri-apps/api MISSING"
+    grep -q '"immer"'                  "$PKG" && pass "immer present" || warn "immer not found — recommended for Zustand"
+    grep -qE '"(redux|@reduxjs)'       "$PKG" && fail "Redux found — use Zustand" || pass "Redux not present ✓"
+    grep -qE '"(jotai|recoil)'         "$PKG" && fail "jotai/recoil found — use Zustand" || pass "jotai/recoil not present ✓"
+    grep -qE '"react-router'           "$PKG" && fail "react-router found — use TanStack Router" || pass "react-router not present ✓"
   else
     fail "package.json not found"
-  fi < "$PKG"
+  fi
 
   echo ""
   echo -e "${CYAN}[02] Feature-based clean architecture${NC}"
@@ -144,6 +249,12 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
     pass "features/ directory exists"
     for feature in "$SRC/features"/*/; do
       fname="$(basename "$feature")"
+      # Skip empty scaffold placeholders (no .ts/.tsx yet) — an unimplemented
+      # feature has no layers to violate. Layer rules apply once code lands.
+      if ! find "$feature" -type f \( -name '*.ts' -o -name '*.tsx' \) 2>/dev/null | grep -q .; then
+        warn "  $fname/ is an empty placeholder — skipped (add code to activate layer checks)"
+        continue
+      fi
       [[ -d "$feature/api" ]]        && pass "  $fname/api/" || warn "  $fname/api/ missing"
       [[ -d "$feature/stores" ]]     && pass "  $fname/stores/" || fail "  $fname/stores/ MISSING"
       [[ -d "$feature/queries" ]]    && pass "  $fname/queries/" || warn "  $fname/queries/ missing (server-side state)"
@@ -156,28 +267,46 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
 
   echo ""
   echo -e "${CYAN}[03] Layer contract enforcement${NC}"
-  # Components should not import stores directly
-  if grep -r "useXxxStore\|from.*stores/" "$SRC/features" 2>/dev/null | grep -E "components/|\.tsx:" | grep -v "hooks/" | grep -q "Store\|from.*stores"; then
+  # Component→Hook→Store→[invoke]. Components must import ONLY hooks: no store
+  # imports (matched by path, so an in-package import from '../stores/…' counts).
+  if grep -rn "from '.*stores/\|from \"@/features/.*stores/" "$SRC/features" 2>/dev/null | grep -E "components/[^:]*\.tsx:" | grep -q .; then
     fail "Store imports found in component files — components must use hooks only"
     echo "    Violations:"
-    grep -r "from.*stores/" "$SRC/features" 2>/dev/null | grep -E "components/.*\.tsx:" | head -5 | sed 's/^/      /'
+    grep -rn "from '.*stores/\|from \"@/features/.*stores/" "$SRC/features" 2>/dev/null | grep -E "components/[^:]*\.tsx:" | head -5 | sed 's/^/      /'
   else
-    pass "No direct store imports in component files"
+    pass "No direct store imports in component files ✓"
   fi
 
-  # Components/hooks should not call invoke() directly
-  if grep -r "invoke(" "$SRC/features" 2>/dev/null | grep -E "components/|hooks/" | grep -q "invoke("; then
-    fail "invoke() found in components or hooks — move to stores/api layers"
-    grep -r "invoke(" "$SRC/features" 2>/dev/null | grep -E "components/|hooks/" | head -5 | sed 's/^/    /'
+  # invoke()/listen() are allowed ONLY in stores — never components, hooks, or
+  # queries. Strip the grep path:line: prefix and drop // comments so the words
+  # "invoke"/"listen" in prose (e.g. "no invoke() here") don't false-positive.
+  ts_ipc_leak() {
+    grep -rn "invoke(\|listen(" "$SRC/features" 2>/dev/null \
+      | grep -E "(components|hooks|queries)/[^:]*\.(ts|tsx):" \
+      | sed -E 's/^([^:]+:[0-9]+):/\1@@/' \
+      | grep -vE '@@[[:space:]]*//' \
+      | sed -E 's/@@/: /'
+  }
+  if ts_ipc_leak | grep -q .; then
+    fail "invoke()/listen() found outside stores — the only IPC layer is stores/"
+    ts_ipc_leak | head -5 | sed 's/^/    /'
   else
-    pass "No invoke() calls in components or hooks ✓"
+    pass "No invoke()/listen() outside stores ✓"
   fi
 
   # Hooks should not call fetch() or API directly
-  if grep -r "^import.*fetch\|await fetch(" "$SRC/features" 2>/dev/null | grep "hooks/" | grep -q fetch; then
+  if grep -rn "await fetch(\|= fetch(" "$SRC/features" 2>/dev/null | grep -E "hooks/[^:]*\.(ts|tsx):" | grep -q .; then
     fail "fetch() found in hooks — calls to external APIs belong in stores or api/"
   else
     pass "No direct fetch() in hooks ✓"
+  fi
+
+  # No raw graph/SQL query strings outside stores — the intent surface (memory_search,
+  # graph_expand) lives in Rust; the browser only runs its own local pglite in stores.
+  if grep -rn "RELATE \|DEFINE INDEX\|DEFINE TABLE" "$SRC/features" 2>/dev/null | grep -E "(components|hooks|queries)/" | grep -q .; then
+    fail "raw SurrealQL found outside stores — graph logic lives in Rust, not the UI"
+  else
+    pass "No raw SurrealQL outside stores ✓"
   fi
 
   echo ""
@@ -203,6 +332,20 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
     pass "a2ui_event listener wired"
   else
     warn "a2ui_event listener not found — wire in store init"
+  fi
+
+  echo ""
+  echo -e "${CYAN}[06] KnowMe-slice features present${NC}"
+  # Same vertical slice as Flutter: chat, entity CRUD, memory/graph-RAG, startup.
+  for f in chat entities memory startup; do
+    [[ -d "$SRC/features/$f" ]] && pass "features/$f/" || fail "features/$f/ MISSING — KnowMe-slice seam unproven"
+  done
+  # memory/startup stores must be the invoke layer (already checked in [03]);
+  # confirm they actually reach the FFI so the seam is real, not a stub-only dir.
+  if grep -rn "invoke(" "$SRC/features/memory" "$SRC/features/startup" 2>/dev/null | grep -E "stores/" | grep -q .; then
+    pass "memory/startup stores reach the FFI (invoke in stores) ✓"
+  else
+    warn "memory/startup stores do not call invoke — seam may be stub-only"
   fi
 
 # ── Rust audit ─────────────────────────────────────────────────────────────
