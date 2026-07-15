@@ -37,8 +37,11 @@ if [[ "$PLATFORM" == "flutter" ]]; then
     grep -q "flutter_rust_bridge:" "$PUBSPEC" && pass "flutter_rust_bridge present" || warn "flutter_rust_bridge not found (required when gen_ui_core is wired)"
     grep -q "shadcn_flutter:" "$PUBSPEC" && pass "shadcn_flutter present (shadcn equivalent)" || warn "shadcn_flutter not found — consider adding"
     grep -q "go_router:" "$PUBSPEC" && pass "go_router present" || warn "go_router not found"
-    grep -q "provider:" "$PUBSPEC" && fail "provider package found — use Riverpod only" || pass "provider package not present ✓"
-    grep -q "bloc:" "$PUBSPEC" && fail "bloc package found — use Riverpod only" || pass "bloc package not present ✓"
+    # Anchor to the dependency key so path_provider (and other *_provider packages)
+    # don't trip the check — match only the standalone `provider` package.
+    grep -qE "^[[:space:]]+provider:" "$PUBSPEC" && fail "provider package found — use Riverpod only" || pass "provider package not present ✓"
+    # Catch both `bloc:` and `flutter_bloc:` as dependency keys.
+    grep -qE "^[[:space:]]+(flutter_)?bloc:" "$PUBSPEC" && fail "bloc package found — use Riverpod only" || pass "bloc package not present ✓"
     grep -q "setState\|StatefulWidget" "$LIB/features" 2>/dev/null && warn "StatefulWidget usage found — prefer ConsumerStatefulWidget or hooks" || true
   else
     fail "pubspec.yaml not found"

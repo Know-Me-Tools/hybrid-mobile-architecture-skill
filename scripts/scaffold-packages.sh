@@ -12,6 +12,7 @@
 #   rust/crates/tauri-plugin-gen-ui/guest-js/   @prometheus-ags/tauri-plugin-gen-ui (npm guest bindings)
 #   flutter_packages/gen_ui_flutter/        gen_ui_flutter (pub.dev, FFI plugin)
 #   flutter_packages/gen_ui_widgets/        gen_ui_widgets (pub.dev, ContentBlock widgets)
+#   flutter_packages/prometheus_entity_management/  (pub.dev, Rust-backed entity mgmt, C-010)
 #
 # ContentBlock contract (FROZEN in gen_ui_types, 11 variants): text, thinking,
 # code, citation, memory, toolUse, toolResult, skill, artifact, image, divider.
@@ -770,9 +771,457 @@ Presentational only — no FFI calls, no providers. Feed it blocks folded from t
 EOF
 ok "pub.dev: gen_ui_widgets (ContentBlock widgets, exhaustive sealed switch)"
 
+# ═══════════════════════════════════════════════════════════════════════════
+# prometheus_entity_management — pub.dev Dart entity-management package (C-010)
+# ═══════════════════════════════════════════════════════════════════════════
+# The Flutter port of PEM (analysis §1.5): the canonical entity store lives in
+# Rust (gen_ui_core, via gen_ui_flutter FFI). This package does NOT re-implement
+# a Dart graph store — Riverpod provider *families* ARE the normalization map.
+# It provides: freezed mirrors of the Rust view/transport/change wire types
+# (1:1 with gen_ui_types), an EntityTransport seam the host wires to the frb
+# bindings, an entity-list family provider, a CRUD controller (@riverpod class)
+# with dirty-path edit buffers + optimistic snapshot/rollback, and a single
+# ChangeEvent → ref.invalidate bridge. All FFI-backed providers opt out of
+# Riverpod 3 auto-retry (a Rust domain error is terminal, not transient).
+PEM_DIR="$ROOT/flutter_packages/prometheus_entity_management"
+mkdir -p "$PEM_DIR/lib/src"
+
+cat > "$PEM_DIR/pubspec.yaml" << 'EOF'
+# TJ-ARCH-MOB-001 compliant
+name: prometheus_entity_management
+description: Rust-backed entity management for Flutter — provider-families-as-normalization, freezed view/change mirrors, and a CRUD controller with optimistic rollback over the gen_ui_core FFI seam.
+version: 0.1.0
+publish_to: none # set to https://pub.dev when ready to publish
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.29.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.3.2
+  riverpod_annotation: ^4.0.3
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  collection: ^1.19.0
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  riverpod_generator: ^4.0.4
+  custom_lint: ^0.7.5
+  riverpod_lint: ^4.0.0
+EOF
+
+cat > "$PEM_DIR/analysis_options.yaml" << 'EOF'
+include: package:flutter_lints/flutter.yaml
+analyzer:
+  plugins:
+    - custom_lint
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  errors:
+    invalid_annotation_target: ignore
+EOF
+
+# ── view.dart — freezed mirror of gen_ui_types::view (ViewDescriptor et al.) ──
+# JSON is snake_case to match the Rust serde(rename_all = "snake_case") wire
+# format, so these types serialize identically to what the FFI boundary produces.
+cat > "$PEM_DIR/lib/src/view.dart" << EOF
+$DART_MARK
+/// Transport-agnostic query description — the Dart mirror of
+/// gen_ui_types::view (ViewDescriptor / FilterSpec / SortSpec). Compiled to SQL
+/// clauses in Rust (gen_ui_db); the UI only ever constructs these. JSON is
+/// snake_case to match the Rust serde wire format 1:1.
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'view.freezed.dart';
+part 'view.g.dart';
+
+enum FilterOp {
+  @JsonValue('eq') eq,
+  @JsonValue('ne') ne,
+  @JsonValue('lt') lt,
+  @JsonValue('lte') lte,
+  @JsonValue('gt') gt,
+  @JsonValue('gte') gte,
+  @JsonValue('in') inList,
+  @JsonValue('like') like,
+}
+
+@freezed
+class FilterSpec with _\$FilterSpec {
+  const factory FilterSpec({
+    required String field,
+    required FilterOp op,
+    required String valueJson,
+  }) = _FilterSpec;
+  factory FilterSpec.fromJson(Map<String, dynamic> json) =>
+      _\$FilterSpecFromJson(json);
+}
+
+@freezed
+class SortSpec with _\$SortSpec {
+  const factory SortSpec({
+    required String field,
+    @Default(false) bool descending,
+  }) = _SortSpec;
+  factory SortSpec.fromJson(Map<String, dynamic> json) =>
+      _\$SortSpecFromJson(json);
+}
+
+@freezed
+class ViewDescriptor with _\$ViewDescriptor {
+  const factory ViewDescriptor({
+    required String entityType,
+    @Default(<FilterSpec>[]) List<FilterSpec> filters,
+    @Default(<SortSpec>[]) List<SortSpec> sorts,
+    int? limit,
+    String? cursor,
+  }) = _ViewDescriptor;
+  factory ViewDescriptor.fromJson(Map<String, dynamic> json) =>
+      _\$ViewDescriptorFromJson(json);
+}
+EOF
+
+# ── entity.dart — EntityRecord / ListResult / ChangeEvent mirrors ─────────────
+cat > "$PEM_DIR/lib/src/entity.dart" << EOF
+$DART_MARK
+/// Entity wire types — Dart mirror of gen_ui_types::transport. \`data_json\` holds
+/// the entity payload as JSON so the transport stays schema-agnostic; features
+/// decode it into their own freezed models. ChangeEvent is the Rust-emitted
+/// invalidation signal the bridge folds into \`ref.invalidate\`.
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'entity.freezed.dart';
+part 'entity.g.dart';
+
+@freezed
+class EntityRecord with _\$EntityRecord {
+  const factory EntityRecord({
+    required String id,
+    required String entityType,
+    required String dataJson,
+  }) = _EntityRecord;
+  factory EntityRecord.fromJson(Map<String, dynamic> json) =>
+      _\$EntityRecordFromJson(json);
+}
+
+@freezed
+class ListResult with _\$ListResult {
+  const factory ListResult({
+    @Default(<EntityRecord>[]) List<EntityRecord> items,
+    String? nextCursor,
+  }) = _ListResult;
+  factory ListResult.fromJson(Map<String, dynamic> json) =>
+      _\$ListResultFromJson(json);
+}
+
+/// Mirrors gen_ui_types::transport::ChangeEvent (serde tag = "op", snake_case).
+@Freezed(unionKey: 'op', unionValueCase: FreezedUnionCase.snake)
+sealed class ChangeEvent with _\$ChangeEvent {
+  const factory ChangeEvent.upsert({required EntityRecord record}) =
+      ChangeUpsert;
+  const factory ChangeEvent.delete({
+    required String entityType,
+    required String id,
+  }) = ChangeDelete;
+  const factory ChangeEvent.invalidate({
+    required String entityType,
+    String? listKey,
+  }) = ChangeInvalidate;
+  factory ChangeEvent.fromJson(Map<String, dynamic> json) =>
+      _\$ChangeEventFromJson(json);
+}
+EOF
+
+# ── sync.dart — SyncStatus mirror of gen_ui_types::sync ──────────────────────
+# frb generates its own Dart union across the FFI, so this mirror carries no
+# JSON codec — it exists so the app + tests compile standalone and so the sync
+# chip can switch exhaustively over a sealed type (compile-time contract).
+cat > "$PEM_DIR/lib/src/sync.dart" << EOF
+$DART_MARK
+/// SyncStatus — Dart mirror of gen_ui_types::sync::SyncStatus. Drives the UI
+/// sync chip. Sealed: a switch that misses a variant is a compile error.
+sealed class SyncStatus {
+  const SyncStatus();
+  const factory SyncStatus.offline() = SyncOffline;
+  const factory SyncStatus.syncing(int pendingWrites) = SyncSyncing;
+  const factory SyncStatus.live() = SyncLive;
+  const factory SyncStatus.error(String message) = SyncError;
+}
+
+class SyncOffline extends SyncStatus {
+  const SyncOffline();
+}
+
+class SyncSyncing extends SyncStatus {
+  final int pendingWrites;
+  const SyncSyncing(this.pendingWrites);
+}
+
+class SyncLive extends SyncStatus {
+  const SyncLive();
+}
+
+class SyncError extends SyncStatus {
+  final String message;
+  const SyncError(this.message);
+}
+EOF
+
+# ── transport.dart — the EntityTransport seam + host registration ─────────────
+# The UI NEVER implements EntityTransport; the host app provides a concrete
+# instance wired to the frb-generated gen_ui_flutter functions. This keeps all
+# data access on the canonical Rust path and lets tests supply a fake at the
+# real FFI boundary (per references/flutter/testing.md).
+cat > "$PEM_DIR/lib/src/transport.dart" << EOF
+$DART_MARK
+/// EntityTransport — the entity data-access seam. Implemented by the host app as
+/// a thin adapter over the frb-generated gen_ui_flutter bindings; it delegates
+/// straight to gen_ui_core. Nothing above this layer talks to the FFI directly.
+import 'entity.dart';
+import 'view.dart';
+
+abstract interface class EntityTransport {
+  Future<ListResult> list(ViewDescriptor view);
+  Future<EntityRecord?> get(String entityType, String id);
+  Future<EntityRecord> create(EntityRecord record);
+  Future<EntityRecord> update(EntityRecord record);
+  Future<void> delete(String entityType, String id);
+
+  /// Rust-emitted change feed — one stream for the whole store. The bridge
+  /// provider folds it into targeted \`ref.invalidate\` calls.
+  Stream<ChangeEvent> changes();
+}
+EOF
+
+# ── providers.dart — family-as-normalization + CRUD controller ───────────────
+cat > "$PEM_DIR/lib/src/providers.dart" << EOF
+$DART_MARK
+/// The heart of the Flutter PEM port. Riverpod provider *families* are the
+/// normalization map: one \`entityList(view)\` instance per query, one
+/// \`entity(type,id)\` instance per record — Riverpod caches and dedupes them, so
+/// there is no hand-built Dart graph store. All FFI-backed providers opt out of
+/// Riverpod 3 auto-retry via \`_noRetry\`: a Rust domain error is a terminal
+/// result, and silent re-invocation would re-run the whole Rust operation.
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'entity.dart';
+import 'transport.dart';
+import 'view.dart';
+
+part 'providers.g.dart';
+
+/// FFI providers are terminal on error — see references/flutter/patterns.md.
+Duration? _noRetry(int retryCount, Object error) => null;
+
+/// Host wiring seam. The app overrides this with its frb-backed adapter:
+/// \`entityTransportProvider.overrideWithValue(FrbEntityTransport(...))\`.
+/// Tests override it with a fake at the FFI boundary — nothing internal is mocked.
+@Riverpod(keepAlive: true)
+EntityTransport entityTransport(Ref ref) =>
+    throw UnimplementedError(
+      'Override entityTransportProvider with a gen_ui_flutter-backed adapter.',
+    );
+
+/// One list instance per ViewDescriptor — the family key normalizes queries.
+@Riverpod(retry: _noRetry)
+Future<ListResult> entityList(Ref ref, ViewDescriptor view) {
+  return ref.watch(entityTransportProvider).list(view);
+}
+
+/// One record instance per (type, id). Features decode \`dataJson\` themselves.
+@Riverpod(retry: _noRetry)
+Future<EntityRecord?> entity(Ref ref, String entityType, String id) {
+  return ref.watch(entityTransportProvider).get(entityType, id);
+}
+
+/// Bridges the single Rust ChangeEvent feed into targeted invalidations. Mount
+/// it once (e.g. \`ref.watch(entityChangeBridgeProvider)\` at app root). It never
+/// holds state — it only translates change ops into \`ref.invalidate\`.
+@Riverpod(keepAlive: true)
+Stream<ChangeEvent> entityChangeBridge(Ref ref) {
+  final stream = ref.watch(entityTransportProvider).changes();
+  final sub = stream.listen((event) {
+    switch (event) {
+      case ChangeUpsert(:final record):
+        ref.invalidate(entityProvider(record.entityType, record.id));
+      case ChangeDelete(:final entityType, :final id):
+        ref.invalidate(entityProvider(entityType, id));
+      case ChangeInvalidate():
+        // A list-shaped change: cheapest correct move is to drop list caches
+        // for the affected type. entityList is a family; invalidating the
+        // provider clears all of its instances.
+        ref.invalidate(entityListProvider);
+    }
+  });
+  ref.onDispose(sub.cancel);
+  return stream;
+}
+
+/// A dirty-path edit buffer over a single record's decoded field map. Tracks
+/// exactly which paths changed so partial updates and optimistic UI both know
+/// the minimal diff. Immutable: every edit returns a new buffer.
+class EditBuffer {
+  const EditBuffer({
+    required this.original,
+    this.edits = const {},
+  });
+
+  /// The last-known-clean field map (decoded from EntityRecord.dataJson).
+  final Map<String, Object?> original;
+
+  /// Path → new value for every field the user touched.
+  final Map<String, Object?> edits;
+
+  bool get isDirty => edits.isNotEmpty;
+  Set<String> get dirtyPaths => edits.keys.toSet();
+
+  /// Effective value for a field: the edit if present, else the original.
+  Object? value(String path) => edits.containsKey(path) ? edits[path] : original[path];
+
+  EditBuffer set(String path, Object? value) {
+    // No-op if the value equals the original — keeps the path out of dirtyPaths.
+    if (original[path] == value && !edits.containsKey(path)) return this;
+    final next = Map<String, Object?>.from(edits);
+    if (original[path] == value) {
+      next.remove(path);
+    } else {
+      next[path] = value;
+    }
+    return EditBuffer(original: original, edits: next);
+  }
+
+  EditBuffer revert() => EditBuffer(original: original, edits: const {});
+
+  /// The merged field map to persist (original overlaid with edits).
+  Map<String, Object?> merged() => {...original, ...edits};
+}
+
+/// CRUD controller for one entity type. Composes the list family, an edit
+/// buffer, and optimistic snapshot/rollback. It performs writes through the
+/// transport (FFI → Rust) and reconciles via the ChangeEvent bridge, so the
+/// canonical store stays in Rust and the UI holds only edit-in-flight state.
+@riverpod
+class EntityCrud extends _\$EntityCrud {
+  @override
+  EditBuffer build(String entityType, String id, Map<String, Object?> initial) {
+    return EditBuffer(original: initial);
+  }
+
+  /// Record a field edit — no I/O, just updates the dirty buffer.
+  void edit(String path, Object? value) {
+    state = state.set(path, value);
+  }
+
+  /// Discard all pending edits.
+  void revert() {
+    state = state.revert();
+  }
+
+  /// Persist the buffer. Optimistically clears dirty state, then rolls back on a
+  /// Rust domain error. Returns true on success. dataJson encoding is the host's
+  /// concern (it owns the feature model) — this passes the merged map through
+  /// the transport by re-reading the record and letting Rust own the write.
+  Future<bool> save(String Function(Map<String, Object?>) encode) async {
+    if (!state.isDirty) return true;
+    final snapshot = state; // optimistic snapshot for rollback
+    final merged = state.merged();
+    state = EditBuffer(original: merged); // optimistic: buffer is now clean
+
+    try {
+      final transport = ref.read(entityTransportProvider);
+      await transport.update(EntityRecord(
+        id: id,
+        entityType: entityType,
+        dataJson: encode(merged),
+      ));
+      return true;
+    } catch (_) {
+      state = snapshot; // roll back — the edits are dirty again
+      rethrow;
+    }
+  }
+
+  /// Delete the record. Optimistic; the ChangeEvent bridge reconciles lists.
+  Future<void> deleteRecord() async {
+    await ref.read(entityTransportProvider).delete(entityType, id);
+  }
+}
+EOF
+
+cat > "$PEM_DIR/lib/prometheus_entity_management.dart" << EOF
+$DART_MARK
+/// prometheus_entity_management — Rust-backed entity management for Flutter.
+///
+/// The canonical entity store lives in Rust (gen_ui_core); this package exposes
+/// it to Flutter through Riverpod, using provider families as the normalization
+/// map. See analysis §1.5. Wire \`entityTransportProvider\` to a gen_ui_flutter
+/// adapter, mount \`entityChangeBridgeProvider\` once, then read
+/// \`entityListProvider(view)\` / \`entityProvider(type, id)\` and drive edits
+/// through \`entityCrudProvider\`.
+library;
+
+export 'src/view.dart';
+export 'src/entity.dart';
+export 'src/sync.dart';
+export 'src/transport.dart';
+export 'src/providers.dart';
+EOF
+
+cat > "$PEM_DIR/README.md" << 'EOF'
+# prometheus_entity_management
+
+Rust-backed entity management for Flutter. The canonical store lives in Rust
+(`gen_ui_core`, reached via the `gen_ui_flutter` FFI plugin) — this package does
+**not** re-implement a Dart graph store. Riverpod provider *families* are the
+normalization map:
+
+- `entityListProvider(view)` — one instance per `ViewDescriptor`
+- `entityProvider(type, id)` — one instance per record
+- `entityCrudProvider(type, id, initial)` — edit buffer + optimistic save/rollback
+- `entityChangeBridgeProvider` — folds the single Rust `ChangeEvent` feed into
+  targeted `ref.invalidate` calls (mount once at app root)
+
+The view/entity/change types are freezed mirrors of `gen_ui_types` and serialize
+snake_case to match the Rust serde wire format 1:1.
+
+## Wiring (host app)
+
+```dart
+final container = ProviderScope(
+  overrides: [
+    entityTransportProvider.overrideWithValue(FrbEntityTransport(genUiCore)),
+  ],
+  child: const App(),
+);
+```
+
+`FrbEntityTransport` is a thin adapter over the frb-generated `entityList` /
+`entityGet` / `entityCreate` / `entityUpdate` / `entityDelete` / `entityChanges`
+functions. Nothing above the transport touches the FFI directly, and no internal
+code is mocked in tests — a fake `EntityTransport` at this boundary is the only
+seam tests override.
+
+## Codegen
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+Generates the `*.freezed.dart` and `*.g.dart` parts. All FFI-backed providers
+opt out of Riverpod 3 automatic retry (a Rust domain error is terminal).
+EOF
+ok "pub.dev: prometheus_entity_management (families-as-normalization, optimistic CRUD)"
+
 echo ""
 echo -e "${GREEN}✅ Publishable package skeletons scaffolded${NC}"
 echo ""
 echo "  npm:      packages/gen-ui-react · packages/gen-ui-wasm · rust/crates/tauri-plugin-gen-ui/guest-js"
-echo "  pub.dev:  flutter_packages/gen_ui_flutter · flutter_packages/gen_ui_widgets"
+echo "  pub.dev:  flutter_packages/gen_ui_flutter · flutter_packages/gen_ui_widgets · flutter_packages/prometheus_entity_management"
 echo ""
