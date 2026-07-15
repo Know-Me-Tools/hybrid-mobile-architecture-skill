@@ -1,7 +1,7 @@
 {
   "name": "Hybrid Mobile Architecture",
   "description": "Skill package and reference library for TJ-ARCH-MOB-001 — scaffolding scripts, reference documents, and templates for building Flutter+Rust FFI mobile and Tauri+React 19 desktop applications sharing a single gen_ui_core Rust crate.",
-  "active_phase": "scaffold-full-hybrid-project",
+  "active_phase": "phase-codegen-and-ci-verification",
   "focus_project_path": "/Users/gqadonis/Projects/hybrid-mobile-architecture-src",
   "spec_paths": [
     "openspec/specs/*.md",

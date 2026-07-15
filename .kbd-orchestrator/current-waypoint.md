@@ -1,5 +1,6 @@
 # Current Waypoint
 
-- **Phase:** scaffold-full-hybrid-project
-- **Status:** reflect_complete (12/12 changes merged, phase closed)
-- **Next:** /kbd-new-phase phase-codegen-and-ci-verification
+- **Phase:** phase-codegen-and-ci-verification
+- **Status:** assessment_ready
+- **Previous phase:** scaffold-full-hybrid-project (reflect_complete, 12/12 merged)
+- **Next:** /kbd-assess phase-codegen-and-ci-verification
