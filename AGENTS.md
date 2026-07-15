@@ -54,20 +54,26 @@ One global Tokio runtime per process. CPU-bound work (GGUF loading, inference fo
 
 ## Required tool versions
 
-| Tool | Minimum |
+| Tool | Required (four-pillar bootstrap — `bash scripts/check-env.sh --install`) |
 |---|---|
-| Rust + Cargo | 1.95+ |
-| Flutter SDK | 3.29+ |
-| Dart | 3.4+ |
-| Node.js | 22+ LTS |
-| Tauri CLI | 2.10.3 |
-| flutter_rust_bridge_codegen | 2.3+ |
+| Rust + Cargo | 1.95+ (+ wasm32-unknown-unknown target) |
+| Flutter SDK | **beta channel**, latest (ships the Dart MCP server) |
+| Dart | latest beta (tracks Flutter beta) |
+| Node.js | 24+ (Active LTS — pin, do not use `--lts`) |
+| bun | latest |
+| pnpm | latest |
+| TypeScript | latest (7.x, Go-native compiler — no version pin) |
+| Tauri CLI | 2.10+ |
+| flutter_rust_bridge_codegen | 2.12+ (must match the workspace's frb crate version) |
+| OpenSpec | 1.6.0+ (`@fission-ai/openspec` — NEVER the bare `openspec` npm package, which is squatted) |
+| Prometheus Skill System | full instance ([Prometheus-AGS/prometheus-skill-system](https://github.com/Prometheus-AGS/prometheus-skill-system)) — verify with `pk doctor --json` |
 
 Check or install everything at once:
 
 ```bash
-bash scripts/check-env.sh
-bash scripts/check-env.sh --install
+bash scripts/check-env.sh                  # check-only
+bash scripts/check-env.sh --install        # remediate normal-cost items
+bash scripts/check-env.sh --install --full # + long ops (Flutter upgrade, full skill-system install)
 ```
 
 ## Scaffolding commands

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # scripts/install-flutter.sh
-# Install Flutter SDK 3.29+ (latest stable) via git clone or FVM.
+# Install Flutter SDK on the BETA channel (this project's required channel — it ships
+# the Dart MCP server and the current SurrealDB/Riverpod/frb-compatible Dart SDK).
 # Usage: bash scripts/install-flutter.sh [--fvm]
 
 set -euo pipefail
@@ -19,9 +20,9 @@ if $USE_FVM; then
     dart pub global activate fvm
   fi
   ok "FVM installed: $(fvm --version)"
-  info "Installing Flutter stable via FVM..."
-  fvm install stable
-  fvm global stable
+  info "Installing Flutter beta via FVM..."
+  fvm install beta
+  fvm global beta
   ok "Flutter $(fvm flutter --version | head -1) via FVM"
   echo ""
   echo "  Add to PATH: export PATH=\"\$HOME/.pub-cache/bin:\$PATH\""
@@ -30,18 +31,25 @@ if $USE_FVM; then
 fi
 
 # ── Direct install via git ─────────────────────────────────────────────────
+# IMPORTANT: clone -b beta, NON-shallow. A shallow (--depth 1) clone cannot switch
+# channels later ('flutter channel <x>' needs full history) — this bit us once.
 FLUTTER_DIR="${HOME}/development/flutter"
 
 if [[ -d "$FLUTTER_DIR" ]]; then
-  info "Flutter already at $FLUTTER_DIR — updating..."
+  info "Flutter already at $FLUTTER_DIR — switching to beta and upgrading..."
   cd "$FLUTTER_DIR"
+  # Unshallow first if this checkout was ever cloned with --depth 1.
+  if [[ -f .git/shallow ]]; then
+    info "Repo is shallow — unshallowing so channel switches work..."
+    git fetch --unshallow origin
+  fi
   git fetch origin
-  git checkout stable
-  git pull
+  flutter channel beta
+  flutter upgrade
 else
-  info "Cloning Flutter SDK to $FLUTTER_DIR..."
+  info "Cloning Flutter SDK (beta channel, full history) to $FLUTTER_DIR..."
   mkdir -p "$(dirname "$FLUTTER_DIR")"
-  git clone https://github.com/flutter/flutter.git -b stable "$FLUTTER_DIR" --depth 1
+  git clone https://github.com/flutter/flutter.git -b beta "$FLUTTER_DIR"
 fi
 
 # Add to PATH for current session
