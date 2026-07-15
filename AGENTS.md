@@ -56,7 +56,7 @@ One global Tokio runtime per process. CPU-bound work (GGUF loading, inference fo
 
 | Tool | Minimum |
 |---|---|
-| Rust + Cargo | 1.93+ |
+| Rust + Cargo | 1.95+ |
 | Flutter SDK | 3.29+ |
 | Dart | 3.4+ |
 | Node.js | 22+ LTS |
