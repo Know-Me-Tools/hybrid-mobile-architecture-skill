@@ -1,0 +1,62 @@
+---
+name: tauri-ui-review
+description: ALWAYS invoke after building or changing any React/Tauri UI surface, before calling it done — run the screenshot-driven review loop at 320/768/1024/1440 in both themes and check against the design-quality bar. Triggers on Tauri UI, desktop UI, React component, screen, page, layout, responsive, breakpoint, screenshot review, visual check, does it look right, UI review, web UI.
+---
+<!-- TJ-ARCH-MOB-001 compliant -->
+
+# Tauri / React UI Review Loop
+
+A React/Tauri surface is not done until it has passed a screenshot-driven review at every
+breakpoint in both themes. This catches overflow, layout jumps, contrast failures, and
+template-generic output before it ships.
+
+## The loop
+
+1. **Run the app** and navigate to the surface (`pnpm tauri dev`, or the web dev server for
+   the browser target).
+2. **Capture screenshots** at **320, 768, 1024, 1440** px wide, in **both light and dark**
+   themes. Use BrowserClaw (`screenshot`) or Playwright. That is 8 shots for a themed
+   surface.
+3. **Inspect each** against the checklist below.
+4. **Fix and re-capture** only the shots that regressed. Do not declare done from a single
+   viewport.
+
+## Checklist (per shot)
+
+- [ ] **No horizontal overflow.** The page body never scrolls sideways; wide content
+      (tables, code, diagrams) scrolls inside its own `overflow-x:auto` container.
+- [ ] **No layout shift** from streaming content or async data (reserve space; explicit
+      image `width`/`height`).
+- [ ] **Hierarchy through scale contrast**, not uniform emphasis.
+- [ ] **Intentional rhythm** — spacing varies with meaning, not uniform padding everywhere.
+- [ ] **Designed hover / focus / active states** on every interactive element.
+- [ ] **Both themes look intentional** — dark isn't just inverted light (see
+      [[hybrid-design-tokens]]).
+- [ ] **Not a default template.** Fails if it reads as stock shadcn/Tailwind with no point
+      of view (centered hero + gradient blob + generic CTA; uniform card grid; gray-on-white
+      with one accent). See the design-quality bar below.
+- [ ] **Motion is compositor-friendly** (opacity/transform/clip-path only).
+- [ ] **Touch targets ≥ 44px** at the 320/768 widths.
+
+## Design-quality bar
+
+Every meaningful surface should demonstrate **at least four**: clear hierarchy via scale
+contrast; intentional spacing rhythm; depth/layering (overlap, surfaces, shadow, motion);
+typography with a real pairing; semantic (not decorative) color; designed interaction
+states; editorial/bento composition where it fits; atmosphere/texture when apt; motion that
+clarifies flow; data-viz treated as part of the design system.
+
+## Layer-contract reminder (don't violate while fixing)
+
+- Components import only hooks. No direct store imports, no `invoke()`/`listen()` in a
+  component or hook — those live only in Zustand stores.
+- Server/async data via TanStack Query; client/UI state via Zustand; shareable state (tab,
+  filter, sort) in the URL.
+
+## Related skills
+
+- `frontend-design`, `web-design-guidelines`, `ui-ux-pro-max` (external) — the design lift
+- `shadcn` MCP — component sourcing; the shadcn/ui skill for correct APIs
+- [[hybrid-design-tokens]] — the tokens every surface must use
+- [[a11y-gate]] — the accessibility half of "done"
+- [[content-block-ui]] — reviewing chat/ContentBlock surfaces

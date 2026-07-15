@@ -47,6 +47,12 @@ step "Scaffolding publishable packages"
 bash "$(dirname "$0")/scaffold-packages.sh" "."
 ok "Package skeletons scaffolded (npm + pub.dev)"
 
+# ── Project-local UI/UX skills + activation hook (C-009) ───────────────────
+# Emits templates/project-skills into the new project's .claude/skills + a
+# UserPromptSubmit activation hook (raises skill hit-rate ~50% -> ~84-100%).
+step "Installing project-local UI/UX skills"
+bash "$(dirname "$0")/add-project-skills.sh" "." || echo "  (skills step skipped)"
+
 # ── Copy documentation ─────────────────────────────────────────────────────
 step "Copying architecture documentation"
 SKILL_DIR="$(dirname "$(dirname "$0")")"
