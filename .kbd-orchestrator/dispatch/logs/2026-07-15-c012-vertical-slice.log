@@ -1,0 +1,16 @@
+[dispatch] 2026-07-15-c012-vertical-slice → claude/claude-opus-4-8  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c012-vertical-slice
+Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+<!-- prometheus-position -->
+Position: scaffold-full-hybrid-project | status: execute_ready
+<!-- /prometheus-position -->
+
+C-012 vertical-slice is complete and self-verified. Summary of this turn:
+
+- **Delivered** the KnowMe-slice's two missing seams (memory/graph-RAG + first-run startup) into the Flutter and React scaffold emitters, plus layer-contract enforcement and an `all` cross-surface mode in `audit.sh`.
+- **Verified**: all scripts `bash -n` clean; scaffolds run standalone + hybrid; `audit.sh` flutter 38/0, tauri 44/0, `all` both-surfaces-compliant; React boundary tests executed 5/5 pass; Dart domain layer analyzed clean.
+- **Fixed** a real layer violation my own new audit check caught (StartupGate) and a pre-existing audit stdin-drain bug.
+- Completion log written to `.kbd-orchestrator/dispatch/logs/2026-07-15-c012-vertical-slice.done.md`. Only the 3 in-scope scaffold scripts changed.
+
+Next: nothing further required from this change — remaining phase work is `/kbd-reflect` for `scaffold-full-hybrid-project` once all Wave-2 changes are dispatched.
+SessionEnd hook [node ${CLAUDE_PLUGIN_ROOT}/dist/index.js session-end] failed: Hook cancelled
+[dispatch] 2026-07-15-c012-vertical-slice done (exit 0)

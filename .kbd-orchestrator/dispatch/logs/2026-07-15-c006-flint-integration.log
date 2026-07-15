@@ -1,0 +1,17 @@
+[dispatch] 2026-07-15-c006-flint-integration → claude/claude-sonnet-5  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c006-flint-integration
+Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+Position: scaffold-full-hybrid-project | status: c006-complete
+
+C-006 flint-integration is done and fully verified. All four tasks completed:
+- `scripts/scaffold-rust-core.sh` emits the real `gen_ui_client/flint` + `gen_ui_mcp` layers (11 marker-carrying files)
+- Coded against verified real-repo contracts (digested gate/forge/FRF first)
+- Green across `cargo metadata`, native clippy `-D warnings`, wasm32 check, `peer-crdt` clippy vs real FRF crates, and 5 boundary tests
+- Frozen `gen_ui_types` seams untouched; done log + memory written
+
+Next: C-006 ready for review/commit (not committed — no commit requested). Remaining phase work belongs to other lanes (Wave-1 C-003/004/005/007, then Wave-2 surfaces); nothing further for this change.
+
+<!-- prometheus-position -->
+Position: scaffold-full-hybrid-project | status: execute_ready
+<!-- /prometheus-position -->
+SessionEnd hook [node ${CLAUDE_PLUGIN_ROOT}/dist/index.js session-end] failed: Hook cancelled
+[dispatch] 2026-07-15-c006-flint-integration done (exit 0)

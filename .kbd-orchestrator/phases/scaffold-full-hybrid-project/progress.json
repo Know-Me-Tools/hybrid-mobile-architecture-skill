@@ -1,69 +1,69 @@
 {
   "phase": "scaffold-full-hybrid-project",
-  "status": "executing",
+  "status": "reflect_complete",
   "changes": [
     {
       "id": "2026-07-15-c001-layered-workspace",
-      "status": "done",
+      "status": "merged",
       "wave": 0
     },
     {
       "id": "2026-07-15-c002-wasm32-spike",
-      "status": "pending",
+      "status": "merged",
       "wave": 0
     },
     {
       "id": "2026-07-15-c003-relational-store",
-      "status": "pending",
+      "status": "merged",
       "wave": 1
     },
     {
       "id": "2026-07-15-c004-graph-rag-store",
-      "status": "pending",
+      "status": "merged",
       "wave": 1
     },
     {
       "id": "2026-07-15-c005-sync-engine",
-      "status": "pending",
+      "status": "merged",
       "wave": 1
     },
     {
       "id": "2026-07-15-c006-flint-integration",
-      "status": "pending",
+      "status": "merged",
       "wave": 1
     },
     {
       "id": "2026-07-15-c007-ffi-leaves-packaging",
-      "status": "pending",
+      "status": "merged",
       "wave": 1
     },
     {
       "id": "2026-07-15-c008-docs-refs-correction",
-      "status": "dispatched",
+      "status": "merged",
       "wave": 1
     },
     {
       "id": "2026-07-15-c009-project-skills",
-      "status": "dispatched",
+      "status": "merged",
       "wave": 1
     },
     {
       "id": "2026-07-15-c010-flutter-surface",
-      "status": "pending",
+      "status": "merged",
       "wave": 2
     },
     {
       "id": "2026-07-15-c011-react-surface",
-      "status": "pending",
+      "status": "merged",
       "wave": 2
     },
     {
       "id": "2026-07-15-c012-vertical-slice",
-      "status": "pending",
+      "status": "merged",
       "wave": 2
     }
   ],
-  "completedChanges": 1,
+  "completedChanges": 12,
   "totalChanges": 12,
   "previousPhase": null,
   "startedAt": "2026-07-15T16:28:38Z",

@@ -30,3 +30,8 @@ DELIVERABLE: working scaffold/code for your change. Generated files begin with
 `// TJ-ARCH-MOB-001 compliant`. When done, write a one-paragraph completion summary to
 .kbd-orchestrator/dispatch/logs/<change-id>.done.md listing files created/modified and
 any deviations or blockers. Then stop.
+
+## YOUR CHANGE: 2026-07-15-c011-react-surface
+
+Read openspec/changes/2026-07-15-c011-react-surface/proposal.md and the matching entry in plan.md.
+Implement it fully per the philosophy above. Assigned model: gpt-5.6-sol (codex).

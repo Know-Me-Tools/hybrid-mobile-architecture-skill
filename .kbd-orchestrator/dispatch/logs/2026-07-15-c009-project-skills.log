@@ -1,0 +1,24 @@
+[dispatch] 2026-07-15-c009-project-skills → claude/claude-sonnet-5  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c009-project-skills
+Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+Position: scaffold-full-hybrid-project | status: c009 complete
+
+C-009 (project-skills) is implemented and verified. Summary of what shipped:
+
+**5 project-local skill templates** (`templates/project-skills/`), each with a directive `ALWAYS invoke when…` description + trigger words, `name`==folder, and `[[…]]` cross-links:
+- `content-block-ui` — 11-variant ContentBlock contract + exhaustiveness
+- `hybrid-design-tokens` — one token source → Tailwind + shadcn_flutter themes
+- `tauri-ui-review` — 320/768/1024/1440 × both-themes screenshot loop
+- `flutter-golden-ui` — VGV goldens + Dart&Flutter MCP verify
+- `a11y-gate` — WCAG 2.2 AA cross-surface checklist
+
+**2 activation hooks** — `skill-activation.py` (UserPromptSubmit, prompt-word→skill matching, non-blocking) and `a11y-reminder.py` (PostToolUse after UI edits), wired via `settings.hooks.json`.
+
+**Emitter + wiring** — `scripts/add-project-skills.sh` (jq deep-merge with safe fallback), called additively from all three scaffold scripts with a `TJ_SKIP_PROJECT_SKILLS` guard to prevent double-install in the hybrid path.
+
+**External wiring** — `references/ui-skills.md`, resolving the dangling CLAUDE.md index entry.
+
+All boundary behaviors exercised once (fresh install, jq merge preserving prior config, hook match/no-match/malformed, syntax/JSON validity). Scope stayed within c009 — no touches to `gen_ui_types`, `plugin.json`, `marketplace.json`, or canonical HTML docs. One documented deviation: frontmatter must be line 1 in SKILL.md, so the compliance marker sits as the first body line. Completion log written to `.kbd-orchestrator/dispatch/logs/2026-07-15-c009-project-skills.done.md`.
+
+Next: c009 done and idle — no further work in this change. Remaining phase work (other changes C-001…C-012) belongs to their own dispatched agents; nothing more for me to do here.
+SessionEnd hook [node ${CLAUDE_PLUGIN_ROOT}/dist/index.js session-end] failed: Hook cancelled
+[dispatch] 2026-07-15-c009-project-skills done (exit 0)

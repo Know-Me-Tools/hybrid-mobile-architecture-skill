@@ -1,7 +1,7 @@
 {
   "phase": "scaffold-full-hybrid-project",
-  "status": "execute_ready",
-  "previousPhase": null,
+  "status": "reflect_complete",
+  "previousPhase": "scaffold-full-hybrid-project",
   "changes": [
     {
       "id": "2026-07-15-c001-layered-workspace",

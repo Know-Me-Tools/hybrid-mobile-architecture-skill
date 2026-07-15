@@ -1,0 +1,49 @@
+[dispatch] 2026-07-15-c008-docs-refs-correction → opencode/kimi-for-coding/k2p6  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
+[0m
+> build · k2p6
+[0m
+I'll read the authority files and the change proposal first.
+[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/*); auto-rejecting
+[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/CLAUDE.md failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/*); auto-rejecting
+[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/constraints.md failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/*); auto-rejecting
+[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/*); auto-rejecting
+[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/openspec/changes/2026-07-15-c008-docs-refs-correction/*); auto-rejecting
+[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/openspec/changes/2026-07-15-c008-docs-refs-correction/proposal.md failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[dispatch] 2026-07-15-c008-docs-refs-correction done (exit 0)
+[dispatch] 2026-07-15-c008-docs-refs-correction → opencode/kimi-for-coding/k2p6  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
+[0m
+> build · k2p6
+[0m
+[dispatch] 2026-07-15-c008-docs-refs-correction → claude/claude-sonnet-5  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
+Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
+Position: scaffold-full-hybrid-project | status: execute_complete (c008)
+
+Change **c008-docs-refs-correction** is fully implemented. Summary of what shipped:
+
+**Corrections (verified factual errors fixed):**
+- `docs/pglite-oxide-tauri-hybrid.md` + `CLAUDE.md` — pglite-oxide is a WASM-runtime host of ElectricSQL's PGlite WASI build (not a native Rust Postgres binary) and has **no iOS/Android support**. Postgres SQL now correctly spans web/desktop/cloud only; mobile = SQLite + sqlite-vec. Added the authoritative per-target data-layer matrix.
+
+**Reference updates:**
+- `references/rust/patterns.md` → SurrealDB 3.2 (HNSW, FULLTEXT, KNN operator, 3.x DDL, graph-RAG pattern, FFI-intent-only contract) + the layered 11-crate workspace layout.
+- `references/flutter/patterns.md` → Riverpod 3.3 (unified Ref, **critical FFI retry opt-out**, Mutations API, `ref.mounted` stream-fold guard) + bumped deps.
+- All three `references/*/testing.md` → rewritten features-first (boundary/snapshot-preferred, no internal mocks, fakes at IO boundaries only, no coverage gates) per binding CLAUDE.md philosophy.
+
+**New files:**
+- `references/rust/compile-speed.md` — clippy-only inner loop, workspace caching, cross-target checks, never-`panic="abort"`-on-FFI.
+- `references/ui-skills.md` — the mandatory UI/UX skill catalog CLAUDE.md points to.
+
+All 9 files (7 modified, 2 created) verified for factual accuracy against analysis.md and for cross-reference integrity. Scope held to the assigned change (Rule 40); two adjacent-but-unassigned items documented as deliberate out-of-scope. Completion log written to `.kbd-orchestrator/dispatch/logs/2026-07-15-c008-docs-refs-correction.done.md`.
+
+Next: c008 is done and independent (deps: none) — no further work on this change. Remaining phase work is the other changes (c001–c007, c009–c011) handled by their own dispatches; this worktree's task is complete and I'm stopping here.
+SessionEnd hook [node ${CLAUDE_PLUGIN_ROOT}/dist/index.js session-end] failed: Hook cancelled
+[dispatch] 2026-07-15-c008-docs-refs-correction done (exit 0)

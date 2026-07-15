@@ -1,0 +1,9 @@
+[dispatch] 2026-07-15-c002-wasm32-spike → claude/claude-sonnet-5  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c002-wasm32-spike
+Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+<!-- prometheus-position -->
+Position: scaffold-full-hybrid-project | status: execute_ready
+<!-- /prometheus-position -->
+
+Next: C-002 wasm32-spike is complete and committed (`fa23659`); progress.json marks it `done` (completedChanges 2/12). Remaining phase work is Wave-1 lanes C-003–C-009 (C-008/C-009 already dispatched); C-004/C-005/C-007 should read `references/rust/wasm-targets.md` before starting — in particular C-004 must bump `rust-toolchain.toml` to 1.96+ before wiring SurrealDB.
+SessionEnd hook [node ${CLAUDE_PLUGIN_ROOT}/dist/index.js session-end] failed: Hook cancelled
+[dispatch] 2026-07-15-c002-wasm32-spike done (exit 0)

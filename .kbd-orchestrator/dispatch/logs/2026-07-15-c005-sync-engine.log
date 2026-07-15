@@ -1,0 +1,25 @@
+[dispatch] 2026-07-15-c005-sync-engine → claude/claude-opus-4-8  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c005-sync-engine
+Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+Position: scaffold-full-hybrid-project | status: c005 complete
+
+C-005 sync-engine is implemented and verified. I extended `scripts/scaffold-rust-core.sh` with an `emit_gen_ui_db()` function that lays down the full `gen_ui_db::sync` module behind the frozen `SyncTransport` seam:
+
+- **Electric shape consumer** (`shapes.rs`) — HTTP long-poll with `(handle, offset)` tracking, `offset=-1` initial sync, `must-refetch`/`up-to-date` control frames, and HTTP 409 shape-rotation handling.
+- **DIY write queue** (`write_queue.rs`) — idempotent keys, capped exponential backoff (200ms→30s), poison quarantine.
+- **`SyncEngine`** (`engine.rs`) — implements `SyncTransport`, spawns consumers + drain loop on the *global* runtime (no second Tokio), derives stable idempotency keys.
+- **Trait seams** (`seam.rs`) — `LocalStore` (C-003) and `WriteSink` (C-006 forge) so sync depends on neither crate, and PES can reuse them.
+- **Status broadcast** (`status.rs`) + **web path README** (pglite-sync JS, engine cfg'd out on wasm32).
+
+**Scope discipline held:** frozen `gen_ui_types` seams untouched; `relational`/`graph` submodules left to C-003/C-004; change is additive to a placeholder stub.
+
+**Verified end-to-end:**
+- `cargo clippy -p gen_ui_db --all-targets -- -D warnings` → CLEAN
+- `cargo check --target wasm32-unknown-unknown` → CLEAN
+- `cargo test -p gen_ui_db` → 3/3 boundary tests pass (no mocks, no network)
+
+Completion summary written to `.kbd-orchestrator/dispatch/logs/2026-07-15-c005-sync-engine.done.md`.
+
+Next: C-005 is done and stopping per Rule 40. Remaining phase work (other lanes, not mine): C-003 relational store, C-004 graph-RAG, C-006 flint integration, C-007 FFI leaves, C-008 docs, C-009 skills — each owns its own change; the parallel `gen_ui_db` submodules will merge additively.
+SessionEnd hook [node ${CLAUDE_PLUGIN_ROOT}/dist/index.js session-end] failed: Hook cancelled
+SessionEnd hook [npx -y -p @ory/claude-code@0.9.0 ory-claude-hook] failed: Hook cancelled
+[dispatch] 2026-07-15-c005-sync-engine done (exit 0)

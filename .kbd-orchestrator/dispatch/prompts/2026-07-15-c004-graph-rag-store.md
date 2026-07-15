@@ -1,12 +1,7 @@
 You are executing ONE change in the KBD phase `scaffold-full-hybrid-project` for the
 Hybrid Mobile Architecture skill package (TJ-ARCH-MOB-001).
 
-IMPORTANT — file paths: you are running INSIDE a git worktree that is a full checkout
-of the repo. Read every file below by its path RELATIVE to your current working
-directory (e.g. `CLAUDE.md`, `.kbd-orchestrator/constraints.md`). Do NOT use absolute
-`/Users/...` paths to the main repo — the sandbox blocks reads outside this worktree.
-
-AUTHORITY — read these first, in order (all relative to your working directory):
+AUTHORITY — read these first, in order:
 1. CLAUDE.md (repo root) — Development Philosophy section is BINDING:
    FEATURES FIRST, code first, test later. Inner loop = `cargo clippy` only (never
    alternate with bare check). No unit tests of internals; no mocks of internal code.
@@ -30,3 +25,8 @@ DELIVERABLE: working scaffold/code for your change. Generated files begin with
 `// TJ-ARCH-MOB-001 compliant`. When done, write a one-paragraph completion summary to
 .kbd-orchestrator/dispatch/logs/<change-id>.done.md listing files created/modified and
 any deviations or blockers. Then stop.
+
+## YOUR CHANGE: 2026-07-15-c004-graph-rag-store
+
+Read openspec/changes/2026-07-15-c004-graph-rag-store/proposal.md and the matching entry in plan.md.
+Implement it fully per the philosophy above. Assigned model: claude-sonnet-5 (claude).

@@ -1,0 +1,2 @@
+[dispatch] 2026-07-15-c008-docs-refs-correction → opencode/kimi-for-coding/k2p6  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
+Terminated: 15             opencode run --dir "$WT" -m "$MODEL" "$PROMPT" >> "$LOG" 2>&1
