@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 # scripts/scaffold-tauri.sh
-# Scaffold a Tauri 2.x + React 19 + Zustand 5 + TanStack desktop app
+# Scaffold a Tauri 2.x + React 19 + Vite 8 desktop/web app
 # Usage: bash scripts/scaffold-tauri.sh <output-dir> <app-name>
 
 set -euo pipefail
 
 OUT="${1:-desktop}"
 APP_NAME="${2:-my-desktop-app}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# A standalone Tauri scaffold still needs the shared ContentBlock package. In a
+# full hybrid scaffold C-007 already emitted it before this script runs.
+if [[ ! -f "$OUT/../packages/gen-ui-react/package.json" ]]; then
+  bash "$SCRIPT_DIR/scaffold-packages.sh" "$OUT/.."
+fi
 
 GREEN='\033[0;32m'; CYAN='\033[0;36m'; NC='\033[0m'
 step() { echo -e "\n${CYAN}── $1${NC}"; }
@@ -45,6 +52,11 @@ cat > package.json << PKGEOF
     "@tanstack/react-router": "^1.0.0",
     "@tanstack/react-table":  "^8.0.0",
     "@tanstack/react-virtual": "^3.0.0",
+    "@electric-sql/pglite":   "0.5.4",
+    "@electric-sql/pglite-sync": "^0.4.0",
+    "@prometheus-ags/prometheus-entity-management": "git+https://github.com/Prometheus-AGS/prometheus-entity-management.git#74d72c7a3394a09c246d08aba833b903666a37d1&path:packages/entity-graph-react",
+    "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
+    "@flint/react": "git+https://github.com/Know-Me-Tools/flint-forge.git#1cae090d2cc02675eb99ba7a599735d339e53e38&path:packages/flint-react",
     "tailwindcss":            "^4.0.0",
     "@tailwindcss/vite":      "^4.0.0",
     "lucide-react":           "^0.400.0",
@@ -54,16 +66,15 @@ cat > package.json << PKGEOF
     "react-markdown":         "^9.0.0",
     "@codemirror/view":       "^6.0.0",
     "@codemirror/lang-javascript": "^6.0.0",
-    "@sandpack/react":        "^2.0.0",
+    "@codesandbox/sandpack-react": "^2.20.0",
     "framer-motion":          "^11.0.0",
-    "@assistant-ui/react":    "^0.8.0",
-    "@supabase/supabase-js":  "^2.46.0"
+    "@assistant-ui/react":    "^0.8.0"
   },
   "devDependencies": {
     "@tauri-apps/cli":        "^2.10.3",
-    "vite":                   "^7.0.0",
-    "@vitejs/plugin-react":   "^4.0.0",
-    "typescript":             "^5.4.0",
+    "vite":                   "^8.0.0",
+    "@vitejs/plugin-react":   "^6.0.0",
+    "typescript":             "^5.9.0",
     "@types/react":           "^19.0.0",
     "@types/react-dom":       "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
@@ -75,6 +86,14 @@ cat > package.json << PKGEOF
 }
 PKGEOF
 ok "package.json"
+
+cat > index.html << EOF
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>${APP_NAME}</title></head>
+  <body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body>
+</html>
+EOF
 
 # ── tsconfig.json ──────────────────────────────────────────────────────────
 cat > tsconfig.json << EOF
@@ -104,6 +123,19 @@ cat > tsconfig.json << EOF
 EOF
 ok "tsconfig.json"
 
+cat > tsconfig.node.json << 'EOF'
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+EOF
+
 # ── vite.config.ts ─────────────────────────────────────────────────────────
 cat > vite.config.ts << 'EOF'
 import { defineConfig } from 'vite'
@@ -132,7 +164,7 @@ ok "vite.config.ts"
 
 # ── Feature-based src structure ────────────────────────────────────────────
 step "Creating feature-based clean architecture"
-mkdir -p src/{app,core/{types,errors,utils,theme},shared/{components/ui,hooks,stores},bridge/{a2ui,agui},features/{chat/{api,stores,queries,hooks,components},auth/{api,stores,queries,hooks,components},memory/{api,stores,queries,hooks,components},settings/{stores,components}}}
+mkdir -p src/{app,core/{types,errors,utils,theme},shared/{components/ui,hooks,stores},bridge/{a2ui,agui},features/{chat/{api,stores,queries,hooks,components},auth/{api,stores,queries,hooks,components},entities/{api,stores,queries,hooks,components},memory/{api,stores,queries,hooks,components},settings/{stores,components}}}
 ok "src/ directory structure"
 
 # ── App providers ──────────────────────────────────────────────────────────
@@ -242,7 +274,7 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import { listen } from '@tauri-apps/api/event'
 import { invoke } from '@tauri-apps/api/core'
 import type { ContentBlock, Message, MessageUsage } from '@/bridge/a2ui/types'
-import { v4 as uuid } from 'uuid'
+import { applyA2uiEvent } from '@/bridge/a2ui/driver'
 
 interface ChatState {
   messages: Message[]
@@ -283,8 +315,8 @@ export const useChatStore = create<ChatState & ChatActions>()(
         }),
 
       sendMessage: async (text: string) => {
-        const userMsg: Message = { id: uuid(), role: 'user', content: [{ type: 'text', text, isStreaming: false }], timestamp: new Date().toISOString() }
-        const assistantId = uuid()
+        const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: [{ type: 'text', text }], timestamp: new Date().toISOString() }
+        const assistantId = crypto.randomUUID()
         const assistantMsg: Message = { id: assistantId, role: 'assistant', content: [], timestamp: new Date().toISOString(), isStreaming: true }
         set((s) => { s.messages.push(userMsg, assistantMsg); s.isStreaming = true })
         // Store calls invoke() — never component or hook
@@ -297,7 +329,6 @@ export const useChatStore = create<ChatState & ChatActions>()(
       initListeners: () => {
         // Wire A2UI events from Rust to store
         const unlistenPromise = listen('a2ui_event', (event: { payload: unknown }) => {
-          const { applyA2uiEvent } = require('@/bridge/a2ui/driver')
           const store = useChatStore.getState()
           applyA2uiEvent(event.payload as never, store.streamBlock, store.finalizeMessage)
         })
@@ -312,32 +343,222 @@ ok "src/features/chat/stores/chatStore.ts"
 # ── Bridge types stub ──────────────────────────────────────────────────────
 cat > src/bridge/a2ui/types.ts << 'EOF'
 // TJ-ARCH-MOB-001 compliant
-export type MemoryType = 'episodic' | 'semantic' | 'working' | 'procedural'
-export type ToolStatus = 'pending' | 'running' | 'success' | 'error' | 'cancelled'
-export type SkillStatus = 'activating' | 'active' | 'complete' | 'failed'
-export type ArtifactType = 'code' | 'ui' | 'data' | 'document' | 'image' | 'custom'
-
-export type ContentBlock =
-  | { type: 'text';       text: string; isStreaming: boolean }
-  | { type: 'thinking';   thinking: string; isStreaming: boolean; defaultExpanded?: boolean }
-  | { type: 'code';       code: string; language: string; filename?: string }
-  | { type: 'citation';   text: string; sources: CitationSource[] }
-  | { type: 'memory';     content: string; memoryType: MemoryType; key: string; isNew: boolean; namespace?: string }
-  | { type: 'toolUse';    toolUseId: string; toolName: string; input: Record<string, unknown>; status: ToolStatus; serverName?: string }
-  | { type: 'toolResult'; toolUseId: string; toolName: string; content: unknown; isError: boolean; executionTime?: number }
-  | { type: 'skill';      skillId: string; skillName: string; parameters: Record<string, unknown>; status: SkillStatus; outputSummary?: string; toolCallIds?: string[] }
-  | { type: 'artifact';   artifactId: string; artifactType: ArtifactType; title: string; contentJson: string; language?: string }
-  | { type: 'image';      source: string; altText?: string }
-  | { type: 'divider' }
-
-export interface CitationSource { id: string; title: string; url?: string; excerpt?: string; score?: number }
+export type { ContentBlock } from '@prometheus-ags/gen-ui-react'
+import type { ContentBlock } from '@prometheus-ags/gen-ui-react'
 export interface MessageUsage { inputTokens?: number; outputTokens?: number; cacheReadTokens?: number; thinkingTokens?: number }
 export interface Message { id: string; role: 'user' | 'assistant' | 'system'; content: ContentBlock[]; timestamp: string; isStreaming?: boolean; usage?: MessageUsage }
 EOF
 ok "src/bridge/a2ui/types.ts"
 
+cat > src/bridge/a2ui/driver.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import type { ContentBlock, MessageUsage } from './types'
+
+export type CoreA2uiEvent =
+  | { type: 'contentBlock'; messageId: string; blockIndex?: number; block: ContentBlock }
+  | { type: 'messageComplete'; messageId: string; usage?: MessageUsage }
+
+export function applyA2uiEvent(
+  event: CoreA2uiEvent,
+  streamBlock: (value: { messageId: string; blockIndex?: number; block: ContentBlock }) => void,
+  finalize: (messageId: string, usage?: MessageUsage) => void,
+): void {
+  switch (event.type) {
+    case 'contentBlock': streamBlock(event); break
+    case 'messageComplete': finalize(event.messageId, event.usage); break
+  }
+}
+EOF
+
+# Shared relational DDL is consumed by Rust migrations and PEM registration.
+cat > src/features/entities/schema.sql << 'EOF'
+-- TJ-ARCH-MOB-001 compliant
+CREATE TABLE IF NOT EXISTS projects (
+  id uuid PRIMARY KEY,
+  tenant_id uuid NOT NULL,
+  name text NOT NULL,
+  description text,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS notes (
+  id uuid PRIMARY KEY,
+  tenant_id uuid NOT NULL,
+  project_id uuid NOT NULL,
+  title text NOT NULL,
+  body text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+EOF
+
+cat > src/features/entities/stores/entityRuntime.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — all Tauri IPC lives in this store module.
+import { invoke, isTauri } from '@tauri-apps/api/core'
+import { PGlite } from '@electric-sql/pglite'
+import {
+  createPGlitePersistenceAdapter,
+  registerEntityFromSql,
+  registerEntityTransport,
+  startLocalFirstGraph,
+  type EntityTransport,
+  type LocalFirstGraphRuntime,
+} from '@prometheus-ags/prometheus-entity-management'
+import schemaSql from '../schema.sql?raw'
+
+export interface EntityRow { id: string; tenant_id: string; [key: string]: unknown }
+let runtime: LocalFirstGraphRuntime | null = null
+
+function tauriTransport(entityType: string): EntityTransport<EntityRow> {
+  return {
+    identify: (row) => row.id,
+    authoritative: true,
+    list: (query) => invoke('entity_list', { view: { entityType, ...query } }),
+    get: (id) => invoke('entity_get', { entityType, id }),
+  }
+}
+
+function pgliteTransport(db: PGlite, table: string, tenantId: string): EntityTransport<EntityRow> {
+  return {
+    identify: (row) => row.id,
+    authoritative: true,
+    list: async ({ limit = 100 }) => {
+      const result = await db.query<EntityRow>(
+        `SELECT * FROM ${table} WHERE tenant_id = $1 ORDER BY updated_at DESC LIMIT $2`,
+        [tenantId, limit],
+      )
+      return { rows: result.rows, total: result.rows.length, nextCursor: null }
+    },
+    get: async (id) => {
+      const result = await db.query<EntityRow>(
+        `SELECT * FROM ${table} WHERE tenant_id = $1 AND id = $2 LIMIT 1`, [tenantId, id],
+      )
+      return result.rows[0] ?? null
+    },
+  }
+}
+
+export async function startEntityRuntime(tenantId: string): Promise<() => void> {
+  const [projectsDdl, notesDdl] = schemaSql.split(';').filter((sql) => sql.includes('CREATE TABLE'))
+  if (!projectsDdl || !notesDdl) throw new Error('shared entity DDL is incomplete')
+  registerEntityFromSql({ entityType: 'Project', createTableSql: projectsDdl })
+  registerEntityFromSql({ entityType: 'Note', createTableSql: notesDdl })
+
+  if (isTauri()) {
+    registerEntityTransport('Project', tauriTransport('projects'))
+    registerEntityTransport('Note', tauriTransport('notes'))
+    await invoke<void>('entity_runtime_start', { tenantId })
+    return () => { void invoke<void>('entity_runtime_stop') }
+  }
+
+  const db = await PGlite.create('idb://gen-ui', { relaxedDurability: true })
+  await db.exec(schemaSql)
+  registerEntityTransport('Project', pgliteTransport(db, 'projects', tenantId))
+  registerEntityTransport('Note', pgliteTransport(db, 'notes', tenantId))
+  runtime = startLocalFirstGraph({
+    storage: await createPGlitePersistenceAdapter(db),
+    key: `tenant:${tenantId}`,
+    replayPendingActions: true,
+  })
+  return () => { runtime?.dispose(); runtime = null; void db.close() }
+}
+EOF
+
+cat > src/features/entities/hooks/useEntityRuntime.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import { useEffect } from 'react'
+import { startEntityRuntime } from '../stores/entityRuntime'
+
+export function useEntityRuntime(tenantId: string | null): void {
+  useEffect(() => {
+    if (!tenantId) return
+    let dispose: (() => void) | undefined
+    void startEntityRuntime(tenantId).then((cleanup) => { dispose = cleanup })
+    return () => dispose?.()
+  }, [tenantId])
+}
+EOF
+
+cat > src/features/chat/stores/flintSurfaceStore.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — core-fed A2UI surface state; no Flint network transport.
+import { listen } from '@tauri-apps/api/event'
+import { create } from 'zustand'
+import type { A2uiComponentSpec } from '@flint/react'
+
+interface SurfaceState {
+  surfaces: Record<string, A2uiComponentSpec[]>
+  start: () => () => void
+}
+
+export const useFlintSurfaceStore = create<SurfaceState>((set) => ({
+  surfaces: {},
+  start: () => {
+    const pending = listen<{ surfaceId: string; components: A2uiComponentSpec[] }>(
+      'a2ui_surface_event',
+      ({ payload }) => set((state) => ({ surfaces: { ...state.surfaces, [payload.surfaceId]: payload.components } })),
+    )
+    return () => { void pending.then((unlisten) => unlisten()) }
+  },
+}))
+EOF
+
+cat > src/features/chat/hooks/useFlintSurface.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import { useEffect } from 'react'
+import { useFlintSurfaceStore } from '../stores/flintSurfaceStore'
+
+export function useFlintSurface(surfaceId: string) {
+  const components = useFlintSurfaceStore((state) => state.surfaces[surfaceId] ?? [])
+  const start = useFlintSurfaceStore((state) => state.start)
+  useEffect(() => start(), [start])
+  return { components }
+}
+EOF
+
+cat > src/features/chat/components/CoreFlintSurface.tsx << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import { registerBaseComponents, resolveFlintComponent, type A2uiComponentSpec } from '@flint/react'
+import { useFlintSurface } from '../hooks/useFlintSurface'
+
+registerBaseComponents()
+
+function CoreComponent({ spec }: { spec: A2uiComponentSpec }) {
+  const Component = resolveFlintComponent(spec.slug)
+  if (!Component) return <div role="alert">Unknown A2UI component: {spec.slug}</div>
+  return <Component {...spec.props}>{spec.children?.map((child) => <CoreComponent key={child.id} spec={child} />)}</Component>
+}
+
+export function CoreFlintSurface({ surfaceId }: { surfaceId: string }) {
+  const { components } = useFlintSurface(surfaceId)
+  return <section aria-label={`Generated surface ${surfaceId}`}>{components.map((spec) => <CoreComponent key={spec.id} spec={spec} />)}</section>
+}
+EOF
+
+cat > src/features/chat/hooks/useChat.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import { useChatStore } from '../stores/chatStore'
+
+export function useChat() {
+  return {
+    messages: useChatStore((state) => state.messages),
+    isStreaming: useChatStore((state) => state.isStreaming),
+    sendMessage: useChatStore((state) => state.sendMessage),
+  }
+}
+EOF
+
+cat > src/features/chat/components/ChatTranscript.tsx << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import { ContentBlockView } from '@prometheus-ags/gen-ui-react'
+import { useChat } from '../hooks/useChat'
+
+export function ChatTranscript() {
+  const { messages } = useChat()
+  return <ol aria-live="polite">{messages.map((message) => <li key={message.id}>{message.content.map((block, index) => <ContentBlockView key={`${message.id}:${index}`} block={block} />)}</li>)}</ol>
+}
+EOF
+
 # ── main.tsx ───────────────────────────────────────────────────────────────
 cat > src/main.tsx << 'EOF'
+// TJ-ARCH-MOB-001 compliant
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AppProviders } from './app/providers'
@@ -462,7 +683,9 @@ EOF
 ok "src-tauri/"
 
 step "Installing dependencies"
-if command -v pnpm &>/dev/null; then
+if [[ "${SKIP_INSTALL:-0}" == "1" ]]; then
+  ok "dependency installation skipped (SKIP_INSTALL=1)"
+elif command -v pnpm &>/dev/null; then
   pnpm install --frozen-lockfile 2>/dev/null || pnpm install
   ok "pnpm install"
 else

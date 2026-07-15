@@ -36,9 +36,7 @@ bash "$(dirname "$0")/scaffold-flutter.sh" "mobile" "$PROJECT"
 ok "Flutter app scaffolded in mobile/"
 
 # ── Scaffold Tauri app ─────────────────────────────────────────────────────
-step "Scaffolding Tauri desktop app"
-bash "$(dirname "$0")/scaffold-tauri.sh" "desktop" "$PROJECT"
-ok "Tauri app scaffolded in desktop/"
+step "Deferring Tauri desktop/web app until local npm packages exist"
 
 # ── Scaffold publishable packages (C-007) ──────────────────────────────────
 # npm (gen-ui-react, gen-ui-wasm, tauri-plugin-gen-ui guest-js) + pub.dev
@@ -46,6 +44,10 @@ ok "Tauri app scaffolded in desktop/"
 step "Scaffolding publishable packages"
 bash "$(dirname "$0")/scaffold-packages.sh" "."
 ok "Package skeletons scaffolded (npm + pub.dev)"
+
+step "Scaffolding Tauri desktop/web app"
+bash "$(dirname "$0")/scaffold-tauri.sh" "desktop" "$PROJECT"
+ok "Tauri desktop/web app scaffolded in desktop/"
 
 # ── Project-local UI/UX skills + activation hook (C-009) ───────────────────
 # Emits templates/project-skills into the new project's .claude/skills + a
