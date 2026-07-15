@@ -5,16 +5,27 @@
 
 set -euo pipefail
 
+# Resolve to an ABSOLUTE path before any `cd` — every subsequent step in this script
+# cd's into the new project directory, so a relative `$(dirname "$0")` (e.g. "scripts")
+# would silently resolve against the WRONG directory after that cd (this was a real,
+# previously-undiscovered bug: it made every downstream `bash "$(dirname "$0")/foo.sh"`
+# call look for scripts inside the freshly-scaffolded project instead of this repo).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 PROJECT="${1:-my-hybrid-app}"
 ORG="${2:---org}"; ORG="${3:-ai.prometheusags}"
 UAR_MODE="${5:-embedded}"
+# PROJECT may be a path (e.g. "apps/knowme-poc"); the leaf name is what downstream
+# scaffolds use for package/app naming (Dart snake_case, npm names, etc.) — passing
+# the full path broke a sed substitution once "/" appeared in a "name" value.
+APP_NAME="$(basename "$PROJECT")"
 
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; NC='\033[0m'
 step() { echo -e "\n${CYAN}── $1${NC}"; }
 ok()   { echo -e "${GREEN}  ✓${NC} $1"; }
 
 # Verify environment first
-bash "$(dirname "$0")/check-env.sh" || { echo "Fix environment issues first."; exit 1; }
+bash "$SCRIPT_DIR/check-env.sh" || { echo "Fix environment issues first."; exit 1; }
 
 step "Creating workspace: $PROJECT"
 mkdir -p "$PROJECT"/{rust,mobile,desktop,docs}
@@ -27,12 +38,12 @@ cd "$PROJECT"
 # config. Do NOT inline a workspace manifest here; that duplicated the source of
 # truth and drifted (old single-crate layout, surrealdb 2.0, panic=abort bug).
 step "Scaffolding layered gen_ui workspace"
-bash "$(dirname "$0")/scaffold-rust-core.sh" "rust" "$UAR_MODE"
+bash "$SCRIPT_DIR/scaffold-rust-core.sh" "rust" "$UAR_MODE"
 ok "gen_ui workspace scaffolded (12 crates, layered)"
 
 # ── Scaffold Flutter app ───────────────────────────────────────────────────
 step "Scaffolding Flutter mobile app"
-bash "$(dirname "$0")/scaffold-flutter.sh" "mobile" "$PROJECT"
+bash "$SCRIPT_DIR/scaffold-flutter.sh" "mobile" "$APP_NAME"
 ok "Flutter app scaffolded in mobile/"
 
 # ── Scaffold Tauri app ─────────────────────────────────────────────────────
@@ -42,22 +53,22 @@ step "Deferring Tauri desktop/web app until local npm packages exist"
 # npm (gen-ui-react, gen-ui-wasm, tauri-plugin-gen-ui guest-js) + pub.dev
 # (gen_ui_flutter, gen_ui_widgets). Structured for publication from day one.
 step "Scaffolding publishable packages"
-bash "$(dirname "$0")/scaffold-packages.sh" "."
+bash "$SCRIPT_DIR/scaffold-packages.sh" "."
 ok "Package skeletons scaffolded (npm + pub.dev)"
 
 step "Scaffolding Tauri desktop/web app"
-bash "$(dirname "$0")/scaffold-tauri.sh" "desktop" "$PROJECT"
+bash "$SCRIPT_DIR/scaffold-tauri.sh" "desktop" "$APP_NAME"
 ok "Tauri desktop/web app scaffolded in desktop/"
 
 # ── Project-local UI/UX skills + activation hook (C-009) ───────────────────
 # Emits templates/project-skills into the new project's .claude/skills + a
 # UserPromptSubmit activation hook (raises skill hit-rate ~50% -> ~84-100%).
 step "Installing project-local UI/UX skills"
-bash "$(dirname "$0")/add-project-skills.sh" "." || echo "  (skills step skipped)"
+bash "$SCRIPT_DIR/add-project-skills.sh" "." || echo "  (skills step skipped)"
 
 # ── Copy documentation ─────────────────────────────────────────────────────
 step "Copying architecture documentation"
-SKILL_DIR="$(dirname "$(dirname "$0")")"
+SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 if [[ -f "$SKILL_DIR/docs/tj-arch-mob-001.html" ]]; then
   cp "$SKILL_DIR/docs/tj-arch-mob-001.html" "docs/"
   ok "Architecture standard (TJ-ARCH-MOB-001) copied to docs/"

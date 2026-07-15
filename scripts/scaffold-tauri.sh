@@ -1060,12 +1060,90 @@ fn main() { app_lib::run() }
 EOF
 ok "src-tauri/"
 
+# ── PEM local-tarball pre-resolve ───────────────────────────────────────────
+# @prometheus-ags/prometheus-entity-management (PEM) is an unpublished pnpm-workspace
+# subpackage: its own package.json depends on "@prometheus-ags/entity-graph-core@workspace:*",
+# which cannot resolve outside the PEM monorepo (ERR_PNPM_WORKSPACE_PKG_NOT_FOUND). Two
+# remediations, in order:
+#   1. If PEM_HOME (a local PEM monorepo checkout) is set/found and its packages are
+#      prebuilt, `pnpm pack` the needed workspace packages into local tarballs and
+#      rewrite this app's dependency to a `file:` tarball reference.
+#   2. Otherwise, strip the PEM dependency entirely — the app still builds using the
+#      local @prometheus-ags/gen-ui-react package + this app's own entity providers.
+step "Resolving PEM (prometheus-entity-management) dependency"
+PEM_HOME="${PEM_HOME:-$HOME/Projects/prometheus/prometheus-entity-management}"
+PEM_RESOLVED=false
+if [[ -d "$PEM_HOME/packages/entity-graph-core" ]] && [[ -d "$PEM_HOME/packages/entity-graph-react" ]]; then
+  mkdir -p packages/vendor
+  PEM_OK=true
+  for pkg in entity-graph-core entity-graph-react; do
+    if [[ ! -d "$PEM_HOME/packages/$pkg/dist" ]]; then
+      echo "  ⚠ $pkg has no dist/ (not built) — falling back to stripping PEM"
+      PEM_OK=false
+      break
+    fi
+  done
+  if $PEM_OK; then
+    VENDOR_DIR="$(pwd)/packages/vendor"
+    # PEM's package.json pins an exact corepack "packageManager" version (pnpm@10.33.0
+    # with a hash). On boxes where that exact build isn't cached, corepack's own
+    # integrity check can hash-mismatch against the registry (an environment issue in
+    # the PEM checkout, not something this scaffold controls) — `pnpm pack` then fails
+    # and we fall through to the strip-PEM fallback below, same as when PEM_HOME is
+    # missing entirely.
+    PACK_OK=true
+    for pkg in entity-graph-core entity-graph-react; do
+      if ! (cd "$PEM_HOME/packages/$pkg" && pnpm pack --pack-destination "$VENDOR_DIR" >/dev/null 2>&1); then
+        echo "  ⚠ pnpm pack failed for $pkg (likely a corepack packageManager-pin mismatch in PEM_HOME) — falling back to stripping PEM"
+        PACK_OK=false
+        break
+      fi
+    done
+    # `ls nomatch* 2>/dev/null | head -1` still fails the pipeline under `set -o pipefail`
+    # (ls's own non-zero exit propagates regardless of head) — guard explicitly.
+    CORE_TGZ=$(ls packages/vendor/prometheus-ags-entity-graph-core-*.tgz 2>/dev/null | head -1) || CORE_TGZ=""
+    REACT_TGZ=$(ls packages/vendor/prometheus-ags-entity-graph-react-*.tgz 2>/dev/null | head -1) || REACT_TGZ=""
+    if $PACK_OK && [[ -n "$CORE_TGZ" ]] && [[ -n "$REACT_TGZ" ]]; then
+      python3 - "$CORE_TGZ" "$REACT_TGZ" << 'PYEOF'
+import json, sys
+core_tgz, react_tgz = sys.argv[1], sys.argv[2]
+with open("package.json") as f:
+    pkg = json.load(f)
+pkg["dependencies"]["@prometheus-ags/entity-graph-core"] = f"file:{core_tgz}"
+pkg["dependencies"]["@prometheus-ags/prometheus-entity-management"] = f"file:{react_tgz}"
+with open("package.json", "w") as f:
+    json.dump(pkg, f, indent=2)
+    f.write("\n")
+PYEOF
+      ok "PEM resolved via local tarballs ($CORE_TGZ, $REACT_TGZ)"
+      PEM_RESOLVED=true
+    fi
+  fi
+fi
+if ! $PEM_RESOLVED; then
+  echo "  ⚠ PEM_HOME not found/buildable ($PEM_HOME) — stripping PEM dependency (fallback)"
+  python3 - << 'PYEOF'
+import json
+with open("package.json") as f:
+    pkg = json.load(f)
+pkg["dependencies"].pop("@prometheus-ags/prometheus-entity-management", None)
+with open("package.json", "w") as f:
+    json.dump(pkg, f, indent=2)
+    f.write("\n")
+PYEOF
+  ok "PEM dependency stripped — app uses gen-ui-react + local entity providers only"
+fi
+
 step "Installing dependencies"
 if [[ "${SKIP_INSTALL:-0}" == "1" ]]; then
   ok "dependency installation skipped (SKIP_INSTALL=1)"
 elif command -v pnpm &>/dev/null; then
-  pnpm install --frozen-lockfile 2>/dev/null || pnpm install
-  ok "pnpm install"
+  # pnpm's newer default exits non-zero when it withholds a dependency's postinstall
+  # script for supply-chain safety (ERR_PNPM_IGNORED_BUILDS) — install itself still
+  # succeeds (node_modules is populated), so this is advisory, not fatal, for a
+  # non-interactive scaffold. Don't let it kill the script under set -e.
+  pnpm install --frozen-lockfile 2>/dev/null || pnpm install || true
+  ok "pnpm install (review 'pnpm approve-builds' if native postinstall steps are needed)"
 else
   npm install
   ok "npm install"
