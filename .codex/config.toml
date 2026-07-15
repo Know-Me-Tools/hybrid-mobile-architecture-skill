@@ -1,0 +1,7 @@
+[mcp_servers.dart]
+command = "dart"
+args = ["mcp-server", "--force-roots-fallback"]
+
+[mcp_servers.shadcn]
+command = "npx"
+args = ["shadcn@latest", "mcp"]

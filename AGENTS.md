@@ -202,6 +202,25 @@ npm run tauri build
 - Use `@riverpod` codegen annotations exclusively — never manual `Provider(...)` declarations.
 - React visual components import **only hooks**; no direct store imports and no `invoke()` calls.
 
+## Project-level MCP servers and skills (all 4 harnesses)
+
+This repo configures the Dart/Flutter MCP server and shadcn MCP server at PROJECT scope
+so every harness (Claude Code, Codex CLI, OpenCode, Kimi Code CLI) picks them up
+automatically from this directory — no per-user global setup required:
+
+| Harness | MCP config file | Skills directory |
+|---|---|---|
+| Claude Code | `.mcp.json` (repo root) | `.claude/skills/` |
+| Codex CLI | `.codex/config.toml` (repo root; requires one-time project-trust accept) | `.agents/skills/` (NOT `.codex/skills/` — Codex's scanner reads `.agents/`) |
+| OpenCode | `opencode.json` (repo root) | `.opencode/skills/` (also reads `.claude/` and `.agents/` as fallback) |
+| Kimi Code CLI | `.kimi-code/mcp.json` (repo root; UNVERIFIED — this build's config surface is ambiguous between TOML `~/.kimi-code/config.toml` and this JSON path, verify with `kimi -p "what MCP tools do you have"`) | `.kimi-code/skills/` (docs also mention `.agents/skills/` as a fallback) |
+
+`.claude/skills/`, `.codex/skills/`, `.opencode/skills/`, `.kimi/skills/`, `.agents/skills/`,
+and `.kimi-code/skills/` are kept in sync (copies, not symlinks, for cross-OS/harness
+portability) — when adding a new project-local skill, copy it into all of them. The
+Dart MCP server requires Dart 3.9+/Flutter 3.35+ (this repo develops against 3.13/3.45,
+comfortably above the floor).
+
 ## Repo-local OpenCode extensions
 
 This repository ships its own OpenCode skills and commands under `.opencode/`:
@@ -213,6 +232,8 @@ Do not edit these unless you are explicitly configuring OpenCode itself. When mo
 
 ## What to leave alone
 
-- `.claude/`, `.codex/`, `.kimi/` — harness-specific configuration for other agent tools. Do not edit for OpenCode work.
+- `.claude/`, `.codex/`, `.kimi/`, `.kimi-code/`, `.agents/` — harness-specific configuration
+  for other agent tools (see "Project-level MCP servers and skills" above for what's
+  intentionally there). Do not edit for OpenCode work.
 - `assets/templates/` — only modify when updating scaffolding output.
 - `docs/*.html` — generated/reference documents; update the source of truth or regeneration pipeline, not the HTML directly.
