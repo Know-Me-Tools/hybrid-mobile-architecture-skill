@@ -220,7 +220,16 @@ cat > "$OUT/bacon.toml" << 'EOF'
 default_job = "clippy"
 
 [jobs.clippy]
-command = ["cargo", "clippy", "--all-targets", "--all-features", "--", "-D", "warnings"]
+# NOT --all-features: gen_ui_ffi's `frb-streams` feature references the
+# codegen-emitted StreamSink<T> and only compiles after
+# `flutter_rust_bridge_codegen generate` has run. Enabling it before codegen
+# would break the inner loop. Run `bacon clippy-frb` after codegen to include it.
+command = ["cargo", "clippy", "--all-targets", "--", "-D", "warnings"]
+need_stdout = false
+
+[jobs.clippy-frb]
+# Post-codegen: lint the full FFI surface including the generated stream sinks.
+command = ["cargo", "clippy", "--all-targets", "--features", "gen_ui_ffi/frb-streams", "--", "-D", "warnings"]
 need_stdout = false
 
 [jobs.check-wasm]
@@ -3871,6 +3880,10 @@ EOF
 ok "gen_ui_agent: PMPO loop seam"
 
 # ── LEAF crates ──────────────────────────────────────────────────────────────
+# C-007 fleshes out the three leaves. Leaves are THIN: they re-export intent-level
+# APIs over the FROZEN gen_ui_types seams + downstream crates. NEVER raw SQL /
+# SurrealQL across a bridge. Wave-1 lanes (C-003/4/5 db, C-006 client) wire their
+# implementations behind these signatures without touching the leaf surface.
 emit_crate gen_ui_ffi '"cdylib", "staticlib"'
 cat >> "$OUT/crates/gen_ui_ffi/Cargo.toml" << 'EOF'
 gen_ui_types    = { path = "../gen_ui_types" }
@@ -3879,47 +3892,393 @@ gen_ui_protocol = { path = "../gen_ui_protocol" }
 gen_ui_agent    = { path = "../gen_ui_agent" }
 flutter_rust_bridge.workspace = true
 anyhow.workspace = true
+log = "0.4"
+
+[features]
+# Enable AFTER `flutter_rust_bridge_codegen generate` has produced frb_generated.rs
+# (the project build turns it on). The stream fns reference the codegen-emitted
+# crate-local `StreamSink<T>`, so pre-codegen `cargo check` leaves this off.
+frb-streams = []
+
+[lints.rust]
+# `#[frb(...)]` expands to code guarded by `cfg(frb_expand)`, a cfg name that only
+# codegen defines. Declare it expected so the pre-codegen build is warning-clean
+# under `-D warnings` (the clippy inner loop).
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "0.14"
 [target.'cfg(target_os = "ios")'.dependencies]
 oslog = "0.2"
 EOF
+mkdir -p "$OUT/crates/gen_ui_ffi/src/api"
 cat > "$OUT/crates/gen_ui_ffi/src/lib.rs" << EOF
 $MARK
 //! gen_ui_ffi (LEAF) — flutter_rust_bridge surface. Thin: editing app logic here
-//! does not retrigger deep recompiles. Re-exports intent-level APIs + streams.
+//! does not retrigger deep recompiles. Re-exports intent-level APIs + streams so
+//! Dart never touches raw SurrealQL / SQL. Wave-1 lanes wire implementations
+//! behind these signatures.
+//!
+//! Generated glue (\`frb_generated.rs\`) is produced by
+//! \`flutter_rust_bridge_codegen generate\` and is gitignored — do not hand-edit.
 pub mod api;
 EOF
 cat > "$OUT/crates/gen_ui_ffi/src/api.rs" << EOF
 $MARK
-//! frb codegen target. Intent-level functions only (no raw SurrealQL / SQL across
-//! the bridge). Filled by C-007; C-001 lands the init seam.
+//! frb codegen root. Intent-level functions only (no raw SurrealQL / SQL across
+//! the bridge). init + submodules for streams and CRUD.
+//!
+//! \`streams\` is gated behind the \`frb-streams\` feature: its \`StreamSink<T>\`
+//! signatures reference the per-crate \`StreamSink\` type that
+//! \`flutter_rust_bridge_codegen generate\` emits into \`frb_generated.rs\`. Enable
+//! the feature after running codegen (the project build does this). The scaffold's
+//! pre-codegen \`cargo check\` gate leaves it off so the workspace checks clean.
+#[cfg(feature = "frb-streams")]
+pub mod streams;
+pub mod entity;
+pub mod chat;
+
 use flutter_rust_bridge::frb;
 
+/// Initialise the shared core (global Tokio runtime + platform loggers).
+/// Called once from Dart at app start. \`#[frb(init)]\` also wires frb's own
+/// default utilities.
 #[frb(init)]
 pub fn init_core(worker_threads: Option<usize>) {
+    #[cfg(target_os = "android")]
+    let _ = android_logger::init_once(
+        android_logger::Config::default().with_max_level(log::LevelFilter::Info),
+    );
     #[cfg(not(target_arch = "wasm32"))]
     gen_ui_runtime::init(worker_threads);
     let _ = worker_threads;
 }
 EOF
-ok "gen_ui_ffi: frb leaf"
+# --- streams: StreamSink surfaces for the three UI-facing event feeds ---------
+cat > "$OUT/crates/gen_ui_ffi/src/api/streams.rs" << EOF
+$MARK
+//! Rust->Dart event streams via frb \`StreamSink<T>\`. Dart consumes each as a
+//! broadcast \`Stream\` behind a Riverpod \`@riverpod\` stream provider (remember:
+//! FFI providers must opt out of Riverpod 3 auto-retry).
+//!
+//! Three feeds map to the three UI chrome elements:
+//!   * A2uiEvent   -> chat transcript (ContentBlock folding)
+//!   * ChangeEvent -> entity cache invalidation (ref.invalidate bridge)
+//!   * SyncStatus  -> the sync status chip
+//!
+//! C-007 lands the sink plumbing; Wave-1 lanes push real events into these sinks
+//! from the agent loop (C-006) and sync engine (C-005). Until then the streams
+//! open and stay idle.
+//!
+//! \`StreamSink<T>\` is the per-crate type emitted by codegen into
+//! \`frb_generated.rs\` and brought into crate-root scope; this module compiles
+//! only with the \`frb-streams\` feature (enabled after codegen runs). The bare
+//! unqualified \`StreamSink\` name is the idiomatic frb 2.x form (see the frb
+//! README's streaming example).
+use crate::frb_generated::StreamSink;
+use gen_ui_types::events::A2uiEvent;
+use gen_ui_types::sync::SyncStatus;
+use gen_ui_types::transport::ChangeEvent;
+
+/// Subscribe to the A2UI event stream for a chat run. The core produces
+/// ContentBlock-bearing events; the transport layer (\`@flint/react\`, flint_genui)
+/// is bypassed by contract.
+pub fn chat_events(run_id: String, sink: StreamSink<A2uiEvent>) {
+    // Wave-1 (C-006) registers \`sink\` with the ProtocolPipeline broadcast for this
+    // run. C-007 proves the type crosses the bridge.
+    let _ = (run_id, sink);
+}
+
+/// Subscribe to entity change events. One Dart listener fans these into
+/// \`ref.invalidate\` calls per the PEM-Flutter cascade-invalidation design.
+pub fn entity_changes(sink: StreamSink<ChangeEvent>) {
+    // Wave-1 (C-003) forwards EntityTransport change notifications here.
+    let _ = sink;
+}
+
+/// Subscribe to the sync status feed that drives the UI sync chip.
+pub fn sync_status(sink: StreamSink<SyncStatus>) {
+    // Wave-1 (C-005) forwards SyncTransport status transitions here.
+    let _ = sink;
+}
+EOF
+# --- entity: intent-level CRUD over the EntityTransport seam -------------------
+cat > "$OUT/crates/gen_ui_ffi/src/api/entity.rs" << EOF
+$MARK
+//! Entity CRUD intent surface. Mirrors the \`EntityTransport\` seam 1:1 so the Dart
+//! \`prometheus_entity_management\` package (C-010) can drive it. ViewDescriptor /
+//! EntityRecord cross the bridge as their gen_ui_types shapes (mirrored to freezed
+//! unions on the Dart side). Wave-1 (C-003) supplies the backing store.
+use gen_ui_types::transport::{EntityRecord, ListResult};
+use gen_ui_types::view::ViewDescriptor;
+use gen_ui_types::CoreResult;
+
+/// List entities matching a view (filters/sorts/pagination compiled to SQL in Rust).
+pub async fn entity_list(view: ViewDescriptor) -> CoreResult<ListResult> {
+    // C-003 backs this with the relational store; C-007 lands the signature.
+    let _ = view;
+    Ok(ListResult { items: Vec::new(), next_cursor: None })
+}
+
+/// Fetch one entity by type + id.
+pub async fn entity_get(entity_type: String, id: String) -> CoreResult<Option<EntityRecord>> {
+    let _ = (entity_type, id);
+    Ok(None)
+}
+
+/// Create an entity. Emits a ChangeEvent::Upsert on the entity_changes stream.
+pub async fn entity_create(record: EntityRecord) -> CoreResult<EntityRecord> {
+    Ok(record)
+}
+
+/// Update an entity. Emits a ChangeEvent::Upsert.
+pub async fn entity_update(record: EntityRecord) -> CoreResult<EntityRecord> {
+    Ok(record)
+}
+
+/// Delete an entity. Emits a ChangeEvent::Delete.
+pub async fn entity_delete(entity_type: String, id: String) -> CoreResult<()> {
+    let _ = (entity_type, id);
+    Ok(())
+}
+EOF
+# --- chat: send + memory/graph intents ---------------------------------------
+cat > "$OUT/crates/gen_ui_ffi/src/api/chat.rs" << EOF
+$MARK
+//! Chat + memory/graph-RAG intent surface. Dart sends a turn and folds the
+//! resulting A2uiEvent stream (see streams::chat_events) into ContentBlocks.
+//! Memory/graph functions are intent-level (\`memory_search\`, \`graph_expand\`) —
+//! never raw SurrealQL. Wave-1 (C-004 graph, C-006 agent) supply the backends.
+use gen_ui_types::CoreResult;
+
+/// Start a chat turn; returns the run_id whose events arrive on chat_events(run_id).
+pub async fn chat_send(thread_id: String, message: String) -> CoreResult<String> {
+    // C-006 dispatches into the PMPO loop / gate proxy. C-007 lands the signature.
+    let _ = (thread_id, message);
+    Ok(String::new())
+}
+
+/// Hybrid memory search (vector recall + graph expansion + BM25, RRF-fused in Rust).
+/// Returns opaque JSON rows the UI renders as Memory/Citation ContentBlocks.
+pub async fn memory_search(query: String, k: u32) -> CoreResult<Vec<String>> {
+    let _ = (query, k);
+    Ok(Vec::new())
+}
+
+/// Expand the entity graph around a node to a given depth. Intent-level; the
+/// recursive RELATE traversal lives in gen_ui_db::graph (C-004).
+pub async fn graph_expand(entity_id: String, depth: u32) -> CoreResult<Vec<String>> {
+    let _ = (entity_id, depth);
+    Ok(Vec::new())
+}
+EOF
+ok "gen_ui_ffi: frb leaf (init + streams + entity CRUD + chat/memory intents)"
 
 emit_crate tauri-plugin-gen-ui ""
+# Tauri 2 plugins MUST set package.links to the crate name — tauri-plugin's build
+# script keys permission/asset linkage on it (build fails otherwise). emit_crate
+# ends the [package] block with a blank line before [dependencies]; insert links
+# just before [dependencies].
+awk '/^\[dependencies\]/ && !done { print "links = \"tauri-plugin-gen-ui\"\n"; done=1 } { print }' \
+    "$OUT/crates/tauri-plugin-gen-ui/Cargo.toml" > "$OUT/crates/tauri-plugin-gen-ui/Cargo.toml.tmp" \
+    && mv "$OUT/crates/tauri-plugin-gen-ui/Cargo.toml.tmp" "$OUT/crates/tauri-plugin-gen-ui/Cargo.toml"
 cat >> "$OUT/crates/tauri-plugin-gen-ui/Cargo.toml" << 'EOF'
 gen_ui_types    = { path = "../gen_ui_types" }
 gen_ui_runtime  = { path = "../gen_ui_runtime" }
+gen_ui_protocol = { path = "../gen_ui_protocol" }
 gen_ui_agent    = { path = "../gen_ui_agent" }
 serde.workspace = true
-# tauri = { version = "2", features = [] }   # enabled by C-007
+serde_json.workspace = true
+thiserror.workspace = true
+tauri = { version = "2", default-features = false }
+
+[build-dependencies]
+tauri-plugin = { version = "2", features = ["build"] }
+
+[package.metadata.docs.rs]
+# Desktop plugin: never built for mobile/wasm targets.
+targets = ["x86_64-unknown-linux-gnu", "x86_64-apple-darwin", "x86_64-pc-windows-msvc"]
+EOF
+# The command list is the single source of truth shared by build.rs (permission
+# autogen) and the invoke_handler in lib.rs.
+cat > "$OUT/crates/tauri-plugin-gen-ui/build.rs" << EOF
+$MARK
+//! Tauri 2 plugin build script: generates permission schemas + the guest-side
+//! command allowlist from COMMANDS. Keep COMMANDS in sync with the invoke_handler
+//! in src/lib.rs.
+const COMMANDS: &[&str] = &[
+    "chat_send",
+    "entity_list",
+    "entity_get",
+    "entity_create",
+    "entity_update",
+    "entity_delete",
+    "memory_search",
+    "graph_expand",
+];
+
+fn main() {
+    tauri_plugin::Builder::new(COMMANDS)
+        .android_path("android")
+        .ios_path("ios")
+        .build();
+}
 EOF
 cat > "$OUT/crates/tauri-plugin-gen-ui/src/lib.rs" << EOF
 $MARK
-//! tauri-plugin-gen-ui (LEAF) — Tauri 2 plugin: commands, events, permissions.
-//! npm guest-js bindings package added by C-007. C-001 lands the crate seam.
+//! tauri-plugin-gen-ui (LEAF) — Tauri 2 plugin exposing the same intent surface as
+//! gen_ui_ffi, but as \`#[tauri::command]\` handlers. Desktop shares gen_ui_core in
+//! the SAME process (no FFI): commands call the intent functions directly.
+//!
+//! LAYER CONTRACT: the JS side invokes these ONLY from Zustand stores — never from
+//! a React component or hook. The npm guest-js package (guest-js/) provides typed
+//! wrappers + \`listen\` helpers for the event channels.
+use tauri::{
+    plugin::{Builder, TauriPlugin},
+    Manager, Runtime,
+};
+
+mod commands;
+mod error;
+
+pub use error::{Error, Result};
+
+/// Emit-channel names for the three UI-facing event feeds (mirror gen_ui_ffi
+/// streams). Stores subscribe with \`listen(GEN_UI_CHAT_EVENT, ...)\`.
+pub const GEN_UI_CHAT_EVENT: &str = "gen-ui://chat-event";
+pub const GEN_UI_ENTITY_CHANGE: &str = "gen-ui://entity-change";
+pub const GEN_UI_SYNC_STATUS: &str = "gen-ui://sync-status";
+
+/// Build the plugin. Register in the Tauri app with \`.plugin(tauri_plugin_gen_ui::init())\`.
+pub fn init<R: Runtime>() -> TauriPlugin<R> {
+    Builder::new("gen-ui")
+        .invoke_handler(tauri::generate_handler![
+            commands::chat_send,
+            commands::entity_list,
+            commands::entity_get,
+            commands::entity_create,
+            commands::entity_update,
+            commands::entity_delete,
+            commands::memory_search,
+            commands::graph_expand,
+        ])
+        .setup(|app, _api| {
+            // One global Tokio runtime per process (never a second). Desktop
+            // shares gen_ui_core in-process, so init here rather than via FFI.
+            gen_ui_runtime::init(None);
+            let _ = app.app_handle();
+            Ok(())
+        })
+        .build()
+}
 EOF
-ok "tauri-plugin-gen-ui: plugin leaf"
+cat > "$OUT/crates/tauri-plugin-gen-ui/src/error.rs" << EOF
+$MARK
+//! Plugin command error. Serializes to a JS string so \`invoke\` rejects cleanly.
+//! Maps gen_ui_types::CoreError; Terminal vs Transient is preserved in the message
+//! so the store's retry policy can branch on it.
+use serde::{Serialize, Serializer};
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error(transparent)]
+    Core(#[from] gen_ui_types::CoreError),
+    #[error("tauri: {0}")]
+    Tauri(#[from] tauri::Error),
+}
+
+impl Serialize for Error {
+    fn serialize<S: Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+EOF
+cat > "$OUT/crates/tauri-plugin-gen-ui/src/commands.rs" << EOF
+$MARK
+//! Tauri command handlers. Thin wrappers over the shared intent surface. Desktop
+//! runs gen_ui_core in-process, so these call the same logic gen_ui_ffi exposes to
+//! Flutter — no duplicated business logic (constraint: logic lives in Rust core).
+use crate::error::Result;
+use gen_ui_types::transport::{EntityRecord, ListResult};
+use gen_ui_types::view::ViewDescriptor;
+
+#[tauri::command]
+pub async fn chat_send(thread_id: String, message: String) -> Result<String> {
+    // C-006 dispatches into the PMPO loop; C-007 lands the command seam.
+    let _ = (thread_id, message);
+    Ok(String::new())
+}
+
+#[tauri::command]
+pub async fn entity_list(view: ViewDescriptor) -> Result<ListResult> {
+    let _ = view;
+    Ok(ListResult { items: Vec::new(), next_cursor: None })
+}
+
+#[tauri::command]
+pub async fn entity_get(entity_type: String, id: String) -> Result<Option<EntityRecord>> {
+    let _ = (entity_type, id);
+    Ok(None)
+}
+
+#[tauri::command]
+pub async fn entity_create(record: EntityRecord) -> Result<EntityRecord> {
+    Ok(record)
+}
+
+#[tauri::command]
+pub async fn entity_update(record: EntityRecord) -> Result<EntityRecord> {
+    Ok(record)
+}
+
+#[tauri::command]
+pub async fn entity_delete(entity_type: String, id: String) -> Result<()> {
+    let _ = (entity_type, id);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn memory_search(query: String, k: u32) -> Result<Vec<String>> {
+    let _ = (query, k);
+    Ok(Vec::new())
+}
+
+#[tauri::command]
+pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<String>> {
+    let _ = (entity_id, depth);
+    Ok(Vec::new())
+}
+EOF
+# Tauri 2 permissions: a "default" set that allows the read intents; write/agent
+# commands are opt-in per capability. Autogenerated per-command files land in
+# permissions/autogenerated/ at build time; these are the curated sets.
+mkdir -p "$OUT/crates/tauri-plugin-gen-ui/permissions"
+cat > "$OUT/crates/tauri-plugin-gen-ui/permissions/default.toml" << 'EOF'
+# TJ-ARCH-MOB-001 compliant
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Default gen-ui permissions: read + chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly."
+permissions = [
+    "allow-chat-send",
+    "allow-entity-list",
+    "allow-entity-get",
+    "allow-memory-search",
+    "allow-graph-expand",
+]
+EOF
+cat > "$OUT/crates/tauri-plugin-gen-ui/permissions/write.toml" << 'EOF'
+# TJ-ARCH-MOB-001 compliant
+"$schema" = "schemas/schema.json"
+
+[[permission]]
+identifier = "allow-write"
+description = "Allow entity create/update/delete. Grant only to capabilities that own writes."
+commands.allow = ["entity_create", "entity_update", "entity_delete"]
+EOF
+ok "tauri-plugin-gen-ui: plugin leaf (init + commands + error + permissions + build.rs)"
 
 emit_crate gen_ui_wasm '"cdylib", "rlib"'
 cat >> "$OUT/crates/gen_ui_wasm/Cargo.toml" << 'EOF'
@@ -3929,18 +4288,123 @@ gen_ui_protocol = { path = "../gen_ui_protocol" }
 wasm-bindgen = "0.2"
 serde.workspace = true
 serde_json.workspace = true
+serde-wasm-bindgen = "0.6"
+console_error_panic_hook = "0.1"
 EOF
 cat > "$OUT/crates/gen_ui_wasm/src/lib.rs" << EOF
 $MARK
-//! gen_ui_wasm (LEAF) — wasm-bindgen/web surface for browser embedding.
-//! Built with: cargo build --profile wasm-release --target wasm32-unknown-unknown
-//! then wasm-opt. Filled by C-002/C-007; C-001 lands the seam.
+//! gen_ui_wasm (LEAF) — wasm-bindgen/web surface for browser embedding. The web
+//! app (@prometheus-ags/gen-ui-wasm) drives the SAME gen_ui_protocol adapters the
+//! native surfaces use, so ContentBlock rendering is identical across platforms.
+//!
+//! Build: ./build-wasm.sh   (wasm-pack --profile wasm-release + wasm-opt -Oz)
+//! Types cross the boundary as JS objects via serde-wasm-bindgen (camelCase,
+//! matching the ContentBlock \`rename_all\` contract).
+use gen_ui_types::events::{A2uiEvent, StreamEvent};
+use gen_ui_protocol::A2uiAdapter;
 use wasm_bindgen::prelude::*;
 
+/// Install a readable panic hook (panics -> console.error with a Rust backtrace).
+/// Call once from JS at module init.
+#[wasm_bindgen(start)]
+pub fn start() {
+    console_error_panic_hook::set_once();
+}
+
+/// Crate version — smoke test that the module loaded.
 #[wasm_bindgen]
-pub fn gen_ui_version() -> String { env!("CARGO_PKG_VERSION").to_string() }
+pub fn gen_ui_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
+/// Wraps the shared A2UI adapter so the web app folds a raw StreamEvent feed into
+/// A2uiEvents (ContentBlock-bearing) with the same logic as native. This is the
+/// point of the shared core: no re-implementing protocol logic in TypeScript.
+#[wasm_bindgen]
+pub struct WasmA2uiAdapter {
+    inner: A2uiAdapter,
+}
+
+#[wasm_bindgen]
+impl WasmA2uiAdapter {
+    #[wasm_bindgen(constructor)]
+    pub fn new(run_id: String) -> Self {
+        Self { inner: A2uiAdapter::new(run_id) }
+    }
+
+    /// Feed one StreamEvent (as a JS object); get back the A2uiEvents it produced
+    /// (as a JS array). Errors surface as thrown JsValue.
+    #[wasm_bindgen]
+    pub fn ingest(&mut self, event: JsValue) -> std::result::Result<JsValue, JsValue> {
+        let ev: StreamEvent = serde_wasm_bindgen::from_value(event)
+            .map_err(|e| JsValue::from_str(&e.to_string()))?;
+        let out: Vec<A2uiEvent> = self.inner.ingest(&ev);
+        serde_wasm_bindgen::to_value(&out).map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+}
 EOF
-ok "gen_ui_wasm: web leaf"
+# wasm build pipeline: wasm-pack (bundler target) + wasm-opt size pass.
+cat > "$OUT/crates/gen_ui_wasm/build-wasm.sh" << 'WASMEOF'
+#!/usr/bin/env bash
+# TJ-ARCH-MOB-001 compliant
+# Build the gen_ui_wasm web module. Output: pkg/ (wasm-pack bundler layout) that
+# @prometheus-ags/gen-ui-wasm re-exports. Requires: wasm-pack, wasm-opt (binaryen).
+set -euo pipefail
+cd "$(dirname "$0")"
+
+OUT_DIR="${1:-pkg}"
+
+if ! command -v wasm-pack >/dev/null 2>&1; then
+  echo "wasm-pack not found. Install: cargo install wasm-pack" >&2; exit 1
+fi
+
+# Build against the size-optimized profile from the workspace Cargo.toml.
+# --target bundler suits Vite/webpack consumers (the web app).
+wasm-pack build --release --target bundler --out-dir "$OUT_DIR" \
+  -- --profile wasm-release
+
+# Extra size pass. wasm-pack runs wasm-opt when present, but pin -Oz explicitly.
+if command -v wasm-opt >/dev/null 2>&1; then
+  WASM_FILE="$(find "$OUT_DIR" -name '*_bg.wasm' | head -n1)"
+  [ -n "$WASM_FILE" ] && wasm-opt -Oz --enable-bulk-memory -o "$WASM_FILE" "$WASM_FILE"
+  echo "  wasm-opt -Oz applied to $WASM_FILE"
+else
+  echo "  (wasm-opt not found — skipping size pass; install binaryen)"
+fi
+
+echo "✅ gen_ui_wasm built to $OUT_DIR/"
+WASMEOF
+chmod +x "$OUT/crates/gen_ui_wasm/build-wasm.sh"
+ok "gen_ui_wasm: web leaf (wasm-bindgen adapter + wasm-pack/wasm-opt pipeline)"
+
+# ── flutter_rust_bridge codegen config (workspace root) ──────────────────────
+# Consumed by `flutter_rust_bridge_codegen generate`. rust_input points at the
+# gen_ui_ffi api module; dart_output is written into the Flutter app by C-010's
+# scaffold-flutter.sh (path is relative to a hybrid project root). frb_generated.rs
+# + the Dart bindings are BUILD ARTIFACTS — gitignored, never hand-edited.
+cat > "$OUT/flutter_rust_bridge.yaml" << 'EOF'
+# TJ-ARCH-MOB-001 compliant
+# flutter_rust_bridge 2.12 codegen. Run from a hybrid project root:
+#   flutter_rust_bridge_codegen generate --config-file rust/flutter_rust_bridge.yaml
+rust_input: crates/gen_ui_ffi/src/api
+rust_root: crates/gen_ui_ffi
+# Written into the Flutter app (adjust if your mobile dir differs):
+dart_output: ../mobile/lib/bridge
+dart_entrypoint_class_name: GenUiCore
+# Keep the generated Rust glue beside the api it wraps.
+rust_output: crates/gen_ui_ffi/src/frb_generated.rs
+EOF
+ok "flutter_rust_bridge.yaml (frb 2.12 codegen config)"
+
+# Ignore generated bridge glue so it is never committed / hand-edited.
+cat > "$OUT/.gitignore" << 'EOF'
+/target
+# flutter_rust_bridge generated glue — regenerate with codegen, never edit.
+crates/gen_ui_ffi/src/frb_generated.rs
+# wasm-pack output
+crates/gen_ui_wasm/pkg/
+EOF
+ok ".gitignore (frb_generated.rs, wasm pkg/, target)"
 
 # ── workspace-hack (cargo-hakari pin) ────────────────────────────────────────
 emit_crate workspace-hack ""
@@ -3967,7 +4431,9 @@ echo ""
 echo "  Layers: types → runtime/protocol → client/mcp/db/inference → agent → ffi/tauri/wasm"
 echo "  Inner loop:   cd $OUT && bacon        (clippy driver)"
 echo "  Cross-target: bacon check-wasm | check-ios"
-echo "  Wave-1 lanes implement: gen_ui_db (C-003/004/005), leaves (C-007)"
-echo "  C-006 DONE: gen_ui_client/flint (gate+forge+frf) + gen_ui_mcp (JSON-RPC/SSE)"
+echo "  C-006: gen_ui_client/flint (gate+forge+frf) + gen_ui_mcp (JSON-RPC/SSE)"
+echo "  Leaves:       gen_ui_ffi (frb 2.12) · tauri-plugin-gen-ui · gen_ui_wasm (wasm-pack)"
+echo "  frb codegen:  flutter_rust_bridge_codegen generate --config-file $OUT/flutter_rust_bridge.yaml"
+echo "  wasm build:   bash $OUT/crates/gen_ui_wasm/build-wasm.sh"
 echo ""
 echo "  ⚠ gen_ui_types trait seams are FROZEN after C-001 review — changes need cross-lane sign-off."
