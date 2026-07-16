@@ -1,7 +1,7 @@
 ---
 type: Reference
-id: codegen-and-ci-verification-executor-completed-with-unknown-change
-title: Codegen and CI verification executor completed with unknown change
+id: codegen-and-ci-verification-executor-completed-unknown-change
+title: Codegen and CI verification executor completed unknown change
 tags:
 - codegen
 - ci-verification
@@ -9,13 +9,13 @@ tags:
 - unknown-change
 - metadata-record
 links:
-- executor-scaffold-full-hybrid-project-completed-with-unknown-change
+- codegen-and-ci-verification-executor-completed-with-unknown-change
 sources:
 - stdin
-timestamp: 2026-07-16T16:28:55.719047+00:00
-created_at: 2026-07-16T16:28:55.719013+00:00
-updated_at: 2026-07-16T16:28:55.719047+00:00
-revision: 1
+timestamp: 2026-07-16T16:42:18.452868+00:00
+created_at: 2026-07-16T16:42:18.452868+00:00
+updated_at: 2026-07-16T16:42:18.452868+00:00
+revision: 0
 ---
 
 ## Context
@@ -28,7 +28,7 @@ revision: 1
 
 The executor session for `phase-codegen-and-ci-verification` completed. The source record does not identify concrete file changes, generated artifacts, CI results, or repository state transitions.
 
-This is a completion-only executor metadata record. Treat it consistently with other completion records that have `unknown` change metadata, such as [Executor scaffold-full-hybrid-project completed with unknown change](/executor-scaffold-full-hybrid-project-completed-with-unknown-change.md).
+This is a completion-only executor metadata record. Treat it consistently with related completion records that have `unknown` change metadata, including [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md).
 
 ## Verification requirements
 
