@@ -70,14 +70,25 @@ DEFINE FIELD IF NOT EXISTS value ON app_setting TYPE option<object> FLEXIBLE;
 "#;
 
 /// Hybrid recall: vector lane + BM25 lane, fused by native `search::rrf`.
-/// Binds: `$qvec` (query embedding), `$q` (query text), `$k` (neighbours).
+/// Binds: `$qvec` (query embedding), `$q` (query text), `$k` (rows to return).
 /// Returns one ranked list of `{ id, text, kind, entity, score }`.
 ///
-/// `<|$k,64|>` = return `$k` HNSW neighbours exploring up to 64 candidates.
-/// RRF k=60 is the standard smoothing constant; limit 128 caps fusion input.
+/// **The KNN `k` is a literal, not `$k`.** SurrealDB's `<|k,ef|>` operator parses its
+/// arguments at query-parse time and rejects a bound parameter:
+///   `Parse error: Unexpected token 'a parameter', expected an unsigned integer`
+/// So every call failed before this. `$k` is still bound — it belongs on the final
+/// LIMIT, where it does the caller's truncation.
+///
+/// Both lanes now hand RRF up to 64 candidates regardless of `k`, which is what fusion
+/// wants: RRF can only rank what it is given, so a lane returning exactly `k` rows
+/// cannot rescue a hit the other lane ranked poorly — the whole point of fusing two.
+/// Only the fused output is cut to `$k`.
+///
+/// `<|64,64|>` = up to 64 HNSW neighbours, exploring 64 candidates (ef).
+/// RRF k=60 is the standard smoothing constant; 128 caps fusion input.
 pub const HYBRID_SEARCH_QUERY: &str = r#"
 LET $vs = SELECT id, text, kind, entity, vector::distance::knn() AS distance
-    FROM memory WHERE embedding <|$k,64|> $qvec
+    FROM memory WHERE embedding <|64,64|> $qvec
     ORDER BY distance ASC LIMIT 64;
 LET $ft = SELECT id, text, kind, entity, search::score(0) AS ft_score
     FROM memory WHERE text @0@ $q

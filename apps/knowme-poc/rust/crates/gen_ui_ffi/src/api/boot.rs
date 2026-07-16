@@ -37,10 +37,18 @@ pub async fn run_migrations(data_dir: String) -> Result<(), CoreError> {
     Ok(())
 }
 
-/// Boot-order invariant, step 2: seed data. No seed bundles for the PoC yet
-/// (C-104's curated corpus lands separately) — a real no-op until then.
-pub async fn load_seeds() -> Result<(), CoreError> {
-    Ok(())
+/// Boot-order invariant, step 2: seed data.
+///
+/// Ingests the C-111 demo corpus through the SAME `gen_ui_agent::memory` the desktop
+/// plugin's `load_seeds` calls — no duplicated seeding logic, and both surfaces get an
+/// identical corpus. Idempotent (stable seed ids), so running on every start upserts
+/// rather than duplicates. MUST follow `run_migrations`.
+///
+/// Returns the number of notes seeded, so Dart can report progress rather than stare at
+/// a silent pause: every note is embedded here, which is not instant on a cold start.
+pub async fn load_seeds() -> Result<u32, CoreError> {
+    let n = gen_ui_agent::memory::seed_demo_corpus().await?;
+    Ok(n as u32)
 }
 
 /// Boot-order invariant, step 3: attach sync (C-106).

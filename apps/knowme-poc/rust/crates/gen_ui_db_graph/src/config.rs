@@ -74,7 +74,7 @@ impl GraphStore {
         }
         self.db()
             .query(
-                "UPSERT type::thing('provider', $id) \
+                "UPSERT type::record('provider', $id) \
                  SET kind = $kind, base_url = $base_url, api_key_ref = $api_key_ref, \
                  enabled = $enabled;",
             )
@@ -89,7 +89,7 @@ impl GraphStore {
 
     /// INTENT: remove a provider by id.
     pub async fn delete_provider(&self, id: &str) -> Result<(), GraphError> {
-        self.db().query("DELETE type::thing('provider', $id);").bind(("id", id.to_string())).await?;
+        self.db().query("DELETE type::record('provider', $id);").bind(("id", id.to_string())).await?;
         Ok(())
     }
 
@@ -131,7 +131,7 @@ impl GraphStore {
     pub async fn upsert_model_pref(&self, pref: &ModelPref) -> Result<(), GraphError> {
         self.db()
             .query(
-                "UPSERT type::thing('model_pref', $key) \
+                "UPSERT type::record('model_pref', $key) \
                  SET surface = $surface, lane = $lane, provider_id = $provider_id, \
                  model_id = $model_id, params = $params;",
             )
@@ -149,7 +149,7 @@ impl GraphStore {
     pub async fn get_setting(&self, key: &str) -> Result<Option<serde_json::Value>, GraphError> {
         let mut res = self
             .db()
-            .query("SELECT VALUE value FROM type::thing('app_setting', $key);")
+            .query("SELECT VALUE value FROM type::record('app_setting', $key);")
             .bind(("key", key.to_string()))
             .await?;
         let rows: Vec<Option<serde_json::Value>> = res.take(0)?;
@@ -159,7 +159,7 @@ impl GraphStore {
     /// INTENT: create or update one app setting.
     pub async fn set_setting(&self, key: &str, value: serde_json::Value) -> Result<(), GraphError> {
         self.db()
-            .query("UPSERT type::thing('app_setting', $key) SET value = $value;")
+            .query("UPSERT type::record('app_setting', $key) SET value = $value;")
             .bind(("key", key.to_string()))
             .bind(("value", value))
             .await?;

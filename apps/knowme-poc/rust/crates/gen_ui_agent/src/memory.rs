@@ -24,6 +24,14 @@ pub async fn search(query: String, k: u32) -> Result<Vec<MemoryHit>, AgentError>
     store.memory_search(&query, k as usize).await.map_err(|e| AgentError::Config(e.to_string()))
 }
 
+/// Ingest the demo corpus (C-111). Idempotent — the notes carry stable ids, so the
+/// `load_seeds` boot step can call this on every start without duplicating.
+/// Returns the number of notes seeded.
+pub async fn seed_demo_corpus() -> Result<usize, AgentError> {
+    let store = state::memory()?;
+    gen_ui_db_graph::seed_corpus(store).await.map_err(|e| AgentError::Config(e.to_string()))
+}
+
 /// Expand the entity graph outward from `entity_id` up to `depth` RELATE hops.
 pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<RelatedEntity>, AgentError> {
     let store = state::memory()?;

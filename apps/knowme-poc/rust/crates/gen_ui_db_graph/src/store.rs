@@ -168,7 +168,7 @@ impl GraphStore {
         let mut res = self
             .db
             .query(
-                "UPSERT type::thing('entity', $id) \
+                "UPSERT type::record('entity', $id) \
                  SET entity_type = $etype, label = $label \
                  RETURN meta::id(id) AS id;",
             )
@@ -189,9 +189,15 @@ impl GraphStore {
         if from.trim().is_empty() || to.trim().is_empty() {
             return Err(GraphError::Invalid("relate endpoints must be non-empty".into()));
         }
+        // RELATE needs record LITERALS at its endpoints — unlike UPSERT/SELECT, it
+        // rejects a function call there ("Parse error: Unexpected token `::`"), so
+        // `type::record('entity', $from)` does not work here even though it works
+        // everywhere else in this file. `entity:⟨$from⟩` is the parameterized-id
+        // literal form: the table stays a compile-time constant and the id is still
+        // bound, so this is not string interpolation of user input.
         self.db
             .query(
-                "RELATE type::thing('entity', $from)->relates_to->type::thing('entity', $to) \
+                "RELATE entity:⟨$from⟩->relates_to->entity:⟨$to⟩ \
                  SET rel = $rel;",
             )
             .bind(("from", from.to_string()))
@@ -250,7 +256,7 @@ impl GraphStore {
                 .db
                 .query(
                     "SELECT VALUE ->relates_to->entity.map(|$e| meta::id($e)) \
-                     FROM $frontier.map(|$id| type::thing('entity', $id));",
+                     FROM $frontier.map(|$id| type::record('entity', $id));",
                 )
                 .bind(("frontier", frontier.clone()))
                 .await?;

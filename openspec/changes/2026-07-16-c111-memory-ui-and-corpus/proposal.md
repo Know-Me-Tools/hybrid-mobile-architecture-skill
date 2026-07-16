@@ -26,6 +26,28 @@ C-104's archive.
 
 ## Impact
 
-- UI-only + fixture data; no change to the verified C-104 backend contract.
-- `memory_search` FFI returns `MemoryHit{id,name,score,snippet}`; the frontend consumes
-  that shape directly (see C-103 decision-log note on the former `Vec<String>` stub).
+> **CORRECTED 2026-07-16 at execute time (user-ratified).** Three claims below were
+> written before C-105/C-113 landed and were wrong. Recorded rather than silently
+> edited, because each one was load-bearing for how this change was scoped.
+
+- ~~UI-only + fixture data; no change to the verified C-104 backend contract.~~
+  **Not UI-only.** `GraphStore::memory_search` is hybrid-*only* — it embeds the query,
+  runs the vector and BM25 lanes, and fuses them with native `search::rrf` in a single
+  SurrealQL statement. There is no vector-only lane to toggle against, so the
+  hybrid-vs-vector toggle needs a real backend addition threaded through
+  store → `gen_ui_agent::memory` → both command surfaces → UI. The C-104 *contract*
+  (ingest/search/graph_expand) is unchanged; its *surface* grows a mode parameter.
+- ~~`memory_search` FFI returns `MemoryHit{id,name,score,snippet}`~~
+  **The real type is `MemoryHit{id, text, kind, score}`** (`gen_ui_db_graph::store`).
+  The `name`/`snippet` shape never existed on the Rust side after C-104; React had
+  drifted to it behind an `as unknown as` cast, corrected in C-113.
+- **The React half of the Memory UI largely landed in C-113**, which surfaced the
+  `/memory` route, mounted the previously-orphaned `MemoryPanel`, styled it, and
+  un-stubbed the desktop `memory_search`/`graph_expand` commands (they were still
+  returning empty `Vec<String>` — C-104 wired the mobile FFI but left the Tauri
+  commands behind). What remains here is the Flutter side, tappable ContentBlocks,
+  the corpus, and the toggle.
+- Seed corpus: authored from `docs/reference-app/` (the KnowMe functional spec and
+  moodboard/user journeys) so search demos land on the product's real domain. It cannot
+  reuse `gen_ui_db::relational::SeedBundle` — that emits SQL for the relational config
+  store, while memory lives in SurrealDB and must be embedded at ingest.

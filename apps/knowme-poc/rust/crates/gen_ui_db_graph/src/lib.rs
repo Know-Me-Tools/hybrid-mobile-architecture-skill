@@ -23,6 +23,7 @@
 #![forbid(unsafe_code)]
 
 mod config;
+mod corpus;
 mod embed;
 mod error;
 mod rrf;
@@ -30,6 +31,7 @@ mod schema;
 mod store;
 
 pub use config::{ModelPref, Provider};
+pub use corpus::{corpus_len, seed_corpus};
 pub use embed::{Embedder, EmbeddingModelInfo, EMBED_DIM};
 pub use error::GraphError;
 pub use rrf::{rrf_fuse, RrfConfig};

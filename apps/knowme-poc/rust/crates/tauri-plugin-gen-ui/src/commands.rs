@@ -107,10 +107,21 @@ pub async fn run_migrations<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> 
     Ok(())
 }
 
-/// Boot-order invariant, step 2: seed data. No seed bundles for the PoC yet
-/// (C-104 supplies the memory corpus) — a real no-op until then.
+/// Boot-order invariant, step 2: seed data.
+///
+/// Ingests the C-111 demo corpus so a fresh install's memory search returns real
+/// results instead of nothing. Idempotent (stable seed ids), so running on every start
+/// upserts rather than duplicates. MUST follow `run_migrations` — there is no store to
+/// seed into before it.
+///
+/// Seeding embeds every note, so this is not instant on a cold start; it is a boot step
+/// rather than a lazy path precisely so the cost lands once, before the user searches.
 #[tauri::command]
 pub async fn load_seeds() -> Result<()> {
+    let n = gen_ui_agent::memory::seed_demo_corpus()
+        .await
+        .map_err(gen_ui_types::CoreError::from)?;
+    log::info!("seeded {n} demo memories");
     Ok(())
 }
 
