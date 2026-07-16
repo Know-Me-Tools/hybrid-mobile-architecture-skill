@@ -115,6 +115,162 @@ impl WriteQueue {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::sync::seam::WriteOutcome;
+    use std::sync::atomic::{AtomicU32, Ordering};
+
+    /// A sink whose verdict is scripted per attempt. Fake at the real IO boundary
+    /// (the server), not a mock of internal code — per CLAUDE.md's testing rules.
+    struct ScriptedSink {
+        /// One outcome per attempt; the last repeats once exhausted.
+        script: Vec<WriteOutcome>,
+        calls: AtomicU32,
+    }
+
+    impl ScriptedSink {
+        fn new(script: Vec<WriteOutcome>) -> Arc<Self> {
+            Arc::new(Self { script, calls: AtomicU32::new(0) })
+        }
+        fn calls(&self) -> u32 {
+            self.calls.load(Ordering::SeqCst)
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl WriteSink for ScriptedSink {
+        async fn send(&self, _w: &PendingWrite) -> WriteOutcome {
+            let n = self.calls.fetch_add(1, Ordering::SeqCst) as usize;
+            self.script.get(n).or_else(|| self.script.last()).cloned().unwrap()
+        }
+    }
+
+    fn queue(sink: Arc<dyn WriteSink>, max_attempts: u32) -> WriteQueue {
+        let cfg = SyncConfig {
+            electric_url: String::new(),
+            shapes: Vec::new(),
+            write_batch: 8,
+            max_write_attempts: max_attempts,
+        };
+        WriteQueue::new(&cfg, sink, SyncStatusHandle::new())
+    }
+
+    fn write(key: &str) -> PendingWrite {
+        PendingWrite {
+            idempotency_key: key.into(),
+            table: "notes".into(),
+            change_json: r#"{"op":"insert","id":"n1"}"#.into(),
+            attempts: 0,
+        }
+    }
+
+    /// The core offline→reconnect promise: a write that fails while the network is down
+    /// must not be lost — it is retried and lands once the server answers.
+    ///
+    /// Note `drain()` loops up to `batch` times, so a re-queued write is re-attempted
+    /// within the SAME drain call rather than waiting for the next one. The contract
+    /// that matters is the outcome (the write lands, is never quarantined), not how many
+    /// drains it takes — asserting the latter would be testing the implementation.
+    #[tokio::test(start_paused = true)]
+    async fn a_write_that_fails_offline_replays_when_the_server_returns() {
+        let sink = ScriptedSink::new(vec![WriteOutcome::Retry, WriteOutcome::Applied]);
+        let q = queue(sink.clone(), 5);
+        q.enqueue(write("k1")).await;
+
+        assert_eq!(q.drain().await, 0, "the write must land, not be dropped");
+        assert_eq!(sink.calls(), 2, "it should have been retried exactly once");
+        assert!(
+            q.poison_writes().await.is_empty(),
+            "a recoverable write must never be quarantined"
+        );
+    }
+
+    /// A permanently-rejected write must NOT be retried forever — that wedges the
+    /// queue behind one bad row and blocks every write after it.
+    #[tokio::test(start_paused = true)]
+    async fn a_transient_write_is_quarantined_once_attempts_run_out() {
+        let sink = ScriptedSink::new(vec![WriteOutcome::Retry]);
+        let q = queue(sink.clone(), 3);
+        q.enqueue(write("k1")).await;
+
+        // Drain until it gives up. Each pass burns one attempt.
+        for _ in 0..3 {
+            q.drain().await;
+        }
+        assert_eq!(q.drain().await, 0, "queue must not hold a give-up write");
+        let poison = q.poison_writes().await;
+        assert_eq!(poison.len(), 1, "it belongs in poison, not limbo");
+        assert_eq!(poison[0].idempotency_key, "k1");
+    }
+
+    /// A terminal rejection (4xx) is poison on the FIRST attempt: replaying the same
+    /// bytes gets the same answer, so retrying only delays the bad news.
+    #[tokio::test(start_paused = true)]
+    async fn a_terminal_rejection_poisons_immediately_without_burning_retries() {
+        let sink = ScriptedSink::new(vec![WriteOutcome::Poison { reason: "400".into() }]);
+        let q = queue(sink.clone(), 5);
+        q.enqueue(write("k1")).await;
+
+        assert_eq!(q.drain().await, 0);
+        assert_eq!(sink.calls(), 1, "must not retry a terminal rejection");
+        assert_eq!(q.poison_writes().await.len(), 1);
+    }
+
+    /// The idempotency key must survive replay unchanged — it is the ONLY thing making
+    /// a retried write safe (the server dedupes on it). A key that changed per attempt
+    /// would turn every retry into a duplicate row.
+    #[tokio::test(start_paused = true)]
+    async fn the_idempotency_key_is_stable_across_replays() {
+        struct KeySpy {
+            seen: Mutex<Vec<String>>,
+        }
+        #[async_trait::async_trait]
+        impl WriteSink for KeySpy {
+            async fn send(&self, w: &PendingWrite) -> WriteOutcome {
+                let mut seen = self.seen.lock().await;
+                seen.push(w.idempotency_key.clone());
+                if seen.len() < 3 { WriteOutcome::Retry } else { WriteOutcome::Applied }
+            }
+        }
+        let spy = Arc::new(KeySpy { seen: Mutex::new(Vec::new()) });
+        let q = queue(spy.clone(), 5);
+        q.enqueue(write("stable-key")).await;
+
+        for _ in 0..3 {
+            q.drain().await;
+        }
+        let seen = spy.seen.lock().await;
+        assert_eq!(seen.len(), 3);
+        assert!(seen.iter().all(|k| k == "stable-key"), "key drifted across replays: {seen:?}");
+    }
+
+    /// Ordering: a retried write goes back to the FRONT, so a later write cannot
+    /// overtake it. Out-of-order replay would apply an update before its insert.
+    #[tokio::test(start_paused = true)]
+    async fn a_retried_write_keeps_its_place_ahead_of_later_writes() {
+        struct OrderSpy {
+            seen: Mutex<Vec<String>>,
+        }
+        #[async_trait::async_trait]
+        impl WriteSink for OrderSpy {
+            async fn send(&self, w: &PendingWrite) -> WriteOutcome {
+                let mut seen = self.seen.lock().await;
+                seen.push(w.idempotency_key.clone());
+                // Fail the first write once, then accept everything.
+                if seen.len() == 1 { WriteOutcome::Retry } else { WriteOutcome::Applied }
+            }
+        }
+        let spy = Arc::new(OrderSpy { seen: Mutex::new(Vec::new()) });
+        let q = queue(spy.clone(), 5);
+        q.enqueue(write("first")).await;
+        q.enqueue(write("second")).await;
+
+        q.drain().await;
+        q.drain().await;
+
+        let seen = spy.seen.lock().await;
+        assert_eq!(seen[0], "first");
+        assert_eq!(seen[1], "first", "the retried write must be re-tried before later ones");
+        assert_eq!(seen[2], "second");
+    }
 
     // Boundary behavior: backoff grows exponentially from the base and never
     // exceeds the cap, even at absurd attempt counts (no overflow panic).

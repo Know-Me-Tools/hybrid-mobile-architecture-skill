@@ -42,4 +42,8 @@ tokio-stream = { workspace = true }
 
 [dev-dependencies]
 tempfile = "3"
-tokio = { workspace = true, features = ["macros", "rt"] }
+# test-util: #[tokio::test(start_paused = true)] auto-advances time, so the write
+# queue's retry backoff (200ms, 400ms, 800ms…) costs zero wall-clock in tests. Without
+# it the replay tests would really sleep — slow tests get skipped, and skipped tests
+# stop protecting anything.
+tokio = { workspace = true, features = ["macros", "rt", "test-util"] }

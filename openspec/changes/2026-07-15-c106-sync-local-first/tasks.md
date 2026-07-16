@@ -117,10 +117,17 @@
       the other surface, desktop ↔ iOS sim. Record what was OBSERVED, not intended.
       **Blocked on Docker registry auth on this host** (`docker pull hello-world` fails
       identically — stale credential, not our compose).
-- [ ] T7b — Rewrite `gen_ui_db/src/sync/README.md`: the browser path is frf-wasm /
+- [x] T7b — DONE. README rewritten for FRF (architecture diagram, per-platform status
+      table, why writes bypass the spine, how to enable the read lane); mod.rs docs, the
+      wasm stub note, and seam.rs's RowChange doc de-Electric-ised; shapes.rs + config.rs
+      marked LEGACY so the next reader is not misled. ORIGINAL:: the browser path is frf-wasm /
       Connect-web, not `@electric-sql/pglite-sync`. Remove the Electric shape-consumer
       docs from the native path or mark `shapes.rs` dead.
-- [ ] T8 — Boundary tests (3-5 per CLAUDE.md, not coverage-driven): write-queue replay
+- [x] T8 — DONE. 5 write-queue boundary tests (19/19 green in the sync module): offline
+      write replays on reconnect; give-up quarantine after max attempts; terminal 4xx
+      poisons on the first attempt without burning retries; idempotency key stable across
+      replays; retried write keeps its place ahead of later writes. Fakes at the IO
+      boundary only. tokio test-util added so backoff costs zero wall-clock. ORIGINAL: write-queue replay
       after reconnect, idempotent-key dedupe, poison handling. Fakes only at the IO
       boundary — no mocks of internal code.
 - [ ] T9 — Verify: `cargo clippy --workspace -D warnings`, `tsc --noEmit`, `dart analyze`
