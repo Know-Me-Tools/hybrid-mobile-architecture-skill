@@ -34,10 +34,19 @@ serde_json.workspace = true
 tokio           = { workspace = true, features = ["sync"] }
 
 [features]
-# Enable AFTER `flutter_rust_bridge_codegen generate` has produced frb_generated.rs
-# (the project build turns it on). The stream fns reference the codegen-emitted
-# crate-local `StreamSink<T>`, so pre-codegen `cargo check` leaves this off.
+# Default ON (T9, 2026-07-16): once `flutter_rust_bridge_codegen generate` has
+# run with this feature active, the emitted `frb_generated.rs` unconditionally
+# does `use crate::api::streams::*` — it is NOT re-gated per subsequent `cargo
+# check` invocation, so leaving this feature off by default after codegen has
+# run once breaks the default build (`cannot find streams in api`). A fresh
+# clone with no `frb_generated.rs` yet fails identically regardless of this
+# flag (the `mod frb_generated;` declaration itself has no cfg gate — confirmed
+# empirically), so defaulting on does not regress the pre-codegen case; it only
+# fixes the post-codegen, feature-off gap. Only meaningful lever left: run
+# `cargo check --no-default-features` on a truly fresh checkout before the
+# first codegen run, if that state needs verifying in isolation.
 frb-streams = []
+default = ["frb-streams"]
 
 [lints.rust]
 # `#[frb(...)]` expands to code guarded by `cfg(frb_expand)`, a cfg name that only

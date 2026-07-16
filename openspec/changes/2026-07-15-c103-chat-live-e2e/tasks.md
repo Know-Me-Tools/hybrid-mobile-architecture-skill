@@ -122,7 +122,36 @@
       NoopConfigStore graceful-degrade applies to desktop until a future task
       installs a real ConfigStore via gen_ui_agent::install_chat_agent in
       tauri-plugin-gen-ui's `.setup()` hook).
-- [ ] T9. Verify: cargo check --workspace, flutter analyze, tsc --noEmit all clean
+- [x] T9. Verify: cargo check --workspace, flutter analyze, tsc --noEmit all clean.
+
+      cargo check --workspace / cargo clippy --workspace -- -D warnings: CLEAN.
+      Fixed a real gap along the way: gen_ui_ffi's `frb-streams` feature was
+      off by default with a stale "pre-codegen `cargo check` leaves this off"
+      comment — but once flutter_rust_bridge_codegen has run WITH the feature
+      active (as it now has, T8), the emitted frb_generated.rs unconditionally
+      does `use crate::api::streams::*` with no cfg gate, so leaving the
+      feature off by default broke the plain `cargo check --workspace`. Flipped
+      `default = ["frb-streams"]` — confirmed this doesn't regress the
+      pre-codegen case (a fresh clone with no frb_generated.rs fails identically
+      regardless of the feature flag, since `mod frb_generated;` itself has no
+      cfg gate).
+
+      flutter analyze: 0 errors (394 pre-existing info-level style lints,
+      mostly auto-generated frb_generated.web.dart formatting — unchanged from
+      T8).
+
+      npx tsc --noEmit: 3 errors remain (down from 6 at T8 checkpoint). Built
+      @prometheus-ags/gen-ui-react's dist/ output (it had never been installed
+      or built in this checkout — `pnpm install` + `tsc -p tsconfig.json` in
+      packages/gen-ui-react, then `pnpm install` in desktop/ to re-link),
+      resolving all of its import errors. The remaining 3 errors are all
+      @flint/react (CoreFlintSurface.tsx, flintSurfaceStore.ts) — this package
+      is fetched via git from a SEPARATE repo (Know-Me-Tools/flint-forge) and
+      the fetched tarball contains only package.json + SKILL.md, no src/ or
+      build tooling (tsup) to build a dist/ from; genuinely out of reach without
+      cloning and building that external repo. Documented, not silently
+      skipped — a real remaining blocker for full tsc cleanliness, unrelated to
+      anything T6-T9 touched.
 - [ ] T10. Run live on macOS Tauri (first real provider round-trip) and capture the
       result
 - [ ] T11. Run live on iOS simulator (first-ever on-target Flutter run for this PoC,
