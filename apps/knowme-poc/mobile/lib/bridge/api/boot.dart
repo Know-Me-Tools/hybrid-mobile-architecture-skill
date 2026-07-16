@@ -18,7 +18,25 @@ Future<void> runMigrations({required String dataDir}) =>
 /// (C-104's curated corpus lands separately) — a real no-op until then.
 Future<void> loadSeeds() => GenUiCore.instance.api.crateApiBootLoadSeeds();
 
-/// Boot-order invariant, step 3: attach sync shapes. C-106's job — real no-op
-/// until then (migrations+seeds must still run first even without live sync).
+/// Boot-order invariant, step 3: attach sync (C-106).
+///
+/// **Still a no-op on mobile, and deliberately so — see below.** Desktop's equivalent
+/// (`tauri-plugin-gen-ui::commands::attach_sync_shapes`) is live: it starts an
+/// `FrfSyncTransport` whose read lane materialises row changes into `PgLocalStore`.
+///
+/// Mobile cannot reuse that, because mobile has no Postgres. `run_migrations` above
+/// opens embedded SurrealDB and registers it as BOTH config and memory backend
+/// (`ConfigBackend::Surreal`) — pglite-oxide is structurally unsupported on iOS/Android
+/// (no child processes, no JIT), which is why the split exists at all. So the read lane
+/// needs a `LocalStore` over SurrealDB, and `gen_ui_db_graph`'s public surface is
+/// intent-level by design ("INTENT-LEVEL, never raw SurrealQL" — lib.rs): it exposes
+/// `memory_ingest`/`memory_search`/`graph_expand`, not row upserts. Writing a
+/// `SurrealLocalStore` means adding a row-persistence surface to that crate, which is a
+/// real design decision about its contract — not something to smuggle in under a sync
+/// task. Tracked as C-106 T5; the honest state is "desktop syncs, mobile does not yet".
+///
+/// The write path is NOT blocked by this: `gen_ui_agent::sync_sink::forge_write_sink`
+/// is platform-agnostic, so once a mobile `LocalStore` exists the wiring here mirrors
+/// desktop's exactly.
 Future<void> attachSyncShapes() =>
     GenUiCore.instance.api.crateApiBootAttachSyncShapes();

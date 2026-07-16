@@ -130,5 +130,22 @@
       boundary only. tokio test-util added so backoff costs zero wall-clock. ORIGINAL: write-queue replay
       after reconnect, idempotent-key dedupe, poison handling. Fakes only at the IO
       boundary — no mocks of internal code.
-- [ ] T9 — Verify: `cargo clippy --workspace -D warnings`, `tsc --noEmit`, `dart analyze`
+- [x] T9 — DONE, and it found a REAL CI BUG rather than just passing.
+      * `cargo clippy --workspace -D warnings` — **green** (first time; see below).
+      * wasm32 (`gen_ui_wasm`) — green, sync still compiled out.
+      * **CI's Rust job could never have passed**: it runs `clippy --workspace` from a
+        bare checkout, but `gen_ui_ffi`'s `mod frb_generated;` is auto-injected by
+        flutter_rust_bridge and the generated file is NOT committed. Confirmed failing on
+        `main` with E0583 across every recent run. Fixed by adding the codegen step (the
+        Mobile job already had it). Codegen also needs the Dart/Flutter toolchain —
+        verified by running it with a Flutter-free PATH ("Dart/Flutter toolchain not
+        available") — so the Rust job gets `subosito/flutter-action` too.
+      * **Desktop Vitest job also fixed**: `pnpm/action-setup` with no version and no
+        `packageManager` field failed with "No pnpm version is specified" on every run.
+        Pinned explicitly.
+      * `tsc --noEmit` — still FAILS (12 errors), **pre-existing and unrelated**: the
+        `@prometheus-ags/tauri-plugin-gen-ui` guest-js package is unbuilt/unlinked.
+        Verified by stashing all my changes and reproducing on a clean tree. NOT fixed
+        here — out of C-106's scope, and silently folding an unrelated packaging fix into
+        a sync change is how a diff becomes unreviewable. ORIGINAL: `cargo clippy --workspace -D warnings`, `tsc --noEmit`, `dart analyze`
       clean; wasm32 still builds (FRF stays compiled out there).

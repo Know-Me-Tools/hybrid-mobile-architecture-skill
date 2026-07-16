@@ -29,12 +29,29 @@ jobs:
         working-directory: apps/knowme-poc/rust
     steps:
       - uses: actions/checkout@v5
+      # frb codegen shells out to `flutter --version` and formats the Dart it emits, so
+      # the toolchain is required even though this job only builds Rust. Verified by
+      # running codegen with a Flutter-free PATH: "Dart/Flutter toolchain not available".
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: beta
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: apps/knowme-poc/rust
+      # gen_ui_ffi's `mod frb_generated;` is AUTO-INJECTED by flutter_rust_bridge and
+      # the generated file is NOT committed, so the workspace cannot compile from a
+      # bare checkout — this job has never been able to pass without codegen. The
+      # Mobile job already does exactly this; the Rust job needs it for the same reason.
+      - name: flutter_rust_bridge_codegen
+        run: cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+      - name: Regenerate bridge
+        # Must run from the hybrid project root — flutter_rust_bridge.yaml's
+        # dart_output is relative to rust_root, itself relative to the invocation dir.
+        working-directory: apps/knowme-poc
+        run: flutter_rust_bridge_codegen generate --config-file rust/flutter_rust_bridge.yaml
       - run: cargo clippy --workspace -- -D warnings
       - run: cargo test --workspace
 
@@ -62,7 +79,12 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
+      # A bare action-setup infers the version from package.json's `packageManager`,
+      # which this repo does not set — so it failed with "No pnpm version is specified"
+      # on every run. Pin explicitly rather than adding a field the repo does not use.
       - uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc --noEmit
       - run: pnpm test
