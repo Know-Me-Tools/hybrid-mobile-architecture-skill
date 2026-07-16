@@ -19,7 +19,7 @@
     },
     {
       "id": "2026-07-15-c104-memory-graph-rag",
-      "status": "in_progress",
+      "status": "archived",
       "wave": 1
     },
     {
@@ -49,6 +49,11 @@
     },
     {
       "id": "2026-07-15-c109-settings-mobile-model",
+      "status": "pending",
+      "wave": 2
+    },
+    {
+      "id": "2026-07-16-c111-memory-ui-and-corpus",
       "status": "pending",
       "wave": 2
     }

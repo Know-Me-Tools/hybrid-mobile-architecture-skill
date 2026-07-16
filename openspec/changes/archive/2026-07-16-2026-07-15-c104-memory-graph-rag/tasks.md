@@ -30,8 +30,10 @@
       (`gen_ui_agent/tests/ollama_live.rs`, ported from a competing branch during
       merge-conflict resolution) exercising a real `GraphStore` for the first time
       this session — this is what surfaced the SurrealDB schema bugs in T2.
-- [ ] T7 — Memory tile UI: ingest form → hybrid search results → tappable
-      citation/memory blocks. **Deferred.**
-- [ ] T8 — Seed corpus (few hundred curated notes) for demo-quality search results.
-      **Deferred.**
-- [ ] T9 — Hybrid-vs-vector dev toggle. **Deferred.**
+- [x] T7 — Memory tile UI: ingest form → hybrid search results → tappable
+      citation/memory blocks. **Deferred — carried forward to
+      `2026-07-16-c111-memory-ui-and-corpus` T1 (not delivered here).**
+- [x] T8 — Seed corpus (few hundred curated notes) for demo-quality search results.
+      **Deferred — carried forward to `2026-07-16-c111-memory-ui-and-corpus` T2.**
+- [x] T9 — Hybrid-vs-vector dev toggle. **Deferred — carried forward to
+      `2026-07-16-c111-memory-ui-and-corpus` T3.**
