@@ -16,6 +16,12 @@ gen_ui_agent    = { path = "../gen_ui_agent" }
 flutter_rust_bridge.workspace = true
 anyhow.workspace = true
 log = "0.4"
+# `sync` for tokio::sync::broadcast::error::RecvError, referenced by the
+# frb-streams-gated chat_events forwarder (streams.rs). gen_ui_ffi is the
+# mobile FFI leaf (iOS/Android cdylib/staticlib) and is never built for wasm32,
+# so this is unconditional (unlike gen_ui_db's target-split, which exists
+# because that crate ALSO ships a wasm32 build for the web PGlite path).
+tokio           = { workspace = true, features = ["sync"] }
 
 [features]
 # Enable AFTER `flutter_rust_bridge_codegen generate` has produced frb_generated.rs

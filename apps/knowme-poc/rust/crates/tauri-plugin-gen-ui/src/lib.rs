@@ -27,6 +27,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("gen-ui")
         .invoke_handler(tauri::generate_handler![
             commands::chat_send,
+            commands::chat_subscribe,
             commands::entity_list,
             commands::entity_get,
             commands::entity_create,

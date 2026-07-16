@@ -8,10 +8,15 @@
 pub use gen_ui_types::CoreResult;
 
 /// Start a chat turn; returns the run_id whose events arrive on chat_events(run_id).
+///
+/// Dispatches into gen_ui_agent::ChatAgent (the single orchestration
+/// implementation shared with tauri-plugin-gen-ui — no duplicated business
+/// logic). Resolves provider/model from the config DB and streams the reply;
+/// if no provider is configured/enabled yet this returns `Err` with a clear
+/// message rather than an empty run_id (see gen_ui_agent::state for the
+/// graceful-degrade default before platform config-store wiring lands, T8+).
 pub async fn chat_send(thread_id: String, message: String) -> CoreResult<String> {
-    // C-006 dispatches into the PMPO loop / gate proxy. C-007 lands the signature.
-    let _ = (thread_id, message);
-    Ok(String::new())
+    gen_ui_agent::global_chat_agent().send(thread_id, message).await
 }
 
 /// Hybrid memory search (vector recall + graph expansion + BM25, RRF-fused in Rust).

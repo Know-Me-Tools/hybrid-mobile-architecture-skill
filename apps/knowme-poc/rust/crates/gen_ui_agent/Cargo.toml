@@ -11,5 +11,27 @@ gen_ui_runtime  = { path = "../gen_ui_runtime" }
 gen_ui_protocol = { path = "../gen_ui_protocol" }
 gen_ui_client   = { path = "../gen_ui_client" }
 gen_ui_mcp      = { path = "../gen_ui_mcp" }
+# Config DB v1 (T3): desktop/web ConfigStore trait + Postgres-dialect impls.
+# Default features only here (no `pg`/`pglite`) — the concrete backend is a
+# downstream consumer's choice (desktop Tauri build enables `pglite`); gen_ui_agent
+# itself is generic over `dyn ConfigStore` and never picks a storage engine.
+gen_ui_db       = { path = "../gen_ui_db" }
 async-trait.workspace = true
 anyhow.workspace = true
+thiserror.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+dashmap.workspace = true
+futures.workspace = true
+uuid.workspace = true
+
+# liter-llm's chat/chat_stream surface is native-http only in this crate — the
+# wasm leaf (gen_ui_wasm) talks to gen_ui_client directly with wasm-http and does
+# NOT depend on gen_ui_agent (see gen_ui_wasm/Cargo.toml). gen_ui_agent is only
+# ever compiled for native targets (mobile FFI via gen_ui_ffi, desktop via
+# tauri-plugin-gen-ui), so defaulting to native-http here is safe and matches
+# gen_ui_client's own default.
+liter-llm       = { workspace = true, features = ["native-http"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio = { workspace = true, features = ["sync", "rt"] }

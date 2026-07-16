@@ -27,11 +27,29 @@
       done)
 - [ ] T5. (folded into T6/T8 — web config store is PGlite on the TS side; wire
       alongside the web chat feature, not as separate Rust work)
-- [ ] T6. Replace chat.rs's stub chat_send with a real liter-llm-backed call reading
+- [x] T6. Replace chat.rs's stub chat_send with a real liter-llm-backed call reading
       provider/model selection from the config DB; graceful degrade when no provider
-      is enabled (no hardcoded API keys/env vars)
-- [ ] T7. Wire ProtocolPipeline -> ContentBlock streaming over frb (mobile) and Tauri
-      events (desktop) for the live liter-llm response stream
+      is enabled (no hardcoded API keys/env vars). Landed as gen_ui_agent::ChatAgent
+      (new crate module set: chat.rs, config_resolve.rs, error.rs, secret.rs,
+      registry.rs, state.rs) — resolves (provider, model) from
+      gen_ui_db::relational::ConfigStore for surface="chat"/lane="default", builds a
+      liter-llm ClientBuilder client, and returns CoreError::Terminal("no provider
+      configured: ...") when no model_pref/provider/enabled-provider exists. No
+      ConfigStore is wired at FFI/Tauri init yet (that's T8+), so
+      gen_ui_agent::state defaults to a NoopConfigStore that always reports
+      "not configured" — the graceful-degrade path is reachable today;
+      `install_chat_agent()` lets T8 swap in the real store without touching
+      chat.rs or the call sites.
+- [x] T7. Wire ProtocolPipeline -> ContentBlock streaming over frb (mobile) and Tauri
+      events (desktop) for the live liter-llm response stream. Landed via
+      gen_ui_agent::RunRegistry (per-run_id tokio::sync::broadcast channel,
+      registered by ChatAgent::send before it returns): gen_ui_ffi's
+      chat_events(run_id, sink) subscribes and forwards into the frb StreamSink
+      (gated on frb-streams, unchanged pre-codegen build story); a new
+      tauri-plugin-gen-ui command chat_subscribe(run_id, app_handle) subscribes
+      and forwards via AppHandle::emit(GEN_UI_CHAT_EVENT, event) for desktop, since
+      Tauri has no StreamSink equivalent. Both sides call the identical
+      gen_ui_agent orchestration — no duplicated business logic.
 - [ ] T8. Update Flutter chat feature + Tauri chat feature to consume the live stream
       end-to-end (replacing any remaining placeholder wiring); wire the web PGlite
       config store (T5) here

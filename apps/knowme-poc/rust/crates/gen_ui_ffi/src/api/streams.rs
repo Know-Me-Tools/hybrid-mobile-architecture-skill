@@ -25,10 +25,36 @@ use gen_ui_types::transport::ChangeEvent;
 /// Subscribe to the A2UI event stream for a chat run. The core produces
 /// ContentBlock-bearing events; the transport layer (`@flint/react`, flint_genui)
 /// is bypassed by contract.
+///
+/// Subscribes to gen_ui_agent's per-run broadcast channel (registered by
+/// `chat::chat_send` before it returns the run_id) and forwards every event
+/// into the frb `StreamSink` until the run's producer task closes the channel
+/// (terminal `RunFinished`/`RunError`, after which `RunRegistry::remove` drops
+/// the sender). If `run_id` is unknown (never started, or already finished
+/// before this subscription attached), the sink is dropped immediately —
+/// there is nothing to stream.
 pub fn chat_events(run_id: String, sink: StreamSink<A2uiEvent>) {
-    // Wave-1 (C-006) registers `sink` with the ProtocolPipeline broadcast for this
-    // run. C-007 proves the type crosses the bridge.
-    let _ = (run_id, sink);
+    let Some(mut rx) = gen_ui_agent::global_chat_agent().registry().subscribe(&run_id) else {
+        return;
+    };
+    gen_ui_runtime::spawn(async move {
+        loop {
+            match rx.recv().await {
+                Ok(event) => {
+                    if sink.add(event).is_err() {
+                        // Dart side unsubscribed; stop forwarding.
+                        break;
+                    }
+                }
+                Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => {
+                    // Subscriber fell behind the producer; skip ahead and keep
+                    // streaming rather than terminating the whole run.
+                    continue;
+                }
+                Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
+            }
+        }
+    });
 }
 
 /// Subscribe to entity change events. One Dart listener fans these into

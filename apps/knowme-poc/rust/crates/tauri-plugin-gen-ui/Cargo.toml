@@ -16,6 +16,9 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 tauri = { version = "2", default-features = false }
+# `sync` for tokio::sync::broadcast::error::RecvError, used by chat_subscribe's
+# forwarding loop. Desktop-only crate (never wasm32), so unconditional.
+tokio           = { workspace = true, features = ["sync"] }
 
 [build-dependencies]
 tauri-plugin = { version = "2", features = ["build"] }
