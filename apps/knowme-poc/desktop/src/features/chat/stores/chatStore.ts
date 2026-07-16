@@ -5,9 +5,19 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import { isTauri } from '@tauri-apps/api/core'
 import { onChatEvent, streamAgentA2ui } from '@prometheus-ags/tauri-plugin-gen-ui'
 import type { ContentBlock, Message, MessageUsage } from '@/bridge/a2ui/types'
-import { applyA2uiEvent } from '@/bridge/a2ui/driver'
+import { applyA2uiEvent, createA2uiWireAdapter, type A2uiWireEvent } from '@/bridge/a2ui/driver'
 import { streamWebLlm } from '../api/webllmLane'
 import { useLaneStore } from './laneStore'
+
+/**
+ * Bridges Rust's run-scoped A2uiEvents to the store's message-scoped ones.
+ * Module-level because `initListeners` (which consumes events) and
+ * `sendMessage` (which knows the message id) are separate entry points.
+ */
+const wireAdapter = createA2uiWireAdapter((event) => {
+  const store = useChatStore.getState()
+  applyA2uiEvent(event, store.streamBlock, store.finalizeMessage)
+})
 
 /**
  * Drive the in-browser WebLLM lane, feeding its CoreA2uiEvents through the same
@@ -104,9 +114,22 @@ export const useChatStore = create<ChatState & ChatActions>()(
           return
         }
 
+        // Rust's events are run-scoped and carry no message id, so tell the
+        // adapter which message this turn's events belong to before starting it.
+        wireAdapter.bind(assistantId)
         // Store calls invoke() (via the plugin's typed wrapper) — never
         // component or hook.
-        await streamAgentA2ui(text, history).catch(console.error)
+        await streamAgentA2ui(text, history).catch((e: unknown) => {
+          console.error(e)
+          // The run never started, so no run_error will arrive to close the
+          // message — finalize it here or it spins forever.
+          get().streamBlock({
+            messageId: assistantId,
+            blockIndex: 0,
+            block: { type: 'text', text: e instanceof Error ? e.message : 'Chat failed to start' },
+          })
+          get().finalizeMessage(assistantId)
+        })
       },
 
       initListeners: () => {
@@ -114,9 +137,24 @@ export const useChatStore = create<ChatState & ChatActions>()(
         // context (this bundle also serves as a plain web page with no
         // __TAURI_INTERNALS__ bridge, where listen() throws synchronously).
         if (!isTauri()) return () => {}
-        const unlistenPromise = onChatEvent((payload: unknown) => {
-          const store = useChatStore.getState()
-          applyA2uiEvent(payload as never, store.streamBlock, store.finalizeMessage)
+        // Time the Rust local lane the same way the web lane times itself, so
+        // on-device tok/s is reported on both. Cloud runs aren't timed: tok/s
+        // there measures the network and the provider's load, not this machine,
+        // so showing it would invite a meaningless comparison.
+        let startedAt: number | null = null
+        let blocks = 0
+        const unlistenPromise = onChatEvent<A2uiWireEvent>((wire) => {
+          if (useLaneStore.getState().lane === 'local') {
+            if (wire.type === 'block') {
+              startedAt ??= performance.now()
+              blocks += 1
+            } else if ((wire.type === 'run_finished' || wire.type === 'run_error') && startedAt !== null) {
+              useLaneStore.getState().recordThroughput(blocks, (performance.now() - startedAt) / 1000)
+              startedAt = null
+              blocks = 0
+            }
+          }
+          wireAdapter.handle(wire)
         })
         return () => { unlistenPromise.then((fn) => fn()) }
       },
