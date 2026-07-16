@@ -20,7 +20,7 @@ enum FilterOp {
 }
 
 @freezed
-class FilterSpec with _$FilterSpec {
+abstract class FilterSpec with _$FilterSpec {
   const factory FilterSpec({
     required String field,
     required FilterOp op,
@@ -31,7 +31,7 @@ class FilterSpec with _$FilterSpec {
 }
 
 @freezed
-class SortSpec with _$SortSpec {
+abstract class SortSpec with _$SortSpec {
   const factory SortSpec({
     required String field,
     @Default(false) bool descending,
@@ -41,7 +41,7 @@ class SortSpec with _$SortSpec {
 }
 
 @freezed
-class ViewDescriptor with _$ViewDescriptor {
+abstract class ViewDescriptor with _$ViewDescriptor {
   const factory ViewDescriptor({
     required String entityType,
     @Default(<FilterSpec>[]) List<FilterSpec> filters,

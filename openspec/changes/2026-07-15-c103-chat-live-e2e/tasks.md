@@ -192,7 +192,80 @@
       `pnpm tauri dev` and typing into the chat box is the only way to see
       the full windowed round-trip. Recommend the user do this once to
       confirm the UI layer, since it's outside what this session could drive.
-- [ ] T11. Run live on iOS simulator (first-ever on-target Flutter run for this PoC,
-      G-6) and capture the result
+- [x] T11. Run live on iOS simulator (first-ever on-target Flutter run for this PoC,
+      G-6) and capture the result.
+
+      This required substantially more fixing than T6-T10 combined — the iOS
+      integration had never been exercised before. Root causes found and
+      fixed, in the order hit:
+
+      1. scripts/ios/build-xcframework.sh referenced a stale crate name
+         (`gen_ui_core`, from the original architecture doc) instead of this
+         PoC's actual FFI crate (`gen_ui_ffi`), and built the whole workspace
+         instead of scoping to `-p gen_ui_ffi` (would have tried and failed to
+         cross-compile desktop-only crates like tauri-plugin-gen-ui for iOS).
+         Fixed. Turned out to be moot for the actual integration path (see #2)
+         but is now correct as a standalone manual-build option.
+      2. The iOS Xcode project had ZERO wiring to any Rust build — no
+         podspec, no build phase, nothing referenced gen_ui_ffi anywhere
+         (confirmed via grep). Ran flutter_rust_bridge_codegen's `integrate`
+         subcommand (`--rust-crate-name gen_ui_ffi --rust-crate-dir
+         ../rust/crates/gen_ui_ffi --no-write-lib --no-integration-test`),
+         which generated mobile/rust_builder/ (cargokit + platform podspecs)
+         and registered `gen_ui_ffi: {path: rust_builder}` in pubspec.yaml —
+         the correct, frb-native integration pattern (an Xcode script phase
+         builds the Rust crate automatically on every build), superseding
+         the manual XCFramework approach entirely.
+      3. `pod install` crashed on a Ruby Unicode-normalization bug caused by
+         LANG not being set to UTF-8 in this shell — worked around with
+         LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 for the pod install invocation
+         (not a code fix; an environment-only workaround, so not committed).
+         Then failed for real: flutter_packages/gen_ui_flutter declared
+         `ffiPlugin: true` for ios/android/macos with zero native build glue
+         ever scaffolded (no podspec, no build.gradle) — a dead, unused
+         package (confirmed via grep: nothing under mobile/lib imports it).
+         Fixed its pubspec.yaml to be a plain Dart-only package (no `flutter:
+         plugin:` platforms block), matching its actual contents.
+      4. First two full Xcode build attempts (the second after a `flutter
+         clean` to rule out stale-cache, which changed nothing — proving the
+         bug was real, not cache) failed identically: "the non-abstract class
+         FilterSpec/SortSpec/ViewDescriptor/EntityRecord/ListResult is
+         missing implementations." Root cause: freezed 3.0 is a breaking
+         release requiring @freezed-annotated classes to be declared
+         `abstract class` (or `sealed class`) rather than a plain `class`
+         (confirmed via freezed's own CHANGELOG.md) —
+         flutter_packages/prometheus_entity_management's view.dart/entity.dart
+         still used the pre-3.0 plain-class syntax for these five classes
+         (ChangeEvent already correctly used `sealed class`). Fixed by adding
+         `abstract` to all five declarations and regenerating.
+      5. Third attempt: Xcode build succeeded in 24.4s (Rust binary cached
+         from the prior attempts, unaffected by the Dart-only fix) and the
+         app genuinely launched on-device — "Syncing files to device...
+         Flutter run key commands," a live Dart VM Service attached. THIS IS
+         THE FIRST TIME THIS POC HAS EVER RUN ON iOS.
+
+      However, the app immediately hit its own separate, pre-existing bug on
+      boot — screenshotted live: "Startup failed: UnimplementedError: run
+      flutter_rust_bridge_codegen generate." Root cause (see the reported
+      finding): main.dart's StartupNotifier unconditionally awaits
+      bridge.runMigrations() -> loadSeeds() -> attachSyncShapes() before
+      showing any UI, and all three are still literal UnimplementedError
+      stubs in rust_bridge_provider.dart — no Rust-side mobile startup
+      orchestrator (migrations/seeds/sync-shape-attach over FFI) was ever
+      implemented. T3 built this for desktop (pglite-oxide + the
+      Startup<Uninitialized/Migrated/Ready> typestate in gen_ui_db) but the
+      equivalent mobile-facing gen_ui_ffi intent functions were never
+      written. This blocks the ENTIRE mobile app, not just chat — the T6-T9
+      chat wiring is correct and unreachable behind this gate. Out of T11's
+      scope to fix (a real T3/T4-class feature, not an iOS-build issue);
+      reported to the user as a blocking finding rather than silently
+      expanding scope further.
+
+      T11's literal ask — "run live on iOS simulator, capture the result" —
+      is satisfied: the on-target run happened, was captured (screenshot),
+      and its failure is fully root-caused with a clear next step, not a
+      mystery. The PoC's mobile surface is NOT yet chat-usable end-to-end
+      until the startup gate is either implemented for real or bypassed for
+      a chat-only demo path.
 - [ ] T12. Update decision-log.md / wiki with pinned SHAs for both forks and any
       defects found (Rule 22/23 provenance)

@@ -15,12 +15,13 @@ dependencies:
 dev_dependencies:
   flutter_lints: ^5.0.0
 
-flutter:
-  plugin:
-    platforms:
-      android:
-        ffiPlugin: true
-      ios:
-        ffiPlugin: true
-      macos:
-        ffiPlugin: true
+# T11 fix, 2026-07-16: this package declared ffiPlugin: true for android/ios/
+# macos with no ios/android/macos/ native build glue ever scaffolded (no
+# podspec, no build.gradle) — `pod install` failed with "No podspec found for
+# gen_ui_flutter". The actual FFI integration lives in mobile/rust_builder
+# (gen_ui_ffi crate, wired via `flutter_rust_bridge_codegen integrate`); this
+# package is unused dead scaffold (no file under mobile/lib imports it —
+# confirmed via grep) predating that integration. Declaring it as a plain
+# Dart-only package (no `flutter: plugin:` platforms block) matches its
+# actual contents and unblocks CocoaPods without deleting the package
+# outright, in case it's meant to be filled in later.

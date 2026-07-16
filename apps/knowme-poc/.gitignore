@@ -9,6 +9,9 @@ mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 mobile/android/app/src/main/jniLibs/
 mobile/ios/Frameworks/
+mobile/rust_builder/**/*.a
+mobile/rust_builder/**/build_pod_phony
+scripts/ios/build/
 
 # Tauri/Node
 desktop/node_modules/
