@@ -19,6 +19,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use gen_ui_agent::ConfigBackend;
 use gen_ui_db::relational::{ConfigStore, ModelPref, Provider, RelationalError, RelationalResult};
+use gen_ui_db_graph::{Embedder, EmbeddingModelInfo, GraphError, GraphStore, GraphStoreConfig, EMBED_DIM};
 
 const DEV_PROVIDER_ID: &str = "dev-ollama";
 const DEV_API_KEY_REF: &str = "dev-ollama-noop";
@@ -69,11 +70,28 @@ impl ConfigStore for DevOllamaConfigStore {
     }
 }
 
+/// Dev shortcut's memory store needs no real embeddings — it exists purely to
+/// let `state::init` (which now always requires a memory store, see
+/// gen_ui_agent::state's doc comment) accept SOMETHING here without pulling in
+/// a real fastembed model just to prove a chat round-trip.
+struct ZeroEmbedder;
+impl Embedder for ZeroEmbedder {
+    fn model_info(&self) -> EmbeddingModelInfo {
+        EmbeddingModelInfo { name: "dev-ollama-zero-fake".into(), dim: EMBED_DIM }
+    }
+    fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, GraphError> {
+        Ok(texts.iter().map(|_| vec![0.0; EMBED_DIM]).collect())
+    }
+}
+
 /// Install the dev Ollama `ConfigStore` if `GEN_UI_DEV_OLLAMA_MODEL` is set
 /// (e.g. `llama3.2:1b`). No-op otherwise — the process falls through to
 /// `run_migrations`'s normal pglite-oxide-backed `state::init` as usual.
 /// Returns whether it installed (callers use this to skip the real
 /// `run_migrations` init when dev Ollama is active).
+///
+/// Called from `.setup()`, which is sync — `block_on` is acceptable here since
+/// this is a rare, opt-in dev-only path, never the hot path.
 pub fn install_if_requested() -> bool {
     let Ok(model_hint) = std::env::var("GEN_UI_DEV_OLLAMA_MODEL") else {
         return false;
@@ -86,8 +104,20 @@ pub fn install_if_requested() -> bool {
         }
     }
 
-    gen_ui_agent::state::init(ConfigBackend::Postgres(Arc::new(DevOllamaConfigStore {
-        model_hint,
-    })));
+    let memory = gen_ui_runtime::handle().block_on(async {
+        GraphStore::open(GraphStoreConfig {
+            endpoint: "memory".to_string(),
+            namespace: "dev".to_string(),
+            database: "ollama".to_string(),
+            embedder: Arc::new(ZeroEmbedder),
+        })
+        .await
+        .expect("ephemeral in-memory dev GraphStore should open")
+    });
+
+    gen_ui_agent::state::init(
+        ConfigBackend::Postgres(Arc::new(DevOllamaConfigStore { model_hint })),
+        Arc::new(memory),
+    );
     true
 }

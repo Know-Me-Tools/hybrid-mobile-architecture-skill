@@ -8,6 +8,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../bridge/rust_bridge_provider.dart' as bridge;
+import '../../../../shared/providers/data_dir.dart';
 import '../../domain/startup_phase.dart';
 
 part 'startup_notifier.g.dart';
@@ -20,7 +21,7 @@ Duration? _noRetry(int retryCount, Object error) => null;
 @Riverpod(retry: _noRetry)
 Stream<StartupPhase> startup(Ref ref) async* {
   yield StartupPhase.migrations;
-  await bridge.runMigrations();
+  await bridge.runMigrations(dataDir: dataDirOverride);
   yield StartupPhase.seeds;
   await bridge.loadSeeds();
   yield StartupPhase.shapes;

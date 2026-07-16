@@ -17,10 +17,14 @@ DEFINE ANALYZER OVERWRITE gu_simple
     FILTERS lowercase, snowball(english);
 
 -- entity: nodes in the knowledge graph (projects, notes, people, ...).
-DEFINE TABLE IF NOT EXISTS entity SCHEMALESS;
+-- SCHEMAFULL (not SCHEMALESS): FLEXIBLE on `data` below requires it — SurrealDB
+-- 3.x rejects FLEXIBLE fields on schemaless tables outright ("FLEXIBLE can only
+-- be used in SCHEMAFULL tables"). This also gives Rule-29 typed enforcement on
+-- entity_type/label, with `data` as the one deliberate escape-hatch JSON blob.
+DEFINE TABLE IF NOT EXISTS entity SCHEMAFULL;
 DEFINE FIELD IF NOT EXISTS entity_type ON entity TYPE string;
 DEFINE FIELD IF NOT EXISTS label       ON entity TYPE string;
-DEFINE FIELD IF NOT EXISTS data        ON entity FLEXIBLE TYPE option<object>;
+DEFINE FIELD IF NOT EXISTS data        ON entity TYPE option<object> FLEXIBLE;
 
 -- memory: retrievable text with its embedding; optionally linked to an entity.
 DEFINE TABLE IF NOT EXISTS memory SCHEMALESS;
@@ -52,15 +56,17 @@ DEFINE FIELD IF NOT EXISTS api_key_ref ON provider TYPE option<string>;
 DEFINE FIELD IF NOT EXISTS enabled     ON provider TYPE bool DEFAULT true;
 
 -- One record per (surface, lane), e.g. surface='chat', lane='cloud'|'local'.
-DEFINE TABLE IF NOT EXISTS model_pref SCHEMALESS;
+-- SCHEMAFULL: see entity's comment above — FLEXIBLE on `params` requires it.
+DEFINE TABLE IF NOT EXISTS model_pref SCHEMAFULL;
 DEFINE FIELD IF NOT EXISTS surface     ON model_pref TYPE string;
 DEFINE FIELD IF NOT EXISTS lane        ON model_pref TYPE string;
 DEFINE FIELD IF NOT EXISTS provider_id ON model_pref TYPE option<string>;
 DEFINE FIELD IF NOT EXISTS model_id    ON model_pref TYPE string;
-DEFINE FIELD IF NOT EXISTS params      ON model_pref FLEXIBLE TYPE option<object>;
+DEFINE FIELD IF NOT EXISTS params      ON model_pref TYPE option<object> FLEXIBLE;
 
-DEFINE TABLE IF NOT EXISTS app_setting SCHEMALESS;
-DEFINE FIELD IF NOT EXISTS value ON app_setting FLEXIBLE TYPE option<object>;
+-- SCHEMAFULL: see entity's comment above — FLEXIBLE on `value` requires it.
+DEFINE TABLE IF NOT EXISTS app_setting SCHEMAFULL;
+DEFINE FIELD IF NOT EXISTS value ON app_setting TYPE option<object> FLEXIBLE;
 "#;
 
 /// Hybrid recall: vector lane + BM25 lane, fused by native `search::rrf`.

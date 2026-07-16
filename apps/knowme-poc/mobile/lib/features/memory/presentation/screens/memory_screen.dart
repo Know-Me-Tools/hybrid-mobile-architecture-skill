@@ -130,9 +130,8 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                       final hit = result.hits[i];
                       return ListTile(
                         leading: const Icon(Icons.memory),
-                        title: Text(hit.name),
-                        subtitle:
-                            hit.snippet == null ? null : Text(hit.snippet!),
+                        title: Text(hit.text),
+                        subtitle: Text(hit.kind),
                         trailing: Text(
                           hit.score.toStringAsFixed(3),
                           style: T.uiMd.copyWith(color: T.textTertiary),

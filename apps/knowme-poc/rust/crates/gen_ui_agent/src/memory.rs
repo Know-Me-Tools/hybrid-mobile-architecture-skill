@@ -1,0 +1,32 @@
+// TJ-ARCH-MOB-001 compliant
+//! Shared memory/graph-RAG implementation. Called identically from gen_ui_ffi
+//! (mobile, via frb) and tauri-plugin-gen-ui (desktop, via Tauri IPC) — both
+//! platforms share the SAME embedded SurrealDB GraphStore instance shape (see
+//! `state::init`'s doc comment on why this is not tied to `ConfigBackend`).
+use gen_ui_db_graph::{MemoryRecord, MemoryHit, RelatedEntity};
+
+use crate::error::AgentError;
+use crate::state;
+
+/// Ingest a note into memory (embeds on-device via fastembed, upserts into
+/// SurrealDB). Returns the assigned record id.
+pub async fn ingest(text: String) -> Result<String, AgentError> {
+    let store = state::memory()?;
+    store
+        .memory_ingest(MemoryRecord { id: None, text, kind: "note".to_string(), entity: None })
+        .await
+        .map_err(|e| AgentError::Config(e.to_string()))
+}
+
+/// Hybrid semantic + lexical search over ingested memory, RRF-fused in Rust.
+pub async fn search(query: String, k: u32) -> Result<Vec<MemoryHit>, AgentError> {
+    let store = state::memory()?;
+    store.memory_search(&query, k as usize).await.map_err(|e| AgentError::Config(e.to_string()))
+}
+
+/// Expand the entity graph outward from `entity_id` up to `depth` RELATE hops.
+pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<RelatedEntity>, AgentError> {
+    let store = state::memory()?;
+    let depth = depth.clamp(1, u8::MAX as u32) as u8;
+    store.graph_expand(&entity_id, depth).await.map_err(|e| AgentError::Config(e.to_string()))
+}

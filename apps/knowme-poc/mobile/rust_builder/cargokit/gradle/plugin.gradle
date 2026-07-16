@@ -3,6 +3,8 @@
 
 import java.nio.file.Paths
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
 
 CargoKitPlugin.file = buildscript.sourceFile
 
@@ -14,6 +16,9 @@ class CargoKitExtension {
 }
 
 abstract class CargoKitBuildTask extends DefaultTask {
+
+    @Inject
+    abstract ExecOperations getExecOperations()
 
     @Input
     String buildMode
@@ -60,12 +65,12 @@ abstract class CargoKitBuildTask extends DefaultTask {
         def rootProjectDir = project.rootProject.projectDir
 
         if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-            project.exec {
+            execOperations.exec {
                 commandLine 'chmod', '+x', path
             }
         }
 
-        project.exec {
+        execOperations.exec {
             executable path
             args "build-gradle"
             environment "CARGOKIT_ROOT_PROJECT_DIR", rootProjectDir
@@ -139,11 +144,15 @@ class CargoKitPlugin implements Plugin<Project> {
                 platforms = plugin.getTargetPlatforms().collect()
             }
 
-            // Same thing addFlutterDependencies does in flutter.gradle
-            if (buildType == "debug") {
-                platforms.add("android-x86")
-                platforms.add("android-x64")
-            }
+            // Unlike upstream cargokit/addFlutterDependencies, x86 emulator
+            // ABIs are NOT force-added for debug builds here: ort (ONNX
+            // Runtime, via fastembed/gen_ui_db_graph's embed-native feature)
+            // ships prebuilt binaries only for arm64-v8a on Android (neither
+            // i686-linux-android nor x86_64-linux-android are supported), so
+            // a debug build that includes either can never succeed. Real
+            // devices are arm64-v8a; x86 emulator debugging is unsupported
+            // until `ort` adds Android x86 binaries or a build-from-source
+            // path is set up.
 
             // The task name depends on plugin properties, which are not available
             // at this point

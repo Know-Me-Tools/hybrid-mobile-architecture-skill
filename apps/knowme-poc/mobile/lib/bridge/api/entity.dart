@@ -4,50 +4,30 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import '../frb_generated.dart';
+import '../third_party/gen_ui_types/error.dart';
+import '../third_party/gen_ui_types/transport.dart';
+import '../third_party/gen_ui_types/view.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// List entities matching a view (filters/sorts/pagination compiled to SQL in Rust).
-Future<CoreResultListResult> entityList({required ViewDescriptor view}) =>
+Future<ListResult> entityList({required ViewDescriptor view}) =>
     GenUiCore.instance.api.crateApiEntityEntityList(view: view);
 
 /// Fetch one entity by type + id.
-Future<CoreResultOptionEntityRecord> entityGet({
-  required String entityType,
-  required String id,
-}) =>
+Future<EntityRecord?> entityGet(
+        {required String entityType, required String id}) =>
     GenUiCore.instance.api
         .crateApiEntityEntityGet(entityType: entityType, id: id);
 
 /// Create an entity. Emits a ChangeEvent::Upsert on the entity_changes stream.
-Future<CoreResultEntityRecord> entityCreate({required EntityRecord record}) =>
+Future<EntityRecord> entityCreate({required EntityRecord record}) =>
     GenUiCore.instance.api.crateApiEntityEntityCreate(record: record);
 
 /// Update an entity. Emits a ChangeEvent::Upsert.
-Future<CoreResultEntityRecord> entityUpdate({required EntityRecord record}) =>
+Future<EntityRecord> entityUpdate({required EntityRecord record}) =>
     GenUiCore.instance.api.crateApiEntityEntityUpdate(record: record);
 
 /// Delete an entity. Emits a ChangeEvent::Delete.
-Future<CoreResult> entityDelete({
-  required String entityType,
-  required String id,
-}) =>
+Future<void> entityDelete({required String entityType, required String id}) =>
     GenUiCore.instance.api
         .crateApiEntityEntityDelete(entityType: entityType, id: id);
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CoreResult < () >>>
-abstract class CoreResult implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CoreResult < EntityRecord >>>
-abstract class CoreResultEntityRecord implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CoreResult < ListResult >>>
-abstract class CoreResultListResult implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CoreResult < Option < EntityRecord > >>>
-abstract class CoreResultOptionEntityRecord implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<EntityRecord>>
-abstract class EntityRecord implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ViewDescriptor>>
-abstract class ViewDescriptor implements RustOpaqueInterface {}

@@ -23,6 +23,14 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // ort (ONNX Runtime, via fastembed) ships prebuilt binaries only for
+        // arm64-v8a on Android — see gen_ui_db_graph's embed-native feature.
+        // Neither i686 nor x86_64 (emulator ABIs) are supported, so this
+        // project targets real arm64 devices only until that changes.
+        ndk {
+            abiFilters += listOf("arm64-v8a")
+        }
     }
 
     buildTypes {

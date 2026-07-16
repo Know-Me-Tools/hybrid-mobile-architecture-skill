@@ -131,6 +131,20 @@ class AndroidEnvironment {
     final rustFlagsKey = 'CARGO_ENCODED_RUSTFLAGS';
     final rustFlagsValue = _libGccWorkaround(targetTempDir, ndkVersionParsed);
 
+    // CMake-based build scripts (e.g. whisper-rs-sys, other -sys crates that
+    // shell out to the `cmake` crate) are not covered by cargokit's cc/AR/CXX
+    // wiring above: the `cmake` crate needs an explicit toolchain file and a
+    // generator that doesn't depend on "Unix Makefiles" (unavailable in this
+    // NDK-only cross-compile context). Both are read by `cmake-rs` via
+    // TARGET_-prefixed env vars (see cmake::Config::getenv_target_os), so they
+    // only affect cross-compiled targets, never the host build.
+    final cmakeToolchainFile = path.join(
+      ndkPath,
+      'build',
+      'cmake',
+      'android.toolchain.cmake',
+    );
+
     final runRustTool =
         Platform.isWindows ? 'run_build_tool.cmd' : 'run_build_tool.sh';
 
@@ -163,6 +177,21 @@ class AndroidEnvironment {
       '_CARGOKIT_NDK_LINK_TARGET': targetArg,
       '_CARGOKIT_NDK_LINK_CLANG': ccValue,
       'CARGOKIT_TOOL_TEMP_DIR': toolTempDir,
+      'TARGET_CMAKE_TOOLCHAIN_FILE': cmakeToolchainFile,
+      'TARGET_CMAKE_GENERATOR': 'Ninja',
+      'TARGET_ANDROID_PLATFORM': 'android-$minSdkVersion',
+      // Neither cmake-rs (which skips its own CMAKE_SYSTEM_PROCESSOR
+      // inference whenever CMAKE_TOOLCHAIN_FILE is already set — see
+      // cmake::Config::build) nor most -sys crates' build.rs (e.g.
+      // whisper-rs-sys has zero android-specific cmake config) ever tell
+      // the NDK toolchain file which ABI to target, so it silently falls
+      // back to its armeabi-v7a default and conflicts with non-arm Rust
+      // targets. Plain env vars don't reach `cmake`; this only works
+      // because it's un-prefixed and matches a CMAKE_ variable name that
+      // -sys crates following the `cc`/`cmake` crate convention forward
+      // verbatim as a `-D` define (see e.g. whisper-rs-sys's
+      // `env::vars().filter(|(k, _)| k.starts_with("CMAKE_"))` passthrough).
+      'CMAKE_ANDROID_ARCH_ABI': target.android!,
     };
   }
 

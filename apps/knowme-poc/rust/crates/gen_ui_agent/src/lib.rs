@@ -6,6 +6,7 @@
 pub mod chat;
 pub mod config;
 pub mod error;
+pub mod memory;
 pub mod secrets;
 pub mod state;
 

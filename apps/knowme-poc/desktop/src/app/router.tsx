@@ -1,26 +1,27 @@
 // TJ-ARCH-MOB-001 compliant
-import { createRouter, createRoute, createRootRouteWithContext, redirect } from '@tanstack/react-router'
+import { createRouter, createRoute, createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
 import type { AuthState } from '@/features/auth/stores/authStore'
+import { ChatScreen } from '@/features/chat/screens/ChatScreen'
 
 interface RouterContext { auth: AuthState; queryClient: QueryClient }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
-  component: () => <div className="h-screen bg-background">outlet placeholder</div>,
+  component: () => <Outlet />,
 })
 
-const protectedRoute = createRoute({
+// PoC has no real auth backend wired yet (authStore.signIn is a stub) — the
+// index route renders the chat surface directly. A '/login' route + real
+// beforeLoad gate lands with the auth feature; do not gate the demo behind a
+// route that doesn't exist yet.
+const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  id: 'protected',
-  beforeLoad: ({ context }) => {
-    // '/login' is not yet a registered route in this placeholder tree — the real
-    // auth route lands with the auth feature; cast keeps intent visible until then.
-    if (!context.auth.isAuthenticated) throw redirect({ to: '/login' as '/' })
-  },
+  path: '/',
+  component: ChatScreen,
 })
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([protectedRoute]),
+  routeTree: rootRoute.addChildren([indexRoute]),
   context: { auth: undefined!, queryClient: undefined! },
 })
 

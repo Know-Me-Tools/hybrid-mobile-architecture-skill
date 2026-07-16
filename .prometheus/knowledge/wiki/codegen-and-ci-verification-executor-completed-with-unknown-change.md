@@ -7,14 +7,12 @@ tags:
 - ci-verification
 - executor-session
 - unknown-change
-- completion-record
-links:
-- executor-scaffold-full-hybrid-project-completed-with-unknown-change
+- verification
 sources:
 - stdin
-timestamp: 2026-07-16T11:21:15.697766+00:00
-created_at: 2026-07-16T11:21:15.697719+00:00
-updated_at: 2026-07-16T11:21:15.697766+00:00
+timestamp: 2026-07-16T15:48:34.675519+00:00
+created_at: 2026-07-16T15:48:34.675457+00:00
+updated_at: 2026-07-16T15:48:34.675519+00:00
 revision: 1
 ---
 
@@ -28,18 +26,18 @@ revision: 1
 
 The executor session for `phase-codegen-and-ci-verification` completed. The source record does not identify concrete file changes, generated artifacts, CI results, or repository state transitions.
 
-This is a completion-only executor metadata record. Treat it similarly to other completion-only records with unknown changes, such as [Executor scaffold-full-hybrid-project completed with unknown change](/executor-scaffold-full-hybrid-project-completed-with-unknown-change.md), while preserving that this record applies to the code generation and CI verification phase rather than scaffolding.
+This is a completion-only executor metadata record. Because the recorded change is `unknown`, do not treat code generation output or CI verification status as confirmed until later evidence identifies concrete artifacts and validation results.
 
 ## Verification requirements
 
-Because the recorded change is `unknown`, do not treat code generation output or CI verification as accepted until later evidence identifies and validates concrete results, such as:
+Before accepting this phase as substantively complete, verify:
 
-- Generated source files, bindings, schemas, or other codegen artifacts.
-- CI workflow execution records and pass/fail status.
-- Test, lint, typecheck, build, or formatting command output.
-- Repository diffs proving the expected phase outputs were created or updated.
-- Any follow-up fixes required by failed verification steps.
+- Generated code artifacts, if any, are present and match expected inputs/templates.
+- Repository diffs identify all files created, modified, or deleted.
+- CI jobs were executed and their pass/fail results are recorded.
+- Build, test, lint, formatting, and integration checks relevant to the project are traceable to logs or CI run identifiers.
+- Any generated outputs are reproducible or have documented generation commands.
 
 # Citations
 
-1. [1] stdin
+1. stdin

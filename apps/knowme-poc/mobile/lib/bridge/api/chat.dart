@@ -4,37 +4,28 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import '../frb_generated.dart';
+import '../third_party/gen_ui_db_graph.dart';
+import '../third_party/gen_ui_types/error.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Start a chat turn; returns the run_id whose events arrive on chat_events(run_id).
 /// `thread_id` is reserved for multi-thread history (not yet used — the agent
 /// layer takes the full turn history via `message` for now).
-Future<CoreResultString> chatSend({
-  required String threadId,
-  required String message,
-}) =>
+Future<String> chatSend({required String threadId, required String message}) =>
     GenUiCore.instance.api
         .crateApiChatChatSend(threadId: threadId, message: message);
 
+/// Ingest a note into memory (embeds on-device via fastembed, upserts into
+/// SurrealDB). Returns the assigned record id.
+Future<String> memoryIngest({required String text}) =>
+    GenUiCore.instance.api.crateApiChatMemoryIngest(text: text);
+
 /// Hybrid memory search (vector recall + graph expansion + BM25, RRF-fused in Rust).
-/// Returns opaque JSON rows the UI renders as Memory/Citation ContentBlocks.
-Future<CoreResultVecString> memorySearch({
-  required String query,
-  required int k,
-}) =>
+Future<List<MemoryHit>> memorySearch({required String query, required int k}) =>
     GenUiCore.instance.api.crateApiChatMemorySearch(query: query, k: k);
 
-/// Expand the entity graph around a node to a given depth. Intent-level; the
-/// recursive RELATE traversal lives in gen_ui_db::graph (C-004).
-Future<CoreResultVecString> graphExpand({
-  required String entityId,
-  required int depth,
-}) =>
+/// Expand the entity graph around a node to a given depth.
+Future<List<RelatedEntity>> graphExpand(
+        {required String entityId, required int depth}) =>
     GenUiCore.instance.api
         .crateApiChatGraphExpand(entityId: entityId, depth: depth);
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CoreResult < String >>>
-abstract class CoreResultString implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CoreResult < Vec < String > >>>
-abstract class CoreResultVecString implements RustOpaqueInterface {}

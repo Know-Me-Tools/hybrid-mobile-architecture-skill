@@ -66,7 +66,7 @@ mod native {
                 .lock()
                 .map_err(|_| GraphError::Embedding("embedder mutex poisoned".into()))?;
             let out = model
-                .embed(texts.to_vec(), None)
+                .embed(texts, None)
                 .map_err(|e| GraphError::Embedding(e.to_string()))?;
             for v in &out {
                 if v.len() != EMBED_DIM {

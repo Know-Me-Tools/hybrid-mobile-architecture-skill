@@ -9,6 +9,7 @@ use std::sync::{Arc, Mutex};
 
 use crate::error::Result;
 use gen_ui_agent::ConfigBackend;
+use gen_ui_db_graph::{FastEmbedder, GraphStore, GraphStoreConfig};
 use gen_ui_types::transport::{EntityRecord, ListResult};
 use gen_ui_types::view::ViewDescriptor;
 use once_cell::sync::OnceCell;
@@ -27,10 +28,14 @@ pub async fn stream_agent_a2ui(user_message: String, messages: Vec<String>) -> R
         .map_err(Into::into)
 }
 
-/// Boot-order invariant, step 1: open the config store (pglite-oxide), run its
-/// migrations, and initialise gen_ui_agent's process-lifetime state (config
-/// backend + A2uiEvent broadcast). Idempotent per process — the frontend calls
-/// this once at startup, before load_seeds/attach_sync_shapes.
+/// Boot-order invariant, step 1: open the config store (pglite-oxide) AND the
+/// memory/graph-RAG store (embedded SurrealDB — a separate concern from config
+/// storage, see gen_ui_agent::state::init's doc comment: memory is
+/// SurrealDB-only on every platform, desktop included, regardless of which
+/// config-DB engine is in use), then initialise gen_ui_agent's process-lifetime
+/// state (config backend + memory store + A2uiEvent broadcast). Idempotent per
+/// process — the frontend calls this once at startup, before
+/// load_seeds/attach_sync_shapes.
 ///
 /// Concurrent duplicate invocations (React StrictMode double-invokes the startup
 /// effect in dev) are safe: `PgliteStore::open` coalesces concurrent callers
@@ -44,10 +49,27 @@ pub async fn run_migrations<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> 
     std::fs::create_dir_all(&data_dir).map_err(|e| {
         tauri::Error::from(std::io::Error::new(e.kind(), format!("app data dir: {e}")))
     })?;
-    let store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
+    let config_store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
         .await
         .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
-    gen_ui_agent::state::init(ConfigBackend::Postgres(Arc::new(store)));
+
+    let embedder = gen_ui_runtime::spawn_blocking(FastEmbedder::new)
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(format!("embedder task join: {e}")))?
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    let memory_store = GraphStore::open(GraphStoreConfig {
+        endpoint: format!("rocksdb://{}", data_dir.join("memory-db").display()),
+        namespace: "knowme".to_string(),
+        database: "poc".to_string(),
+        embedder: Arc::new(embedder),
+    })
+    .await
+    .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+
+    gen_ui_agent::state::init(
+        ConfigBackend::Postgres(Arc::new(config_store)),
+        Arc::new(memory_store),
+    );
     Ok(())
 }
 

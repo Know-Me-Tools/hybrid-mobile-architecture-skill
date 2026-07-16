@@ -14,15 +14,15 @@ void main() {
 
     // Rust-shaped hits at the FFI boundary — the only fake. Nothing else mocked.
     const hits = [
-      MemoryHit(id: 'entity:1', name: 'Alpha', score: 0.91, snippet: 'first'),
-      MemoryHit(id: 'entity:2', name: 'Beta', score: 0.42),
+      MemoryHit(id: 'entity:1', text: 'Alpha', kind: 'note', score: 0.91),
+      MemoryHit(id: 'entity:2', text: 'Beta', kind: 'note', score: 0.42),
     ];
     container.read(memoryProvider.notifier).applyHits('alpha', hits);
 
     final MemoryResult result = container.read(memoryProvider);
     expect(result.query, 'alpha');
     expect(result.hits, hasLength(2));
-    expect(result.hits.first.name, 'Alpha');
+    expect(result.hits.first.text, 'Alpha');
     expect(result.hits.first.score, greaterThan(result.hits.last.score));
   });
 }

@@ -13,7 +13,11 @@
 pub mod streams;
 pub mod entity;
 pub mod chat;
+// gen_ui_audio (whisper-rs) is off on Android — see gen_ui_ffi/Cargo.toml's
+// target-gated dependency comment for why.
+#[cfg(not(target_os = "android"))]
 pub mod scribe;
+pub mod boot;
 
 use flutter_rust_bridge::frb;
 

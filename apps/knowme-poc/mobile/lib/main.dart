@@ -2,17 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// Staged for the post-codegen bootstrap below (kept imported so uncommenting is
-// a one-line change once gen_ui_core is built and frb bindings are generated).
-// ignore: unused_import
 import 'package:path_provider/path_provider.dart';
 import 'package:prometheus_entity_management/prometheus_entity_management.dart';
 
 import 'app/router.dart';
-// ignore: unused_import
 import 'bridge/rust_bridge_provider.dart';
 import 'features/startup/presentation/screens/startup_gate.dart';
 import 'shared/providers/entity_transport.dart';
+import 'shared/providers/data_dir.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,10 +21,9 @@ Future<void> main() async {
   );
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  // Initialise the Rust runtime BEFORE runApp (uncomment after frb codegen):
-  // final dir = await getApplicationDocumentsDirectory();
-  // await initRustBridge(dataDir: dir.path);
-  // await setApiKey(const String.fromEnvironment('ANTHROPIC_API_KEY'));
+  final dir = await getApplicationDocumentsDirectory();
+  dataDirOverride = dir.path;
+  await initRustBridge(dataDir: dir.path);
 
   runApp(
     ProviderScope(

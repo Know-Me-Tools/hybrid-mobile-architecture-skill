@@ -7,7 +7,15 @@
 //! One recording in flight at a time per process, mirroring gen_ui_agent's
 //! single-chat-turn precedent: `scribe_start` errors if a recording is already
 //! live rather than silently discarding it.
-use gen_ui_types::CoreResult;
+// frb's Result<T,E> detection only matches a literal `Result<...>` return
+// type — it does NOT resolve through a generic type alias like `CoreResult<T>`
+// (verified against flutter_rust_bridge_codegen 2.12.0's alias-parsing filter,
+// which drops any `type Foo<T> = ...` with generics before resolution ever
+// runs). Every frb-exposed fn in this crate MUST spell out
+// `Result<T, gen_ui_types::CoreError>` literally or Dart gets an opaque
+// blob with zero field/error access instead of a normal Future<T> that
+// throws on Err.
+use gen_ui_types::CoreError;
 use once_cell::sync::OnceCell;
 use std::sync::Mutex;
 
@@ -18,7 +26,7 @@ fn slot() -> &'static Mutex<Option<gen_ui_audio::Recorder>> {
 }
 
 /// Start a microphone recording. Errors if one is already in progress.
-pub fn scribe_start() -> CoreResult<()> {
+pub fn scribe_start() -> Result<(), CoreError> {
     let mut guard = slot().lock().expect("scribe recording mutex poisoned");
     if guard.is_some() {
         return Err(gen_ui_types::CoreError::Terminal(
@@ -34,7 +42,7 @@ pub fn scribe_start() -> CoreResult<()> {
 
 /// Stop the in-flight recording and transcribe it on-device. Returns the
 /// transcript; the caller (Dart UI) decides whether/how to save it to memory.
-pub async fn scribe_stop() -> CoreResult<String> {
+pub async fn scribe_stop() -> Result<String, CoreError> {
     let recorder = slot()
         .lock()
         .expect("scribe recording mutex poisoned")

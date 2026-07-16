@@ -14,23 +14,18 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 /// carry a `run_id`; `Block` does not) — correct for this PoC's single-turn-at-
 /// a-time chat, since only one run is ever in flight. Multiplexing by run_id is
 /// a real gap for concurrent turns, deferred until that's an actual requirement.
-Stream<A2UiEvent> chatEvents({required String runId}) =>
+Stream<String> chatEvents({required String runId}) =>
     GenUiCore.instance.api.crateApiStreamsChatEvents(runId: runId);
 
 /// Subscribe to entity change events. One Dart listener fans these into
 /// `ref.invalidate` calls per the PEM-Flutter cascade-invalidation design.
-Stream<ChangeEvent> entityChanges() =>
+/// Emits `gen_ui_types::transport::ChangeEvent` JSON once Wave-1 (C-003)
+/// forwards EntityTransport change notifications here.
+Stream<String> entityChanges() =>
     GenUiCore.instance.api.crateApiStreamsEntityChanges();
 
 /// Subscribe to the sync status feed that drives the UI sync chip.
-Stream<SyncStatus> syncStatus() =>
+/// Emits `gen_ui_types::sync::SyncStatus` JSON once Wave-1 (C-005) forwards
+/// SyncTransport status transitions here.
+Stream<String> syncStatus() =>
     GenUiCore.instance.api.crateApiStreamsSyncStatus();
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<A2uiEvent>>
-abstract class A2UiEvent implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ChangeEvent>>
-abstract class ChangeEvent implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<SyncStatus>>
-abstract class SyncStatus implements RustOpaqueInterface {}

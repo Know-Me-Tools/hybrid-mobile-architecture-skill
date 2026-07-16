@@ -16,11 +16,25 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use gen_ui_agent::{state, ConfigBackend};
 use gen_ui_db::relational::{ConfigStore, ModelPref, Provider, RelationalError, RelationalResult};
+use gen_ui_db_graph::{Embedder, EmbeddingModelInfo, GraphError, GraphStore, GraphStoreConfig, EMBED_DIM};
 use gen_ui_types::events::A2uiEvent;
 
 const PROVIDER_ID: &str = "test-ollama";
 const API_KEY_REF: &str = "test-ollama-noop";
 const SERVICE: &str = "ai.prometheusags.knowme-poc";
+
+/// This test never exercises memory/graph-RAG — a real fastembed model would
+/// be pure overhead. A deterministic zero-vector fake keeps state::init's
+/// required memory store cheap and dependency-free.
+struct ZeroEmbedder;
+impl Embedder for ZeroEmbedder {
+    fn model_info(&self) -> EmbeddingModelInfo {
+        EmbeddingModelInfo { name: "zero-fake".into(), dim: EMBED_DIM }
+    }
+    fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, GraphError> {
+        Ok(texts.iter().map(|_| vec![0.0; EMBED_DIM]).collect())
+    }
+}
 
 struct OllamaConfigStore {
     model_hint: String,
@@ -81,7 +95,17 @@ async fn chat_send_streams_a_real_ollama_response() {
     seed_test_keychain_entry();
 
     let model_hint = std::env::var("OLLAMA_MODEL").unwrap_or_else(|_| "llama3.2:1b".into());
-    state::init(ConfigBackend::Postgres(Arc::new(OllamaConfigStore { model_hint })));
+    let memory = Arc::new(
+        GraphStore::open(GraphStoreConfig {
+            endpoint: "memory".to_string(),
+            namespace: "test".to_string(),
+            database: "ollama_live".to_string(),
+            embedder: Arc::new(ZeroEmbedder),
+        })
+        .await
+        .expect("ephemeral in-memory GraphStore should open"),
+    );
+    state::init(ConfigBackend::Postgres(Arc::new(OllamaConfigStore { model_hint })), memory);
 
     let run_id = gen_ui_agent::chat::send("Say hello in exactly one word.".into(), Vec::new())
         .await

@@ -1,6 +1,16 @@
 # Update Log
 
 ## 2026-07-16
+* **Creation**: [Android Rust target install during Hybrid Mobile PoC verification](/android-rust-target-install-during-hybrid-mobile-poc-verification.md)
+* **Creation**: [SurrealDB core rebuild delayed Hybrid Mobile PoC verification](/surrealdb-core-rebuild-delayed-hybrid-mobile-poc-verification.md)
+* **Creation**: [Hybrid Mobile Codegen and CI Verification Completion Marker](/hybrid-mobile-codegen-and-ci-verification-completion-marker.md)
+* **Creation**: [Hybrid Mobile PoC Android build monitor status at assembleDebug](/hybrid-mobile-poc-android-build-monitor-status-at-assembledebug.md)
+* **Creation**: [Hybrid Mobile PoC Android build reached Gradle assembleDebug](/hybrid-mobile-poc-android-build-reached-gradle-assembledebug.md)
+* **Creation**: [FRB rust_input fix for transparent PoC bridge types](/frb-rust-input-fix-for-transparent-poc-bridge-types.md)
+* **Creation**: [Codegen and CI Verification Executor Session Completion](/codegen-and-ci-verification-executor-session-completion.md)
+* **Creation**: [Android Rust cross-compile progress for Hybrid Mobile PoC](/android-rust-cross-compile-progress-for-hybrid-mobile-poc.md)
+* **Creation**: [Codegen and CI Verification Executor Completion Marker](/codegen-and-ci-verification-executor-completion-marker.md)
+* **Creation**: [KnowMe PoC chat routing restored after aborted stale PR merge](/knowme-poc-chat-routing-restored-after-aborted-stale-pr-merge.md)
 * **Creation**: [Executor Completion Marker for Codegen and CI Phase](/executor-completion-marker-for-codegen-and-ci-phase.md)
 * **Creation**: [Hybrid Mobile PoC phase goals and verification scope](/hybrid-mobile-poc-phase-goals-and-verification-scope.md)
 * **Creation**: [Executor Completion Marker for Codegen and CI Verification Phase](/executor-completion-marker-for-codegen-and-ci-verification-phase.md)

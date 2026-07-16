@@ -6,13 +6,20 @@
 // Static analysis wrongly picks the IO variant, thus ignore this
 // ignore_for_file: argument_type_not_assignable
 
+import 'api/boot.dart';
 import 'api/chat.dart';
 import 'api/entity.dart';
+import 'api/scribe.dart';
 import 'api/streams.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_web.dart';
+import 'third_party/gen_ui_db_graph.dart';
+import 'third_party/gen_ui_types/error.dart';
+import 'third_party/gen_ui_types/sync.dart';
+import 'third_party/gen_ui_types/transport.dart';
+import 'third_party/gen_ui_types/view.dart';
 
 abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   GenUiCoreApiImplPlatform({
@@ -22,211 +29,180 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
     required super.portManager,
   });
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_A2UiEventPtr =>
-      wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent;
-
   CrossPlatformFinalizerArg
       get rust_arc_decrement_strong_count_ChangeEventPtr => wire
           .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent;
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_CoreResultPtr =>
-      wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult;
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_CoreErrorPtr =>
+      wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_GraphErrorPtr =>
+      wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_GraphStorePtr =>
+      wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore;
 
   CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_CoreResultEntityRecordPtr => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_CoreResultListResultPtr => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_CoreResultOptionEntityRecordPtr => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_CoreResultStringPtr => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_CoreResultVecStringPtr => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_EntityRecordPtr => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord;
+      get rust_arc_decrement_strong_count_GraphStoreConfigPtr => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_SyncStatusPtr =>
       wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_ViewDescriptorPtr => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor;
 
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
   @protected
-  A2UiEvent
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    dynamic raw,
-  );
-
-  @protected
   ChangeEvent
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    dynamic raw,
-  );
+          dynamic raw);
 
   @protected
-  CoreResult
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    dynamic raw,
-  );
+  CoreError
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          dynamic raw);
 
   @protected
-  CoreResultEntityRecord
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    dynamic raw,
-  );
+  GraphError
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          dynamic raw);
 
   @protected
-  CoreResultListResult
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    dynamic raw,
-  );
+  GraphStore
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          dynamic raw);
 
   @protected
-  CoreResultOptionEntityRecord
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    dynamic raw,
-  );
-
-  @protected
-  CoreResultString
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    dynamic raw,
-  );
-
-  @protected
-  CoreResultVecString
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    dynamic raw,
-  );
-
-  @protected
-  EntityRecord
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    dynamic raw,
-  );
+  GraphStoreConfig
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          dynamic raw);
 
   @protected
   SyncStatus
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    dynamic raw,
-  );
+          dynamic raw);
 
   @protected
-  ViewDescriptor
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    dynamic raw,
-  );
-
-  @protected
-  A2UiEvent
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    dynamic raw,
-  );
+  GraphStore
+      dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          dynamic raw);
 
   @protected
   ChangeEvent
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    dynamic raw,
-  );
+          dynamic raw);
 
   @protected
-  CoreResult
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    dynamic raw,
-  );
+  CoreError
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          dynamic raw);
 
   @protected
-  CoreResultEntityRecord
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    dynamic raw,
-  );
+  GraphError
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          dynamic raw);
 
   @protected
-  CoreResultListResult
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    dynamic raw,
-  );
+  GraphStore
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          dynamic raw);
 
   @protected
-  CoreResultOptionEntityRecord
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    dynamic raw,
-  );
-
-  @protected
-  CoreResultString
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    dynamic raw,
-  );
-
-  @protected
-  CoreResultVecString
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    dynamic raw,
-  );
-
-  @protected
-  EntityRecord
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    dynamic raw,
-  );
+  GraphStoreConfig
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          dynamic raw);
 
   @protected
   SyncStatus
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    dynamic raw,
-  );
+          dynamic raw);
 
   @protected
-  ViewDescriptor
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    dynamic raw,
-  );
-
-  @protected
-  RustStreamSink<A2UiEvent>
-      dco_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent_Sse(
-    dynamic raw,
-  );
-
-  @protected
-  RustStreamSink<ChangeEvent>
-      dco_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
-    dynamic raw,
-  );
-
-  @protected
-  RustStreamSink<SyncStatus>
-      dco_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
-    dynamic raw,
-  );
+  RustStreamSink<String> dco_decode_StreamSink_String_Sse(dynamic raw);
 
   @protected
   String dco_decode_String(dynamic raw);
 
   @protected
+  SyncTransport dco_decode_TraitDef_SyncTransport(dynamic raw);
+
+  @protected
+  bool dco_decode_bool(dynamic raw);
+
+  @protected
+  EntityRecord dco_decode_box_autoadd_entity_record(dynamic raw);
+
+  @protected
+  MemoryRecord dco_decode_box_autoadd_memory_record(dynamic raw);
+
+  @protected
+  int dco_decode_box_autoadd_u_32(dynamic raw);
+
+  @protected
   BigInt dco_decode_box_autoadd_usize(dynamic raw);
+
+  @protected
+  ViewDescriptor dco_decode_box_autoadd_view_descriptor(dynamic raw);
+
+  @protected
+  EntityRecord dco_decode_entity_record(dynamic raw);
+
+  @protected
+  double dco_decode_f_32(dynamic raw);
+
+  @protected
+  FilterOp dco_decode_filter_op(dynamic raw);
+
+  @protected
+  FilterSpec dco_decode_filter_spec(dynamic raw);
+
+  @protected
+  int dco_decode_i_32(dynamic raw);
+
+  @protected
+  List<EntityRecord> dco_decode_list_entity_record(dynamic raw);
+
+  @protected
+  List<FilterSpec> dco_decode_list_filter_spec(dynamic raw);
+
+  @protected
+  List<MemoryHit> dco_decode_list_memory_hit(dynamic raw);
 
   @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  List<RelatedEntity> dco_decode_list_related_entity(dynamic raw);
+
+  @protected
+  ListResult dco_decode_list_result(dynamic raw);
+
+  @protected
+  List<SortSpec> dco_decode_list_sort_spec(dynamic raw);
+
+  @protected
+  MemoryHit dco_decode_memory_hit(dynamic raw);
+
+  @protected
+  MemoryRecord dco_decode_memory_record(dynamic raw);
+
+  @protected
+  String? dco_decode_opt_String(dynamic raw);
+
+  @protected
+  EntityRecord? dco_decode_opt_box_autoadd_entity_record(dynamic raw);
+
+  @protected
+  int? dco_decode_opt_box_autoadd_u_32(dynamic raw);
+
+  @protected
   BigInt? dco_decode_opt_box_autoadd_usize(dynamic raw);
+
+  @protected
+  RelatedEntity dco_decode_related_entity(dynamic raw);
+
+  @protected
+  SortSpec dco_decode_sort_spec(dynamic raw);
 
   @protected
   int dco_decode_u_32(dynamic raw);
@@ -241,169 +217,166 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   BigInt dco_decode_usize(dynamic raw);
 
   @protected
-  AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
+  ViewDescriptor dco_decode_view_descriptor(dynamic raw);
 
   @protected
-  A2UiEvent
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    SseDeserializer deserializer,
-  );
+  AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
   ChangeEvent
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    SseDeserializer deserializer,
-  );
+          SseDeserializer deserializer);
 
   @protected
-  CoreResult
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    SseDeserializer deserializer,
-  );
+  CoreError
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          SseDeserializer deserializer);
 
   @protected
-  CoreResultEntityRecord
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    SseDeserializer deserializer,
-  );
+  GraphError
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          SseDeserializer deserializer);
 
   @protected
-  CoreResultListResult
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    SseDeserializer deserializer,
-  );
+  GraphStore
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          SseDeserializer deserializer);
 
   @protected
-  CoreResultOptionEntityRecord
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  CoreResultString
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  CoreResultVecString
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  EntityRecord
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    SseDeserializer deserializer,
-  );
+  GraphStoreConfig
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          SseDeserializer deserializer);
 
   @protected
   SyncStatus
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SseDeserializer deserializer,
-  );
+          SseDeserializer deserializer);
 
   @protected
-  ViewDescriptor
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  A2UiEvent
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    SseDeserializer deserializer,
-  );
+  GraphStore
+      sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          SseDeserializer deserializer);
 
   @protected
   ChangeEvent
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    SseDeserializer deserializer,
-  );
+          SseDeserializer deserializer);
 
   @protected
-  CoreResult
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    SseDeserializer deserializer,
-  );
+  CoreError
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          SseDeserializer deserializer);
 
   @protected
-  CoreResultEntityRecord
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    SseDeserializer deserializer,
-  );
+  GraphError
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          SseDeserializer deserializer);
 
   @protected
-  CoreResultListResult
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    SseDeserializer deserializer,
-  );
+  GraphStore
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          SseDeserializer deserializer);
 
   @protected
-  CoreResultOptionEntityRecord
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  CoreResultString
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  CoreResultVecString
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  EntityRecord
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    SseDeserializer deserializer,
-  );
+  GraphStoreConfig
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          SseDeserializer deserializer);
 
   @protected
   SyncStatus
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SseDeserializer deserializer,
-  );
+          SseDeserializer deserializer);
 
   @protected
-  ViewDescriptor
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  RustStreamSink<A2UiEvent>
-      sse_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent_Sse(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  RustStreamSink<ChangeEvent>
-      sse_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  RustStreamSink<SyncStatus>
-      sse_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
-    SseDeserializer deserializer,
-  );
+  RustStreamSink<String> sse_decode_StreamSink_String_Sse(
+      SseDeserializer deserializer);
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
 
   @protected
+  bool sse_decode_bool(SseDeserializer deserializer);
+
+  @protected
+  EntityRecord sse_decode_box_autoadd_entity_record(
+      SseDeserializer deserializer);
+
+  @protected
+  MemoryRecord sse_decode_box_autoadd_memory_record(
+      SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
   BigInt sse_decode_box_autoadd_usize(SseDeserializer deserializer);
+
+  @protected
+  ViewDescriptor sse_decode_box_autoadd_view_descriptor(
+      SseDeserializer deserializer);
+
+  @protected
+  EntityRecord sse_decode_entity_record(SseDeserializer deserializer);
+
+  @protected
+  double sse_decode_f_32(SseDeserializer deserializer);
+
+  @protected
+  FilterOp sse_decode_filter_op(SseDeserializer deserializer);
+
+  @protected
+  FilterSpec sse_decode_filter_spec(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_i_32(SseDeserializer deserializer);
+
+  @protected
+  List<EntityRecord> sse_decode_list_entity_record(
+      SseDeserializer deserializer);
+
+  @protected
+  List<FilterSpec> sse_decode_list_filter_spec(SseDeserializer deserializer);
+
+  @protected
+  List<MemoryHit> sse_decode_list_memory_hit(SseDeserializer deserializer);
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  List<RelatedEntity> sse_decode_list_related_entity(
+      SseDeserializer deserializer);
+
+  @protected
+  ListResult sse_decode_list_result(SseDeserializer deserializer);
+
+  @protected
+  List<SortSpec> sse_decode_list_sort_spec(SseDeserializer deserializer);
+
+  @protected
+  MemoryHit sse_decode_memory_hit(SseDeserializer deserializer);
+
+  @protected
+  MemoryRecord sse_decode_memory_record(SseDeserializer deserializer);
+
+  @protected
+  String? sse_decode_opt_String(SseDeserializer deserializer);
+
+  @protected
+  EntityRecord? sse_decode_opt_box_autoadd_entity_record(
+      SseDeserializer deserializer);
+
+  @protected
+  int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
   BigInt? sse_decode_opt_box_autoadd_usize(SseDeserializer deserializer);
+
+  @protected
+  RelatedEntity sse_decode_related_entity(SseDeserializer deserializer);
+
+  @protected
+  SortSpec sse_decode_sort_spec(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_32(SseDeserializer deserializer);
@@ -418,206 +391,170 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   BigInt sse_decode_usize(SseDeserializer deserializer);
 
   @protected
-  int sse_decode_i_32(SseDeserializer deserializer);
-
-  @protected
-  bool sse_decode_bool(SseDeserializer deserializer);
+  ViewDescriptor sse_decode_view_descriptor(SseDeserializer deserializer);
 
   @protected
   void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    A2UiEvent self,
-    SseSerializer serializer,
-  );
+      AnyhowException self, SseSerializer serializer);
 
   @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    ChangeEvent self,
-    SseSerializer serializer,
-  );
+          ChangeEvent self, SseSerializer serializer);
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    CoreResult self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          CoreError self, SseSerializer serializer);
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    CoreResultEntityRecord self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          GraphError self, SseSerializer serializer);
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    CoreResultListResult self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          GraphStore self, SseSerializer serializer);
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    CoreResultOptionEntityRecord self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    CoreResultString self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    CoreResultVecString self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    EntityRecord self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          GraphStoreConfig self, SseSerializer serializer);
 
   @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SyncStatus self,
-    SseSerializer serializer,
-  );
+          SyncStatus self, SseSerializer serializer);
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    ViewDescriptor self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    A2UiEvent self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          GraphStore self, SseSerializer serializer);
 
   @protected
   void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    ChangeEvent self,
-    SseSerializer serializer,
-  );
+          ChangeEvent self, SseSerializer serializer);
 
   @protected
   void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    CoreResult self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          CoreError self, SseSerializer serializer);
 
   @protected
   void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    CoreResultEntityRecord self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          GraphError self, SseSerializer serializer);
 
   @protected
   void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    CoreResultListResult self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          GraphStore self, SseSerializer serializer);
 
   @protected
   void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    CoreResultOptionEntityRecord self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    CoreResultString self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    CoreResultVecString self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    EntityRecord self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          GraphStoreConfig self, SseSerializer serializer);
 
   @protected
   void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SyncStatus self,
-    SseSerializer serializer,
-  );
+          SyncStatus self, SseSerializer serializer);
 
   @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    ViewDescriptor self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent_Sse(
-    RustStreamSink<A2UiEvent> self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
-    RustStreamSink<ChangeEvent> self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
-    RustStreamSink<SyncStatus> self,
-    SseSerializer serializer,
-  );
+  void sse_encode_StreamSink_String_Sse(
+      RustStreamSink<String> self, SseSerializer serializer);
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
 
   @protected
+  void sse_encode_bool(bool self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_entity_record(
+      EntityRecord self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_memory_record(
+      MemoryRecord self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer);
+
+  @protected
   void sse_encode_box_autoadd_usize(BigInt self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_view_descriptor(
+      ViewDescriptor self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_entity_record(EntityRecord self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_f_32(double self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_filter_op(FilterOp self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_filter_spec(FilterSpec self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_i_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_entity_record(
+      List<EntityRecord> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_filter_spec(
+      List<FilterSpec> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_memory_hit(
+      List<MemoryHit> self, SseSerializer serializer);
+
+  @protected
   void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  );
+      Uint8List self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_related_entity(
+      List<RelatedEntity> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_result(ListResult self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_sort_spec(List<SortSpec> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_memory_hit(MemoryHit self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_memory_record(MemoryRecord self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_String(String? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_entity_record(
+      EntityRecord? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer);
 
   @protected
   void sse_encode_opt_box_autoadd_usize(BigInt? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_related_entity(RelatedEntity self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_sort_spec(SortSpec self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_32(int self, SseSerializer serializer);
@@ -632,10 +569,8 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   void sse_encode_usize(BigInt self, SseSerializer serializer);
 
   @protected
-  void sse_encode_i_32(int self, SseSerializer serializer);
-
-  @protected
-  void sse_encode_bool(bool self, SseSerializer serializer);
+  void sse_encode_view_descriptor(
+      ViewDescriptor self, SseSerializer serializer);
 }
 
 // Section: wire_class
@@ -643,203 +578,77 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 class GenUiCoreWire implements BaseWire {
   GenUiCoreWire.fromExternalLibrary(ExternalLibrary lib);
 
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-            ptr,
-          );
+  void rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          int ptr) =>
+      wasmModule
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+              ptr);
 
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-            ptr,
-          );
+  void rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          int ptr) =>
+      wasmModule
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+              ptr);
 
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-            ptr,
-          );
+  void rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          int ptr) =>
+      wasmModule
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+              ptr);
 
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-            ptr,
-          );
+  void rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          int ptr) =>
+      wasmModule
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+              ptr);
 
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-            ptr,
-          );
+  void rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          int ptr) =>
+      wasmModule
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+              ptr);
 
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-            ptr,
-          );
+  void rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          int ptr) =>
+      wasmModule
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+              ptr);
 
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-            ptr,
-          );
+  void rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          int ptr) =>
+      wasmModule
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+              ptr);
 
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-            ptr,
-          );
+  void rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          int ptr) =>
+      wasmModule
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+              ptr);
 
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-            ptr,
-          );
+  void rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          int ptr) =>
+      wasmModule
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+              ptr);
 
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-            ptr,
-          );
+  void rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          int ptr) =>
+      wasmModule
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+              ptr);
 
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-            ptr,
-          );
+  void rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          int ptr) =>
+      wasmModule
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+              ptr);
 
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-            ptr,
-          );
-
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-            ptr,
-          );
-
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-            ptr,
-          );
-
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-            ptr,
-          );
-
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-            ptr,
-          );
-
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-            ptr,
-          );
-
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-            ptr,
-          );
-
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-            ptr,
-          );
-
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-            ptr,
-          );
-
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-            ptr,
-          );
-
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-            ptr,
-          );
+  void rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          int ptr) =>
+      wasmModule
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+              ptr);
 }
 
 @JS('wasm_bindgen')
@@ -849,112 +658,50 @@ external GenUiCoreWasmModule get wasmModule;
 @anonymous
 extension type GenUiCoreWasmModule._(JSObject _) implements JSObject {
   external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    int ptr,
-  );
-
-  external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
-    int ptr,
-  );
-
-  external void
       rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    int ptr,
-  );
+          int ptr);
 
   external void
       rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    int ptr,
-  );
+          int ptr);
 
   external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    int ptr,
-  );
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          int ptr);
 
   external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    int ptr,
-  );
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          int ptr);
 
   external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    int ptr,
-  );
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          int ptr);
 
   external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    int ptr,
-  );
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          int ptr);
 
   external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    int ptr,
-  );
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          int ptr);
 
   external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    int ptr,
-  );
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          int ptr);
 
   external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    int ptr,
-  );
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          int ptr);
 
   external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    int ptr,
-  );
-
-  external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    int ptr,
-  );
-
-  external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    int ptr,
-  );
-
-  external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    int ptr,
-  );
-
-  external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    int ptr,
-  );
-
-  external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    int ptr,
-  );
-
-  external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    int ptr,
-  );
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          int ptr);
 
   external void
       rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    int ptr,
-  );
+          int ptr);
 
   external void
       rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    int ptr,
-  );
-
-  external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    int ptr,
-  );
-
-  external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    int ptr,
-  );
+          int ptr);
 }

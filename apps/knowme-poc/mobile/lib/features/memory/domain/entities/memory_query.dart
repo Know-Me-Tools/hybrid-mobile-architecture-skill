@@ -1,7 +1,7 @@
 // TJ-ARCH-MOB-001 compliant
-import '../../../../bridge/rust_bridge_provider.dart' show MemoryHit;
+import '../../../../bridge/third_party/gen_ui_db_graph.dart' show MemoryHit;
 
-export '../../../../bridge/rust_bridge_provider.dart' show MemoryHit;
+export '../../../../bridge/third_party/gen_ui_db_graph.dart' show MemoryHit;
 
 /// Immutable result of one hybrid-search run: the query and its ranked hits.
 class MemoryResult {
