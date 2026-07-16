@@ -29,7 +29,7 @@ step "Installing project-local UI/UX skills into $CLAUDE_DIR"
 mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/hooks"
 
 # ── Skills ──────────────────────────────────────────────────────────────────
-for skill in content-block-ui hybrid-design-tokens tauri-ui-review flutter-golden-ui a11y-gate; do
+for skill in content-block-ui hybrid-design-tokens tauri-ui-review tauri-custom-titlebar flutter-golden-ui a11y-gate; do
   if [[ -d "$SRC/$skill" ]]; then
     mkdir -p "$CLAUDE_DIR/skills/$skill"
     cp "$SRC/$skill/SKILL.md" "$CLAUDE_DIR/skills/$skill/SKILL.md"

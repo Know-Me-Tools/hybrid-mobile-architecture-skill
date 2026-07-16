@@ -147,6 +147,31 @@
 - Verified clean before commit: `cargo clippy --workspace -- -D warnings`,
   `flutter analyze`, `npx tsc --noEmit` (desktop) — all zero warnings/errors.
 
+### 2026-07-16 — C-105 "research wait-state" resolved; C-112/C-113 UI scope added (user-directed)
+- **C-105 wait-state was stale, not blocking.** The wiki note
+  (`knowme-poc-phase-goals-and-c-105-research-wait-state`) recorded a phase snapshot, not
+  an open question: the research it waited on was already decided on 2026-07-15 (mistral.rs
+  GQAdonis fork native + WebLLM/MLC on web, both with sources in this log). A concurrent
+  session has since landed T1-T8 on main (`79bb7af`, `dddfe85`) — fork pinned at
+  `b7746a85cb2e78fb2cf11cfb6ea9abd0a167d1f3`, regex + safetensors/candle conflicts
+  resolved, `MistralEngine` + WebLLM lane implemented, design.md written. **Remaining:
+  T9-T12** (plugin commands, agent lane selection, cloud↔local toggle + tok/s, e2e smoke).
+  C-105 marked `in_progress`, NOT taken up here, to avoid racing that session.
+- **C-112 (new, delivered)**: the PoC's custom Tauri title bar
+  (`decorations: false` + `Titlebar.tsx`) extracted into a reusable project-local skill,
+  `tauri-custom-titlebar`. Captures the two non-obvious defects the PoC already solved:
+  `data-tauri-drag-region` alone leaves dead zones (explicit `startDragging()` needed for
+  the whole bar), and Tauri API imports throw at module scope in a plain web page
+  (`isTauri()` guard). Per user direction the skill treats **surface gating as a
+  first-class decision** — it must NOT default the desktop bar onto web/mobile, and offers
+  the alternatives (no bar / plain web header / mobile app bar) instead.
+- **C-113 (new, pending)**: mobile navigation must follow platform convention — iOS bottom
+  tab bar (HIG); Android top-or-bottom per Material 3 — across BOTH React and Flutter, and
+  extending to mobile-web PWA. Per user direction the PWA-by-platform rule must be a single
+  **consistent** documented choice (adaptive vs. one convention), recorded here at execute
+  time, not left to whichever component an agent reaches for. Research (T1) precedes the
+  decision (T2) precisely because the 2026 conventions are what bind the choice.
+
 ### 2026-07-16 — C-106 execution: infra landed (T1-T3); TWO BLOCKERS surfaced
 - **T2/T3 delivered**: `apps/knowme-poc/infra/` — docker-compose.yml (Postgres 18-alpine
   + Electric 1.7.7 pinned by multi-arch digest), postgres.conf (Electric's own required

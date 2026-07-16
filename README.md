@@ -149,7 +149,8 @@ hybrid-mobile-architecture/
     add-project-skills.sh           # Project-local UI/UX skills + activation hook
     new-feature.sh / add-auth.sh / audit.sh
   templates/project-skills/         # content-block-ui · hybrid-design-tokens ·
-                                    #   tauri-ui-review · flutter-golden-ui · a11y-gate
+                                    #   tauri-ui-review · tauri-custom-titlebar ·
+                                    #   flutter-golden-ui · a11y-gate
   apps/                             # Proof-of-concept applications (knowme-poc upcoming)
   openspec/                         # OpenSpec change management (active + archive)
 ```

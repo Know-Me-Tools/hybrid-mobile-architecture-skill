@@ -125,7 +125,8 @@ assessment in `.kbd-orchestrator/phases/scaffold-full-hybrid-project/assessment.
   (official), VGV golden-test workflow, `shadcn-ui-flutter`.
 - Accessibility: a11y agents (WCAG 2.2 AA) on both surfaces.
 - Scaffolded projects receive project-local skills (`content-block-ui`,
-  `hybrid-design-tokens`, `tauri-ui-review`, `flutter-golden-ui`, `a11y-gate`) plus a
+  `hybrid-design-tokens`, `tauri-ui-review`, `tauri-custom-titlebar`,
+  `flutter-golden-ui`, `a11y-gate`) plus a
   skill-activation hook — directive descriptions and prompt-matching hooks raise skill
   activation from ~50% to ~84–100%.
 

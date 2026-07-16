@@ -9,6 +9,7 @@
 * [C-009 Project Skill Templates for Hybrid Mobile Scaffold](/c-009-project-skill-templates-for-hybrid-mobile-scaffold.md)
 * [C-012 completes hybrid scaffold vertical slice seams](/c-012-completes-hybrid-scaffold-vertical-slice-seams.md)
 * [C-103 execute handoff for KnowMe PoC live chat milestone](/c-103-execute-handoff-for-knowme-poc-live-chat-milestone.md)
+* [C-104 Graph-RAG backend archived and C-111 UI work created](/c-104-graph-rag-backend-archived-and-c-111-ui-work-created.md)
 * [Claude Code model access divergence caused by org login context](/claude-code-model-access-divergence-caused-by-org-login-context.md)
 * [Claude Code model restrictions from managed organization policies](/claude-code-model-restrictions-from-managed-organization-policies.md)
 * [Codegen and CI verification completed with unknown change](/codegen-and-ci-verification-completed-with-unknown-change.md)
