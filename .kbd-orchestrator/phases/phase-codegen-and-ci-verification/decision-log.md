@@ -264,3 +264,65 @@
   honesty discipline (no receiver has observed a decoded frame; `framesDecoded=0`), and
   FRF's CLAUDE.md mandates halting at phase boundaries for approval. That work is WebRTC
   media decode — unrelated to realtime *data* sync and of no use to the skills repo.
+
+### 2026-07-16 — C-106 T4/T5: the write path, and a task I dropped
+- **MY ERROR, corrected**: rewriting the task list for the FRF pivot silently dropped
+  **T3c (`impl WriteSink`)**. T4/T5 cannot construct a transport without one —
+  `FrfSyncTransport::new(cfg, store, sink)` needs it — so the gap surfaced immediately.
+  Restored as T3c below. There is still no production `WriteSink` in the workspace (only
+  the test `NoopSink` in frf_transport.rs's tests).
+- **VERIFIED, and it settles the write-target question the pivot left open**: the write
+  path is **forge/Quarry, NOT the FRF spine**. Evidence:
+  * `SpineService` (envelope.proto) is `Publish`/`Subscribe`/`Ack`. `Publish` writes to
+    the **Iggy broker only** — `frf-app::publish` takes a `broker: Arc<L>` (LogBroker)
+    and there is **no spine→Postgres writer anywhere in the FRF workspace**.
+  * `EntityService` (entity.proto) is **read-only**: `GetEntity` + `WatchEntity`. FRF
+    exposes no entity-write RPC at all.
+  * Therefore CDC is strictly one-directional: **Postgres → spine**. Publishing a row
+    change to the spine would fan it out to subscribers but never persist it, so the
+    row would vanish on the next re-materialisation and never reach other devices.
+    Using the spine as the write path would have looked like it worked in a demo and
+    silently lost data.
+  * Our `gen_ui_client::flint::forge` already implements the full `EntityTransport`
+    CRUD surface (`create`/`update`/`delete`) over **Quarry's PostgREST grammar**
+    (`/<schema>/<table>`) — i.e. writes land in Postgres, where CDC picks them up and
+    fans them back out. That closes the loop. The original plan's "DIY write queue ->
+    forge Quarry API" was right; the pivot does not change the write lane at all.
+- **OPEN CONFIG REQUIREMENT (blocks the T7 demo, not the code)**: the loop only closes
+  if forge/Quarry is pointed at **the same Postgres that FRF's CDC slot reads**. FRF's
+  compose runs its own Postgres (`frf` db, port 15432) and no forge service. So the demo
+  needs either (a) forge added to the compose against FRF's Postgres, or (b) forge
+  configured at FRF's Postgres. Recorded rather than guessed — it is a deployment
+  decision, and T7 is blocked on Docker auth regardless.
+
+### 2026-07-16 — C-106 T3c/T4 landed; T5 (mobile) blocked on a gen_ui_db_graph contract decision
+- **T3c (WriteSink) DONE** — `gen_ui_agent::sync_sink::ForgeWriteSink`, 5/5 tests. Placed
+  at **L3** because the trait lives in `gen_ui_db` (L2) and the client in
+  `gen_ui_client` (L2) — siblings that must not depend on each other, so L3 is the first
+  layer that legitimately sees both. `forge_write_sink()` constructor also lives there so
+  the platform leaves don't each grow reqwest/parking_lot deps just to build a client.
+- **Bug caught in my own code before it shipped**: the first `forge_write_sink` took a
+  `bearer` argument and never applied it — it logged and built an `Unauthenticated`
+  state. A sync engine that silently writes as anon when told to authenticate is a
+  data-leak shape. Now parses the token into `AuthState::Authenticated` and returns
+  `Result` (a malformed token is an error, not a silent downgrade).
+- **T4 (desktop) DONE** — `attach_sync_shapes` starts a real `FrfSyncTransport`:
+  `PgLocalStore` over the same pglite singleton `run_migrations` opened, forge write
+  queue, config read from `sync.frf` in the config DB. **Sync is opt-in**: absent config
+  logs and returns Ok (local-only), because failing startup over an unconfigured optional
+  backend would make the app unrunnable for everyone not doing sync work today. A
+  *malformed* setting is still an error — someone tried and got it wrong.
+- **T5 (mobile) BLOCKED — decision needed, and it is not an effort question.** Mobile has
+  **no Postgres**: `gen_ui_ffi::api::boot::run_migrations` registers embedded SurrealDB as
+  BOTH config and memory backend (`ConfigBackend::Surreal`), because pglite-oxide is
+  structurally unsupported on iOS/Android (no child processes, no JIT). Therefore:
+  * `PgLocalStore` (needs `sqlx::PgPool`) cannot serve mobile at all.
+  * A `SurrealLocalStore` needs row-level upsert/truncate against SurrealDB — but
+    `gen_ui_db_graph`'s public surface is **INTENT-LEVEL by explicit design** ("never raw
+    SurrealQL"; the FFI contract depends on it, since there is no Dart SurrealDB SDK).
+    Adding row persistence changes that crate's contract. **That is a design decision for
+    the owner, not something to smuggle in under a sync task.**
+  * The write path is NOT blocked — `forge_write_sink` is platform-agnostic. Once a
+    mobile `LocalStore` exists, the wiring mirrors desktop's exactly.
+  * Honest state: **desktop syncs, mobile does not yet.** Documented at the seam itself
+    so the next reader finds it where they'd look.

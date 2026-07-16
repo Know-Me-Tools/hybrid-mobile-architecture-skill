@@ -86,10 +86,30 @@
       uses SurrealDB. Upserts via jsonb_populate_record (schema-agnostic), soft-deletes,
       one txn per batch, SYNCED_TABLES allow-list as an injection guard. ORIGINAL: (pglite-oxide desktop /
       mobile store): apply RowChange batches atomically, upsert on PK, soft-delete rows.
-- [ ] T4 — Wire the desktop seam: `tauri-plugin-gen-ui::commands::attach_sync_shapes`
+- [x] T3c — **`impl WriteSink` over forge/Quarry** — DONE (`gen_ui_agent::sync_sink`,
+      5/5 tests). Lives at L3 because the trait is gen_ui_db's and the client is
+      gen_ui_client's — L2 siblings that must not depend on each other. (RESTORED — dropped in error when the
+      task list was rewritten for the FRF pivot; T4/T5 cannot construct a transport
+      without it). VERIFIED 2026-07-16 that forge — NOT the FRF spine — is the write
+      target: `SpineService::Publish` writes to the Iggy broker only (no spine→Postgres
+      writer exists in FRF), and `EntityService` is read-only, so CDC is strictly
+      Postgres→spine. Writes must land in Postgres via Quarry's PostgREST surface, which
+      `gen_ui_client::flint::forge` already implements (`EntityTransport` CRUD); CDC then
+      fans them back out. Map `PendingWrite` → create/update/delete, forward the
+      idempotency key, and classify outcomes into `WriteOutcome`.
+- [x] T4 — DONE. `attach_sync_shapes` starts a real FrfSyncTransport (PgLocalStore read
+      lane + forge write queue), reading `sync.frf` from the config DB. Sync is opt-in:
+      absent config = local-only, not a startup failure. ORIGINAL: `tauri-plugin-gen-ui::commands::attach_sync_shapes`
       constructs and starts the FRF engine (currently a no-op `Ok(())`), reading endpoint
       + tenant + token from the config DB the way other settings are supplied.
-- [ ] T5 — Wire the mobile seam: `gen_ui_ffi::api::boot::attach_sync_shapes` likewise
+- [~] T5 — **BLOCKED on a design decision, not effort.** Mobile has NO Postgres:
+      `run_migrations` registers embedded SurrealDB as both config and memory backend
+      (`ConfigBackend::Surreal`) because pglite-oxide cannot run on iOS/Android. So
+      `PgLocalStore` cannot serve mobile, and a `SurrealLocalStore` requires adding a
+      row-persistence surface to `gen_ui_db_graph`, whose public API is INTENT-LEVEL by
+      explicit design ("never raw SurrealQL" — lib.rs). That is a contract change for
+      that crate and needs a decision. The write path is unaffected (forge_write_sink is
+      platform-agnostic). Blocker documented at the seam itself. ORIGINAL: `gen_ui_ffi::api::boot::attach_sync_shapes` likewise
       (also a no-op `Ok(())` today).
 - [ ] T6 — SyncChip live on both surfaces: subscribe to the existing SyncStatus broadcast
       (do not poll). React via Hooks→Stores; Flutter via a `@riverpod` autoDispose stream.
