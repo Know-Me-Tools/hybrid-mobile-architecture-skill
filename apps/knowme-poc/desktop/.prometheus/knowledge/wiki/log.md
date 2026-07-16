@@ -1,6 +1,8 @@
 # Update Log
 
 ## 2026-07-16
+* **Creation**: [Codegen and CI Verification Phase Executor Marker](/codegen-and-ci-verification-phase-executor-marker.md)
+* **Creation**: [kbd-apply os_mark_done Top-Level Checkbox Ordinal Fix](/kbd-apply-os-mark-done-top-level-checkbox-ordinal-fix.md)
 * **Creation**: [Codegen and CI Verification Phase Executor Complete](/codegen-and-ci-verification-phase-executor-complete.md)
 * **Creation**: [KnowMe PoC Android assembleDebug Running on SM S936U](/knowme-poc-android-assembledebug-running-on-sm-s936u.md)
 * **Creation**: [Codegen and CI Verification Phase Completion Marker](/codegen-and-ci-verification-phase-completion-marker.md)
