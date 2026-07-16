@@ -78,11 +78,21 @@
       The test first PASSED on that garbage — it only asserted "text is
       non-empty". It now asserts the answer doesn't echo the prompt, isn't a
       repetition loop, and actually greets.
-- [ ] T12c — **Verify the WebLLM lane in a real browser.** Not yet done: it
-      typechecks and follows the verified 0.2.84 API, but no browser has actually
-      loaded the model. Given that the native lane's plausible-looking code hid
-      two real bugs until a model really ran, this is the one remaining claim
-      resting on inspection rather than evidence.
+- [~] T12c — WebLLM lane, browser-probed. **Partially verified.** A probe page
+      importing the real `webllmLane.ts` was run against the Vite dev server in a
+      live browser. Confirmed with evidence:
+        - `navigator.gpu` present; adapter granted (4GB max buffer) — the WebGPU
+          gate and its degrade path are correct.
+        - `@mlc-ai/web-llm` imports; `CreateMLCEngine` is a function.
+        - **The model id is real**: `Qwen2.5-1.5B-Instruct-q4f16_1-MLC` appears in
+          the live 163-entry `prebuiltAppConfig` catalog, exactly as written.
+        - `huggingface.co` weight host reachable from the page (HTTP 200);
+          Worker/WASM/Cache/IndexedDB all available.
+      **Not** confirmed: an actual generation. `CreateMLCEngine` stalls inside the
+      automated browser pane without emitting a single weight fetch or an error —
+      it never reaches the network. Environment and network are demonstrably fine,
+      so this looks like the sandboxed pane (not cross-origin-isolated), not the
+      lane code. Needs one manual run in a normal browser to close.
 - [ ] T12d — Confirm mistral.rs's internal spawn_blocking behaviour empirically
       (design.md flags it as unverified — generation does not stall the runtime in
       practice, but the mechanism is unconfirmed).
