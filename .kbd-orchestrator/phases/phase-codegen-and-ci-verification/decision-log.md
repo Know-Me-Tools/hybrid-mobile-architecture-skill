@@ -353,3 +353,101 @@ pre-existing; none were C-106's doing.
    flint-forge (commit a built `dist/`, add `src` to `files`, or publish to a registry).
    3 residual tsc errors, all from this one module. NOT worked around here — a stub or a
    `skipLibCheck` hack would hide a real packaging defect in another repo.
+
+### 2026-07-16 — C-105 execution: the fork does not work as planned (evidence-backed)
+- **CORRECTION to the 2026-07-15 inference decision**: that entry recorded mistral.rs
+  (GQAdonis fork) as the C-105 native lane on the strength of "crates verified". Building
+  and *running* it found the fork unusable as-pinned without two fixes. Recording this
+  because the earlier entry reads as more settled than it was — crate-existence is not
+  build-verification, and neither is build-verification run-verification.
+- **PIN**: mistralrs @ `b7746a85cb2e78fb2cf11cfb6ea9abd0a167d1f3` (Rule 22). MSRV 1.88,
+  clears our 1.95 floor.
+- **FIX 1 — the fork's own crates do not compile together.** It declares
+  `safetensors = "0.7"`, but the candle fork it tracks by floating `branch = "main"` has
+  moved to `"0.8"` — semver-incompatible, so `candle-core::Dtype` stopped unifying with
+  `mistralrs-quant`'s (E0308). Resolved with the fallback the fork's OWN Cargo.toml
+  documents: `[patch]` candle → upstream `huggingface/candle` rev `5404348` (verified:
+  declares 0.7). Side benefit: removes a floating branch ref from our graph.
+- **FIX 2 — regex conflict.** mistral.rs (via serde-saphyr) needs `regex <1.13`; the lock
+  held 1.13.1 (pulled by liter-llm as a loose `^1`). Pinned 1.12.4 — satisfies both lanes.
+- **DECISION (reverses the plan) — Q4_K_M → Q4_0.** The plan named Qwen2.5-1.5B **Q4_K_M**.
+  It produces garbage on this fork. Isolated by driving mistral.rs's own API directly,
+  bypassing all our code:
+    Qwen2.5 Q4_K_M → repetition loop | Qwen2.5 Q5_K_M → garbage
+    Qwen2.5 Q4_0 → "Hello" ✓ | Qwen2.5 Q8_0 → "Hello" ✓ | TinyLlama Q4_K_M → "Ho!" ✓
+  So: Qwen-architecture-specific K-quant dequantization, almost certainly the same candle
+  skew as FIX 1 (the patch made it compile; the quant kernels are still mismatched).
+  Ships **Q4_0** (same ~1GB class). Re-test K-quants on any candle/mistral.rs bump.
+  Provenance: measured, not recalled.
+- **FIX 3 — `top_k`.** `RequestBuilder::new()` defaults to `SamplingParams::deterministic()`
+  → `top_k = 1` (greedy), silently overriding temperature/top_p. `SampleParams` is frozen
+  and carries no top_k, so the lane sets `DEFAULT_TOP_K = 40` explicitly.
+- **FIX 4 (pre-existing, C-103) — the desktop A2UI wire contract was broken.** The plugin
+  emits `A2uiEvent` verbatim (`{"type":"block"}` / `{"type":"run_finished"}`), but
+  `driver.ts` switched on `contentBlock`/`messageComplete` — matching neither, so the
+  desktop lane rendered NO streamed response and had not since C-103. An `as never` cast
+  hid it from tsc. Added `createA2uiWireAdapter` + 5 tests over that contract.
+- **PROCESS LESSON**: the T12 live test initially PASSED on the Q4_K_M garbage, because it
+  only asserted `!text.is_empty()` — which a well-formed stream of nonsense satisfies. A
+  test that cannot fail on garbage verifies nothing. It now asserts the answer doesn't
+  echo the prompt, isn't a repetition loop, and actually greets.
+- **DECISION — commit dependency lockfiles.** `apps/knowme-poc/.gitignore` had a blanket
+  `*.lock` that silently dropped `Cargo.lock`/`pubspec.lock`/`Podfile.lock`. Cargo.lock is
+  the ONLY pin holding mistral.rs's floating `turboquant-rs#main` to a reviewed SHA, and it
+  carries the regex resolution above — without it CI re-resolves and breaks. Rule narrowed
+  to genuine build-tool scratch locks (Gradle, build_runner).
+- **Open**: T12c (WebLLM generation in a real browser) — probe confirmed WebGPU, module
+  import, HF reachability, and that the model id is in the live catalog, but
+  `CreateMLCEngine` stalls in the automated pane without fetching. Not claimed as verified.
+
+### 2026-07-16 — C-113 mobile navigation: the premise was wrong; one convention, no detection
+- **RESEARCH (T1, sourced from live pages — WebFetch returned JS shells, re-fetched via
+  Firecrawl; every claim below is quoted guidance, not recall):**
+  - iOS HIG, *Tab bars*: a tab bar "lets people navigate between **top-level sections**"
+    and "floats above content at the **bottom of the screen**". Top-placed tab bars on
+    iPhone aren't discouraged — they're never contemplated. The explicit prohibition is
+    about purpose, not position: "Use a tab bar to support navigation, not to provide
+    actions." No hard tab count; "avoid overflow tabs"; ≤5 only as iPad-customization
+    guidance.
+  - M3, *Navigation bar*: "always placed at the **bottom**"; "**three to five**
+    destinations"; "On mobile or tablet, navigation bars should be used for **top-level
+    destinations**"; <3 destinations → use tabs; >5 → tabs or a modal rail.
+  - M3, *Tabs*: "primary tabs are placed at the **top** of the content pane under an app
+    bar"; "tabs organize groups of **related content at the same level of hierarchy**".
+- **CORRECTION — the C-113 proposal's premise is false.** It states the platforms
+  "disagree" about top-vs-bottom. They do not. On phones both converge on **bottom**
+  placement for top-level destinations. M3's own decisive line: "**Use navigation for
+  distinct pages and tabs for related content within a page**" — Android's top tabs are a
+  *different component for a different purpose* (in-screen content switching), not a rival
+  placement for app-level navigation. M3 illustrates tabs living *inside* a nav-bar
+  destination. Provenance: sourced research, contradicting the proposal's framing.
+- **DECISION (T2) — mobile web/PWA uses ONE convention: bottom navigation, no platform
+  detection.** Rationale, in order of weight:
+  1. It follows from the convergence above — a single bottom nav satisfies **both** HIG and
+     M3 phone guidance simultaneously, so "adaptive" would buy nothing.
+  2. **No authority exists** for the adaptive alternative. web.dev's PWA *App design*
+     chapter (the closest candidate) doesn't address navigation placement at all; its only
+     platform-adaptation advice is cosmetic, and it is internally inconsistent (icons
+     platform-*agnostic*, fonts platform-*native*). Recording the negative result rather
+     than citing something weak.
+  3. Reliable OS detection on the web is UA-sniffing — fragile, and Client Hints
+     deliberately reduce the signal. Adaptive nav means shipping and testing two nav trees
+     keyed off an unreliable input, for no guidance-backed benefit.
+  Satisfies the user's directive that the PWA rule be a single deliberate choice.
+- **QUALIFICATIONS (recorded so this isn't over-read):**
+  - The real divergence is **by form factor, not by OS**. Apple moves the tab bar to the
+    **top** on iPadOS; M3 swaps the bottom bar for a **rail** at expanded widths. Both
+    abandon bottom placement as windows widen — they differ on what they move *to*. The
+    decision above is scoped to **phone-width** top-level navigation.
+  - M3 also says primary tabs "display the app's main content destinations", so the
+    tabs-are-never-navigation split is a simplification of M3's actual wording. The
+    convergence claim holds firmly at phone width; don't generalize past it.
+- **STATE FOUND**: Flutter already ships a bottom M3 `NavigationBar` (3 destinations:
+  Chat/Notes/Memory) — already conformant, no change needed. The **React surface has no
+  navigation at all** (single `/` route → ChatScreen), so C-113's React/PWA work is
+  greenfield, not a retrofit.
+- **USER RATIFIED (2026-07-16)**: both the T2 rule (one convention — bottom nav, no
+  platform detection) and the T5 scope (React matches Flutter's 3 destinations, responsive:
+  bottom nav at phone width, desktop-appropriate layout above it, since Tauri desktop
+  shares the bundle and both HIG/M3 abandon bottom placement as windows widen).
+  Provenance: user.
