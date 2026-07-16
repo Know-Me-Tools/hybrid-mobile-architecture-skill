@@ -326,3 +326,30 @@
     mobile `LocalStore` exists, the wiring mirrors desktop's exactly.
   * Honest state: **desktop syncs, mobile does not yet.** Documented at the seam itself
     so the next reader finds it where they'd look.
+
+### 2026-07-16 — CI repair: three separate root causes, two fixed, one upstream
+Chasing T9's gate turned up three independent reasons CI could never be green. All were
+pre-existing; none were C-106's doing.
+1. **Rust job — FIXED.** `clippy --workspace` from a bare checkout cannot compile:
+   `gen_ui_ffi`'s `mod frb_generated;` is auto-injected by flutter_rust_bridge and the
+   generated file is not committed (E0583 on every run, incl. main). Added the codegen
+   step the Mobile job already had — plus `flutter-action`, because codegen shells out to
+   `flutter --version` and formats the Dart it emits. Verified by running codegen with a
+   Flutter-free PATH: "Dart/Flutter toolchain not available".
+2. **Desktop job, part 1 — FIXED.** `pnpm/action-setup` ran with no version and the repo
+   has no `packageManager` field → "No pnpm version is specified", every run. Pinned.
+3. **Desktop job, part 2 — PARTIALLY FIXED (12 errors → 3).** The `file:` sibling
+   packages (`gen-ui-react`, `tauri-plugin-gen-ui/guest-js`) publish their types from
+   `dist/`, and **pnpm hard-copies a `file:` dep at install time** — so installing before
+   those packages are built snapshots them WITHOUT `dist/`, and no later build can fix it.
+   Order is load-bearing: build siblings, THEN install. Verified end-to-end from a clean
+   `node_modules`.
+4. **`@flint/react` — UPSTREAM, NOT FIXABLE HERE.** It is a git dep
+   (`Know-Me-Tools/flint-forge#1cae090`, `path:packages/flint-react`) whose package.json
+   declares `files: ["dist", "SKILL.md"]` and `types: ./dist/index.d.ts`. The fetched
+   package contains **only package.json and SKILL.md** — no `dist/` (not prebuilt in the
+   repo) and no `src/` (excluded by `files`). It is therefore structurally unusable as a
+   git dep: nothing to import, nothing to build from. Fixing it means changing
+   flint-forge (commit a built `dist/`, add `src` to `files`, or publish to a registry).
+   3 residual tsc errors, all from this one module. NOT worked around here — a stub or a
+   `skipLibCheck` hack would hide a real packaging defect in another repo.

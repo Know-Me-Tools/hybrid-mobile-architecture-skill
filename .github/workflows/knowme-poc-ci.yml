@@ -85,6 +85,16 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 10
+      # ORDER IS LOAD-BEARING: the `file:` sibling packages resolve their types through
+      # `dist/`, and pnpm hard-copies a file: dep at install time. Installing before the
+      # siblings are built snapshots them WITHOUT dist/, so tsc then cannot find their
+      # type declarations no matter what runs afterwards. Build first, then install.
+      - name: "Build file: sibling packages (they publish types from dist/)"
+        working-directory: apps/knowme-poc
+        run: |
+          for pkg in packages/gen-ui-react rust/crates/tauri-plugin-gen-ui/guest-js; do
+            (cd "$pkg" && pnpm install --ignore-scripts && pnpm run build)
+          done
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc --noEmit
       - run: pnpm test
