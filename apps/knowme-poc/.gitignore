@@ -1,6 +1,24 @@
 # Rust
 target/
-*.lock
+
+# Build-tool scratch locks (Gradle daemon, build_runner) — machine-local, never
+# shared. Formerly a blanket `*.lock`, which also swallowed the dependency
+# lockfiles below; those MUST be committed (see C-105 design doc).
+*.gradle/**/*.lock
+**/.dart_tool/build/lock/*.lock
+
+# Dependency lockfiles ARE committed — this is an application workspace, not a
+# library, so builds must be reproducible across machines and CI. This matters
+# concretely here: mistral.rs (desktop inference lane) depends on
+# GQAdonis/turboquant-rs by floating `branch = "main"`, and Cargo.lock is the ONLY
+# thing pinning it to a reviewed SHA. It also holds the regex 1.12.4 resolution
+# that lets the mistral.rs and liter-llm lanes coexist. Without these committed,
+# CI silently re-resolves and the build breaks.
+!rust/Cargo.lock
+!desktop/src-tauri/Cargo.lock
+!mobile/pubspec.lock
+!mobile/ios/Podfile.lock
+!flutter_packages/*/pubspec.lock
 
 # Flutter
 mobile/.dart_tool/
