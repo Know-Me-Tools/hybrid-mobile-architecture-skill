@@ -3288,50 +3288,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "frf-domain"
-version = "0.1.0"
-source = "git+ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric?rev=9ba04ae6ce41be796ae149609414b17a0d0d376b#9ba04ae6ce41be796ae149609414b17a0d0d376b"
-dependencies = [
- "chrono",
- "serde",
- "serde_json",
- "uuid 1.24.0",
-]
-
-[[package]]
-name = "frf-proto"
-version = "0.1.0"
-source = "git+ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric?rev=9ba04ae6ce41be796ae149609414b17a0d0d376b#9ba04ae6ce41be796ae149609414b17a0d0d376b"
-dependencies = [
- "prost",
- "prost-types",
- "tonic",
- "tonic-prost",
- "tonic-prost-build",
-]
-
-[[package]]
-name = "frf-sdk-rust"
-version = "0.1.0"
-source = "git+ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric?rev=9ba04ae6ce41be796ae149609414b17a0d0d376b#9ba04ae6ce41be796ae149609414b17a0d0d376b"
-dependencies = [
- "async-stream",
- "chrono",
- "frf-domain",
- "frf-proto",
- "futures-util",
- "prost",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
- "tokio-stream",
- "tonic",
- "tonic-prost",
- "tracing",
- "uuid 1.24.0",
-]
-
-[[package]]
 name = "fs_extra"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3758,7 +3714,6 @@ name = "gen_ui_client"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "frf-sdk-rust",
  "futures",
  "gen_ui_mcp",
  "gen_ui_protocol",
@@ -6265,12 +6220,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "multimap"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d87ecb2933e8aeadb3e3a02b828fed80a7528047e68b4f424523a0981a3a084"
-
-[[package]]
 name = "munge"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7606,27 +7555,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "prost-build"
-version = "0.14.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03da047801ff44bb6a4d407d4860c05fd70bb81714e6b2f3812603d5b145b042"
-dependencies = [
- "heck 0.4.1",
- "itertools 0.11.0",
- "log",
- "multimap",
- "petgraph",
- "prettyplease",
- "prost",
- "prost-types",
- "pulldown-cmark 0.13.4",
- "pulldown-cmark-to-cmark",
- "regex",
- "syn 2.0.119",
- "tempfile",
-]
-
-[[package]]
 name = "prost-derive"
 version = "0.14.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7703,26 +7631,6 @@ dependencies = [
  "bitflags 1.3.2",
  "memchr",
  "unicase",
-]
-
-[[package]]
-name = "pulldown-cmark"
-version = "0.13.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9f068eba8e7071c5f9511831b44f32c740d5adf574e990f946ddb53db2f314e"
-dependencies = [
- "bitflags 2.13.1",
- "memchr",
- "unicase",
-]
-
-[[package]]
-name = "pulldown-cmark-to-cmark"
-version = "22.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50793def1b900256624a709439404384204a5dc3a6ec580281bfaac35e882e90"
-dependencies = [
- "pulldown-cmark 0.13.4",
 ]
 
 [[package]]
@@ -11474,24 +11382,11 @@ dependencies = [
  "socket2",
  "sync_wrapper",
  "tokio",
- "tokio-rustls",
  "tokio-stream",
  "tower",
  "tower-layer",
  "tower-service",
  "tracing",
-]
-
-[[package]]
-name = "tonic-build"
-version = "0.14.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c68f61875ac5293cf72e6c8cf0158086428c82c37229e98c840878f1706b0322"
-dependencies = [
- "prettyplease",
- "proc-macro2",
- "quote",
- "syn 2.0.119",
 ]
 
 [[package]]
@@ -11503,22 +11398,6 @@ dependencies = [
  "bytes",
  "prost",
  "tonic",
-]
-
-[[package]]
-name = "tonic-prost-build"
-version = "0.14.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "654e5643eff75d7f8c99197ce1440ed19a3474eada74c12bbac488b2cafdae27"
-dependencies = [
- "prettyplease",
- "proc-macro2",
- "prost-build",
- "prost-types",
- "quote",
- "syn 2.0.119",
- "tempfile",
- "tonic-build",
 ]
 
 [[package]]
@@ -12277,7 +12156,7 @@ checksum = "9bd0acb6d70885ea0c343749019ba74f015f64a9d30542e66db69b49b7e28186"
 dependencies = [
  "anyhow",
  "id-arena",
- "pulldown-cmark 0.8.0",
+ "pulldown-cmark",
  "unicode-normalization",
  "unicode-xid",
 ]

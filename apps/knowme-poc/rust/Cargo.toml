@@ -54,8 +54,28 @@ reqwest-eventsource = "0.6"
 #     `peer-crdt` features, UNCOMMENT below and point at your vendored checkout —
 #     a `git`+`rev` pin (reproducible) or a `path` to a local clone:
 #       frf-sdk-rust = { git = "ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b" }
-#     ── VERIFIED HEAD (2026-07-15): 9ba04ae6ce41be796ae149609414b17a0d0d376b ──
-frf-sdk-rust      = { git = "ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+#     ── VERIFIED HEAD (2026-07-15, re-confirmed 2026-07-16): 9ba04ae6ce41be796ae149609414b17a0d0d376b ──
+#
+#     C-106 (2026-07-16) VERIFIED the enable path end-to-end, then reverted it. Findings:
+#       * The git+rev dep RESOLVES fine — cargo clones the whole repo, so FRF's internal
+#         `path` deps (frf-domain = { path = "../frf-domain" }) are satisfied. The older
+#         note claiming a fresh scaffold "cannot resolve them" was wrong on that point.
+#       * The org casing is `Prometheus-AGS`, NOT `prometheusags` (verified: git ls-remote).
+#       * Cargo's libgit2 SSH transport CANNOT auth against this private repo
+#         ("no usernames succeeded") though the git CLI can. Requires, in .cargo/config.toml:
+#             [net]
+#             git-fetch-with-cli = true
+#       * THE REAL BLOCKER — why this stays commented: **FRF lives in a DIFFERENT GitHub org
+#         (Prometheus-AGS) than this repo (Know-Me-Tools), so CI's GITHUB_TOKEN can never
+#         reach it.** Uncommenting puts an `ssh://git@github.com/...` source in Cargo.lock,
+#         and CI then fails at fetch — `git@github.com: Permission denied (publickey)` — even
+#         though the `frf` feature is OFF by default, because the LOCK forces resolution.
+#         Enabling FRF in CI therefore needs a cross-org deploy key / PAT secret + an
+#         ssh-agent step in the workflow. That is a repo-admin action, not a code change.
+#       * Locally, uncomment + set git-fetch-with-cli and it builds clean:
+#         `cargo check -p gen_ui_client --features frf` passes, clippy -D warnings passes,
+#         and wasm32 stays FRF-free (verified via cargo tree).
+# frf-sdk-rust      = { git = "ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
 # frf-crdt          = { git = "ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
 # frf-store-redb    = { git = "ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
 # JWT decode (inspect exp/role/tenant_id from gate-minted tokens; no local verify —

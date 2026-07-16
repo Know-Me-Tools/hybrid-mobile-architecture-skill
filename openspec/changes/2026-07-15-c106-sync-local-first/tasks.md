@@ -59,7 +59,13 @@
 - [x] T3d — Postgres schema + CDC publication: notes/memories tables (carry T3's PK and
       soft-delete design forward) + the `CREATE PUBLICATION` / replication-slot config
       `frf-postgres-cdc` requires, and the `channel_path` its rows land on.
-- [x] T4b — Un-stub the `frf` feature: real `frf-sdk-rust` git dep at the pinned rev
+- [~] T4b — Un-stub the `frf` feature — **VERIFIED LOCALLY, THEN REVERTED. BLOCKED ON
+      A REPO SECRET.** The dep resolves, compiles, and passes clippy with the wasm32 gate
+      intact — but FRF lives in a DIFFERENT GitHub org (Prometheus-AGS) than this repo
+      (Know-Me-Tools), so CI's GITHUB_TOKEN cannot fetch it and `Cargo.lock` recording an
+      `ssh://` source fails CI at resolve time even with the feature OFF. **Needs a
+      cross-org deploy key / PAT + ssh-agent step in the workflow — a repo-admin action.**
+      Findings + the exact enable recipe are documented in rust/Cargo.toml. Old T4b: real `frf-sdk-rust` git dep at the pinned rev
       (`9ba04ae…`, Rule 22/23) in the workspace + gen_ui_client Cargo.tomls; keep it
       native-only and wasm-excluded (tonic/HTTP-2 does not build for wasm32 — the
       existing cfg-gating already anticipates this). Verify wasm32 still checks clean.
