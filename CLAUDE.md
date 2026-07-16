@@ -474,3 +474,12 @@ Graph RAG (memory, entity graph) is uniform across every tier via embedded Surre
 - **KnowMe** (`know-me.tools`) — Flutter mobile (iOS/Android) + Tauri desktop
 - **Prometheus AGS** — Tauri desktop primary + Flutter field mobile
 - **TribeHealth.ai** — Flutter mobile (healthcare, non-negotiable per `references/arch-standard.md`)
+
+---
+
+## Session logs: always commit
+
+The `.prometheus/` directory (events.jsonl, knowledge wiki, session logs) is part of
+this repository's durable knowledge base. **Standing authorization (user, 2026-07-16):
+always commit and push ALL `.prometheus/` session-log and wiki changes** together with
+the work they document. Do not ask for permission each time.

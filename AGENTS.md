@@ -247,3 +247,10 @@ Do not edit these unless you are explicitly configuring OpenCode itself. When mo
   intentionally there). Do not edit for OpenCode work.
 - `assets/templates/` — only modify when updating scaffolding output.
 - `docs/*.html` — generated/reference documents; update the source of truth or regeneration pipeline, not the HTML directly.
+
+## Session logs: always commit
+
+The `.prometheus/` directory (events.jsonl, knowledge wiki, session logs) is part of
+this repository's durable knowledge base. **Standing authorization (user, 2026-07-16):
+always commit and push ALL `.prometheus/` session-log and wiki changes** together with
+the work they document. Do not ask for permission each time.
