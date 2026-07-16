@@ -34,12 +34,12 @@
     },
     {
       "id": "2026-07-15-c107-whisper-scribe",
-      "status": "in_progress",
+      "status": "merged",
       "wave": 1
     },
     {
       "id": "2026-07-15-c110-ci",
-      "status": "in_progress",
+      "status": "merged",
       "wave": 1
     },
     {
@@ -53,7 +53,7 @@
       "wave": 2
     }
   ],
-  "completedChanges": 3,
+  "completedChanges": 5,
   "totalChanges": 10,
   "previousPhase": "scaffold-full-hybrid-project",
   "startedAt": "2026-07-15T22:04:11Z",
