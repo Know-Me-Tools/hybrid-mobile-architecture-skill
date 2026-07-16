@@ -146,3 +146,28 @@
   --no-bundle` + `flutter build ios --simulator --no-codesign`).
 - Verified clean before commit: `cargo clippy --workspace -- -D warnings`,
   `flutter analyze`, `npx tsc --noEmit` (desktop) — all zero warnings/errors.
+
+### 2026-07-16 — C-106 execution: infra landed (T1-T3); TWO BLOCKERS surfaced
+- **T2/T3 delivered**: `apps/knowme-poc/infra/` — docker-compose.yml (Postgres 18-alpine
+  + Electric 1.7.7 pinned by multi-arch digest), postgres.conf (Electric's own required
+  settings), init.sql (notes/memories with client-generated UUID PKs + soft-delete, both
+  dictated by the shape contract). `docker compose config` validates.
+- **BLOCKER 1 (environment, user action needed)**: cannot verify the stack actually runs
+  — Docker registry auth on this machine is broken. `docker pull hello-world` fails with
+  the same "authentication required - incorrect username or password"; `docker info`
+  shows no logged-in user. This is a stale credential in the host's Docker config, NOT a
+  defect in the compose file. `docker login` (or clearing the stale credsStore entry)
+  unblocks T7's live demo. The pins themselves were verified against the Docker Hub API.
+- **BLOCKER 2 (scope, decision needed)**: **the sync engine has no body.** `impl
+  LocalStore` and `impl WriteSink` have ZERO hits workspace-wide; neither trait is
+  referenced outside `gen_ui_db::sync`. `SyncEngine::new(cfg, store, sink)` is therefore
+  uncallable — C-005 delivered the engine + seams, but no concrete store/sink ever
+  landed. The plan's C-106 entry ("Electric read-path + DIY write queue") reads as if
+  this existed. Added as T3b/T3c; they are the bulk of the remaining work, NOT the
+  30-minute wiring the plan implies.
+- **Write-target question (must be decided before T3c)**: the plan says the write path
+  flushes through the "forge Quarry API", but the demo's Postgres is directly reachable
+  and no forge instance is part of `infra/`. Either add forge to the compose or point
+  the sink at Postgres for the PoC and label it. NOT decided unilaterally.
+- Plan decision-2 fallback (SyncStatus + write queue proven by boundary tests, shape
+  lane labeled honestly) remains available if T3b/T3c overrun.
