@@ -1,0 +1,12 @@
+# TJ-ARCH-MOB-001 compliant
+# Append-only session/knowledge logs: concurrent sessions each append their own
+# entries, so a "conflict" here is never a real disagreement — both sides are
+# always correct and both must survive. `merge=union` keeps every line from both
+# branches instead of forcing a hand-resolve on every PR.
+#
+# Union merge is ONLY safe for append-only, line-independent files. Do NOT extend
+# this to structured files (JSON, YAML, source) where interleaving lines produces
+# a syntactically broken result — progress.json is deliberately excluded.
+.prometheus/events.jsonl            merge=union
+.prometheus/knowledge/wiki/log.md   merge=union
+.prometheus/knowledge/wiki/index.md merge=union

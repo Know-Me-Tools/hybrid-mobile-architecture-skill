@@ -196,3 +196,26 @@
   the sink at Postgres for the PoC and label it. NOT decided unilaterally.
 - Plan decision-2 fallback (SyncStatus + write queue proven by boundary tests, shape
   lane labeled honestly) remains available if T3b/T3c overrun.
+### 2026-07-16 — C-106 (T1) sync infra research + pins (Rule 22/23 provenance)
+- **Pinned (verified against Docker Hub API, 2026-07-16)**: `electricsql/electric:1.7.7`,
+  multi-arch digest `sha256:15e9a25d5f6c515ad9113392291e34c6751b8b31d563ee4c496fde499a5ce14f`
+  (arm64 + amd64 both present → runs on the dev Mac AND CI). 1.7.7 is the current release
+  (2026-07-08); `latest` points at the same build. `canary` deliberately NOT used.
+- **Wire-protocol compatibility CONFIRMED**: 1.7.x is the v1.x line our C-005 shape
+  consumer already targets (`/v1/shape`, `offset=-1` initial sync, `electric-handle` /
+  `electric-offset` headers, `must-refetch`/409 rotation). No consumer changes needed —
+  the engine was written against this contract.
+- **Postgres floor**: `postgres:18-alpine` per Electric's own dev compose
+  (`packages/sync-service/dev/docker-compose.yml` @ main). Matches the CLAUDE.md cloud
+  tier (PostgreSQL 18 / Supabase), so the PoC's local infra and its cloud target agree.
+- **Required PG settings** (from Electric's own `dev/postgres.conf`, not invented):
+  `wal_level = logical`, `max_replication_slots = 100`, `max_connections = 200`,
+  `listen_addresses = '*'`. Logical replication is Electric's hard requirement (README).
+- Sources: hub.docker.com/v2/repositories/electricsql/electric (tags + digest);
+  github.com/electric-sql/electric @ main — README.md, packages/sync-service/dev/
+  docker-compose.yml, packages/sync-service/dev/postgres.conf.
+- **Scope finding**: C-106's gap is NOT the engine. `gen_ui_db::sync` (C-005) already has
+  a real shape consumer, write queue (idempotent keys, backoff, poison handler),
+  SyncStatus broadcast, and the LocalStore/WriteSink seams. The gap is (a) no infra to
+  sync against and (b) BOTH `attach_sync_shapes` entry points are no-op `Ok(())` stubs
+  (`tauri-plugin-gen-ui::commands`, `gen_ui_ffi::api::boot`). Tasks scoped accordingly.

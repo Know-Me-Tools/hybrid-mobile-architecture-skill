@@ -1,6 +1,13 @@
 # Update Log
 
 ## 2026-07-16
+* **Creation**: [FRF versus ElectricSQL decision point for KnowMe PoC sync](/frf-versus-electricsql-decision-point-for-knowme-poc-sync.md)
+* **Creation**: [KnowMe PoC C-106 sync infra blockers and next decisions](/knowme-poc-c-106-sync-infra-blockers-and-next-decisions.md)
+* **Creation**: [Codegen and CI verification session completed with unknown change](/codegen-and-ci-verification-session-completed-with-unknown-change.md)
+* **Creation**: [Codegen and CI verification executor session completed unknown change](/codegen-and-ci-verification-executor-session-completed-unknown-change.md)
+* **Creation**: [KnowMe PoC PR #4 status and title bar skill verification](/knowme-poc-pr-4-status-and-title-bar-skill-verification.md)
+* **Creation**: [Phase codegen and CI verification completed with unknown change](/phase-codegen-and-ci-verification-completed-with-unknown-change.md)
+* **Creation**: [C-105 local inference lanes verified with remaining Tauri integration](/c-105-local-inference-lanes-verified-with-remaining-tauri-integration.md)
 * **Creation**: [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md)
 * **Creation**: [Codegen and CI verification session ended at 17:17 with no changes](/codegen-and-ci-verification-session-ended-at-17-17-with-no-changes.md)
 * **Creation**: [C-104 Graph-RAG backend archived and C-111 UI work created](/c-104-graph-rag-backend-archived-and-c-111-ui-work-created.md)
