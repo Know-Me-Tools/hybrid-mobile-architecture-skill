@@ -26,6 +26,12 @@ mod shapes;
 mod write_queue;
 #[cfg(not(target_arch = "wasm32"))]
 mod engine;
+#[cfg(not(target_arch = "wasm32"))]
+mod frf_transport;
+// Needs sqlx::PgPool → `pg`. Desktop/web only; mobile's local store is SurrealDB
+// (gen_ui_db_graph), matching how `relational` is gated.
+#[cfg(all(not(target_arch = "wasm32"), feature = "pg"))]
+mod local_store;
 
 pub use status::{SyncStatusHandle, SyncStatusStream};
 // Re-export the frozen seam types so callers use one import path.
@@ -35,6 +41,12 @@ pub use gen_ui_types::sync::{SyncStatus, SyncTransport};
 pub use config::{ShapeSpec, SyncConfig};
 #[cfg(not(target_arch = "wasm32"))]
 pub use engine::SyncEngine;
+// C-106: the FRF-backed transport (the substrate the PoC actually runs) + the concrete
+// read-path store. `SyncEngine` above stays for the Electric lane until it is removed.
+#[cfg(not(target_arch = "wasm32"))]
+pub use frf_transport::{row_change_from_payload, FrfSyncConfig, FrfSyncTransport};
+#[cfg(all(not(target_arch = "wasm32"), feature = "pg"))]
+pub use local_store::PgLocalStore;
 #[cfg(not(target_arch = "wasm32"))]
 pub use seam::{LocalStore, PendingWrite, RowChange, RowOp, WriteOutcome, WriteSink};
 

@@ -13,9 +13,9 @@ links:
 - codegen-and-ci-verification-executor-completed-unknown-change
 sources:
 - stdin
-timestamp: 2026-07-16T18:10:21.786263+00:00
-created_at: 2026-07-16T18:10:21.784704+00:00
-updated_at: 2026-07-16T18:10:21.786263+00:00
+timestamp: 2026-07-16T18:43:32.513362+00:00
+created_at: 2026-07-16T18:43:32.513229+00:00
+updated_at: 2026-07-16T18:43:32.513362+00:00
 revision: 1
 ---
 
@@ -27,9 +27,9 @@ revision: 1
 
 ## Record
 
-The executor session for `phase-codegen-and-ci-verification` completed. The raw record does not identify concrete file changes, generated artifacts, CI results, logs, or repository state transitions.
+The executor session for `phase-codegen-and-ci-verification` completed. The source record does not identify concrete file changes, generated artifacts, CI results, logs, or repository state transitions.
 
-This is a completion-only executor metadata record. Treat it consistently with related unknown-change records such as [Codegen and CI verification executor session completed unknown change](/codegen-and-ci-verification-executor-session-completed-unknown-change.md) and [Codegen and CI verification executor completed unknown change](/codegen-and-ci-verification-executor-completed-unknown-change.md).
+This is a completion-only executor metadata record. Treat it consistently with related completion records such as [Codegen and CI verification executor session completed unknown change](/codegen-and-ci-verification-executor-session-completed-unknown-change.md) and [Codegen and CI verification executor completed unknown change](/codegen-and-ci-verification-executor-completed-unknown-change.md).
 
 ## Verification requirements
 

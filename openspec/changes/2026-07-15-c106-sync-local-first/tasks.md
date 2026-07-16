@@ -69,7 +69,11 @@
       (`9ba04ae…`, Rule 22/23) in the workspace + gen_ui_client Cargo.tomls; keep it
       native-only and wasm-excluded (tonic/HTTP-2 does not build for wasm32 — the
       existing cfg-gating already anticipates this). Verify wasm32 still checks clean.
-- [ ] T5b — **`impl SyncTransport` for an FRF-backed engine** — the crux, and the work
+- [x] T5b — **`impl SyncTransport` for an FRF-backed engine** — DONE (`sync/frf_transport.rs`).
+      Decode + apply (`row_change_from_payload`, `apply_envelope_payload`) are ungated and
+      tested; only the SDK subscribe-loop driver sits behind `feature = "frf"`, which CI
+      cannot build (cross-org dep). Write path reuses WriteQueue + engine::derive_key
+      rather than forking a second queue/key derivation. ORIGINAL: — the crux, and the work
       C-005 left undone (there is still NO concrete LocalStore/WriteSink anywhere):
         * `start()` → `subscribe(channel_id, consumer_id, from)`, decode `EventEnvelope`
           → `RowChange`, apply via `LocalStore::apply_batch` in one txn per batch.
@@ -77,7 +81,10 @@
           idempotency key so retries dedupe; map outcomes onto `WriteOutcome`.
         * `status()` → the existing SyncStatus broadcast.
       Reuse `engine.rs`'s queue/backoff/poison machinery — do NOT write a second one.
-- [ ] T6b — `impl LocalStore` over the local relational store (pglite-oxide desktop /
+- [x] T6b — `impl LocalStore` — DONE (`sync/local_store.rs`, `PgLocalStore`). Gated on
+      `feature = "pg"` (needs sqlx::PgPool), matching how `relational` is gated; mobile
+      uses SurrealDB. Upserts via jsonb_populate_record (schema-agnostic), soft-deletes,
+      one txn per batch, SYNCED_TABLES allow-list as an injection guard. ORIGINAL: (pglite-oxide desktop /
       mobile store): apply RowChange batches atomically, upsert on PK, soft-delete rows.
 - [ ] T4 — Wire the desktop seam: `tauri-plugin-gen-ui::commands::attach_sync_shapes`
       constructs and starts the FRF engine (currently a no-op `Ok(())`), reading endpoint

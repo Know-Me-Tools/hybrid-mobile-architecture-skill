@@ -112,7 +112,10 @@ impl SyncTransport for SyncEngine {
 
 /// Derive a stable idempotency key from a write payload (FNV-1a over the bytes).
 /// Deterministic so an identical retried write dedupes server-side.
-fn derive_key(payload: &str) -> String {
+///
+/// `pub(crate)` so the FRF transport reuses THIS derivation rather than growing a
+/// second one — two key functions that drift would silently break server-side dedup.
+pub(crate) fn derive_key(payload: &str) -> String {
     let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
     for b in payload.as_bytes() {
         hash ^= u64::from(*b);
