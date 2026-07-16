@@ -219,3 +219,48 @@
   SyncStatus broadcast, and the LocalStore/WriteSink seams. The gap is (a) no infra to
   sync against and (b) BOTH `attach_sync_shapes` entry points are no-op `Ok(())` stubs
   (`tauri-plugin-gen-ui::commands`, `gen_ui_ffi::api::boot`). Tasks scoped accordingly.
+
+### 2026-07-16 — DECISION (user, option B): FRF replaces ElectricSQL as the realtime substrate
+- **Decision**: flint-realtime-fabric (FRF) is the realtime substrate for C-106 and for
+  realtime generally. **ElectricSQL is dropped from this codebase.** C-106's T1-T3
+  (Electric compose/pins/schema, merged in PR #5) are SUPERSEDED, not reverted for
+  history's sake — `infra/` is rewritten onto FRF's own stack.
+- **The premise that prompted this was false, and the evidence is unambiguous.** The ask
+  was to "add ElectricSQL support to FRF, which also supports Electric SQL realtime
+  integration." Verified against a freshly-pulled FRF (`git pull`; branch
+  `sovereign-sfu-decode-proof` @ `9ba04ae`, 14 ahead of `origin/main` @ `d263ede`, 0
+  behind): **`grep -rli 'electric'` returns ZERO files** across the entire repo — no code,
+  no docs, no compose, no proto. FRF has never integrated Electric.
+- **Why it shouldn't**: `frf-postgres-cdc` opens a logical replication slot and reads
+  **`pgoutput`** directly via `tokio-postgres`/`pg_walstream`, publishing each decoded row
+  change onto the Iggy spine. That is *the same Postgres mechanism Electric itself
+  consumes*. FRF and Electric are alternative implementations of one job, not layers that
+  stack. Adding Electric would mean two CDC paths contending for replication slots on the
+  same WAL, for zero capability gain (`pgoutput` is `pgoutput` either way).
+- **Why the pivot is cheap**: `gen_ui_client/src/flint/frf.rs` ALREADY exists — a
+  `FrfSpine` façade over `frf-sdk-rust` documenting the SDK entry points as VERIFIED
+  against FRF HEAD and pinned at rev `9ba04ae`, which is *exactly* the HEAD pulled today.
+  The `frf` feature is stubbed (`frf = []`, dep commented out). The frozen
+  `gen_ui_types::sync::SyncTransport` seam is UNCHANGED by the swap — which is what
+  freezing it at C-001 was for.
+- **VERIFIED FRF mapping (read from FRF source, not assumed)**:
+  * READ = CDC → spine channel → `FrfClient::subscribe(channel_id, consumer_id, from)`
+    → `EventEnvelope` stream. **NOT `EntityService::WatchEntity`** — that takes a single
+    `entity_id` and watches ONE entity, not a table/shape feed. Easy and costly trap.
+  * WRITE = `FrfClient::publish(&EventEnvelope) -> Offset`, `ack(offset)` to consume.
+    Offsets replace Electric's `(handle, offset)` cursor.
+  * AUTH = gate-minted Bearer via the SDK `AuthInterceptor`; per-message `tenant_id`.
+    Strictly better than the `ELECTRIC_INSECURE=true` posture T2's compose shipped.
+- **Accepted cost**: the web lane's documented browser path was `@electric-sql/pglite-sync`
+  (`gen_ui_db/src/sync/README.md`); FRF's browser story is frf-wasm / Connect-web. Tracked
+  as T7b. Native desktop↔mobile is the demo's critical path, so this is not blocking.
+  `gen_ui_db::sync::shapes.rs` (the Electric HTTP shape consumer) becomes dead weight.
+- **Still true after the pivot**: C-005 left the engine with NO body — `impl LocalStore` /
+  `impl WriteSink` still have zero hits workspace-wide, so `SyncEngine::new` remains
+  uncallable. That work does not disappear with Electric; it moves to T5b/T6b and remains
+  the bulk of C-106.
+- **NOT done, deliberately**: FRF's own phase-36 / sovereign-SFU-decode work was left
+  untouched. Its `SFU_MODE=sovereign` gate is held OFF across phases 16→35 by an explicit
+  honesty discipline (no receiver has observed a decoded frame; `framesDecoded=0`), and
+  FRF's CLAUDE.md mandates halting at phase boundaries for approval. That work is WebRTC
+  media decode — unrelated to realtime *data* sync and of no use to the skills repo.
