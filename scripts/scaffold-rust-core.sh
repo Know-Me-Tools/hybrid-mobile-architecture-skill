@@ -4386,7 +4386,12 @@ cat > "$OUT/flutter_rust_bridge.yaml" << 'EOF'
 # TJ-ARCH-MOB-001 compliant
 # flutter_rust_bridge 2.12 codegen. Run from a hybrid project root:
 #   flutter_rust_bridge_codegen generate --config-file rust/flutter_rust_bridge.yaml
-rust_input: crates/gen_ui_ffi/src/api
+#
+# rust_input is a Rust MODULE PATH (crate::module syntax, per `cargo expand`), NOT a
+# filesystem path — frb passes it straight to `cargo expand -p <rust_input>`, so a
+# path like "crates/gen_ui_ffi/src/api" fails with "invalid character `/` in package
+# name". rust_root is the filesystem crate directory frb resolves against.
+rust_input: crate::api
 rust_root: crates/gen_ui_ffi
 # Written into the Flutter app (adjust if your mobile dir differs):
 dart_output: ../mobile/lib/bridge

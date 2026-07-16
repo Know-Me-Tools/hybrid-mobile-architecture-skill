@@ -1,0 +1,308 @@
+// TJ-ARCH-MOB-001 compliant
+//! `GraphStore` — the intent-level API over SurrealDB. Callers (FFI, agent) use
+//! `memory_ingest` / `memory_search` / `graph_expand`; SurrealQL never leaves this
+//! module.
+use crate::embed::{Embedder, EMBED_DIM};
+use crate::error::GraphError;
+use crate::rrf::{rrf_fuse, RrfConfig};
+use crate::schema::{HYBRID_SEARCH_QUERY, SCHEMA_DDL};
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+use surrealdb::engine::any::{connect, Any};
+use surrealdb::types::SurrealValue;
+use surrealdb::Surreal;
+
+/// Where the embedded store lives and how it is embedded.
+pub struct GraphStoreConfig {
+    /// SurrealDB connection endpoint. Native persistent: `rocksdb://<path>`.
+    /// Tests / ephemeral: `memory`. wasm: `indxdb://<name>`.
+    pub endpoint: String,
+    pub namespace: String,
+    pub database: String,
+    /// Embedding backend. Behind `Arc` so it can be shared across concurrent calls.
+    pub embedder: Arc<dyn Embedder>,
+}
+
+/// A memory row as ingested. `id` is `None` on the way in (DB assigns it).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct MemoryRecord {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    pub text: String,
+    #[serde(default = "default_kind")]
+    pub kind: String,
+    /// Optional owning entity record id (e.g. `entity:project_x`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub entity: Option<String>,
+}
+
+fn default_kind() -> String {
+    "note".to_string()
+}
+
+/// One hybrid-search hit. `score` is the fused RRF score (higher = better).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct MemoryHit {
+    pub id: String,
+    pub text: String,
+    pub kind: String,
+    pub score: f32,
+}
+
+/// A neighbour reached by graph expansion, with the RRF score from re-fusing the
+/// expansion lanes.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct RelatedEntity {
+    pub id: String,
+    pub label: String,
+    pub entity_type: String,
+    pub score: f32,
+}
+
+impl GraphStore {
+    /// Open (or create) the embedded store, select ns/db, and apply the schema.
+    /// Idempotent: safe on every boot.
+    pub async fn open(cfg: GraphStoreConfig) -> Result<Self, GraphError> {
+        let model = cfg.embedder.model_info();
+        if model.dim != EMBED_DIM {
+            return Err(GraphError::Invalid(format!(
+                "embedder dim {} != index dim {EMBED_DIM} ({})",
+                model.dim, model.name
+            )));
+        }
+        let db = connect(&cfg.endpoint).await?;
+        db.use_ns(&cfg.namespace).use_db(&cfg.database).await?;
+        let store = Self { db, embedder: cfg.embedder };
+        store.init().await?;
+        Ok(store)
+    }
+
+    async fn init(&self) -> Result<(), GraphError> {
+        let mut res = self.db.query(SCHEMA_DDL).await?;
+        // DDL errors surface per-statement, not as a query-level Err — surface the
+        // first so a bad schema fails loudly at boot instead of at first search.
+        if let Some((idx, err)) = res.take_errors().into_iter().next() {
+            return Err(GraphError::Surreal(format!("schema stmt {idx}: {err}")));
+        }
+        Ok(())
+    }
+
+    /// Run the (synchronous, CPU-bound) embedder off the async runtime.
+    async fn embed_blocking(&self, texts: Vec<String>) -> Result<Vec<Vec<f32>>, GraphError> {
+        let embedder = Arc::clone(&self.embedder);
+        gen_ui_runtime::spawn_blocking(move || embedder.embed(&texts))
+            .await
+            .map_err(|e| GraphError::Embedding(format!("embed task join: {e}")))?
+    }
+
+    /// INTENT: ingest a memory. Embeds `text`, stores row + vector, returns the id.
+    pub async fn memory_ingest(&self, record: MemoryRecord) -> Result<String, GraphError> {
+        if record.text.trim().is_empty() {
+            return Err(GraphError::Invalid("memory text is empty".into()));
+        }
+        let embedding = self
+            .embed_blocking(vec![record.text.clone()])
+            .await?
+            .into_iter()
+            .next()
+            .ok_or_else(|| GraphError::Embedding("embedder returned no vector".into()))?;
+
+        let mut res = self
+            .db
+            .query(
+                "CREATE memory SET text = $text, kind = $kind, embedding = $embedding, \
+                 entity = IF $entity != NONE THEN type::record($entity) ELSE NONE END \
+                 RETURN meta::id(id) AS id;",
+            )
+            .bind(("text", record.text))
+            .bind(("kind", record.kind))
+            .bind(("embedding", embedding))
+            .bind(("entity", record.entity))
+            .await?;
+        let ids: Vec<IdRow> = res.take(0)?;
+        ids.into_iter()
+            .next()
+            .map(|r| r.id)
+            .ok_or_else(|| GraphError::Surreal("ingest returned no id".into()))
+    }
+
+    /// INTENT: create (or upsert) a graph entity node. `id` is the record key
+    /// (e.g. `project_x`); `label`/`entity_type` are indexed graph metadata.
+    pub async fn create_entity(
+        &self,
+        id: &str,
+        entity_type: &str,
+        label: &str,
+    ) -> Result<String, GraphError> {
+        if id.trim().is_empty() {
+            return Err(GraphError::Invalid("entity id is empty".into()));
+        }
+        let mut res = self
+            .db
+            .query(
+                "UPSERT type::thing('entity', $id) \
+                 SET entity_type = $etype, label = $label \
+                 RETURN meta::id(id) AS id;",
+            )
+            .bind(("id", id.to_string()))
+            .bind(("etype", entity_type.to_string()))
+            .bind(("label", label.to_string()))
+            .await?;
+        let ids: Vec<IdRow> = res.take(0)?;
+        ids.into_iter()
+            .next()
+            .map(|r| r.id)
+            .ok_or_else(|| GraphError::Surreal("create_entity returned no id".into()))
+    }
+
+    /// INTENT: create a directed RELATE edge `from -> to` with a relation label.
+    /// Edges are what `graph_expand` traverses.
+    pub async fn relate(&self, from: &str, to: &str, rel: &str) -> Result<(), GraphError> {
+        if from.trim().is_empty() || to.trim().is_empty() {
+            return Err(GraphError::Invalid("relate endpoints must be non-empty".into()));
+        }
+        self.db
+            .query(
+                "RELATE type::thing('entity', $from)->relates_to->type::thing('entity', $to) \
+                 SET rel = $rel;",
+            )
+            .bind(("from", from.to_string()))
+            .bind(("to", to.to_string()))
+            .bind(("rel", rel.to_string()))
+            .await?;
+        Ok(())
+    }
+
+    /// INTENT: hybrid semantic + lexical search. Embeds `query`, runs the vector
+    /// and BM25 lanes, fuses them with native `search::rrf`, returns top-`k`.
+    pub async fn memory_search(&self, query: &str, k: usize) -> Result<Vec<MemoryHit>, GraphError> {
+        if query.trim().is_empty() {
+            return Err(GraphError::Invalid("search query is empty".into()));
+        }
+        let qvec = self
+            .embed_blocking(vec![query.to_string()])
+            .await?
+            .into_iter()
+            .next()
+            .ok_or_else(|| GraphError::Embedding("embedder returned no vector".into()))?;
+
+        let mut res = self
+            .db
+            .query(HYBRID_SEARCH_QUERY)
+            .bind(("qvec", qvec))
+            .bind(("q", query.to_string()))
+            .bind(("k", k as i64))
+            .await?;
+        // The SELECT is the last statement in the multi-statement query. Bind the
+        // index first — `take(&mut self)` and `num_statements(&self)` can't borrow
+        // `res` in the same expression.
+        let last = res.num_statements().saturating_sub(1);
+        let rows: Vec<HitRow> = res.take(last)?;
+        Ok(rows.into_iter().map(HitRow::into_hit).collect())
+    }
+
+    /// INTENT: expand the graph outward from `entity_id` up to `depth` RELATE hops,
+    /// fusing per-depth neighbour lists with Rust RRF (nearer hops rank higher).
+    pub async fn graph_expand(
+        &self,
+        entity_id: &str,
+        depth: u8,
+    ) -> Result<Vec<RelatedEntity>, GraphError> {
+        if depth == 0 {
+            return Err(GraphError::Invalid("depth must be >= 1".into()));
+        }
+        // One lane per hop distance; closer hops fuse to higher RRF scores.
+        let mut lanes: Vec<Vec<String>> = Vec::with_capacity(depth as usize);
+        let mut frontier = vec![entity_id.to_string()];
+        let mut seen = std::collections::HashSet::new();
+        seen.insert(entity_id.to_string());
+
+        for _ in 0..depth {
+            let mut res = self
+                .db
+                .query(
+                    "SELECT VALUE ->relates_to->entity.map(|$e| meta::id($e)) \
+                     FROM $frontier.map(|$id| type::thing('entity', $id));",
+                )
+                .bind(("frontier", frontier.clone()))
+                .await?;
+            let hops: Vec<Vec<String>> = res.take(0)?;
+            let next: Vec<String> = hops
+                .into_iter()
+                .flatten()
+                .filter(|id| seen.insert(id.clone()))
+                .collect();
+            if next.is_empty() {
+                break;
+            }
+            lanes.push(next.clone());
+            frontier = next;
+        }
+
+        let fused = rrf_fuse(&lanes, RrfConfig::default());
+        if fused.is_empty() {
+            return Ok(vec![]);
+        }
+        // Hydrate the fused ids into labelled entities, preserving fusion order.
+        let ids: Vec<String> = fused.iter().map(|(id, _)| id.clone()).collect();
+        let mut res = self
+            .db
+            .query(
+                "SELECT meta::id(id) AS id, label, entity_type \
+                 FROM entity WHERE meta::id(id) IN $ids;",
+            )
+            .bind(("ids", ids))
+            .await?;
+        let rows: Vec<EntityRow> = res.take(0)?;
+        let by_id: std::collections::HashMap<String, EntityRow> =
+            rows.into_iter().map(|r| (r.id.clone(), r)).collect();
+        Ok(fused
+            .into_iter()
+            .filter_map(|(id, score)| {
+                by_id.get(&id).map(|r| RelatedEntity {
+                    id: id.clone(),
+                    label: r.label.clone(),
+                    entity_type: r.entity_type.clone(),
+                    score,
+                })
+            })
+            .collect())
+    }
+}
+
+/// Handle to the embedded SurrealDB plus the shared embedder.
+pub struct GraphStore {
+    db: Surreal<Any>,
+    embedder: Arc<dyn Embedder>,
+}
+
+// SurrealDB 3.2's `IndexedResults::take` deserializes into `SurrealValue`, not
+// serde — so the row structs read back from `.query()` derive `SurrealValue`.
+// (The public API types — MemoryRecord/MemoryHit/RelatedEntity — stay serde-based
+// because they cross the FFI boundary as JSON.) Every field is projected as a
+// primitive (`meta::id(id)` → String) so no RecordId handling is needed here.
+#[derive(SurrealValue)]
+struct IdRow {
+    id: String,
+}
+
+#[derive(SurrealValue)]
+struct HitRow {
+    id: String,
+    text: String,
+    kind: String,
+    score: f32,
+}
+
+impl HitRow {
+    fn into_hit(self) -> MemoryHit {
+        MemoryHit { id: self.id, text: self.text, kind: self.kind, score: self.score }
+    }
+}
+
+#[derive(SurrealValue)]
+struct EntityRow {
+    id: String,
+    label: String,
+    entity_type: String,
+}

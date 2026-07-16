@@ -1,0 +1,30 @@
+# Rust
+target/
+*.lock
+
+# Flutter
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/android/app/src/main/jniLibs/
+mobile/ios/Frameworks/
+
+# Tauri/Node
+desktop/node_modules/
+desktop/src-tauri/target/
+desktop/dist/
+
+# Publishable packages (C-007)
+packages/*/node_modules/
+packages/*/dist/
+packages/gen-ui-wasm/pkg/
+rust/crates/tauri-plugin-gen-ui/guest-js/node_modules/
+rust/crates/tauri-plugin-gen-ui/guest-js/dist/
+flutter_packages/*/.dart_tool/
+flutter_packages/*/build/
+
+# Environment
+.env
+.env.*
+!.env.example

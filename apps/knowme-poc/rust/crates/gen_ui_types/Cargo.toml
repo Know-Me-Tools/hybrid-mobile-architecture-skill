@@ -1,0 +1,22 @@
+[package]
+name = "gen_ui_types"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace       = true
+serde_json.workspace  = true
+thiserror.workspace   = true
+uuid.workspace        = true
+chrono.workspace      = true
+async-trait.workspace = true
+futures.workspace     = true
+
+# uuid v4/fast-rng needs getrandom's wasm backend to compile for the browser.
+# Without the "js" feature, getrandom has no wasm32-unknown-unknown source of
+# entropy and the build fails (E0433). Native targets ignore this.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+uuid = { version = "1.10", features = ["v4", "js"] }
+getrandom = { version = "0.2", features = ["js"] }

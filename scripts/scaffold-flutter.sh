@@ -40,6 +40,11 @@ flutter create \
 
 cd "$OUT"
 
+# flutter create's default counter-app smoke test references MyApp/main.dart from the
+# stock template — this scaffold writes its own real boundary tests, so remove the
+# stale default rather than leaving broken/misleading cruft in test/.
+rm -f test/widget_test.dart
+
 # ── pubspec.yaml — Riverpod 3.3.2, frb 2.12, path-dep the three packages ─────
 step "Writing pubspec.yaml (Riverpod 3.3.2 / frb 2.12)"
 cat > pubspec.yaml << PUBEOF
@@ -67,17 +72,17 @@ dependencies:
   # ── State management (Riverpod 3) ────────────────────────────────────────
   flutter_riverpod: ^3.3.2
   riverpod_annotation: ^4.0.3
-  riverpod_sqflite: ^0.2.0     # offline provider-cache persistence (Riverpod 3)
+  riverpod_sqflite: ^0.4.3     # offline provider-cache persistence (Riverpod 3)
 
   # ── Models ───────────────────────────────────────────────────────────────
-  freezed_annotation: ^2.4.4
+  freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
 
   # ── FFI bridge ───────────────────────────────────────────────────────────
   flutter_rust_bridge: ^2.12.0
 
   # ── UI components (shadcn/ui equivalent) ─────────────────────────────────
-  shadcn_flutter: ^0.1.6
+  shadcn_flutter: ^0.0.53
 
   # ── Navigation ───────────────────────────────────────────────────────────
   go_router: ^15.0.0
@@ -98,7 +103,7 @@ dependencies:
   # ── Utilities ────────────────────────────────────────────────────────────
   gap: ^3.0.1
   uuid: ^4.5.1
-  intl: ^0.19.0
+  intl: ^0.20.2
   path_provider: ^2.1.4
   collection: ^1.19.0
 
@@ -107,11 +112,15 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
   build_runner: ^2.4.13
-  freezed: ^2.5.7
+  freezed: ^3.2.5
   json_serializable: ^6.8.0
   riverpod_generator: ^4.0.4
-  custom_lint: ^0.7.5
-  riverpod_lint: ^4.0.0
+  # custom_lint + riverpod_lint intentionally OMITTED: as of 2026-07, their latest
+  # versions have an unresolvable transitive conflict (riverpod_lint requires
+  # analyzer_plugin ^0.14/analyzer ^12, custom_lint requires ^0.13/^8 respectively) —
+  # a live ecosystem incompatibility, not a version we can pin around. Neither is
+  # needed to build/run/build_runner; they're IDE-only lint plugins. Re-add once the
+  # ecosystem resolves (check `flutter pub add custom_lint riverpod_lint --dry-run`).
   alchemist: ^0.12.0           # deterministic golden tests (VGV workflow) — no mocks
 
 flutter:
@@ -124,8 +133,6 @@ cat > analysis_options.yaml << 'EOF'
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  plugins:
-    - custom_lint
   exclude:
     - "lib/bridge/generated_api.dart"
     - "**/*.g.dart"
@@ -484,7 +491,7 @@ class SyncChip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final status = ref.watch(syncStatusProvider);
-    final (label, color) = switch (status.valueOrNull) {
+    final (label, color) = switch (status.value) {
       SyncOffline() || null => ('offline', T.textTertiary),
       SyncSyncing(:final pendingWrites) => ('syncing · $pendingWrites', T.amber),
       SyncLive() => ('live', T.green),
@@ -670,8 +677,10 @@ import '../providers/chat_notifier.dart';
 
 /// Chat surface. Renders each message's ContentBlocks with the shared
 /// ContentBlockView (exhaustive over all 11 variants — a compile-time contract).
-/// Send uses the Riverpod 3 Mutations API for first-class pending/error state.
-final sendMessageMutation = Mutation<void>();
+/// Send tracks its own local pending state — Riverpod 3.3.2's Mutation API exists
+/// internally (riverpod/src/core/mutations.dart) but is NOT part of the public
+/// export surface yet (still experimental per the Riverpod 3 release notes), so
+/// this uses the always-available local-state pattern instead of an unstable API.
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -681,6 +690,7 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _controller = TextEditingController();
+  bool _isSending = false;
 
   @override
   void dispose() {
@@ -690,8 +700,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(chatNotifierProvider);
-    final sendState = ref.watch(sendMessageMutation);
+    final state = ref.watch(chatProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Chat'), actions: const [Padding(padding: EdgeInsets.only(right: 12), child: Center(child: SyncChip()))]),
@@ -721,13 +730,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 child: TextField(
                   controller: _controller,
                   decoration: const InputDecoration(hintText: 'Message…', border: OutlineInputBorder()),
-                  onSubmitted: sendState.isPending ? null : (_) => _send(),
+                  onSubmitted: _isSending ? null : (_) => _send(),
                 ),
               ),
               const SizedBox(width: 8),
               IconButton.filled(
-                onPressed: sendState.isPending ? null : _send,
-                icon: sendState.isPending
+                onPressed: _isSending ? null : _send,
+                icon: _isSending
                     ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.send),
               ),
@@ -738,17 +747,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  void _send() {
+  Future<void> _send() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     _controller.clear();
-    sendMessageMutation.run(ref, (tsx) async {
-      await tsx.get(chatNotifierProvider.notifier).sendMessage(text);
-    });
+    setState(() => _isSending = true);
+    try {
+      await ref.read(chatProvider.notifier).sendMessage(text);
+    } finally {
+      if (mounted) setState(() => _isSending = false);
+    }
   }
 }
 EOF
-ok "features/chat (ChatNotifier + A2uiContentDriver + Mutations send)"
+ok "features/chat (ChatNotifier + A2uiContentDriver + local pending-state send)"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # features/notes — entity-CRUD demo backed by prometheus_entity_management.
@@ -894,17 +906,16 @@ cat > lib/features/memory/presentation/screens/memory_screen.dart << 'EOF'
 // Memory / graph-RAG panel: ingest arbitrary text into the on-device graph,
 // then run a hybrid search and render the ranked hits. Both actions flow through
 // MemoryNotifier → bridge facade → Rust gen_ui_db. Presentation only; no query
-// logic lives here. Ingest and search each use the Riverpod 3 Mutations API for
-// first-class pending/error state (FFI errors are terminal — no silent retry).
+// logic lives here. Ingest and search each track local pending state — Riverpod
+// 3.3.2's Mutation API exists internally but is not on the public export surface
+// yet (still experimental), so this uses the always-available local-state pattern
+// (FFI errors are still terminal — no silent retry — that's enforced in the notifier).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/sync_chip.dart';
 import '../../../../core/theme/tokens.dart';
 import '../providers/memory_notifier.dart';
-
-final ingestMemoryMutation = Mutation<String>();
-final searchMemoryMutation = Mutation<void>();
 
 class MemoryScreen extends ConsumerStatefulWidget {
   const MemoryScreen({super.key});
@@ -915,6 +926,8 @@ class MemoryScreen extends ConsumerStatefulWidget {
 class _MemoryScreenState extends ConsumerState<MemoryScreen> {
   final _ingestController = TextEditingController();
   final _searchController = TextEditingController();
+  bool _isIngesting = false;
+  bool _isSearching = false;
 
   @override
   void dispose() {
@@ -925,9 +938,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final result = ref.watch(memoryNotifierProvider);
-    final ingestState = ref.watch(ingestMemoryMutation);
-    final searchState = ref.watch(searchMemoryMutation);
+    final result = ref.watch(memoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -945,13 +956,13 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                 child: TextField(
                   controller: _ingestController,
                   decoration: const InputDecoration(hintText: 'Add a memory…', border: OutlineInputBorder()),
-                  onSubmitted: ingestState.isPending ? null : (_) => _ingest(),
+                  onSubmitted: _isIngesting ? null : (_) => _ingest(),
                 ),
               ),
               const SizedBox(width: 8),
               FilledButton(
-                onPressed: ingestState.isPending ? null : _ingest,
-                child: ingestState.isPending
+                onPressed: _isIngesting ? null : _ingest,
+                child: _isIngesting
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Text('Ingest'),
               ),
@@ -964,13 +975,13 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                 child: TextField(
                   controller: _searchController,
                   decoration: const InputDecoration(hintText: 'Hybrid graph-RAG search…', border: OutlineInputBorder()),
-                  onSubmitted: searchState.isPending ? null : (_) => _search(),
+                  onSubmitted: _isSearching ? null : (_) => _search(),
                 ),
               ),
               const SizedBox(width: 8),
               IconButton.filled(
-                onPressed: searchState.isPending ? null : _search,
-                icon: searchState.isPending
+                onPressed: _isSearching ? null : _search,
+                icon: _isSearching
                     ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.search),
               ),
@@ -1000,21 +1011,27 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
     );
   }
 
-  void _ingest() {
+  Future<void> _ingest() async {
     final text = _ingestController.text.trim();
     if (text.isEmpty) return;
     _ingestController.clear();
-    ingestMemoryMutation.run(ref, (tsx) async {
-      return tsx.get(memoryNotifierProvider.notifier).ingest(text);
-    });
+    setState(() => _isIngesting = true);
+    try {
+      await ref.read(memoryProvider.notifier).ingest(text);
+    } finally {
+      if (mounted) setState(() => _isIngesting = false);
+    }
   }
 
-  void _search() {
+  Future<void> _search() async {
     final query = _searchController.text.trim();
     if (query.isEmpty) return;
-    searchMemoryMutation.run(ref, (tsx) async {
-      await tsx.get(memoryNotifierProvider.notifier).search(query);
-    });
+    setState(() => _isSearching = true);
+    try {
+      await ref.read(memoryProvider.notifier).search(query);
+    } finally {
+      if (mounted) setState(() => _isSearching = false);
+    }
   }
 }
 EOF
@@ -1367,12 +1384,12 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
-    final notifier = container.read(chatNotifierProvider.notifier);
+    final notifier = container.read(chatProvider.notifier);
     await notifier.foldStream('msg-1', _cannedRun());
     // let the stream drain
     await Future<void>.delayed(const Duration(milliseconds: 20));
 
-    final ChatState state = container.read(chatNotifierProvider);
+    final ChatState state = container.read(chatProvider);
     final msg = state.messages.firstWhere((m) => m.id == 'msg-1');
     expect(msg.isStreaming, isFalse, reason: 'RunFinished finalizes the message');
     expect(msg.content, hasLength(2));
@@ -1394,7 +1411,7 @@ void main() {
     'ContentBlockView renders core variants',
     fileName: 'content_block_view',
     builder: () => GoldenTestGroup(
-      children: const [
+      children: [
         GoldenTestScenario(name: 'text', child: ContentBlockView(block: TextBlock('Hello world'))),
         GoldenTestScenario(name: 'thinking', child: ContentBlockView(block: ThinkingBlock('reasoning…'))),
         GoldenTestScenario(name: 'code', child: ContentBlockView(block: CodeBlock('dart', 'void main() {}'))),
@@ -1467,16 +1484,16 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
-    expect(container.read(memoryNotifierProvider).hits, isEmpty);
+    expect(container.read(memoryProvider).hits, isEmpty);
 
     // Rust-shaped hits at the FFI boundary — the only fake. Nothing else mocked.
     const hits = [
       MemoryHit(id: 'entity:1', name: 'Alpha', score: 0.91, snippet: 'first'),
       MemoryHit(id: 'entity:2', name: 'Beta', score: 0.42),
     ];
-    container.read(memoryNotifierProvider.notifier).applyHits('alpha', hits);
+    container.read(memoryProvider.notifier).applyHits('alpha', hits);
 
-    final MemoryResult result = container.read(memoryNotifierProvider);
+    final MemoryResult result = container.read(memoryProvider);
     expect(result.query, 'alpha');
     expect(result.hits, hasLength(2));
     expect(result.hits.first.name, 'Alpha');

@@ -1,0 +1,12 @@
+# TJ-ARCH-MOB-001 compliant
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Default gen-ui permissions: read + chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly."
+permissions = [
+    "allow-chat-send",
+    "allow-entity-list",
+    "allow-entity-get",
+    "allow-memory-search",
+    "allow-graph-expand",
+]

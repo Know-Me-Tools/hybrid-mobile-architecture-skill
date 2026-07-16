@@ -1,0 +1,131 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/gen_ui_types",
+    "crates/gen_ui_runtime",
+    "crates/gen_ui_protocol",
+    "crates/gen_ui_client",
+    "crates/gen_ui_mcp",
+    "crates/gen_ui_db",
+    "crates/gen_ui_db_graph",
+    "crates/gen_ui_inference",
+    "crates/gen_ui_agent",
+    "crates/gen_ui_ffi",
+    "crates/tauri-plugin-gen-ui",
+    "crates/gen_ui_wasm",
+    "crates/workspace-hack",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+# MSRV floor. 1.80 (the original TJ-ARCH-MOB-001 minimum) can no longer resolve the
+# current dependency graph — transitive crates (e.g. chacha20 ≥0.10) now require the
+# edition2024 Cargo feature, unparseable before Cargo 1.85. 1.93 is the realistic
+# mid-2026 floor. 1.93 can no longer build the SurrealDB 3.2 graph crate (C-004):
+# its transitive fastnum ≥0.7.5 requires rustc 1.94+, so the floor moves to 1.95
+# (the mid-2026 stable that satisfies it). Keep in sync with rust-toolchain.toml
+# and CLAUDE.md tool versions.
+rust-version = "1.95"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+# --- shared, workspace-wide (each crate opts in via `.workspace = true`) ---
+serde             = { version = "1.0",  features = ["derive"] }
+serde_json        = "1.0"
+thiserror         = "1.0"
+anyhow            = "1.0"
+futures           = "0.3"
+async-trait       = "0.1"
+tracing           = "0.1"
+uuid              = { version = "1.10", features = ["v4", "fast-rng", "serde"] }
+chrono            = { version = "0.4",  features = ["serde"] }
+# --- native-heavy (feature/target gated inside crates) ---
+tokio             = { version = "1.40", default-features = false }
+tokio-stream      = { version = "0.1",  features = ["sync"] }
+reqwest           = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+reqwest-eventsource = "0.6"
+# --- Flint platform SDK (FRF realtime spine). Nothing is published to crates.io —
+#     all FRF inter-crate deps are PATH deps in-repo, and the repo is private, so a
+#     fresh scaffold cannot resolve them. They are therefore left COMMENTED here (as
+#     C-001 leaves `tauri` commented for C-007): the default gate+forge build has NO
+#     FRF dependency and stays wasm-safe + offline-resolvable. To enable the `frf` /
+#     `peer-crdt` features, UNCOMMENT below and point at your vendored checkout —
+#     a `git`+`rev` pin (reproducible) or a `path` to a local clone:
+#       frf-sdk-rust = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b" }
+#     ── VERIFIED HEAD (2026-07-15): 9ba04ae6ce41be796ae149609414b17a0d0d376b ──
+# frf-sdk-rust      = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+# frf-crdt          = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+# frf-store-redb    = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+# JWT decode (inspect exp/role/tenant_id from gate-minted tokens; no local verify —
+# gate/forge own verification via JWKS). validation disabled for pure claim reads.
+jsonwebtoken      = { version = "9", default-features = false }
+surrealdb         = { version = "3.2",  default-features = false }
+sqlx              = { version = "0.8",  default-features = false, features = ["runtime-tokio-rustls", "macros", "migrate"] }
+pglite-oxide       = { version = "0.5.1", default-features = false }
+refinery           = { version = "0.8", default-features = false }
+sqlite-vec         = "0.1"
+libsqlite3-sys     = "0.30"
+virtual-net        = "=0.702.0-alpha.3"
+candle-core       = "0.7"
+candle-nn         = "0.7"
+candle-transformers = "0.7"
+fastembed         = "5"
+flutter_rust_bridge = { version = "2.12", features = ["anyhow"] }
+dashmap           = "6.1"
+parking_lot       = "0.12"
+once_cell         = "1.20"
+
+# Feature-unification pin (cargo-hakari): all real crates depend on this so a
+# switch between desktop/mobile/wasm invocations doesn't churn shared deps.
+# Regenerate with: cargo hakari generate
+[workspace.dependencies.workspace-hack]
+path = "crates/workspace-hack"
+
+# ─────────────────────────── Compile profiles ───────────────────────────────
+# Development: fast iteration on host. Deps compiled well once (opt-2) then cached;
+# app code iterates at opt-0. line-tables-only + unpacked debuginfo = big macOS win.
+[profile.dev]
+opt-level = 0
+debug = "line-tables-only"
+split-debuginfo = "unpacked"
+incremental = true
+
+[profile.dev.package."*"]
+opt-level = 2
+debug = false
+
+# Build scripts + proc-macros (serde_derive, frb support, sqlx macros) run at
+# compile time — optimizing them speeds every downstream compile.
+[profile.dev.build-override]
+opt-level = 3
+
+# Release: shipped desktop/mobile binaries.
+# panic = "unwind" is REQUIRED: flutter_rust_bridge wraps handlers in catch_unwind
+# to convert Rust panics into a catchable Dart PanicException. panic="abort" would
+# hard-kill the entire mobile app process on any panic. (Do NOT change to abort.)
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "unwind"
+incremental = false
+
+# WASM: size-optimized. panic=abort is safe & standard on wasm32.
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
+
+# Optional nightly host-only fast codegen. Enable per-invocation:
+#   cargo +nightly build --profile dev-fast -Zcodegen-backend
+# Cranelift works on aarch64-macOS host dev ONLY — never iOS/Android/wasm.
+# (Left commented so stable builds are unaffected; uncomment cargo-features to use.)
+# cargo-features = ["codegen-backend"]
+# [profile.dev-fast]
+# inherits = "dev"
+# codegen-backend = "cranelift"

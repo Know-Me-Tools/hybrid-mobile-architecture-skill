@@ -2,6 +2,7 @@
 
 ## Reference
 
+* [Analyze completion for KnowMe PoC codegen and CI phase](/analyze-completion-for-knowme-poc-codegen-and-ci-phase.md)
 * [Bootstrap prerequisite analysis for KnowMe PoC phase](/bootstrap-prerequisite-analysis-for-knowme-poc-phase.md)
 * [C-001 freezes gen_ui_types seams for hybrid mobile scaffold](/c-001-freezes-gen-ui-types-seams-for-hybrid-mobile-scaffold.md)
 * [C-009 Project Skill Templates for Hybrid Mobile Scaffold](/c-009-project-skill-templates-for-hybrid-mobile-scaffold.md)
@@ -54,7 +55,9 @@
 * [Hybrid scaffold Wave 1 merged; UI surfaces building](/hybrid-scaffold-wave-1-merged-ui-surfaces-building.md)
 * [KBD status before codegen and CI verification assessment](/kbd-status-before-codegen-and-ci-verification-assessment.md)
 * [KnowMe PoC assessment for codegen and CI verification phase](/knowme-poc-assessment-for-codegen-and-ci-verification-phase.md)
+* [KnowMe PoC phase analysis complete with README and reference docs](/knowme-poc-phase-analysis-complete-with-readme-and-reference-docs.md)
 * [pglite-oxide Hybrid Tauri Architecture for Mobile PostgreSQL](/pglite-oxide-hybrid-tauri-architecture-for-mobile-postgresql.md)
+* [Phase codegen and CI verification completed with unknown change](/phase-codegen-and-ci-verification-completed-with-unknown-change.md)
 * [PoC-focused codegen and CI phase assessment update](/poc-focused-codegen-and-ci-phase-assessment-update.md)
 * [Scaffold full hybrid executor completed with unknown change](/scaffold-full-hybrid-executor-completed-with-unknown-change.md)
 * [Scaffold full hybrid executor completion with unknown change](/scaffold-full-hybrid-executor-completion-with-unknown-change.md)

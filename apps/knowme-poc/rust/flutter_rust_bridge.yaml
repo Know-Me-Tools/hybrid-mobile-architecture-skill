@@ -1,0 +1,10 @@
+# TJ-ARCH-MOB-001 compliant
+# flutter_rust_bridge 2.12 codegen. Run from a hybrid project root:
+#   flutter_rust_bridge_codegen generate --config-file rust/flutter_rust_bridge.yaml
+rust_input: crate::api
+rust_root: crates/gen_ui_ffi
+# Written into the Flutter app (adjust if your mobile dir differs):
+dart_output: ../mobile/lib/bridge
+dart_entrypoint_class_name: GenUiCore
+# Keep the generated Rust glue beside the api it wraps.
+rust_output: crates/gen_ui_ffi/src/frb_generated.rs

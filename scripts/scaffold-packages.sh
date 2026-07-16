@@ -479,7 +479,7 @@ description: Flutter FFI plugin exposing gen_ui_core (Rust) via flutter_rust_bri
 version: 0.1.0
 publish_to: none # set to https://pub.dev when ready to publish
 environment:
-  sdk: ">=3.4.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.29.0"
 
 dependencies:
@@ -574,7 +574,7 @@ description: ContentBlock widget set for gen_ui — an exhaustive Flutter render
 version: 0.1.0
 publish_to: none # set to https://pub.dev when ready to publish
 environment:
-  sdk: ">=3.4.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.29.0"
 
 dependencies:
@@ -793,7 +793,7 @@ description: Rust-backed entity management for Flutter — provider-families-as-
 version: 0.1.0
 publish_to: none # set to https://pub.dev when ready to publish
 environment:
-  sdk: ">=3.4.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.29.0"
 
 dependencies:
@@ -801,25 +801,23 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^3.3.2
   riverpod_annotation: ^4.0.3
-  freezed_annotation: ^2.4.4
-  json_annotation: ^4.9.0
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
   collection: ^1.19.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner: ^2.4.13
-  freezed: ^2.5.7
+  freezed: ^3.2.5
   json_serializable: ^6.8.0
   riverpod_generator: ^4.0.4
-  custom_lint: ^0.7.5
-  riverpod_lint: ^4.0.0
+  # custom_lint + riverpod_lint intentionally OMITTED — see scaffold-flutter.sh for why
+  # (unresolvable transitive analyzer/analyzer_plugin version conflict as of 2026-07).
 EOF
 
 cat > "$PEM_DIR/analysis_options.yaml" << 'EOF'
 include: package:flutter_lints/flutter.yaml
 analyzer:
-  plugins:
-    - custom_lint
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"

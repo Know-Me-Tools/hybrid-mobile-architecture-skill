@@ -120,7 +120,6 @@ cat > tsconfig.json << EOF
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
     "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src"],
@@ -764,7 +763,7 @@ import { useFlintSurface } from '../hooks/useFlintSurface'
 registerBaseComponents()
 
 function CoreComponent({ spec }: { spec: A2uiComponentSpec }) {
-  const Component = resolveFlintComponent(spec.slug)
+  const Component = resolveFlintComponent(spec.slug, {})
   if (!Component) return <div role="alert">Unknown A2UI component: {spec.slug}</div>
   return <Component {...spec.props}>{spec.children?.map((child) => <CoreComponent key={child.id} spec={child} />)}</Component>
 }
@@ -798,6 +797,12 @@ export function ChatTranscript() {
   return <ol aria-live="polite">{messages.map((message) => <li key={message.id}>{message.content.map((block, index) => <ContentBlockView key={`${message.id}:${index}`} block={block} />)}</li>)}</ol>
 }
 EOF
+
+# ── vite-env.d.ts (declares .css / ?raw / import.meta.env types for tsc) ────
+cat > src/vite-env.d.ts << 'EOF'
+/// <reference types="vite/client" />
+EOF
+ok "src/vite-env.d.ts"
 
 # ── main.tsx ───────────────────────────────────────────────────────────────
 cat > src/main.tsx << 'EOF'
@@ -982,10 +987,13 @@ edition = "2021"
 
 [lib]
 name = "${APP_NAME//-/_}"
-crate-type = ["staticlib", "cdylib"]
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["devtools"] }
 tauri-plugin-shell = "2"
 tauri-plugin-store = "2"
 serde = { version = "1", features = ["derive"] }
@@ -1028,10 +1036,19 @@ cat > src-tauri/tauri.conf.json << EOF
 }
 EOF
 
+cat > src-tauri/build.rs << 'RSEOF'
+fn main() {
+    tauri_build::build()
+}
+RSEOF
+
 cat > src-tauri/src/lib.rs << 'RSEOF'
 // TJ-ARCH-MOB-001 compliant
 // Tauri application entry point
 // gen_ui_core commands are registered here
+
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -1048,17 +1065,99 @@ pub fn run() {
         //     commands::run_migrations, commands::load_seeds, commands::attach_sync_shapes,
         //     commands::mcp_call_tool,
         // ])
+        .setup(|app| {
+            // Native View menu with a Toggle Developer Tools item — the only
+            // discoverable way to reach devtools (console/elements/network) on a
+            // packaged build; right-click "Inspect Element" is undiscoverable and
+            // absent entirely in release builds without this menu wiring.
+            let toggle_devtools = MenuItem::with_id(
+                app,
+                "toggle_devtools",
+                "Toggle Developer Tools",
+                true,
+                Some("CmdOrCtrl+Alt+I"),
+            )?;
+            let view_menu = Submenu::with_items(
+                app,
+                "View",
+                true,
+                &[
+                    &PredefinedMenuItem::fullscreen(app, None)?,
+                    &PredefinedMenuItem::separator(app)?,
+                    &toggle_devtools,
+                ],
+            )?;
+            let menu = Menu::with_items(app, &[&view_menu])?;
+            app.set_menu(menu)?;
+
+            app.on_menu_event(move |app_handle, event| {
+                if event.id() == "toggle_devtools" {
+                    if let Some(window) = app_handle.get_webview_window("main") {
+                        if window.is_devtools_open() {
+                            window.close_devtools();
+                        } else {
+                            window.open_devtools();
+                        }
+                    }
+                }
+            });
+
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 RSEOF
 
-cat > src-tauri/src/main.rs << 'EOF'
+cat > src-tauri/src/main.rs << EOF
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-fn main() { app_lib::run() }
+fn main() { ${APP_NAME//-/_}::run() }
 EOF
 ok "src-tauri/"
+
+# ── App icons ────────────────────────────────────────────────────────────────
+# tauri.conf.json's bundle.icon list requires src-tauri/icons/* to exist before the
+# app can even `cargo check` (tauri::generate_context! reads them at compile time via
+# a build-script-emitted OUT_DIR). Generate a placeholder square PNG with the stdlib
+# zlib module (no ImageMagick/sips dependency) and run the Tauri CLI's own icon
+# generator to produce the full macOS/Windows/iOS/Android set.
+step "Generating placeholder app icons"
+python3 - << 'PYEOF'
+import struct, zlib
+W = H = 1024
+r, g, b, a = 0x4F, 0x46, 0xE5, 0xFF  # placeholder brand square (indigo)
+def chunk(t, d):
+    c = t + d
+    return struct.pack('>I', len(d)) + c + struct.pack('>I', zlib.crc32(c))
+row = bytes([r, g, b, a]) * W
+raw = (b'\x00' + row) * H
+png = b'\x89PNG\r\n\x1a\n'
+png += chunk(b'IHDR', struct.pack('>IIBBBBB', W, H, 8, 6, 0, 0, 0))
+png += chunk(b'IDAT', zlib.compress(raw, 9))
+png += chunk(b'IEND', b'')
+with open('app-icon.png', 'wb') as f:
+    f.write(png)
+PYEOF
+npx tauri icon app-icon.png > /dev/null 2>&1
+ok "src-tauri/icons/ (placeholder — replace app-icon.png + rerun \`tauri icon\` with real branding)"
+
+# ── Capabilities (Tauri v2 ACL) ──────────────────────────────────────────────
+# Tauri v2's permission system denies every IPC/event call by default; without an
+# explicit capabilities file the frontend's own `event.listen()` throws at runtime
+# ("event.listen not allowed"). The window has no explicit "label" in tauri.conf.json
+# so it uses Tauri's default label "main".
+mkdir -p src-tauri/capabilities
+cat > src-tauri/capabilities/default.json << 'EOF'
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "permissions": ["core:default", "shell:default", "store:default"]
+}
+EOF
+ok "src-tauri/capabilities/default.json"
 
 # ── PEM local-tarball pre-resolve ───────────────────────────────────────────
 # @prometheus-ags/prometheus-entity-management (PEM) is an unpublished pnpm-workspace

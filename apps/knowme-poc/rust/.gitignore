@@ -1,0 +1,5 @@
+/target
+# flutter_rust_bridge generated glue — regenerate with codegen, never edit.
+crates/gen_ui_ffi/src/frb_generated.rs
+# wasm-pack output
+crates/gen_ui_wasm/pkg/

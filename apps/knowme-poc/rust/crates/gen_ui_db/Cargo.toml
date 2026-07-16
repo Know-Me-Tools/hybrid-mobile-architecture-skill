@@ -1,0 +1,38 @@
+[package]
+name = "gen_ui_db"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+gen_ui_types   = { path = "../gen_ui_types" }
+gen_ui_runtime = { path = "../gen_ui_runtime" }
+async-trait.workspace = true
+anyhow.workspace      = true
+serde.workspace       = true
+serde_json.workspace  = true
+thiserror.workspace   = true
+futures.workspace     = true
+tracing.workspace     = true
+sqlx.workspace        = true
+refinery.workspace    = true
+reqwest.workspace     = true
+sqlite-vec = { workspace = true, optional = true }
+libsqlite3-sys = { workspace = true, optional = true }
+pglite-oxide = { workspace = true, optional = true }
+virtual-net = { workspace = true, optional = true }
+
+[features]
+default = []
+pg = ["sqlx/postgres"]
+sqlite = ["sqlx/sqlite", "dep:sqlite-vec", "dep:libsqlite3-sys"]
+pglite = ["pg", "dep:pglite-oxide", "dep:virtual-net"]
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio        = { workspace = true, features = ["rt", "sync", "time", "macros"] }
+tokio-stream = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { workspace = true, features = ["macros", "rt"] }

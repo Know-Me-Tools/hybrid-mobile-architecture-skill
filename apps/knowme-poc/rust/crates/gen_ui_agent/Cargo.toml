@@ -1,0 +1,15 @@
+[package]
+name = "gen_ui_agent"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+gen_ui_types    = { path = "../gen_ui_types" }
+gen_ui_runtime  = { path = "../gen_ui_runtime" }
+gen_ui_protocol = { path = "../gen_ui_protocol" }
+gen_ui_client   = { path = "../gen_ui_client" }
+gen_ui_mcp      = { path = "../gen_ui_mcp" }
+async-trait.workspace = true
+anyhow.workspace = true

@@ -1,0 +1,35 @@
+[package]
+name = "gen_ui_ffi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+gen_ui_types    = { path = "../gen_ui_types" }
+gen_ui_runtime  = { path = "../gen_ui_runtime" }
+gen_ui_protocol = { path = "../gen_ui_protocol" }
+gen_ui_agent    = { path = "../gen_ui_agent" }
+flutter_rust_bridge.workspace = true
+anyhow.workspace = true
+log = "0.4"
+
+[features]
+# Enable AFTER `flutter_rust_bridge_codegen generate` has produced frb_generated.rs
+# (the project build turns it on). The stream fns reference the codegen-emitted
+# crate-local `StreamSink<T>`, so pre-codegen `cargo check` leaves this off.
+frb-streams = []
+
+[lints.rust]
+# `#[frb(...)]` expands to code guarded by `cfg(frb_expand)`, a cfg name that only
+# codegen defines. Declare it expected so the pre-codegen build is warning-clean
+# under `-D warnings` (the clippy inner loop).
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+android_logger = "0.14"
+[target.'cfg(target_os = "ios")'.dependencies]
+oslog = "0.2"
