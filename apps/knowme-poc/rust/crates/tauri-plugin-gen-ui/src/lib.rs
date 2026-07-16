@@ -12,6 +12,7 @@ use tauri::{
 };
 
 mod commands;
+mod dev_ollama;
 mod error;
 
 pub use error::{Error, Result};
@@ -47,6 +48,10 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             // One global Tokio runtime per process (never a second). Desktop
             // shares gen_ui_core in-process, so init here rather than via FFI.
             gen_ui_runtime::init(None);
+            // Opt-in dev shortcut (GEN_UI_DEV_OLLAMA_MODEL): if it installs,
+            // run_migrations's later state::init call becomes a harmless no-op
+            // (see state.rs's doc comment on double-init).
+            dev_ollama::install_if_requested();
             spawn_chat_event_forwarder(app.app_handle().clone());
             Ok(())
         })

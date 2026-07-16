@@ -33,3 +33,6 @@ futures.workspace = true
 # keyring pulls in transitively — see the workspace Cargo.toml comment on keyring
 # for why the `protected` feature can't be enabled through keyring's own table.
 apple-native-keyring-store.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
