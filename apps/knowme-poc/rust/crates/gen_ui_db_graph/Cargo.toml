@@ -15,6 +15,8 @@ serde_json.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 futures.workspace = true
+# `sync` only (OnceCell for the singleton open) — wasm32-safe, no runtime pulled in.
+tokio = { workspace = true, features = ["sync"] }
 
 # SurrealDB engine is target-split so the native build gets RocksDB (persistent,
 # incl. iOS/Android) and wasm gets IndexedDB — the only embedded KV that links on

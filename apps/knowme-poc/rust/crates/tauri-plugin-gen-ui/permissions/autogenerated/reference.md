@@ -1,14 +1,22 @@
 ## Default Permission
 
-Default gen-ui permissions: read + chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.
+Default gen-ui permissions: startup/read/chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.
 
 #### This default permission set includes the following:
 
-- `allow-chat-send`
+- `allow-stream-agent-a2ui`
+- `allow-run-migrations`
+- `allow-load-seeds`
+- `allow-attach-sync-shapes`
+- `allow-memory-ingest`
+- `allow-entity-runtime-start`
+- `allow-entity-runtime-stop`
 - `allow-entity-list`
 - `allow-entity-get`
 - `allow-memory-search`
 - `allow-graph-expand`
+- `allow-scribe-start`
+- `allow-scribe-stop`
 
 ## Permission Table
 
@@ -22,12 +30,12 @@ Default gen-ui permissions: read + chat intents. Mutating entity commands requir
 <tr>
 <td>
 
-`gen-ui:allow-chat-send`
+`gen-ui:allow-attach-sync-shapes`
 
 </td>
 <td>
 
-Enables the chat_send command without any pre-configured scope.
+Enables the attach_sync_shapes command without any pre-configured scope.
 
 </td>
 </tr>
@@ -35,12 +43,12 @@ Enables the chat_send command without any pre-configured scope.
 <tr>
 <td>
 
-`gen-ui:deny-chat-send`
+`gen-ui:deny-attach-sync-shapes`
 
 </td>
 <td>
 
-Denies the chat_send command without any pre-configured scope.
+Denies the attach_sync_shapes command without any pre-configured scope.
 
 </td>
 </tr>
@@ -152,6 +160,58 @@ Denies the entity_list command without any pre-configured scope.
 <tr>
 <td>
 
+`gen-ui:allow-entity-runtime-start`
+
+</td>
+<td>
+
+Enables the entity_runtime_start command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-entity-runtime-start`
+
+</td>
+<td>
+
+Denies the entity_runtime_start command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:allow-entity-runtime-stop`
+
+</td>
+<td>
+
+Enables the entity_runtime_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-entity-runtime-stop`
+
+</td>
+<td>
+
+Denies the entity_runtime_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `gen-ui:allow-entity-update`
 
 </td>
@@ -204,6 +264,58 @@ Denies the graph_expand command without any pre-configured scope.
 <tr>
 <td>
 
+`gen-ui:allow-load-seeds`
+
+</td>
+<td>
+
+Enables the load_seeds command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-load-seeds`
+
+</td>
+<td>
+
+Denies the load_seeds command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:allow-memory-ingest`
+
+</td>
+<td>
+
+Enables the memory_ingest command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-memory-ingest`
+
+</td>
+<td>
+
+Denies the memory_ingest command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `gen-ui:allow-memory-search`
 
 </td>
@@ -223,6 +335,110 @@ Enables the memory_search command without any pre-configured scope.
 <td>
 
 Denies the memory_search command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:allow-run-migrations`
+
+</td>
+<td>
+
+Enables the run_migrations command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-run-migrations`
+
+</td>
+<td>
+
+Denies the run_migrations command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:allow-scribe-start`
+
+</td>
+<td>
+
+Enables the scribe_start command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-scribe-start`
+
+</td>
+<td>
+
+Denies the scribe_start command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:allow-scribe-stop`
+
+</td>
+<td>
+
+Enables the scribe_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-scribe-stop`
+
+</td>
+<td>
+
+Denies the scribe_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:allow-stream-agent-a2ui`
+
+</td>
+<td>
+
+Enables the stream_agent_a2ui command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-stream-agent-a2ui`
+
+</td>
+<td>
+
+Denies the stream_agent_a2ui command without any pre-configured scope.
 
 </td>
 </tr>

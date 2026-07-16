@@ -29,7 +29,7 @@ virtual-net = { workspace = true, optional = true }
 # / SurrealDB mobile), not three.
 default = []
 pg = ["sqlx/postgres"]
-pglite = ["pg", "dep:pglite-oxide", "dep:virtual-net"]
+pglite = ["pg", "dep:pglite-oxide", "dep:virtual-net", "pglite-oxide/bundled"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio        = { workspace = true, features = ["rt", "sync", "time", "macros"] }

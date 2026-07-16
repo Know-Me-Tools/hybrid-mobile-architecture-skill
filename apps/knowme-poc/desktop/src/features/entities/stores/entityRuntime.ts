@@ -1,5 +1,12 @@
 // TJ-ARCH-MOB-001 compliant — all Tauri IPC lives in this store module.
-import { invoke, isTauri } from '@tauri-apps/api/core'
+import { isTauri } from '@tauri-apps/api/core'
+import {
+  entityGet,
+  entityList,
+  entityRuntimeStart,
+  entityRuntimeStop,
+  type EntityRecord as PluginEntityRecord,
+} from '@prometheus-ags/tauri-plugin-gen-ui'
 import { PGlite } from '@electric-sql/pglite'
 import {
   createPGlitePersistenceAdapter,
@@ -14,12 +21,31 @@ import schemaSql from '../schema.sql?raw'
 export interface EntityRow { id: string; tenant_id: string; [key: string]: unknown }
 let runtime: LocalFirstGraphRuntime | null = null
 
-function tauriTransport(entityType: string): EntityTransport<EntityRow> {
+// The plugin's wire shape ({id, entityType, dataJson}) is schema-agnostic —
+// dataJson is the entity payload as a JSON string (see gen_ui_types::transport
+// and the PEM Dart mirror's identical dataJson: String pattern). Adapt it into
+// the row shape PEM's transport expects; tenant scoping is the caller's job.
+function toEntityRow(record: PluginEntityRecord, tenantId: string): EntityRow {
+  const data = JSON.parse(record.dataJson) as Record<string, unknown>
+  return { ...data, id: record.id, tenant_id: tenantId }
+}
+
+function tauriTransport(entityType: string, tenantId: string): EntityTransport<EntityRow> {
   return {
     identify: (row) => row.id,
     authoritative: true,
-    list: (query) => invoke('entity_list', { view: { entityType, ...query } }),
-    get: (id) => invoke('entity_get', { entityType, id }),
+    // The plugin's ViewDescriptor filters/sorts/pagination land with the real
+    // entity-view UI (C-104+) — list() ignores the PEM ListQuery for now and
+    // fetches everything, matching this transport's current pre-C-104 scope.
+    list: async () => {
+      const result = await entityList({ entityType, filters: [], sorts: [], limit: null, cursor: null })
+      const rows = result.items.map((r) => toEntityRow(r, tenantId))
+      return { rows, total: rows.length, nextCursor: result.nextCursor }
+    },
+    get: async (id) => {
+      const record = await entityGet(entityType, id)
+      return record ? toEntityRow(record, tenantId) : null
+    },
   }
 }
 
@@ -50,10 +76,10 @@ export async function startEntityRuntime(tenantId: string): Promise<() => void> 
   registerEntityFromSql({ entityType: 'Note', createTableSql: notesDdl })
 
   if (isTauri()) {
-    registerEntityTransport('Project', tauriTransport('projects'))
-    registerEntityTransport('Note', tauriTransport('notes'))
-    await invoke<void>('entity_runtime_start', { tenantId })
-    return () => { void invoke<void>('entity_runtime_stop') }
+    registerEntityTransport('Project', tauriTransport('projects', tenantId))
+    registerEntityTransport('Note', tauriTransport('notes', tenantId))
+    await entityRuntimeStart(tenantId)
+    return () => { void entityRuntimeStop() }
   }
 
   const db = await PGlite.create('idb://gen-ui', { relaxedDurability: true })

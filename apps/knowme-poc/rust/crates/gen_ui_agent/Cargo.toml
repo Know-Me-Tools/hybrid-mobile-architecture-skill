@@ -9,7 +9,27 @@ license.workspace = true
 gen_ui_types    = { path = "../gen_ui_types" }
 gen_ui_runtime  = { path = "../gen_ui_runtime" }
 gen_ui_protocol = { path = "../gen_ui_protocol" }
-gen_ui_client   = { path = "../gen_ui_client" }
+# gen_ui_agent is native-only (consumed by gen_ui_ffi mobile + tauri-plugin-gen-ui
+# desktop, never gen_ui_wasm), so native-http is unconditional here.
+gen_ui_client   = { path = "../gen_ui_client", default-features = false, features = ["native-http"] }
+gen_ui_db       = { path = "../gen_ui_db", features = ["pglite"] }
+gen_ui_db_graph = { path = "../gen_ui_db_graph" }
 gen_ui_mcp      = { path = "../gen_ui_mcp" }
+liter-llm.workspace = true
 async-trait.workspace = true
 anyhow.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["sync", "rt"] }
+once_cell.workspace = true
+tracing.workspace = true
+keyring.workspace = true
+uuid.workspace = true
+futures.workspace = true
+
+[target.'cfg(target_os = "ios")'.dependencies]
+# Cargo feature-unifies this into the same apple-native-keyring-store instance
+# keyring pulls in transitively — see the workspace Cargo.toml comment on keyring
+# for why the `protected` feature can't be enabled through keyring's own table.
+apple-native-keyring-store.workspace = true

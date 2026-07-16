@@ -8,6 +8,7 @@ use crate::rrf::{rrf_fuse, RrfConfig};
 use crate::schema::{HYBRID_SEARCH_QUERY, SCHEMA_DDL};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use tokio::sync::OnceCell;
 use surrealdb::engine::any::{connect, Any};
 use surrealdb::types::SurrealValue;
 use surrealdb::Surreal;
@@ -59,22 +60,41 @@ pub struct RelatedEntity {
     pub score: f32,
 }
 
+// One embedded store per process: native persistent endpoints (`rocksdb://<path>`)
+// take an exclusive lock on their data directory, the same way pglite-oxide's
+// PgliteServer does for its own data directory (see gen_ui_db's PgliteStore).
+// `get_or_try_init` serializes initializers so concurrent `open()` callers await
+// the winner's in-flight init instead of racing a second exclusive open; a
+// failed init leaves the cell unset so later retries work. This isn't
+// load-bearing yet — mobile's FFI boot sequence doesn't call `open()` today —
+// but it keeps GraphStore's singleton contract identical to the desktop
+// config-DB's before mobile wiring makes it load-bearing.
+static GRAPH_STORE: OnceCell<GraphStore> = OnceCell::const_new();
+
 impl GraphStore {
-    /// Open (or create) the embedded store, select ns/db, and apply the schema.
-    /// Idempotent: safe on every boot.
+    /// Open (or return/await the already-opening) singleton embedded store for
+    /// this process, selecting ns/db and applying the schema on first open.
+    /// `cfg` is only honoured by the call that performs the first successful
+    /// initialization — later calls ignore it and hand back the existing
+    /// handle, since a second endpoint would imply a second store.
     pub async fn open(cfg: GraphStoreConfig) -> Result<Self, GraphError> {
-        let model = cfg.embedder.model_info();
-        if model.dim != EMBED_DIM {
-            return Err(GraphError::Invalid(format!(
-                "embedder dim {} != index dim {EMBED_DIM} ({})",
-                model.dim, model.name
-            )));
-        }
-        let db = connect(&cfg.endpoint).await?;
-        db.use_ns(&cfg.namespace).use_db(&cfg.database).await?;
-        let store = Self { db, embedder: cfg.embedder };
-        store.init().await?;
-        Ok(store)
+        GRAPH_STORE
+            .get_or_try_init(|| async move {
+                let model = cfg.embedder.model_info();
+                if model.dim != EMBED_DIM {
+                    return Err(GraphError::Invalid(format!(
+                        "embedder dim {} != index dim {EMBED_DIM} ({})",
+                        model.dim, model.name
+                    )));
+                }
+                let db = connect(&cfg.endpoint).await?;
+                db.use_ns(&cfg.namespace).use_db(&cfg.database).await?;
+                let store = Self { db, embedder: cfg.embedder };
+                store.init().await?;
+                Ok(store)
+            })
+            .await
+            .cloned()
     }
 
     async fn init(&self) -> Result<(), GraphError> {
@@ -88,11 +108,19 @@ impl GraphStore {
     }
 
     /// Run the (synchronous, CPU-bound) embedder off the async runtime.
+    #[cfg(not(target_arch = "wasm32"))]
     async fn embed_blocking(&self, texts: Vec<String>) -> Result<Vec<Vec<f32>>, GraphError> {
         let embedder = Arc::clone(&self.embedder);
         gen_ui_runtime::spawn_blocking(move || embedder.embed(&texts))
             .await
             .map_err(|e| GraphError::Embedding(format!("embed task join: {e}")))?
+    }
+
+    /// wasm has no blocking pool (single-threaded, host-supplied JS embedder
+    /// per `embed.rs`) — call the embedder inline on the current task.
+    #[cfg(target_arch = "wasm32")]
+    async fn embed_blocking(&self, texts: Vec<String>) -> Result<Vec<Vec<f32>>, GraphError> {
+        self.embedder.embed(&texts)
     }
 
     /// INTENT: ingest a memory. Embeds `text`, stores row + vector, returns the id.
@@ -270,7 +298,10 @@ impl GraphStore {
     }
 }
 
-/// Handle to the embedded SurrealDB plus the shared embedder.
+/// Handle to the embedded SurrealDB plus the shared embedder. Cheap to clone:
+/// `Surreal<Any>` and `Arc<dyn Embedder>` are both `Arc`-backed handles, not
+/// owning the connection/model themselves.
+#[derive(Clone)]
 pub struct GraphStore {
     db: Surreal<Any>,
     embedder: Arc<dyn Embedder>,

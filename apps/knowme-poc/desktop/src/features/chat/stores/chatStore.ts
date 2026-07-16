@@ -2,8 +2,8 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { listen } from '@tauri-apps/api/event'
-import { invoke, isTauri } from '@tauri-apps/api/core'
+import { isTauri } from '@tauri-apps/api/core'
+import { onChatEvent, streamAgentA2ui } from '@prometheus-ags/tauri-plugin-gen-ui'
 import type { ContentBlock, Message, MessageUsage } from '@/bridge/a2ui/types'
 import { applyA2uiEvent } from '@/bridge/a2ui/driver'
 
@@ -50,11 +50,12 @@ export const useChatStore = create<ChatState & ChatActions>()(
         const assistantId = crypto.randomUUID()
         const assistantMsg: Message = { id: assistantId, role: 'assistant', content: [], timestamp: new Date().toISOString(), isStreaming: true }
         set((s) => { s.messages.push(userMsg, assistantMsg); s.isStreaming = true })
-        // Store calls invoke() — never component or hook
-        await invoke('stream_agent_a2ui', {
-          userMessage: text,
-          messages: get().messages.slice(0, -1).flatMap((m) => [m.role, m.content.find(b => b.type === 'text')?.text ?? '']),
-        }).catch(console.error)
+        // Store calls invoke() (via the plugin's typed wrapper) — never
+        // component or hook.
+        await streamAgentA2ui(
+          text,
+          get().messages.slice(0, -1).flatMap((m) => [m.role, m.content.find(b => b.type === 'text')?.text ?? '']),
+        ).catch(console.error)
       },
 
       initListeners: () => {
@@ -62,9 +63,9 @@ export const useChatStore = create<ChatState & ChatActions>()(
         // context (this bundle also serves as a plain web page with no
         // __TAURI_INTERNALS__ bridge, where listen() throws synchronously).
         if (!isTauri()) return () => {}
-        const unlistenPromise = listen('a2ui_event', (event: { payload: unknown }) => {
+        const unlistenPromise = onChatEvent((payload: unknown) => {
           const store = useChatStore.getState()
-          applyA2uiEvent(event.payload as never, store.streamBlock, store.finalizeMessage)
+          applyA2uiEvent(payload as never, store.streamBlock, store.finalizeMessage)
         })
         return () => { unlistenPromise.then((fn) => fn()) }
       },

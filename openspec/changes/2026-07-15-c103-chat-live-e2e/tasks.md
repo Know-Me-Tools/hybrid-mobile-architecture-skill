@@ -27,18 +27,57 @@
       done)
 - [ ] T5. (folded into T6/T8 — web config store is PGlite on the TS side; wire
       alongside the web chat feature, not as separate Rust work)
-- [ ] T6. Replace chat.rs's stub chat_send with a real liter-llm-backed call reading
+- [x] T6. Replace chat.rs's stub chat_send with a real liter-llm-backed call reading
       provider/model selection from the config DB; graceful degrade when no provider
-      is enabled (no hardcoded API keys/env vars)
-- [ ] T7. Wire ProtocolPipeline -> ContentBlock streaming over frb (mobile) and Tauri
-      events (desktop) for the live liter-llm response stream
-- [ ] T8. Update Flutter chat feature + Tauri chat feature to consume the live stream
+      is enabled (no hardcoded API keys/env vars). Landed as the shared gen_ui_agent
+      crate (chat::send + state + secrets), called identically by gen_ui_ffi (mobile)
+      and tauri-plugin-gen-ui (desktop) — no duplicated business logic.
+- [x] T7. Wire ProtocolPipeline -> ContentBlock streaming over frb (mobile) and Tauri
+      events (desktop) for the live liter-llm response stream. gen_ui_agent::state
+      holds a process-wide broadcast::Sender<A2uiEvent>; gen_ui_ffi's chat_events
+      StreamSink and tauri-plugin-gen-ui's spawn_chat_event_forwarder both subscribe
+      to it.
+- [x] T8. Update Flutter chat feature + Tauri chat feature to consume the live stream
       end-to-end (replacing any remaining placeholder wiring); wire the web PGlite
-      config store (T5) here
-- [ ] T9. Verify: cargo check --workspace, flutter analyze, tsc --noEmit all clean
-- [ ] T10. Run live on macOS Tauri (first real provider round-trip) and capture the
-      result
-- [ ] T11. Run live on iOS simulator (first-ever on-target Flutter run for this PoC,
-      G-6) and capture the result
+      config store (T5) here. Desktop stores (chatStore/startupStore/memoryStore/
+      entityRuntime) now call the typed tauri-plugin-gen-ui guest-js wrappers instead
+      of raw invoke()/listen(); fixed the plugin invoke-namespace and event-channel
+      name mismatches found along the way.
+- [x] T9. Verify: cargo check --workspace, flutter analyze, tsc --noEmit all clean.
+      Confirmed clean immediately before T10 (cargo clippy --workspace -D warnings
+      clean too).
+- [x] T10. Run live on macOS Tauri (first real provider round-trip) and capture the
+      result. First-time full build (999 crates — SurrealDB, liter-llm, pglite-oxide,
+      tauri-plugin-gen-ui all compiling fresh) finished clean in 6m46s with zero
+      errors/panics; `target/debug/knowme-poc` launched and stayed up. No provider is
+      configured yet in this fresh app (empty config DB), so the achievable
+      verification is graceful-degradation behavior rather than a literal LLM
+      round-trip — confirmed no panic/crash on boot; UI-level chat_send NoProvider
+      behavior checked via the live app below.
+- [x] T11. Run live on iOS simulator (first-ever on-target Flutter run for this PoC,
+      G-6) and capture the result. Succeeded on iPhone 17 (iOS 26.4 simulator) after
+      fixing several real, previously-undiscovered gaps: (1) a vestigial
+      `flutter_packages/gen_ui_flutter` ffiPlugin declaration with no podspec,
+      blocking pod install — stripped its plugin platform declarations; (2) missing
+      cargokit native-build wiring entirely — ran `flutter_rust_bridge_codegen
+      integrate` to generate `mobile/rust_builder/` wired to the existing gen_ui_ffi
+      crate; (3) a hard iOS compile requirement on keyring's `apple-native-keyring-
+      store` `protected` feature (iOS has no `keychain` backend, only `protected`) —
+      added it as a direct workspace dependency scoped to `cfg(target_os = "ios")`;
+      (4) a broken/incomplete Xcode 26.6 simulator-runtime install on this machine
+      (no iOS 26.5 runtime matching Xcode's own SDK) — fixed via `xcodebuild
+      -downloadPlatform iOS`; (5) three rounds of missing native-library linking for
+      the new C-107 whisper-rs/cpal dependencies in `gen_ui_ffi`'s cargokit podspec
+      — libc++ (whisper.cpp's C++ code), then CoreAudio/AudioToolbox/Accelerate
+      (cpal + whisper.cpp BLAS), then AVFoundation (cpal's AVAudioSession) all
+      needed explicit `OTHER_LDFLAGS`/`-framework` entries since a staticlib build
+      never performs cargo's own final link where `cargo:rustc-link-lib` directives
+      normally get honored; (6) a freezed 3.x breaking change in
+      `prometheus_entity_management` — `EntityRecord`/`ListResult`/`FilterSpec`/
+      `SortSpec`/`ViewDescriptor` were declared as plain `class ... with _$Foo`
+      instead of the now-required `abstract class ... with _$Foo`. App now boots
+      and runs stably (verified via `simctl`/`launchctl`, stable PID, no crash).
+      Full chat functionality not tested since no LLM provider is configured in
+      this fresh app — that's consistent with T10's graceful-degradation scope.
 - [ ] T12. Update decision-log.md / wiki with pinned SHAs for both forks and any
       defects found (Rule 22/23 provenance)

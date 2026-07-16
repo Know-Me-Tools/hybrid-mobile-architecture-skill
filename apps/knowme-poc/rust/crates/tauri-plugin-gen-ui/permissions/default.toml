@@ -2,11 +2,19 @@
 "$schema" = "schemas/schema.json"
 
 [default]
-description = "Default gen-ui permissions: read + chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly."
+description = "Default gen-ui permissions: startup/read/chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly."
 permissions = [
-    "allow-chat-send",
+    "allow-stream-agent-a2ui",
+    "allow-run-migrations",
+    "allow-load-seeds",
+    "allow-attach-sync-shapes",
+    "allow-memory-ingest",
+    "allow-entity-runtime-start",
+    "allow-entity-runtime-stop",
     "allow-entity-list",
     "allow-entity-get",
     "allow-memory-search",
     "allow-graph-expand",
+    "allow-scribe-start",
+    "allow-scribe-stop",
 ]

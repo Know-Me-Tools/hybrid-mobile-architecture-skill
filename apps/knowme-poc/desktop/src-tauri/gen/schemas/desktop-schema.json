@@ -2403,6 +2403,210 @@
           "markdownDescription": "Denies the unminimize command without any pre-configured scope."
         },
         {
+          "description": "Default gen-ui permissions: startup/read/chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.\n#### This default permission set includes:\n\n- `allow-stream-agent-a2ui`\n- `allow-run-migrations`\n- `allow-load-seeds`\n- `allow-attach-sync-shapes`\n- `allow-memory-ingest`\n- `allow-entity-runtime-start`\n- `allow-entity-runtime-stop`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`\n- `allow-scribe-start`\n- `allow-scribe-stop`",
+          "type": "string",
+          "const": "gen-ui:default",
+          "markdownDescription": "Default gen-ui permissions: startup/read/chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.\n#### This default permission set includes:\n\n- `allow-stream-agent-a2ui`\n- `allow-run-migrations`\n- `allow-load-seeds`\n- `allow-attach-sync-shapes`\n- `allow-memory-ingest`\n- `allow-entity-runtime-start`\n- `allow-entity-runtime-stop`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`\n- `allow-scribe-start`\n- `allow-scribe-stop`"
+        },
+        {
+          "description": "Enables the attach_sync_shapes command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-attach-sync-shapes",
+          "markdownDescription": "Enables the attach_sync_shapes command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the entity_create command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-entity-create",
+          "markdownDescription": "Enables the entity_create command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the entity_delete command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-entity-delete",
+          "markdownDescription": "Enables the entity_delete command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the entity_get command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-entity-get",
+          "markdownDescription": "Enables the entity_get command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the entity_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-entity-list",
+          "markdownDescription": "Enables the entity_list command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the entity_runtime_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-entity-runtime-start",
+          "markdownDescription": "Enables the entity_runtime_start command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the entity_runtime_stop command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-entity-runtime-stop",
+          "markdownDescription": "Enables the entity_runtime_stop command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the entity_update command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-entity-update",
+          "markdownDescription": "Enables the entity_update command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the graph_expand command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-graph-expand",
+          "markdownDescription": "Enables the graph_expand command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the load_seeds command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-load-seeds",
+          "markdownDescription": "Enables the load_seeds command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the memory_ingest command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-memory-ingest",
+          "markdownDescription": "Enables the memory_ingest command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the memory_search command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-memory-search",
+          "markdownDescription": "Enables the memory_search command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the run_migrations command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-run-migrations",
+          "markdownDescription": "Enables the run_migrations command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the scribe_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-scribe-start",
+          "markdownDescription": "Enables the scribe_start command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the scribe_stop command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-scribe-stop",
+          "markdownDescription": "Enables the scribe_stop command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the stream_agent_a2ui command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:allow-stream-agent-a2ui",
+          "markdownDescription": "Enables the stream_agent_a2ui command without any pre-configured scope."
+        },
+        {
+          "description": "Allow entity create/update/delete. Grant only to capabilities that own writes.",
+          "type": "string",
+          "const": "gen-ui:allow-write",
+          "markdownDescription": "Allow entity create/update/delete. Grant only to capabilities that own writes."
+        },
+        {
+          "description": "Denies the attach_sync_shapes command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-attach-sync-shapes",
+          "markdownDescription": "Denies the attach_sync_shapes command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the entity_create command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-entity-create",
+          "markdownDescription": "Denies the entity_create command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the entity_delete command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-entity-delete",
+          "markdownDescription": "Denies the entity_delete command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the entity_get command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-entity-get",
+          "markdownDescription": "Denies the entity_get command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the entity_list command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-entity-list",
+          "markdownDescription": "Denies the entity_list command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the entity_runtime_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-entity-runtime-start",
+          "markdownDescription": "Denies the entity_runtime_start command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the entity_runtime_stop command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-entity-runtime-stop",
+          "markdownDescription": "Denies the entity_runtime_stop command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the entity_update command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-entity-update",
+          "markdownDescription": "Denies the entity_update command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the graph_expand command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-graph-expand",
+          "markdownDescription": "Denies the graph_expand command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the load_seeds command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-load-seeds",
+          "markdownDescription": "Denies the load_seeds command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the memory_ingest command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-memory-ingest",
+          "markdownDescription": "Denies the memory_ingest command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the memory_search command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-memory-search",
+          "markdownDescription": "Denies the memory_search command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the run_migrations command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-run-migrations",
+          "markdownDescription": "Denies the run_migrations command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the scribe_start command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-scribe-start",
+          "markdownDescription": "Denies the scribe_start command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the scribe_stop command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-scribe-stop",
+          "markdownDescription": "Denies the scribe_stop command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the stream_agent_a2ui command without any pre-configured scope.",
+          "type": "string",
+          "const": "gen-ui:deny-stream-agent-a2ui",
+          "markdownDescription": "Denies the stream_agent_a2ui command without any pre-configured scope."
+        },
+        {
           "description": "This permission set configures which\noperating system information are available\nto gather from the frontend.\n\n#### Granted Permissions\n\nAll information except the host name are available.\n\n\n#### This default permission set includes:\n\n- `allow-arch`\n- `allow-exe-extension`\n- `allow-family`\n- `allow-locale`\n- `allow-os-type`\n- `allow-platform`\n- `allow-version`",
           "type": "string",
           "const": "os:default",

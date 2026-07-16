@@ -1,8 +1,7 @@
 // TJ-ARCH-MOB-001 compliant
-// Tauri application entry point
-// gen_ui_core commands are registered here
-
-mod commands;
+// Tauri application entry point. Intent commands (chat, entity CRUD, memory,
+// startup) are registered by tauri-plugin-gen-ui, NOT here — this file owns
+// only app-shell concerns (menu, window chrome, other Tauri plugins).
 
 use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::Manager;
@@ -10,19 +9,18 @@ use tauri::Manager;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        // Must be registered first: a second launch attempt is redirected here
+        // instead of racing the first instance for the config-db PGlite lock.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_focus();
+                let _ = window.unminimize();
+            }
+        }))
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_os::init())
-        // .manage(AppState::new())          // Uncomment when gen_ui_core is wired
-        .invoke_handler(tauri::generate_handler![
-            commands::run_migrations,
-            commands::load_seeds,
-            commands::attach_sync_shapes,
-            commands::memory_ingest,
-            commands::memory_search,
-            commands::entity_runtime_start,
-            commands::entity_runtime_stop,
-        ])
+        .plugin(tauri_plugin_gen_ui::init())
         .setup(|app| {
             let exit = MenuItem::with_id(app, "exit", "Exit", true, Some("CmdOrCtrl+Q"))?;
             let file_menu = Submenu::with_items(app, "File", true, &[&exit])?;

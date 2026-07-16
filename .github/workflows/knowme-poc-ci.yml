@@ -1,0 +1,122 @@
+# TJ-ARCH-MOB-001 compliant
+# CI for the KnowMe PoC (apps/knowme-poc). Scoped to the PoC + the scaffolding
+# scripts that generate it, since this repo is primarily a skill package and
+# most of it has no runnable CI surface.
+name: knowme-poc-ci
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/knowme-poc/**"
+      - "scripts/**"
+      - ".github/workflows/knowme-poc-ci.yml"
+  pull_request:
+    paths:
+      - "apps/knowme-poc/**"
+      - "scripts/**"
+      - ".github/workflows/knowme-poc-ci.yml"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust:
+    name: Rust — clippy + test
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: apps/knowme-poc/rust
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/knowme-poc/rust
+      - run: cargo clippy --workspace -- -D warnings
+      - run: cargo test --workspace
+
+  audit:
+    name: audit.sh — scratch-scaffolded app
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Scaffold a throwaway app
+        # scaffold-hybrid.sh <project-path> — pass an absolute path outside the
+        # checkout so the scratch app never gets committed or cached.
+        run: bash scripts/scaffold-hybrid.sh "${{ runner.temp }}/ci-audit-scratch"
+      - name: Run architecture audit
+        run: bash scripts/audit.sh all "${{ runner.temp }}/ci-audit-scratch"
+
+  desktop-test:
+    name: Desktop — Vitest
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: apps/knowme-poc/desktop
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm test
+
+  mobile-analyze:
+    name: Mobile — dart analyze (post-codegen)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: beta
+      - uses: dtolnay/rust-toolchain@stable
+      - name: flutter_rust_bridge_codegen
+        run: cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+      - name: Regenerate bridge
+        # Must run from the hybrid project root — flutter_rust_bridge.yaml's
+        # dart_output (../mobile/lib/bridge) is relative to rust_root, itself
+        # relative to the invocation directory.
+        working-directory: apps/knowme-poc
+        run: flutter_rust_bridge_codegen generate --config-file rust/flutter_rust_bridge.yaml
+      - working-directory: apps/knowme-poc/mobile
+        run: flutter pub get
+      - working-directory: apps/knowme-poc/mobile
+        # info-level style lints are a known, accepted baseline (462 at last
+        # count) — fail only on warnings/errors, not infos.
+        run: flutter analyze --no-fatal-infos --fatal-warnings
+
+  poc-build:
+    name: PoC build — Tauri desktop + iOS simulator
+    runs-on: macos-15
+    needs: [rust, desktop-test, mobile-analyze]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios-sim
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/knowme-poc/rust
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: pnpm/action-setup@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: beta
+      - name: Tauri build (desktop)
+        working-directory: apps/knowme-poc/desktop
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run tauri:build -- --no-bundle
+      - name: Flutter build (iOS simulator)
+        working-directory: apps/knowme-poc/mobile
+        run: |
+          flutter pub get
+          flutter build ios --simulator --no-codesign

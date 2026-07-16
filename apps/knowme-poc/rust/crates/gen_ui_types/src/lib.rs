@@ -13,6 +13,7 @@ pub mod transport;
 pub mod sync;
 pub mod config;
 pub mod error;
+pub mod inference;
 
 pub use content_block::ContentBlock;
 pub use error::{CoreError, CoreResult};

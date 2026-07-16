@@ -15,10 +15,8 @@ Future<CoreResultOptionEntityRecord> entityGet({
   required String entityType,
   required String id,
 }) =>
-    GenUiCore.instance.api.crateApiEntityEntityGet(
-      entityType: entityType,
-      id: id,
-    );
+    GenUiCore.instance.api
+        .crateApiEntityEntityGet(entityType: entityType, id: id);
 
 /// Create an entity. Emits a ChangeEvent::Upsert on the entity_changes stream.
 Future<CoreResultEntityRecord> entityCreate({required EntityRecord record}) =>
@@ -33,10 +31,8 @@ Future<CoreResult> entityDelete({
   required String entityType,
   required String id,
 }) =>
-    GenUiCore.instance.api.crateApiEntityEntityDelete(
-      entityType: entityType,
-      id: id,
-    );
+    GenUiCore.instance.api
+        .crateApiEntityEntityDelete(entityType: entityType, id: id);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CoreResult < () >>>
 abstract class CoreResult implements RustOpaqueInterface {}

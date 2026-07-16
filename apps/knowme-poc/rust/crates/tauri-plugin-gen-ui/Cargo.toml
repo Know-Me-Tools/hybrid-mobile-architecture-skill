@@ -12,10 +12,14 @@ gen_ui_types    = { path = "../gen_ui_types" }
 gen_ui_runtime  = { path = "../gen_ui_runtime" }
 gen_ui_protocol = { path = "../gen_ui_protocol" }
 gen_ui_agent    = { path = "../gen_ui_agent" }
+gen_ui_db       = { path = "../gen_ui_db", features = ["pglite"] }
+gen_ui_audio    = { path = "../gen_ui_audio" }
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+once_cell.workspace = true
 tauri = { version = "2", default-features = false }
+tokio = { workspace = true, features = ["time"] }
 
 [build-dependencies]
 tauri-plugin = { version = "2", features = ["build"] }

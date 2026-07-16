@@ -27,8 +27,11 @@ void main() {
 
     final ChatState state = container.read(chatProvider);
     final msg = state.messages.firstWhere((m) => m.id == 'msg-1');
-    expect(msg.isStreaming, isFalse,
-        reason: 'RunFinished finalizes the message');
+    expect(
+      msg.isStreaming,
+      isFalse,
+      reason: 'RunFinished finalizes the message',
+    );
     expect(msg.content, hasLength(2));
     expect(msg.content.every((b) => b is TextBlock), isTrue);
   });

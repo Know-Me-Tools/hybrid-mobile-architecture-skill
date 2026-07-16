@@ -32,14 +32,17 @@ class _BootScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         body: Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            SizedBox(
-              width: 200,
-              child: LinearProgressIndicator(value: phase.progress),
-            ),
-            const SizedBox(height: 16),
-            Text(phase.label, style: T.uiMd.copyWith(color: T.textSecondary)),
-          ]),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 200,
+                child: LinearProgressIndicator(value: phase.progress),
+              ),
+              const SizedBox(height: 16),
+              Text(phase.label, style: T.uiMd.copyWith(color: T.textSecondary)),
+            ],
+          ),
         ),
       );
 }
@@ -53,15 +56,20 @@ class _BootError extends StatelessWidget {
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.error_outline, color: T.red, size: 40),
-              const SizedBox(height: 12),
-              Text('Startup failed', style: T.uiMd.copyWith(color: T.red)),
-              const SizedBox(height: 8),
-              Text(message,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, color: T.red, size: 40),
+                const SizedBox(height: 12),
+                Text('Startup failed', style: T.uiMd.copyWith(color: T.red)),
+                const SizedBox(height: 8),
+                Text(
+                  message,
                   textAlign: TextAlign.center,
-                  style: T.uiMd.copyWith(color: T.textTertiary)),
-            ]),
+                  style: T.uiMd.copyWith(color: T.textTertiary),
+                ),
+              ],
+            ),
           ),
         ),
       );

@@ -34,64 +34,77 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final state = ref.watch(chatProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat'), actions: const [
-        Padding(
+      appBar: AppBar(
+        title: const Text('Chat'),
+        actions: const [
+          Padding(
             padding: EdgeInsets.only(right: 12),
-            child: Center(child: SyncChip()))
-      ]),
-      body: Column(children: [
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: state.messages.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 16),
-            itemBuilder: (context, i) {
-              final msg = state.messages[i];
-              return Column(
-                crossAxisAlignment: msg.role == 'user'
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
-                children: [
-                  for (final block in msg.content)
-                    ContentBlockView(block: block),
-                  if (msg.isStreaming)
-                    const Padding(
+            child: Center(child: SyncChip()),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: state.messages.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 16),
+              itemBuilder: (context, i) {
+                final msg = state.messages[i];
+                return Column(
+                  crossAxisAlignment: msg.role == 'user'
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  children: [
+                    for (final block in msg.content)
+                      ContentBlockView(block: block),
+                    if (msg.isStreaming)
+                      const Padding(
                         padding: EdgeInsets.only(top: 4),
                         child: SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(strokeWidth: 2))),
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: const InputDecoration(
+                        hintText: 'Message…',
+                        border: OutlineInputBorder(),
+                      ),
+                      onSubmitted: _isSending ? null : (_) => _send(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.filled(
+                    onPressed: _isSending ? null : _send,
+                    icon: _isSending
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.send),
+                  ),
                 ],
-              );
-            },
-          ),
-        ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                      hintText: 'Message…', border: OutlineInputBorder()),
-                  onSubmitted: _isSending ? null : (_) => _send(),
-                ),
               ),
-              const SizedBox(width: 8),
-              IconButton.filled(
-                onPressed: _isSending ? null : _send,
-                icon: _isSending
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.send),
-              ),
-            ]),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 

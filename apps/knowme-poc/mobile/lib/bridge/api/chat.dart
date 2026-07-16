@@ -7,14 +7,14 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Start a chat turn; returns the run_id whose events arrive on chat_events(run_id).
+/// `thread_id` is reserved for multi-thread history (not yet used — the agent
+/// layer takes the full turn history via `message` for now).
 Future<CoreResultString> chatSend({
   required String threadId,
   required String message,
 }) =>
-    GenUiCore.instance.api.crateApiChatChatSend(
-      threadId: threadId,
-      message: message,
-    );
+    GenUiCore.instance.api
+        .crateApiChatChatSend(threadId: threadId, message: message);
 
 /// Hybrid memory search (vector recall + graph expansion + BM25, RRF-fused in Rust).
 /// Returns opaque JSON rows the UI renders as Memory/Citation ContentBlocks.
@@ -30,10 +30,8 @@ Future<CoreResultVecString> graphExpand({
   required String entityId,
   required int depth,
 }) =>
-    GenUiCore.instance.api.crateApiChatGraphExpand(
-      entityId: entityId,
-      depth: depth,
-    );
+    GenUiCore.instance.api
+        .crateApiChatGraphExpand(entityId: entityId, depth: depth);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<CoreResult < String >>>
 abstract class CoreResultString implements RustOpaqueInterface {}

@@ -1,6 +1,9 @@
 # Update Log
 
 ## 2026-07-16
+* **Creation**: [Codegen and CI Verification Executor Completion Status](/codegen-and-ci-verification-executor-completion-status.md)
+* **Creation**: [KnowMe PoC wasm embed_blocking fix for gen_ui_db_graph](/knowme-poc-wasm-embed-blocking-fix-for-gen-ui-db-graph.md)
+* **Creation**: [Codegen and CI Verification Executor Completion Marker](/codegen-and-ci-verification-executor-completion-marker.md)
 * **Creation**: [Executor Completion Marker for Codegen and CI Verification Phase](/executor-completion-marker-for-codegen-and-ci-verification-phase.md)
 * **Creation**: [KnowMe Tauri Dev Build Clean After Branding and Startup Fixes](/knowme-tauri-dev-build-clean-after-branding-and-startup-fixes.md)
 * **Creation**: [Executor Completion Marker for Codegen and CI Verification Phase](/executor-completion-marker-for-codegen-and-ci-verification-phase.md)

@@ -2,15 +2,18 @@
 //! frb codegen root. Intent-level functions only (no raw SurrealQL / SQL across
 //! the bridge). init + submodules for streams and CRUD.
 //!
-//! `streams` is gated behind the `frb-streams` feature: its `StreamSink<T>`
-//! signatures reference the per-crate `StreamSink` type that
-//! `flutter_rust_bridge_codegen generate` emits into `frb_generated.rs`. Enable
-//! the feature after running codegen (the project build does this). The scaffold's
-//! pre-codegen `cargo check` gate leaves it off so the workspace checks clean.
-#[cfg(feature = "frb-streams")]
+//! `streams`'s `StreamSink<T>` signatures reference the per-crate `StreamSink`
+//! type that `flutter_rust_bridge_codegen generate` emits into
+//! `frb_generated.rs` — this crate is unbuildable before the first codegen run
+//! (see references/rust/new-block-type.md's codegen-first-run note). Codegen
+//! itself must run with `--rust-features frb-streams` gone (removed entirely,
+//! 2026-07: the module is no longer feature-gated) so it actually sees these
+//! functions and generates their SseEncode impls + Dart stream bindings —
+//! there is no build of this crate, gated or not, that doesn't need them.
 pub mod streams;
 pub mod entity;
 pub mod chat;
+pub mod scribe;
 
 use flutter_rust_bridge::frb;
 

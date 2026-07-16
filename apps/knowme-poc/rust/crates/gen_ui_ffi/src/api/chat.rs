@@ -2,16 +2,19 @@
 //! Chat + memory/graph-RAG intent surface. Dart sends a turn and folds the
 //! resulting A2uiEvent stream (see streams::chat_events) into ContentBlocks.
 //! Memory/graph functions are intent-level (`memory_search`, `graph_expand`) —
-//! never raw SurrealQL. Wave-1 (C-004 graph, C-006 agent) supply the backends.
+//! never raw SurrealQL. chat_send delegates to gen_ui_agent::chat::send, the
+//! SAME implementation tauri-plugin-gen-ui's stream_agent_a2ui calls — no
+//! duplicated business logic between the mobile and desktop leaves.
 // `pub use` (not `use`) — frb_generated.rs re-exports this module's types via
 // `use crate::api::chat::*`, which only sees items visible through a public path.
 pub use gen_ui_types::CoreResult;
 
 /// Start a chat turn; returns the run_id whose events arrive on chat_events(run_id).
+/// `thread_id` is reserved for multi-thread history (not yet used — the agent
+/// layer takes the full turn history via `message` for now).
 pub async fn chat_send(thread_id: String, message: String) -> CoreResult<String> {
-    // C-006 dispatches into the PMPO loop / gate proxy. C-007 lands the signature.
-    let _ = (thread_id, message);
-    Ok(String::new())
+    let _ = thread_id;
+    gen_ui_agent::chat::send(message, Vec::new()).await.map_err(Into::into)
 }
 
 /// Hybrid memory search (vector recall + graph expansion + BM25, RRF-fused in Rust).

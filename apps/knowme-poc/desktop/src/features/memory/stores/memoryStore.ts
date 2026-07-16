@@ -1,7 +1,8 @@
 // TJ-ARCH-MOB-001 compliant — store layer (the ONLY place invoke() is called).
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import { invoke, isTauri } from '@tauri-apps/api/core'
+import { isTauri } from '@tauri-apps/api/core'
+import { memoryIngest, memorySearch } from '@prometheus-ags/tauri-plugin-gen-ui'
 
 /** Mirror of gen_ui_db::graph::EntityHit — the fused RRF result. snake_case wire. */
 export interface MemoryHit {
@@ -38,7 +39,7 @@ export const useMemoryStore = create<MemoryState & MemoryActions>()(
     ingest: async (text: string) => {
       set((s) => { s.isIngesting = true; s.error = null })
       try {
-        if (isTauri()) await invoke<string>('memory_ingest', { text })
+        if (isTauri()) await memoryIngest(text)
       } catch (e) {
         set((s) => { s.error = String(e) })
       } finally {
@@ -49,9 +50,10 @@ export const useMemoryStore = create<MemoryState & MemoryActions>()(
     search: async (query: string) => {
       set((s) => { s.isSearching = true; s.error = null; s.query = query })
       try {
-        const hits = isTauri()
-          ? await invoke<MemoryHit[]>('memory_search', { query, k: 8 })
-          : []
+        // NOTE: the plugin's memory_search currently returns string[] (a stub —
+        // real graph-RAG search lands in C-104), not MemoryHit[] as this store's
+        // type expects. Cast is a known, tracked mismatch, not a silent fix.
+        const hits = isTauri() ? ((await memorySearch(query, 8)) as unknown as MemoryHit[]) : []
         set((s) => { s.hits = hits })
       } catch (e) {
         set((s) => { s.error = String(e); s.hits = [] })

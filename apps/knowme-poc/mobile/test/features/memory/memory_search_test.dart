@@ -2,7 +2,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:knowme_poc/bridge/rust_bridge_provider.dart' show MemoryHit;
 import 'package:knowme_poc/features/memory/domain/entities/memory_query.dart';
 import 'package:knowme_poc/features/memory/presentation/providers/memory_notifier.dart';
 

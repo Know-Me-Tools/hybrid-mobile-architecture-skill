@@ -41,8 +41,35 @@ export interface ViewDescriptor {
 }
 
 // --- Command wrappers --------------------------------------------------------
-export function chatSend(threadId: string, message: string): Promise<string> {
-  return invoke<string>(cmd("chat_send"), { threadId, message });
+
+/** Boot-order invariant, step 1 of 3: open the config store + run migrations. */
+export function runMigrations(): Promise<void> {
+  return invoke<void>(cmd("run_migrations"));
+}
+/** Boot-order invariant, step 2 of 3. */
+export function loadSeeds(): Promise<void> {
+  return invoke<void>(cmd("load_seeds"));
+}
+/** Boot-order invariant, step 3 of 3. */
+export function attachSyncShapes(): Promise<void> {
+  return invoke<void>(cmd("attach_sync_shapes"));
+}
+export function entityRuntimeStart(tenantId: string): Promise<void> {
+  return invoke<void>(cmd("entity_runtime_start"), { tenantId });
+}
+export function entityRuntimeStop(): Promise<void> {
+  return invoke<void>(cmd("entity_runtime_stop"));
+}
+export function memoryIngest(text: string): Promise<string> {
+  return invoke<string>(cmd("memory_ingest"), { text });
+}
+/**
+ * Start a chat turn through the liter-llm gateway. Returns the run_id whose
+ * ContentBlock events arrive on {@link onChatEvent}. `messages` is the prior
+ * turn history flattened to alternating role/text pairs, oldest first.
+ */
+export function streamAgentA2ui(userMessage: string, messages: string[]): Promise<string> {
+  return invoke<string>(cmd("stream_agent_a2ui"), { userMessage, messages });
 }
 export function entityList(view: ViewDescriptor): Promise<ListResult> {
   return invoke<ListResult>(cmd("entity_list"), { view });
@@ -64,6 +91,14 @@ export function memorySearch(query: string, k: number): Promise<string[]> {
 }
 export function graphExpand(entityId: string, depth: number): Promise<string[]> {
   return invoke<string[]>(cmd("graph_expand"), { entityId, depth });
+}
+/** Start a Scribe microphone recording. Errors if one is already in progress. */
+export function scribeStart(): Promise<void> {
+  return invoke<void>(cmd("scribe_start"));
+}
+/** Stop the in-flight Scribe recording and return its on-device transcript. */
+export function scribeStop(): Promise<string> {
+  return invoke<string>(cmd("scribe_stop"));
 }
 
 // --- Event channels (mirror gen_ui_ffi StreamSink feeds) ---------------------

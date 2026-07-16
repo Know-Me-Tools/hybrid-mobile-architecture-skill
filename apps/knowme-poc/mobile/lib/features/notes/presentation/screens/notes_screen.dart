@@ -40,14 +40,17 @@ class NotesScreen extends ConsumerWidget {
             for (final rec in result.items)
               ListTile(
                 title: Text(
-                    (jsonDecode(rec.dataJson) as Map)['title']?.toString() ??
-                        rec.id),
+                  (jsonDecode(rec.dataJson) as Map)['title']?.toString() ??
+                      rec.id,
+                ),
                 subtitle: Text(rec.id, style: const TextStyle(fontSize: 11)),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () => ref
-                      .read(entityCrudProvider(rec.entityType, rec.id, const {})
-                          .notifier)
+                      .read(
+                        entityCrudProvider(rec.entityType, rec.id, const {})
+                            .notifier,
+                      )
                       .deleteRecord(),
                 ),
               ),
@@ -60,10 +63,12 @@ class NotesScreen extends ConsumerWidget {
   Future<void> _create(WidgetRef ref) async {
     final id = _uuid.v4();
     final transport = ref.read(entityTransportProvider);
-    await transport.create(EntityRecord(
-      id: id,
-      entityType: 'note',
-      dataJson: jsonEncode({'title': 'New note', 'body': ''}),
-    ));
+    await transport.create(
+      EntityRecord(
+        id: id,
+        entityType: 'note',
+        dataJson: jsonEncode({'title': 'New note', 'body': ''}),
+      ),
+    );
   }
 }

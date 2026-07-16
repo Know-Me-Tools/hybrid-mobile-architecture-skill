@@ -9,19 +9,25 @@ void main() {
     builder: () => GoldenTestGroup(
       children: [
         GoldenTestScenario(
-            name: 'text',
-            child: const ContentBlockView(block: TextBlock('Hello world'))),
+          name: 'text',
+          child: const ContentBlockView(block: TextBlock('Hello world')),
+        ),
         GoldenTestScenario(
-            name: 'thinking',
-            child: const ContentBlockView(
-                block: ThinkingBlock('reasoning…'))),
+          name: 'thinking',
+          child: const ContentBlockView(
+            block: ThinkingBlock('reasoning…'),
+          ),
+        ),
         GoldenTestScenario(
-            name: 'code',
-            child: const ContentBlockView(
-                block: CodeBlock('dart', 'void main() {}'))),
+          name: 'code',
+          child: const ContentBlockView(
+            block: CodeBlock('dart', 'void main() {}'),
+          ),
+        ),
         GoldenTestScenario(
-            name: 'divider',
-            child: const ContentBlockView(block: DividerBlock())),
+          name: 'divider',
+          child: const ContentBlockView(block: DividerBlock()),
+        ),
       ],
     ),
   );

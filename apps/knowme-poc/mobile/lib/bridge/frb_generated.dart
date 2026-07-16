@@ -5,6 +5,7 @@
 
 import 'api/chat.dart';
 import 'api/entity.dart';
+import 'api/streams.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -37,8 +38,12 @@ class GenUiCore
 
   /// Initialize flutter_rust_bridge in mock mode.
   /// No libraries for FFI are loaded.
-  static void initMock({required GenUiCoreApi api}) {
-    instance.initMockImpl(api: api);
+  static void initMock({
+    required GenUiCoreApi api,
+  }) {
+    instance.initMockImpl(
+      api: api,
+    );
   }
 
   /// Dispose flutter_rust_bridge
@@ -68,7 +73,7 @@ class GenUiCore
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 1610600774;
+  int get rustContentHash => 618846197;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -80,10 +85,14 @@ class GenUiCore
 }
 
 abstract class GenUiCoreApi extends BaseApi {
+  Stream<A2UiEvent> crateApiStreamsChatEvents({required String runId});
+
   Future<CoreResultString> crateApiChatChatSend({
     required String threadId,
     required String message,
   });
+
+  Stream<ChangeEvent> crateApiStreamsEntityChanges();
 
   Future<CoreResultEntityRecord> crateApiEntityEntityCreate({
     required EntityRecord record,
@@ -118,6 +127,24 @@ abstract class GenUiCoreApi extends BaseApi {
     required String query,
     required int k,
   });
+
+  Stream<SyncStatus> crateApiStreamsSyncStatus();
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_A2UiEvent;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_A2UiEvent;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_A2UiEventPtr;
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_ChangeEvent;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_ChangeEvent;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_ChangeEventPtr;
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_CoreResult;
@@ -181,6 +208,14 @@ abstract class GenUiCoreApi extends BaseApi {
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_EntityRecordPtr;
 
   RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_SyncStatus;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_SyncStatus;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_SyncStatusPtr;
+
+  RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_ViewDescriptor;
 
   RustArcDecrementStrongCountFnType
@@ -200,6 +235,44 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   });
 
   @override
+  Stream<A2UiEvent> crateApiStreamsChatEvents({required String runId}) {
+    final sink = RustStreamSink<A2UiEvent>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_String(runId, serializer);
+            sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent_Sse(
+              sink,
+              serializer,
+            );
+            pdeCallFfi(
+              generalizedFrbRustBinding,
+              serializer,
+              funcId: 1,
+              port: port_,
+            );
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: null,
+          ),
+          constMeta: kCrateApiStreamsChatEventsConstMeta,
+          argValues: [runId, sink],
+          apiImpl: this,
+        ),
+      ),
+    );
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiStreamsChatEventsConstMeta => const TaskConstMeta(
+        debugName: 'chat_events',
+        argNames: ['runId', 'sink'],
+      );
+
+  @override
   Future<CoreResultString> crateApiChatChatSend({
     required String threadId,
     required String message,
@@ -213,7 +286,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 1,
+            funcId: 2,
             port: port_,
           );
         },
@@ -235,6 +308,44 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       );
 
   @override
+  Stream<ChangeEvent> crateApiStreamsEntityChanges() {
+    final sink = RustStreamSink<ChangeEvent>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
+              sink,
+              serializer,
+            );
+            pdeCallFfi(
+              generalizedFrbRustBinding,
+              serializer,
+              funcId: 3,
+              port: port_,
+            );
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: null,
+          ),
+          constMeta: kCrateApiStreamsEntityChangesConstMeta,
+          argValues: [sink],
+          apiImpl: this,
+        ),
+      ),
+    );
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiStreamsEntityChangesConstMeta =>
+      const TaskConstMeta(
+        debugName: 'entity_changes',
+        argNames: ['sink'],
+      );
+
+  @override
   Future<CoreResultEntityRecord> crateApiEntityEntityCreate({
     required EntityRecord record,
   }) {
@@ -249,7 +360,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 4,
             port: port_,
           );
         },
@@ -265,8 +376,10 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiEntityEntityCreateConstMeta =>
-      const TaskConstMeta(debugName: 'entity_create', argNames: ['record']);
+  TaskConstMeta get kCrateApiEntityEntityCreateConstMeta => const TaskConstMeta(
+        debugName: 'entity_create',
+        argNames: ['record'],
+      );
 
   @override
   Future<CoreResult> crateApiEntityEntityDelete({
@@ -282,7 +395,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 5,
             port: port_,
           );
         },
@@ -317,7 +430,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 6,
             port: port_,
           );
         },
@@ -353,7 +466,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 7,
             port: port_,
           );
         },
@@ -369,8 +482,10 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiEntityEntityListConstMeta =>
-      const TaskConstMeta(debugName: 'entity_list', argNames: ['view']);
+  TaskConstMeta get kCrateApiEntityEntityListConstMeta => const TaskConstMeta(
+        debugName: 'entity_list',
+        argNames: ['view'],
+      );
 
   @override
   Future<CoreResultEntityRecord> crateApiEntityEntityUpdate({
@@ -387,7 +502,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 8,
             port: port_,
           );
         },
@@ -403,8 +518,10 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiEntityEntityUpdateConstMeta =>
-      const TaskConstMeta(debugName: 'entity_update', argNames: ['record']);
+  TaskConstMeta get kCrateApiEntityEntityUpdateConstMeta => const TaskConstMeta(
+        debugName: 'entity_update',
+        argNames: ['record'],
+      );
 
   @override
   Future<CoreResultVecString> crateApiChatGraphExpand({
@@ -420,7 +537,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 9,
             port: port_,
           );
         },
@@ -451,7 +568,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 10,
             port: port_,
           );
         },
@@ -466,8 +583,10 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiInitCoreConstMeta =>
-      const TaskConstMeta(debugName: 'init_core', argNames: ['workerThreads']);
+  TaskConstMeta get kCrateApiInitCoreConstMeta => const TaskConstMeta(
+        debugName: 'init_core',
+        argNames: ['workerThreads'],
+      );
 
   @override
   Future<CoreResultVecString> crateApiChatMemorySearch({
@@ -483,7 +602,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 11,
             port: port_,
           );
         },
@@ -499,8 +618,63 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiChatMemorySearchConstMeta =>
-      const TaskConstMeta(debugName: 'memory_search', argNames: ['query', 'k']);
+  TaskConstMeta get kCrateApiChatMemorySearchConstMeta => const TaskConstMeta(
+        debugName: 'memory_search',
+        argNames: ['query', 'k'],
+      );
+
+  @override
+  Stream<SyncStatus> crateApiStreamsSyncStatus() {
+    final sink = RustStreamSink<SyncStatus>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
+              sink,
+              serializer,
+            );
+            pdeCallFfi(
+              generalizedFrbRustBinding,
+              serializer,
+              funcId: 12,
+              port: port_,
+            );
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: null,
+          ),
+          constMeta: kCrateApiStreamsSyncStatusConstMeta,
+          argValues: [sink],
+          apiImpl: this,
+        ),
+      ),
+    );
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiStreamsSyncStatusConstMeta => const TaskConstMeta(
+        debugName: 'sync_status',
+        argNames: ['sink'],
+      );
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_A2UiEvent => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_A2UiEvent => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent;
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_ChangeEvent => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_ChangeEvent => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent;
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_CoreResult => wire
@@ -559,12 +733,44 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord;
 
   RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_SyncStatus => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_SyncStatus => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus;
+
+  RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_ViewDescriptor => wire
           .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor;
 
   RustArcDecrementStrongCountFnType
       get rust_arc_decrement_strong_count_ViewDescriptor => wire
           .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor;
+
+  @protected
+  AnyhowException dco_decode_AnyhowException(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return AnyhowException(raw as String);
+  }
+
+  @protected
+  A2UiEvent
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return A2UiEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  ChangeEvent
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ChangeEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
 
   @protected
   CoreResult
@@ -634,12 +840,39 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  SyncStatus
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return SyncStatusImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   ViewDescriptor
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
     dynamic raw,
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ViewDescriptorImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  A2UiEvent
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return A2UiEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  ChangeEvent
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ChangeEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
@@ -710,12 +943,48 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  SyncStatus
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return SyncStatusImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   ViewDescriptor
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
     dynamic raw,
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ViewDescriptorImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  RustStreamSink<A2UiEvent>
+      dco_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent_Sse(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    throw UnimplementedError();
+  }
+
+  @protected
+  RustStreamSink<ChangeEvent>
+      dco_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    throw UnimplementedError();
+  }
+
+  @protected
+  RustStreamSink<SyncStatus>
+      dco_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    throw UnimplementedError();
   }
 
   @protected
@@ -764,6 +1033,37 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   BigInt dco_decode_usize(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dcoDecodeU64(raw);
+  }
+
+  @protected
+  AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_String(deserializer);
+    return AnyhowException(inner);
+  }
+
+  @protected
+  A2UiEvent
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return A2UiEventImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  ChangeEvent
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ChangeEventImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
   }
 
   @protected
@@ -851,12 +1151,48 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  SyncStatus
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return SyncStatusImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   ViewDescriptor
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ViewDescriptorImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  A2UiEvent
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return A2UiEventImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  ChangeEvent
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ChangeEventImpl.frbInternalSseDecode(
       sse_decode_usize(deserializer),
       sse_decode_i_32(deserializer),
     );
@@ -947,6 +1283,18 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  SyncStatus
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return SyncStatusImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   ViewDescriptor
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
     SseDeserializer deserializer,
@@ -956,6 +1304,33 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       sse_decode_usize(deserializer),
       sse_decode_i_32(deserializer),
     );
+  }
+
+  @protected
+  RustStreamSink<A2UiEvent>
+      sse_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent_Sse(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    throw UnimplementedError('Unreachable ()');
+  }
+
+  @protected
+  RustStreamSink<ChangeEvent>
+      sse_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    throw UnimplementedError('Unreachable ()');
+  }
+
+  @protected
+  RustStreamSink<SyncStatus>
+      sse_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    throw UnimplementedError('Unreachable ()');
   }
 
   @protected
@@ -1025,6 +1400,41 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  void sse_encode_AnyhowException(
+    AnyhowException self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.message, serializer);
+  }
+
+  @protected
+  void
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
+    A2UiEvent self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as A2UiEventImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+    ChangeEvent self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as ChangeEventImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
     CoreResult self,
@@ -1071,9 +1481,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultOptionEntityRecordImpl).frbInternalSseEncode(
-        move: true,
-      ),
+      (self as CoreResultOptionEntityRecordImpl)
+          .frbInternalSseEncode(move: true),
       serializer,
     );
   }
@@ -1119,6 +1528,19 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+    SyncStatus self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as SyncStatusImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
     ViewDescriptor self,
     SseSerializer serializer,
@@ -1126,6 +1548,32 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
       (self as ViewDescriptorImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent(
+    A2UiEvent self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as A2UiEventImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+    ChangeEvent self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as ChangeEventImpl).frbInternalSseEncode(move: null),
       serializer,
     );
   }
@@ -1177,9 +1625,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultOptionEntityRecordImpl).frbInternalSseEncode(
-        move: null,
-      ),
+      (self as CoreResultOptionEntityRecordImpl)
+          .frbInternalSseEncode(move: null),
       serializer,
     );
   }
@@ -1225,6 +1672,19 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+    SyncStatus self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as SyncStatusImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
+  void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
     ViewDescriptor self,
     SseSerializer serializer,
@@ -1232,6 +1692,63 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
       (self as ViewDescriptorImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+      sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent_Sse(
+    RustStreamSink<A2UiEvent> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(
+      self.setupAndSerialize(
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerA2uiEvent,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+      ),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+      sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
+    RustStreamSink<ChangeEvent> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(
+      self.setupAndSerialize(
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+      ),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+      sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
+    RustStreamSink<SyncStatus> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(
+      self.setupAndSerialize(
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+      ),
       serializer,
     );
   }
@@ -1305,6 +1822,46 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint8(self ? 1 : 0);
   }
+}
+
+@sealed
+class A2UiEventImpl extends RustOpaque implements A2UiEvent {
+  // Not to be used by end users
+  A2UiEventImpl.frbInternalDcoDecode(List<dynamic> wire)
+      : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  A2UiEventImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        GenUiCore.instance.api.rust_arc_increment_strong_count_A2UiEvent,
+    rustArcDecrementStrongCount:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_A2UiEvent,
+    rustArcDecrementStrongCountPtr:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_A2UiEventPtr,
+  );
+}
+
+@sealed
+class ChangeEventImpl extends RustOpaque implements ChangeEvent {
+  // Not to be used by end users
+  ChangeEventImpl.frbInternalDcoDecode(List<dynamic> wire)
+      : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  ChangeEventImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        GenUiCore.instance.api.rust_arc_increment_strong_count_ChangeEvent,
+    rustArcDecrementStrongCount:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_ChangeEvent,
+    rustArcDecrementStrongCountPtr:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_ChangeEventPtr,
+  );
 }
 
 @sealed
@@ -1458,6 +2015,26 @@ class EntityRecordImpl extends RustOpaque implements EntityRecord {
         GenUiCore.instance.api.rust_arc_decrement_strong_count_EntityRecord,
     rustArcDecrementStrongCountPtr:
         GenUiCore.instance.api.rust_arc_decrement_strong_count_EntityRecordPtr,
+  );
+}
+
+@sealed
+class SyncStatusImpl extends RustOpaque implements SyncStatus {
+  // Not to be used by end users
+  SyncStatusImpl.frbInternalDcoDecode(List<dynamic> wire)
+      : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  SyncStatusImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        GenUiCore.instance.api.rust_arc_increment_strong_count_SyncStatus,
+    rustArcDecrementStrongCount:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_SyncStatus,
+    rustArcDecrementStrongCountPtr:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_SyncStatusPtr,
   );
 }
 

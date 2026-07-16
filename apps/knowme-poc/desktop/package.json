@@ -23,6 +23,7 @@
     "@electric-sql/pglite-sync": "^0.4.0",
     "@flint/react": "git+https://github.com/Know-Me-Tools/flint-forge.git#1cae090d2cc02675eb99ba7a599735d339e53e38&path:packages/flint-react",
     "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
+    "@prometheus-ags/tauri-plugin-gen-ui": "file:../rust/crates/tauri-plugin-gen-ui/guest-js",
     "@radix-ui/react-slot": "^1.3.0",
     "@tailwindcss/vite": "^4.0.0",
     "@tanstack/react-query": "^5.0.0",

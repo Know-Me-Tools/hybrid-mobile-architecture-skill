@@ -9,6 +9,7 @@ members = [
     "crates/gen_ui_db",
     "crates/gen_ui_db_graph",
     "crates/gen_ui_inference",
+    "crates/gen_ui_audio",
     "crates/gen_ui_agent",
     "crates/gen_ui_ffi",
     "crates/tauri-plugin-gen-ui",
@@ -73,6 +74,19 @@ flutter_rust_bridge = { version = "2.12", features = ["anyhow"] }
 dashmap           = "6.1"
 parking_lot       = "0.12"
 once_cell         = "1.20"
+# Cross-platform OS credential store (macOS Keychain, Windows Credential Manager,
+# Linux Secret Service, iOS Keychain). NO Android Keystore support yet (tracked
+# upstream: open-source-cooperative/keyring-rs#127) — Android secret storage is
+# deferred to C-109 alongside the Settings/keychain-admin UI.
+# `apple-native-keyring-store`'s `protected` feature is a hard compile-time
+# requirement on iOS (its `keychain` backend, enabled by keyring's default `v1`
+# feature, is macOS-only). keyring 4.1 doesn't re-export a standalone `protected`
+# feature (only bundled inside its heavyweight `cli` feature), so the store crate
+# is declared directly here purely to enable that one feature — Cargo unifies it
+# into the same dependency edge keyring itself pulls in. Additive on macOS/desktop,
+# which keeps using `keychain` from `v1` unless the app opts into Protected Data.
+keyring           = "4.1"
+apple-native-keyring-store = { version = "1", default-features = false, features = ["protected"] }
 # Universal LLM gateway (142+ providers) — user's fork, pinned by SHA (Rule 22/23).
 # native-http (reqwest/tokio) for desktop+mobile; wasm-http (reqwest/fetch, no
 # tokio multithread) for the wasm32 web target — same crate, feature-gated.

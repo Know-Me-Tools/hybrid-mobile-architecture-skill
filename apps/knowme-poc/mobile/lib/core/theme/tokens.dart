@@ -26,20 +26,26 @@ abstract final class T {
 
   // Typography
   static TextStyle get displayLg => GoogleFonts.spaceGrotesk(
-      fontSize: 32,
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.03,
-      color: textPrimary);
+        fontSize: 32,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.03,
+        color: textPrimary,
+      );
   static TextStyle get uiMd => GoogleFonts.inter(
-      fontSize: 13, fontWeight: FontWeight.w500, color: textSecondary);
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: textSecondary,
+      );
   static TextStyle get prose => GoogleFonts.roboto(
-      fontSize: 15,
-      fontWeight: FontWeight.w400,
-      color: textPrimary,
-      height: 1.75);
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+        color: textPrimary,
+        height: 1.75,
+      );
   static TextStyle get mono => GoogleFonts.jetBrainsMono(
-      fontSize: 12.5,
-      fontWeight: FontWeight.w400,
-      color: textPrimary,
-      height: 1.55);
+        fontSize: 12.5,
+        fontWeight: FontWeight.w400,
+        color: textPrimary,
+        height: 1.55,
+      );
 }

@@ -94,14 +94,17 @@ class ChatNotifier extends _$ChatNotifier {
   /// boundary test to drive canned Rust-shaped events through the real fold path.
   Future<void> foldStream(String messageId, Stream<A2uiEvent> stream) async {
     if (!state.messages.any((m) => m.id == messageId)) {
-      state = state.copyWith(messages: [
-        ...state.messages,
-        ChatMessage(
+      state = state.copyWith(
+        messages: [
+          ...state.messages,
+          ChatMessage(
             id: messageId,
             role: 'assistant',
             content: const [],
-            isStreaming: true),
-      ]);
+            isStreaming: true,
+          ),
+        ],
+      );
     }
     final driver = A2uiContentDriver(
       messageId: messageId,

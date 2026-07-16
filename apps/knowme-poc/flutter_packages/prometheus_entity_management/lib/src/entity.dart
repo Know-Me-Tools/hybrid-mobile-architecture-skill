@@ -9,7 +9,7 @@ part 'entity.freezed.dart';
 part 'entity.g.dart';
 
 @freezed
-class EntityRecord with _$EntityRecord {
+abstract class EntityRecord with _$EntityRecord {
   const factory EntityRecord({
     required String id,
     required String entityType,
@@ -20,7 +20,7 @@ class EntityRecord with _$EntityRecord {
 }
 
 @freezed
-class ListResult with _$ListResult {
+abstract class ListResult with _$ListResult {
   const factory ListResult({
     @Default(<EntityRecord>[]) List<EntityRecord> items,
     String? nextCursor,
