@@ -111,11 +111,29 @@ export function entityUpdate(record: EntityRecord): Promise<EntityRecord> {
 export function entityDelete(entityType: string, id: string): Promise<void> {
   return invoke<void>(cmd("entity_delete"), { entityType, id });
 }
-export function memorySearch(query: string, k: number): Promise<string[]> {
-  return invoke<string[]>(cmd("memory_search"), { query, k });
+/** A hybrid graph-RAG search hit. Mirrors `gen_ui_db_graph::MemoryHit`. */
+export interface MemoryHit {
+  id: string;
+  text: string;
+  kind: string;
+  score: number;
 }
-export function graphExpand(entityId: string, depth: number): Promise<string[]> {
-  return invoke<string[]>(cmd("graph_expand"), { entityId, depth });
+
+/** A neighbour reached by graph expansion. Mirrors `gen_ui_db_graph::RelatedEntity`. */
+export interface RelatedEntity {
+  id: string;
+  label: string;
+  /** snake_case on the wire: the Rust struct carries no serde `rename_all`, so
+      field names serialize verbatim. */
+  entity_type: string;
+  score: number;
+}
+
+export function memorySearch(query: string, k: number): Promise<MemoryHit[]> {
+  return invoke<MemoryHit[]>(cmd("memory_search"), { query, k });
+}
+export function graphExpand(entityId: string, depth: number): Promise<RelatedEntity[]> {
+  return invoke<RelatedEntity[]>(cmd("graph_expand"), { entityId, depth });
 }
 /** Start a Scribe microphone recording. Errors if one is already in progress. */
 export function scribeStart(): Promise<void> {

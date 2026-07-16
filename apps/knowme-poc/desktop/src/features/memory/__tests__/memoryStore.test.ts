@@ -2,10 +2,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Fake ONLY the Tauri IPC edge — a real IO boundary. The store logic is real.
+//
+// Both modules must be faked. The store guards on `isTauri()` from
+// @tauri-apps/api/core, but it reaches Rust through the PLUGIN's typed wrappers,
+// and the plugin imports its own `invoke` — mocking core alone leaves the real
+// wrapper in place and no call ever lands (0 invocations, not a wrong one).
 const invoke = vi.fn()
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: (...args: unknown[]) => invoke(...args),
   isTauri: () => true,
+}))
+vi.mock('@prometheus-ags/tauri-plugin-gen-ui', () => ({
+  memorySearch: (query: string, k: number) => invoke('memory_search', { query, k }),
+  memoryIngest: (text: string) => invoke('memory_ingest', { text }),
 }))
 
 import { useMemoryStore, type MemoryHit } from '../stores/memoryStore'
@@ -18,9 +27,13 @@ beforeEach(() => {
 
 describe('memoryStore', () => {
   it('folds ranked hits from memory_search into state', async () => {
+    // The real MemoryHit shape (id/text/kind/score) — mirrors
+    // gen_ui_db_graph::MemoryHit. This used to assert name/snippet, which the
+    // Rust type dropped in C-104; an `as unknown as` cast in the store hid the
+    // drift from tsc until the binding became properly typed.
     const hits: MemoryHit[] = [
-      { id: 'entity:1', name: 'Alpha', score: 0.91, snippet: 'first' },
-      { id: 'entity:2', name: 'Beta', score: 0.42 },
+      { id: 'entity:1', text: 'Alpha', kind: 'note', score: 0.91 },
+      { id: 'entity:2', text: 'Beta', kind: 'note', score: 0.42 },
     ]
     invoke.mockResolvedValueOnce(hits)
 

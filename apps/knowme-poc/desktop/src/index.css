@@ -27,6 +27,14 @@
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Roboto', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* Navigation breakpoint (C-113). Overrides Tailwind's 640px default so `sm:`
+     means Material 3's compact→medium window-size-class boundary exactly
+     (https://m3.material.io/foundations/layout/applying-layout/window-size-classes):
+     below it a bottom navigation bar, at/above it a rail. Both iOS and Android
+     abandon bottom placement as windows widen — this is the width where our
+     layout follows suit, and it is a real spec value, not a round number. */
+  --breakpoint-sm: 600px;
 }
 
 :root { color-scheme: dark; }

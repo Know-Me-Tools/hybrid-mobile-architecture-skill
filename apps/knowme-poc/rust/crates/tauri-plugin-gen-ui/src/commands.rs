@@ -9,7 +9,7 @@ use std::sync::{Arc, Mutex};
 
 use crate::error::Result;
 use gen_ui_agent::ConfigBackend;
-use gen_ui_db_graph::{FastEmbedder, GraphStore, GraphStoreConfig};
+use gen_ui_db_graph::{FastEmbedder, GraphStore, GraphStoreConfig, MemoryHit, RelatedEntity};
 use gen_ui_types::transport::{EntityRecord, ListResult};
 use gen_ui_types::view::ViewDescriptor;
 use once_cell::sync::OnceCell;
@@ -263,16 +263,28 @@ pub async fn entity_delete(entity_type: String, id: String) -> Result<()> {
     Ok(())
 }
 
+/// Hybrid graph-RAG search. Delegates to the SAME `gen_ui_agent::memory` the mobile
+/// FFI calls — no duplicated business logic.
+///
+/// Returns the real `MemoryHit` (id/text/kind/score), not the `Vec<String>` this
+/// used to stub out: C-104 wired the mobile FFI to the agent but left this command
+/// returning an empty vec, so desktop memory search silently produced nothing.
+/// Found while surfacing the Memory screen in C-113.
 #[tauri::command]
-pub async fn memory_search(query: String, k: u32) -> Result<Vec<String>> {
-    let _ = (query, k);
-    Ok(Vec::new())
+pub async fn memory_search(query: String, k: u32) -> Result<Vec<MemoryHit>> {
+    gen_ui_agent::memory::search(query, k)
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
 }
 
+/// Graph expansion from an entity. Same delegation, same C-104 gap as above.
 #[tauri::command]
-pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<String>> {
-    let _ = (entity_id, depth);
-    Ok(Vec::new())
+pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<RelatedEntity>> {
+    gen_ui_agent::memory::graph_expand(entity_id, depth)
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
 }
 
 // Scribe (voice-to-memory): delegates entirely to gen_ui_audio, the SAME crate

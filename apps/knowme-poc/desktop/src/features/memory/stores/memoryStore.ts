@@ -3,14 +3,14 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { isTauri } from '@tauri-apps/api/core'
 import { memoryIngest, memorySearch } from '@prometheus-ags/tauri-plugin-gen-ui'
+import type { MemoryHit } from '@prometheus-ags/tauri-plugin-gen-ui'
 
-/** Mirror of gen_ui_db::graph::EntityHit — the fused RRF result. snake_case wire. */
-export interface MemoryHit {
-  id: string
-  name: string
-  score: number
-  snippet?: string | null
-}
+// MemoryHit is re-exported from the plugin's typed bindings rather than
+// hand-mirrored here. It used to be a local interface with `name`/`snippet`,
+// which drifted from the Rust type (`text`/`kind`) when C-104 landed — Flutter
+// was updated, this wasn't, and an `as unknown as` cast at the call site kept
+// tsc quiet about it. One definition, generated from the source of truth.
+export type { MemoryHit }
 
 interface MemoryState {
   query: string
@@ -50,10 +50,10 @@ export const useMemoryStore = create<MemoryState & MemoryActions>()(
     search: async (query: string) => {
       set((s) => { s.isSearching = true; s.error = null; s.query = query })
       try {
-        // NOTE: the plugin's memory_search currently returns string[] (a stub —
-        // real graph-RAG search lands in C-104), not MemoryHit[] as this store's
-        // type expects. Cast is a known, tracked mismatch, not a silent fix.
-        const hits = isTauri() ? ((await memorySearch(query, 8)) as unknown as MemoryHit[]) : []
+        // No cast: memory_search now returns real MemoryHits (C-104's agent
+        // delegation reached the desktop command in C-113). Outside Tauri there
+        // is no Rust side to ask, so results stay empty.
+        const hits = isTauri() ? await memorySearch(query, 8) : []
         set((s) => { s.hits = hits })
       } catch (e) {
         set((s) => { s.error = String(e); s.hits = [] })
