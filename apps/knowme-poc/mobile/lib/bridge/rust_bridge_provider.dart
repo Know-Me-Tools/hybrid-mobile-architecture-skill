@@ -1,37 +1,49 @@
 // TJ-ARCH-MOB-001 compliant
-// The FFI facade. Every call here delegates to gen_ui_core (Rust). After running
-// `flutter_rust_bridge_codegen generate --config-file rust/flutter_rust_bridge.yaml`
-// replace the stub bodies with the generated bindings — the signatures already
-// match the Rust api surface (chat_send, chat_events, entity_*, sync_status).
+// The FFI facade. Every call here delegates to gen_ui_core (Rust).
 //
 // Do NOT add networking, inference, or persistence logic here. This file is a
 // pass-through to Rust; business logic living in Dart violates the architecture.
 import 'dart:async';
+import 'dart:convert';
 
 import 'a2ui/a2ui_event.dart';
 import 'package:prometheus_entity_management/prometheus_entity_management.dart';
 
-// import 'generated_api.dart' as ffi; // uncomment after codegen
+import 'frb_generated.dart';
+import 'api/chat.dart' as ffi_chat;
+import 'api/streams.dart' as ffi_streams;
 
+/// `dataDir` has no corresponding Rust parameter yet (`init_core` only takes
+/// `worker_threads`, which `GenUiCore.init()` always passes as its default
+/// `null`) — kept as an accepted-but-unused param so call sites don't need to
+/// change when platform-specific data-dir wiring lands.
 Future<void> initRustBridge({String? dataDir}) async {
-  // await ffi.initCore(workerThreads: null, dataDir: dataDir);
+  final _ = dataDir;
+  await GenUiCore.init();
 }
 
 Future<void> setApiKey(String key) async {
-  // await ffi.setApiKey(key: key);
+  // No corresponding Rust function yet — secrets are resolved via
+  // gen_ui_agent::SecretResolver (platform keychain), not passed from Dart.
 }
 
-/// chat_send(thread_id, message) -> run_id. FFI call; terminal on Rust error.
-Future<String> chatSend(String threadId, String message) async {
-  // return await ffi.chatSend(threadId: threadId, message: message);
-  throw UnimplementedError('run flutter_rust_bridge_codegen generate');
-}
+/// chat_send(thread_id, message) -> run_id. Terminal on Rust error: `CoreError`
+/// (e.g. "no provider configured") surfaces as a thrown Dart exception, per
+/// frb's built-in `Result<T, E: std::error::Error>` handling (see
+/// gen_ui_ffi::api::chat's module doc for why this needed spelling out
+/// `Result<T, CoreError>` instead of the `CoreResult<T>` alias).
+Future<String> chatSend(String threadId, String message) =>
+    ffi_chat.chatSend(threadId: threadId, message: message);
 
-/// chat_events(run_id) -> Stream<A2uiEvent>. Fold into ContentBlocks.
-Stream<A2uiEvent> chatEvents(String runId) {
-  // return ffi.chatEvents(runId: runId).map(A2uiEvent.fromWire);
-  return const Stream.empty();
-}
+/// chat_events(run_id) -> Stream<A2uiEvent>. The wire carries JSON `String`s
+/// (see gen_ui_ffi::api::streams's module doc for why — the freezed/
+/// riverpod_generator dependency conflict blocks native frb type mirroring
+/// for enums with data-carrying variants); decode each with the hand-written
+/// `A2uiEvent.fromWire`, which mirrors gen_ui_types::events::A2uiEvent's
+/// `{"type": "...", ...}` serde shape.
+Stream<A2uiEvent> chatEvents(String runId) => ffi_streams
+    .chatEvents(runId: runId)
+    .map((json) => A2uiEvent.fromWire(jsonDecode(json) as Map<String, dynamic>));
 
 /// entity_changes() -> Stream<ChangeEvent>. Bridged to ref.invalidate by PEM.
 Stream<ChangeEvent> entityChanges() {

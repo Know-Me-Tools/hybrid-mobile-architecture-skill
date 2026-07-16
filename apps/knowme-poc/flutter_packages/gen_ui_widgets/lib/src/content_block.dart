@@ -1,11 +1,57 @@
 // TJ-ARCH-MOB-001 compliant
 /// ContentBlock — the cross-platform UI contract, mirrored from gen_ui_types.
-/// In the host app this is the frb-generated union; this sealed hierarchy lets
-/// the widget package compile and be tested standalone. Dart's exhaustive
-/// switch on a sealed type is a compile error if a variant is unhandled — the
-/// same guarantee the Rust match site has.
+/// In the host app this crosses the FFI wire as JSON (see gen_ui_ffi::api::
+/// streams's module doc: frb type-mirroring is blocked for enums with
+/// data-carrying variants by a freezed/riverpod_generator dependency
+/// conflict), decoded here via [ContentBlock.fromWire]. This sealed hierarchy
+/// also lets the widget package compile and be tested standalone. Dart's
+/// exhaustive switch on a sealed type is a compile error if a variant is
+/// unhandled — the same guarantee the Rust match site has.
 sealed class ContentBlock {
   const ContentBlock();
+
+  /// Decode one `ContentBlock` from its serde wire shape:
+  /// `#[serde(tag = "type", rename_all = "camelCase")]` on
+  /// `gen_ui_types::content_block::ContentBlock` — e.g.
+  /// `{"type": "text", "text": "..."}`.
+  factory ContentBlock.fromWire(Map<String, dynamic> json) {
+    return switch (json['type'] as String) {
+      'text' => TextBlock(json['text'] as String),
+      'thinking' => ThinkingBlock(json['text'] as String),
+      'code' => CodeBlock(json['language'] as String, json['code'] as String),
+      'citation' =>
+        CitationBlock(json['source'] as String, json['quote'] as String),
+      'memory' => MemoryBlock(
+          json['operation'] as String,
+          json['key'] as String,
+          json['value'] as String?,
+        ),
+      'toolUse' => ToolUseBlock(
+          json['id'] as String,
+          json['name'] as String,
+          json['inputJson'] as String,
+        ),
+      'toolResult' => ToolResultBlock(
+          json['toolUseId'] as String,
+          json['outputJson'] as String,
+          json['isError'] as bool,
+        ),
+      'skill' => SkillBlock(json['name'] as String, json['status'] as String),
+      'artifact' => ArtifactBlock(
+          json['id'] as String,
+          json['kind'] as String,
+          json['content'] as String,
+        ),
+      'image' => ImageBlock(
+          json['url'] as String?,
+          json['dataBase64'] as String?,
+          json['mime'] as String,
+        ),
+      'divider' => const DividerBlock(),
+      final unknown =>
+        throw FormatException('unknown ContentBlock type: $unknown'),
+    };
+  }
 }
 
 class TextBlock extends ContentBlock {

@@ -5,6 +5,7 @@
 description = "Default gen-ui permissions: read + chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly."
 permissions = [
     "allow-chat-send",
+    "allow-chat-subscribe",
     "allow-entity-list",
     "allow-entity-get",
     "allow-memory-search",

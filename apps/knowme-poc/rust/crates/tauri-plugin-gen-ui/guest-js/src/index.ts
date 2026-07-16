@@ -44,6 +44,14 @@ export interface ViewDescriptor {
 export function chatSend(threadId: string, message: string): Promise<string> {
   return invoke<string>(cmd("chat_send"), { threadId, message });
 }
+// Attaches the forwarder that emits CHAT_EVENT for this run_id. Call this
+// (and start listening on onChatEvent) as soon as possible after chatSend
+// resolves — chat_send's producer task can finish and deregister before this
+// attaches for very fast responses/errors (see chatStore.ts sendMessage for
+// how the residual race window is minimised on the caller side).
+export function chatSubscribe(runId: string): Promise<void> {
+  return invoke<void>(cmd("chat_subscribe"), { runId });
+}
 export function entityList(view: ViewDescriptor): Promise<ListResult> {
   return invoke<ListResult>(cmd("entity_list"), { view });
 }

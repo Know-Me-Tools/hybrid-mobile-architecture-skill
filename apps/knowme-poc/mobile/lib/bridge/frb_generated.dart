@@ -5,6 +5,7 @@
 
 import 'api/chat.dart';
 import 'api/entity.dart';
+import 'api/streams.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -37,8 +38,12 @@ class GenUiCore
 
   /// Initialize flutter_rust_bridge in mock mode.
   /// No libraries for FFI are loaded.
-  static void initMock({required GenUiCoreApi api}) {
-    instance.initMockImpl(api: api);
+  static void initMock({
+    required GenUiCoreApi api,
+  }) {
+    instance.initMockImpl(
+      api: api,
+    );
   }
 
   /// Dispose flutter_rust_bridge
@@ -68,7 +73,7 @@ class GenUiCore
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 1610600774;
+  int get rustContentHash => 618846197;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -80,44 +85,53 @@ class GenUiCore
 }
 
 abstract class GenUiCoreApi extends BaseApi {
-  Future<CoreResultString> crateApiChatChatSend({
-    required String threadId,
-    required String message,
-  });
+  Stream<String> crateApiStreamsChatEvents({required String runId});
 
-  Future<CoreResultEntityRecord> crateApiEntityEntityCreate({
-    required EntityRecord record,
-  });
+  Future<String> crateApiChatChatSend(
+      {required String threadId, required String message});
 
-  Future<CoreResult> crateApiEntityEntityDelete({
-    required String entityType,
-    required String id,
-  });
+  Stream<ChangeEvent> crateApiStreamsEntityChanges();
 
-  Future<CoreResultOptionEntityRecord> crateApiEntityEntityGet({
-    required String entityType,
-    required String id,
-  });
+  Future<CoreResultEntityRecord> crateApiEntityEntityCreate(
+      {required EntityRecord record});
 
-  Future<CoreResultListResult> crateApiEntityEntityList({
-    required ViewDescriptor view,
-  });
+  Future<CoreResult> crateApiEntityEntityDelete(
+      {required String entityType, required String id});
 
-  Future<CoreResultEntityRecord> crateApiEntityEntityUpdate({
-    required EntityRecord record,
-  });
+  Future<CoreResultOptionEntityRecord> crateApiEntityEntityGet(
+      {required String entityType, required String id});
 
-  Future<CoreResultVecString> crateApiChatGraphExpand({
-    required String entityId,
-    required int depth,
-  });
+  Future<CoreResultListResult> crateApiEntityEntityList(
+      {required ViewDescriptor view});
+
+  Future<CoreResultEntityRecord> crateApiEntityEntityUpdate(
+      {required EntityRecord record});
+
+  Future<List<String>> crateApiChatGraphExpand(
+      {required String entityId, required int depth});
 
   Future<void> crateApiInitCore({BigInt? workerThreads});
 
-  Future<CoreResultVecString> crateApiChatMemorySearch({
-    required String query,
-    required int k,
-  });
+  Future<List<String>> crateApiChatMemorySearch(
+      {required String query, required int k});
+
+  Stream<SyncStatus> crateApiStreamsSyncStatus();
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_ChangeEvent;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_ChangeEvent;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_ChangeEventPtr;
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_CoreError;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_CoreError;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_CoreErrorPtr;
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_CoreResult;
@@ -155,30 +169,20 @@ abstract class GenUiCoreApi extends BaseApi {
       get rust_arc_decrement_strong_count_CoreResultOptionEntityRecordPtr;
 
   RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_CoreResultString;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_CoreResultString;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_CoreResultStringPtr;
-
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_CoreResultVecString;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_CoreResultVecString;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_CoreResultVecStringPtr;
-
-  RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_EntityRecord;
 
   RustArcDecrementStrongCountFnType
       get rust_arc_decrement_strong_count_EntityRecord;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_EntityRecordPtr;
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_SyncStatus;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_SyncStatus;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_SyncStatusPtr;
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_ViewDescriptor;
@@ -200,27 +204,52 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   });
 
   @override
-  Future<CoreResultString> crateApiChatChatSend({
-    required String threadId,
-    required String message,
-  }) {
+  Stream<String> crateApiStreamsChatEvents({required String runId}) {
+    final sink = RustStreamSink<String>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_String(runId, serializer);
+            sse_encode_StreamSink_String_Sse(sink, serializer);
+            pdeCallFfi(generalizedFrbRustBinding, serializer,
+                funcId: 1, port: port_);
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: null,
+          ),
+          constMeta: kCrateApiStreamsChatEventsConstMeta,
+          argValues: [runId, sink],
+          apiImpl: this,
+        ),
+      ),
+    );
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiStreamsChatEventsConstMeta => const TaskConstMeta(
+        debugName: 'chat_events',
+        argNames: ['runId', 'sink'],
+      );
+
+  @override
+  Future<String> crateApiChatChatSend(
+      {required String threadId, required String message}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(threadId, serializer);
           sse_encode_String(message, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 1,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 2, port: port_);
         },
         codec: SseCodec(
-          decodeSuccessData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString,
-          decodeErrorData: null,
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
         ),
         constMeta: kCrateApiChatChatSendConstMeta,
         argValues: [threadId, message],
@@ -235,23 +264,48 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       );
 
   @override
-  Future<CoreResultEntityRecord> crateApiEntityEntityCreate({
-    required EntityRecord record,
-  }) {
+  Stream<ChangeEvent> crateApiStreamsEntityChanges() {
+    final sink = RustStreamSink<ChangeEvent>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
+                sink, serializer);
+            pdeCallFfi(generalizedFrbRustBinding, serializer,
+                funcId: 3, port: port_);
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: null,
+          ),
+          constMeta: kCrateApiStreamsEntityChangesConstMeta,
+          argValues: [sink],
+          apiImpl: this,
+        ),
+      ),
+    );
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiStreamsEntityChangesConstMeta =>
+      const TaskConstMeta(
+        debugName: 'entity_changes',
+        argNames: ['sink'],
+      );
+
+  @override
+  Future<CoreResultEntityRecord> crateApiEntityEntityCreate(
+      {required EntityRecord record}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-            record,
-            serializer,
-          );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 2,
-            port: port_,
-          );
+              record, serializer);
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 4, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -265,26 +319,22 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiEntityEntityCreateConstMeta =>
-      const TaskConstMeta(debugName: 'entity_create', argNames: ['record']);
+  TaskConstMeta get kCrateApiEntityEntityCreateConstMeta => const TaskConstMeta(
+        debugName: 'entity_create',
+        argNames: ['record'],
+      );
 
   @override
-  Future<CoreResult> crateApiEntityEntityDelete({
-    required String entityType,
-    required String id,
-  }) {
+  Future<CoreResult> crateApiEntityEntityDelete(
+      {required String entityType, required String id}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(entityType, serializer);
           sse_encode_String(id, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 3,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 5, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -304,22 +354,16 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       );
 
   @override
-  Future<CoreResultOptionEntityRecord> crateApiEntityEntityGet({
-    required String entityType,
-    required String id,
-  }) {
+  Future<CoreResultOptionEntityRecord> crateApiEntityEntityGet(
+      {required String entityType, required String id}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(entityType, serializer);
           sse_encode_String(id, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 4,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 6, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -339,23 +383,16 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       );
 
   @override
-  Future<CoreResultListResult> crateApiEntityEntityList({
-    required ViewDescriptor view,
-  }) {
+  Future<CoreResultListResult> crateApiEntityEntityList(
+      {required ViewDescriptor view}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-            view,
-            serializer,
-          );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 5,
-            port: port_,
-          );
+              view, serializer);
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 7, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -369,27 +406,22 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiEntityEntityListConstMeta =>
-      const TaskConstMeta(debugName: 'entity_list', argNames: ['view']);
+  TaskConstMeta get kCrateApiEntityEntityListConstMeta => const TaskConstMeta(
+        debugName: 'entity_list',
+        argNames: ['view'],
+      );
 
   @override
-  Future<CoreResultEntityRecord> crateApiEntityEntityUpdate({
-    required EntityRecord record,
-  }) {
+  Future<CoreResultEntityRecord> crateApiEntityEntityUpdate(
+      {required EntityRecord record}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-            record,
-            serializer,
-          );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 6,
-            port: port_,
-          );
+              record, serializer);
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 8, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -403,31 +435,27 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiEntityEntityUpdateConstMeta =>
-      const TaskConstMeta(debugName: 'entity_update', argNames: ['record']);
+  TaskConstMeta get kCrateApiEntityEntityUpdateConstMeta => const TaskConstMeta(
+        debugName: 'entity_update',
+        argNames: ['record'],
+      );
 
   @override
-  Future<CoreResultVecString> crateApiChatGraphExpand({
-    required String entityId,
-    required int depth,
-  }) {
+  Future<List<String>> crateApiChatGraphExpand(
+      {required String entityId, required int depth}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(entityId, serializer);
           sse_encode_u_32(depth, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 7,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 9, port: port_);
         },
         codec: SseCodec(
-          decodeSuccessData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString,
-          decodeErrorData: null,
+          decodeSuccessData: sse_decode_list_String,
+          decodeErrorData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
         ),
         constMeta: kCrateApiChatGraphExpandConstMeta,
         argValues: [entityId, depth],
@@ -448,12 +476,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_opt_box_autoadd_usize(workerThreads, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 8,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 10, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -466,31 +490,27 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiInitCoreConstMeta =>
-      const TaskConstMeta(debugName: 'init_core', argNames: ['workerThreads']);
+  TaskConstMeta get kCrateApiInitCoreConstMeta => const TaskConstMeta(
+        debugName: 'init_core',
+        argNames: ['workerThreads'],
+      );
 
   @override
-  Future<CoreResultVecString> crateApiChatMemorySearch({
-    required String query,
-    required int k,
-  }) {
+  Future<List<String>> crateApiChatMemorySearch(
+      {required String query, required int k}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(query, serializer);
           sse_encode_u_32(k, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 9,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 11, port: port_);
         },
         codec: SseCodec(
-          decodeSuccessData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString,
-          decodeErrorData: null,
+          decodeSuccessData: sse_decode_list_String,
+          decodeErrorData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
         ),
         constMeta: kCrateApiChatMemorySearchConstMeta,
         argValues: [query, k],
@@ -499,8 +519,57 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiChatMemorySearchConstMeta =>
-      const TaskConstMeta(debugName: 'memory_search', argNames: ['query', 'k']);
+  TaskConstMeta get kCrateApiChatMemorySearchConstMeta => const TaskConstMeta(
+        debugName: 'memory_search',
+        argNames: ['query', 'k'],
+      );
+
+  @override
+  Stream<SyncStatus> crateApiStreamsSyncStatus() {
+    final sink = RustStreamSink<SyncStatus>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
+                sink, serializer);
+            pdeCallFfi(generalizedFrbRustBinding, serializer,
+                funcId: 12, port: port_);
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: null,
+          ),
+          constMeta: kCrateApiStreamsSyncStatusConstMeta,
+          argValues: [sink],
+          apiImpl: this,
+        ),
+      ),
+    );
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiStreamsSyncStatusConstMeta => const TaskConstMeta(
+        debugName: 'sync_status',
+        argNames: ['sink'],
+      );
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_ChangeEvent => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_ChangeEvent => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent;
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_CoreError => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_CoreError => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError;
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_CoreResult => wire
@@ -535,28 +604,20 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord;
 
   RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_CoreResultString => wire
-          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_CoreResultString => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString;
-
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_CoreResultVecString => wire
-          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_CoreResultVecString => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString;
-
-  RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_EntityRecord => wire
           .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord;
 
   RustArcDecrementStrongCountFnType
       get rust_arc_decrement_strong_count_EntityRecord => wire
           .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord;
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_SyncStatus => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_SyncStatus => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus;
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_ViewDescriptor => wire
@@ -567,10 +628,31 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor;
 
   @protected
+  AnyhowException dco_decode_AnyhowException(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return AnyhowException(raw as String);
+  }
+
+  @protected
+  ChangeEvent
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ChangeEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  CoreError
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return CoreErrorImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   CoreResult
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreResultImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -578,19 +660,16 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   @protected
   CoreResultEntityRecord
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreResultEntityRecordImpl.frbInternalDcoDecode(
-      raw as List<dynamic>,
-    );
+        raw as List<dynamic>);
   }
 
   @protected
   CoreResultListResult
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreResultListResultImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -598,55 +677,56 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   @protected
   CoreResultOptionEntityRecord
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreResultOptionEntityRecordImpl.frbInternalDcoDecode(
-      raw as List<dynamic>,
-    );
-  }
-
-  @protected
-  CoreResultString
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return CoreResultStringImpl.frbInternalDcoDecode(raw as List<dynamic>);
-  }
-
-  @protected
-  CoreResultVecString
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return CoreResultVecStringImpl.frbInternalDcoDecode(raw as List<dynamic>);
+        raw as List<dynamic>);
   }
 
   @protected
   EntityRecord
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return EntityRecordImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
+  SyncStatus
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return SyncStatusImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   ViewDescriptor
       dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ViewDescriptorImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
+  ChangeEvent
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ChangeEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  CoreError
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return CoreErrorImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   CoreResult
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreResultImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -654,19 +734,16 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   @protected
   CoreResultEntityRecord
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreResultEntityRecordImpl.frbInternalDcoDecode(
-      raw as List<dynamic>,
-    );
+        raw as List<dynamic>);
   }
 
   @protected
   CoreResultListResult
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreResultListResultImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -674,48 +751,56 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   @protected
   CoreResultOptionEntityRecord
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreResultOptionEntityRecordImpl.frbInternalDcoDecode(
-      raw as List<dynamic>,
-    );
-  }
-
-  @protected
-  CoreResultString
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return CoreResultStringImpl.frbInternalDcoDecode(raw as List<dynamic>);
-  }
-
-  @protected
-  CoreResultVecString
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return CoreResultVecStringImpl.frbInternalDcoDecode(raw as List<dynamic>);
+        raw as List<dynamic>);
   }
 
   @protected
   EntityRecord
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return EntityRecordImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
+  SyncStatus
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return SyncStatusImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   ViewDescriptor
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    dynamic raw,
-  ) {
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ViewDescriptorImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  RustStreamSink<ChangeEvent>
+      dco_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    throw UnimplementedError();
+  }
+
+  @protected
+  RustStreamSink<SyncStatus>
+      dco_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    throw UnimplementedError();
+  }
+
+  @protected
+  RustStreamSink<String> dco_decode_StreamSink_String_Sse(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    throw UnimplementedError();
   }
 
   @protected
@@ -728,6 +813,12 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   BigInt dco_decode_box_autoadd_usize(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_usize(raw);
+  }
+
+  @protected
+  List<String> dco_decode_list_String(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_String).toList();
   }
 
   @protected
@@ -767,195 +858,195 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_String(deserializer);
+    return AnyhowException(inner);
+  }
+
+  @protected
+  ChangeEvent
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ChangeEventImpl.frbInternalSseDecode(
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+  }
+
+  @protected
+  CoreError
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return CoreErrorImpl.frbInternalSseDecode(
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+  }
+
+  @protected
   CoreResult
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreResultImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   CoreResultEntityRecord
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreResultEntityRecordImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   CoreResultListResult
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreResultListResultImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   CoreResultOptionEntityRecord
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreResultOptionEntityRecordImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
-  CoreResultString
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return CoreResultStringImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
-  CoreResultVecString
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return CoreResultVecStringImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   EntityRecord
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return EntityRecordImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+  }
+
+  @protected
+  SyncStatus
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return SyncStatusImpl.frbInternalSseDecode(
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   ViewDescriptor
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ViewDescriptorImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+  }
+
+  @protected
+  ChangeEvent
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ChangeEventImpl.frbInternalSseDecode(
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+  }
+
+  @protected
+  CoreError
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return CoreErrorImpl.frbInternalSseDecode(
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   CoreResult
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreResultImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   CoreResultEntityRecord
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreResultEntityRecordImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   CoreResultListResult
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreResultListResultImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   CoreResultOptionEntityRecord
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreResultOptionEntityRecordImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
-  CoreResultString
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return CoreResultStringImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
-  CoreResultVecString
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return CoreResultVecStringImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   EntityRecord
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return EntityRecordImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+  }
+
+  @protected
+  SyncStatus
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return SyncStatusImpl.frbInternalSseDecode(
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   ViewDescriptor
       sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    SseDeserializer deserializer,
-  ) {
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ViewDescriptorImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+  }
+
+  @protected
+  RustStreamSink<ChangeEvent>
+      sse_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    throw UnimplementedError('Unreachable ()');
+  }
+
+  @protected
+  RustStreamSink<SyncStatus>
+      sse_decode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    throw UnimplementedError('Unreachable ()');
+  }
+
+  @protected
+  RustStreamSink<String> sse_decode_StreamSink_String_Sse(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    throw UnimplementedError('Unreachable ()');
   }
 
   @protected
@@ -969,6 +1060,18 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   BigInt sse_decode_box_autoadd_usize(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_usize(deserializer));
+  }
+
+  @protected
+  List<String> sse_decode_list_String(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <String>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_String(deserializer));
+    }
+    return ans_;
   }
 
   @protected
@@ -1025,160 +1128,198 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  void sse_encode_AnyhowException(
+      AnyhowException self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.message, serializer);
+  }
+
+  @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    CoreResult self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          ChangeEvent self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as ChangeEventImpl).frbInternalSseEncode(move: true), serializer);
+  }
+
+  @protected
+  void
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          CoreError self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as CoreErrorImpl).frbInternalSseEncode(move: true), serializer);
+  }
+
+  @protected
+  void
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
+          CoreResult self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as CoreResultImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    CoreResultEntityRecord self,
-    SseSerializer serializer,
-  ) {
+          CoreResultEntityRecord self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultEntityRecordImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as CoreResultEntityRecordImpl).frbInternalSseEncode(move: true),
+        serializer);
   }
 
   @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    CoreResultListResult self,
-    SseSerializer serializer,
-  ) {
+          CoreResultListResult self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultListResultImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as CoreResultListResultImpl).frbInternalSseEncode(move: true),
+        serializer);
   }
 
   @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    CoreResultOptionEntityRecord self,
-    SseSerializer serializer,
-  ) {
+          CoreResultOptionEntityRecord self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultOptionEntityRecordImpl).frbInternalSseEncode(
-        move: true,
-      ),
-      serializer,
-    );
-  }
-
-  @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    CoreResultString self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as CoreResultStringImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
-  }
-
-  @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    CoreResultVecString self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as CoreResultVecStringImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as CoreResultOptionEntityRecordImpl)
+            .frbInternalSseEncode(move: true),
+        serializer);
   }
 
   @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    EntityRecord self,
-    SseSerializer serializer,
-  ) {
+          EntityRecord self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as EntityRecordImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as EntityRecordImpl).frbInternalSseEncode(move: true),
+        serializer);
+  }
+
+  @protected
+  void
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SyncStatus self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as SyncStatusImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
   void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    ViewDescriptor self,
-    SseSerializer serializer,
-  ) {
+          ViewDescriptor self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as ViewDescriptorImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as ViewDescriptorImpl).frbInternalSseEncode(move: true),
+        serializer);
+  }
+
+  @protected
+  void
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          ChangeEvent self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as ChangeEventImpl).frbInternalSseEncode(move: null), serializer);
+  }
+
+  @protected
+  void
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          CoreError self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as CoreErrorImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
   void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResult(
-    CoreResult self,
-    SseSerializer serializer,
-  ) {
+          CoreResult self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+        (self as CoreResultImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
   void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultEntityRecord(
-    CoreResultEntityRecord self,
-    SseSerializer serializer,
-  ) {
+          CoreResultEntityRecord self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultEntityRecordImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+        (self as CoreResultEntityRecordImpl).frbInternalSseEncode(move: null),
+        serializer);
   }
 
   @protected
   void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultListResult(
-    CoreResultListResult self,
-    SseSerializer serializer,
-  ) {
+          CoreResultListResult self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultListResultImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+        (self as CoreResultListResultImpl).frbInternalSseEncode(move: null),
+        serializer);
   }
 
   @protected
   void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultOptionEntityRecord(
-    CoreResultOptionEntityRecord self,
-    SseSerializer serializer,
-  ) {
+          CoreResultOptionEntityRecord self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreResultOptionEntityRecordImpl).frbInternalSseEncode(
-        move: null,
+        (self as CoreResultOptionEntityRecordImpl)
+            .frbInternalSseEncode(move: null),
+        serializer);
+  }
+
+  @protected
+  void
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
+          EntityRecord self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as EntityRecordImpl).frbInternalSseEncode(move: null),
+        serializer);
+  }
+
+  @protected
+  void
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SyncStatus self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as SyncStatusImpl).frbInternalSseEncode(move: null), serializer);
+  }
+
+  @protected
+  void
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
+          ViewDescriptor self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as ViewDescriptorImpl).frbInternalSseEncode(move: null),
+        serializer);
+  }
+
+  @protected
+  void
+      sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent_Sse(
+          RustStreamSink<ChangeEvent> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(
+      self.setupAndSerialize(
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
       ),
       serializer,
     );
@@ -1186,52 +1327,32 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultString(
-    CoreResultString self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_StreamSink_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus_Sse(
+          RustStreamSink<SyncStatus> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as CoreResultStringImpl).frbInternalSseEncode(move: null),
+    sse_encode_String(
+      self.setupAndSerialize(
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+      ),
       serializer,
     );
   }
 
   @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreResultVecString(
-    CoreResultVecString self,
-    SseSerializer serializer,
-  ) {
+  void sse_encode_StreamSink_String_Sse(
+      RustStreamSink<String> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as CoreResultVecStringImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
-  }
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerEntityRecord(
-    EntityRecord self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as EntityRecordImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
-  }
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerViewDescriptor(
-    ViewDescriptor self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as ViewDescriptorImpl).frbInternalSseEncode(move: null),
+    sse_encode_String(
+      self.setupAndSerialize(
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+      ),
       serializer,
     );
   }
@@ -1249,10 +1370,17 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  void sse_encode_list_String(List<String> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_String(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  ) {
+      Uint8List self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
@@ -1260,9 +1388,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_opt_box_autoadd_usize(
-    BigInt? self,
-    SseSerializer serializer,
-  ) {
+      BigInt? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
@@ -1308,6 +1434,46 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 }
 
 @sealed
+class ChangeEventImpl extends RustOpaque implements ChangeEvent {
+  // Not to be used by end users
+  ChangeEventImpl.frbInternalDcoDecode(List<dynamic> wire)
+      : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  ChangeEventImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        GenUiCore.instance.api.rust_arc_increment_strong_count_ChangeEvent,
+    rustArcDecrementStrongCount:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_ChangeEvent,
+    rustArcDecrementStrongCountPtr:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_ChangeEventPtr,
+  );
+}
+
+@sealed
+class CoreErrorImpl extends RustOpaque implements CoreError {
+  // Not to be used by end users
+  CoreErrorImpl.frbInternalDcoDecode(List<dynamic> wire)
+      : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  CoreErrorImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        GenUiCore.instance.api.rust_arc_increment_strong_count_CoreError,
+    rustArcDecrementStrongCount:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_CoreError,
+    rustArcDecrementStrongCountPtr:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_CoreErrorPtr,
+  );
+}
+
+@sealed
 class CoreResultEntityRecordImpl extends RustOpaque
     implements CoreResultEntityRecord {
   // Not to be used by end users
@@ -1316,9 +1482,8 @@ class CoreResultEntityRecordImpl extends RustOpaque
 
   // Not to be used by end users
   CoreResultEntityRecordImpl.frbInternalSseDecode(
-    BigInt ptr,
-    int externalSizeOnNative,
-  ) : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+      BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount: GenUiCore
@@ -1359,9 +1524,8 @@ class CoreResultListResultImpl extends RustOpaque
 
   // Not to be used by end users
   CoreResultListResultImpl.frbInternalSseDecode(
-    BigInt ptr,
-    int externalSizeOnNative,
-  ) : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+      BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount: GenUiCore
@@ -1382,9 +1546,8 @@ class CoreResultOptionEntityRecordImpl extends RustOpaque
 
   // Not to be used by end users
   CoreResultOptionEntityRecordImpl.frbInternalSseDecode(
-    BigInt ptr,
-    int externalSizeOnNative,
-  ) : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+      BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount: GenUiCore.instance.api
@@ -1393,51 +1556,6 @@ class CoreResultOptionEntityRecordImpl extends RustOpaque
         .rust_arc_decrement_strong_count_CoreResultOptionEntityRecord,
     rustArcDecrementStrongCountPtr: GenUiCore.instance.api
         .rust_arc_decrement_strong_count_CoreResultOptionEntityRecordPtr,
-  );
-}
-
-@sealed
-class CoreResultStringImpl extends RustOpaque implements CoreResultString {
-  // Not to be used by end users
-  CoreResultStringImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
-
-  // Not to be used by end users
-  CoreResultStringImpl.frbInternalSseDecode(
-    BigInt ptr,
-    int externalSizeOnNative,
-  ) : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
-
-  static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount:
-        GenUiCore.instance.api.rust_arc_increment_strong_count_CoreResultString,
-    rustArcDecrementStrongCount:
-        GenUiCore.instance.api.rust_arc_decrement_strong_count_CoreResultString,
-    rustArcDecrementStrongCountPtr: GenUiCore
-        .instance.api.rust_arc_decrement_strong_count_CoreResultStringPtr,
-  );
-}
-
-@sealed
-class CoreResultVecStringImpl extends RustOpaque
-    implements CoreResultVecString {
-  // Not to be used by end users
-  CoreResultVecStringImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
-
-  // Not to be used by end users
-  CoreResultVecStringImpl.frbInternalSseDecode(
-    BigInt ptr,
-    int externalSizeOnNative,
-  ) : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
-
-  static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount: GenUiCore
-        .instance.api.rust_arc_increment_strong_count_CoreResultVecString,
-    rustArcDecrementStrongCount: GenUiCore
-        .instance.api.rust_arc_decrement_strong_count_CoreResultVecString,
-    rustArcDecrementStrongCountPtr: GenUiCore
-        .instance.api.rust_arc_decrement_strong_count_CoreResultVecStringPtr,
   );
 }
 
@@ -1458,6 +1576,26 @@ class EntityRecordImpl extends RustOpaque implements EntityRecord {
         GenUiCore.instance.api.rust_arc_decrement_strong_count_EntityRecord,
     rustArcDecrementStrongCountPtr:
         GenUiCore.instance.api.rust_arc_decrement_strong_count_EntityRecordPtr,
+  );
+}
+
+@sealed
+class SyncStatusImpl extends RustOpaque implements SyncStatus {
+  // Not to be used by end users
+  SyncStatusImpl.frbInternalDcoDecode(List<dynamic> wire)
+      : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  SyncStatusImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        GenUiCore.instance.api.rust_arc_increment_strong_count_SyncStatus,
+    rustArcDecrementStrongCount:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_SyncStatus,
+    rustArcDecrementStrongCountPtr:
+        GenUiCore.instance.api.rust_arc_decrement_strong_count_SyncStatusPtr,
   );
 }
 

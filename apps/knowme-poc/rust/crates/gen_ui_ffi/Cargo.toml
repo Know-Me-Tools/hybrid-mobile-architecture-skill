@@ -13,9 +13,19 @@ gen_ui_types    = { path = "../gen_ui_types" }
 gen_ui_runtime  = { path = "../gen_ui_runtime" }
 gen_ui_protocol = { path = "../gen_ui_protocol" }
 gen_ui_agent    = { path = "../gen_ui_agent" }
-flutter_rust_bridge.workspace = true
+# `anyhow` feature (also enabled on the workspace's own flutter_rust_bridge
+# entry, but this crate pins an exact version below rather than inheriting
+# via `.workspace = true`, so the feature must be re-declared here too) is
+# what lets frb turn `Result<T, E: std::error::Error>` returns like
+# `chat_send`'s `CoreResult<String>` into a plain `Future<T>` that throws a
+# Dart exception on `Err`, instead of an opaque `CoreResult<T>` handle.
+flutter_rust_bridge = { version = "=2.12.0", features = ["anyhow"] }
 anyhow.workspace = true
 log = "0.4"
+# chat_events serializes A2uiEvent to JSON for the frb wire (see streams.rs
+# module doc — the freezed/riverpod_generator dependency conflict blocks
+# native frb type mirroring for enums with data-carrying variants).
+serde_json.workspace = true
 # `sync` for tokio::sync::broadcast::error::RecvError, referenced by the
 # frb-streams-gated chat_events forwarder (streams.rs). gen_ui_ffi is the
 # mobile FFI leaf (iOS/Android cdylib/staticlib) and is never built for wasm32,

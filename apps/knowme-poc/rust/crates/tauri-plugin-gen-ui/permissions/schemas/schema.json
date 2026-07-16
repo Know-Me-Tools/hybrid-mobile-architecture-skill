@@ -307,6 +307,18 @@
           "markdownDescription": "Denies the chat_send command without any pre-configured scope."
         },
         {
+          "description": "Enables the chat_subscribe command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-chat-subscribe",
+          "markdownDescription": "Enables the chat_subscribe command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the chat_subscribe command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-chat-subscribe",
+          "markdownDescription": "Denies the chat_subscribe command without any pre-configured scope."
+        },
+        {
           "description": "Enables the entity_create command without any pre-configured scope.",
           "type": "string",
           "const": "allow-entity-create",
@@ -391,10 +403,10 @@
           "markdownDescription": "Denies the memory_search command without any pre-configured scope."
         },
         {
-          "description": "Default gen-ui permissions: read + chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.\n#### This default permission set includes:\n\n- `allow-chat-send`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`",
+          "description": "Default gen-ui permissions: read + chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.\n#### This default permission set includes:\n\n- `allow-chat-send`\n- `allow-chat-subscribe`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default gen-ui permissions: read + chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.\n#### This default permission set includes:\n\n- `allow-chat-send`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`"
+          "markdownDescription": "Default gen-ui permissions: read + chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.\n#### This default permission set includes:\n\n- `allow-chat-send`\n- `allow-chat-subscribe`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`"
         },
         {
           "description": "Allow entity create/update/delete. Grant only to capabilities that own writes.",

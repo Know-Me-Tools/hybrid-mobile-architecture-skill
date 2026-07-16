@@ -50,9 +50,78 @@
       and forwards via AppHandle::emit(GEN_UI_CHAT_EVENT, event) for desktop, since
       Tauri has no StreamSink equivalent. Both sides call the identical
       gen_ui_agent orchestration — no duplicated business logic.
-- [ ] T8. Update Flutter chat feature + Tauri chat feature to consume the live stream
+- [x] T8. Update Flutter chat feature + Tauri chat feature to consume the live stream
       end-to-end (replacing any remaining placeholder wiring); wire the web PGlite
-      config store (T5) here
+      config store (T5) here.
+
+      Mobile (Flutter): ran flutter_rust_bridge_codegen generate for the first
+      time in this checkout (previously blocked — pubspec.lock never existed,
+      `flutter pub get` never run; fixed as a prerequisite). Discovered and fixed
+      a real frb 2.12.0 parser gap: `CoreResult<T>` (a `Result<String, CoreError>`
+      type alias) used directly as a function's RETURN TYPE generates as an
+      opaque, fieldless `RustOpaqueInterface` handle instead of a throwing
+      `Future<T>` — frb does not resolve type aliases at that position (confirmed
+      empirically: a spelled-out `Result<String, String>` generates correctly).
+      Fixed by spelling out `Result<T, CoreError>` in gen_ui_ffi::api::chat's
+      FFI-facing signatures instead of using the alias (gen_ui_agent and other
+      non-FFI Rust callers keep using CoreResult<T> — this is a Dart-boundary-only
+      workaround). Also discovered `A2uiEvent`/`ContentBlock` (enums with
+      data-carrying variants) require `freezed` Dart codegen to mirror natively,
+      but this project's riverpod_generator (all versions 3.0.0-4.0.4) and stable
+      freezed (analyzer >=9,<11) have DISJOINT analyzer requirements — no
+      published version combination resolves; freezed's prerelease line that
+      would resolve is separately rejected by frb's own `>=1.0.0` semver gate
+      (excludes prereleases). Worked around by having chat_events (gen_ui_ffi::
+      api::streams) serialize A2uiEvent to a JSON String over the wire instead of
+      native frb mirroring; Dart decodes via new `A2uiEvent.fromWire`/
+      `ContentBlock.fromWire` factory constructors (gen_ui_widgets' ContentBlock
+      and mobile's A2uiEvent — both previously placeholder sealed classes with no
+      wire parser). `rust_bridge_provider.dart`'s chatSend/chatEvents now call the
+      real generated bindings (`GenUiCore.init()`, api/chat.dart, api/streams.dart)
+      instead of throwing UnimplementedError. `flutter analyze`: 0 errors (433
+      pre-existing info-level style lints, mostly in auto-generated
+      frb_generated.web.dart, unrelated to this change).
+
+      Desktop (Tauri/React): chatStore.ts previously called a stale, non-existent
+      command (`stream_agent_a2ui`) and listened on a stale event name
+      (`a2ui_event`) that didn't match anything T6/T7 registered. Rewired to call
+      the real `chat_send`/`chat_subscribe` Tauri commands and listen on
+      `gen-ui://chat-event` (tauri-plugin-gen-ui's actual GEN_UI_CHAT_EVENT
+      constant), following the existing bare-command-name invoke() convention
+      already used by entityRuntime.ts. Rewrote bridge/a2ui/driver.ts's
+      `CoreA2uiEvent` type (previously a speculative `contentBlock`/
+      `messageComplete` shape with no relation to the real Rust enum) to match
+      gen_ui_types::events::A2uiEvent's actual serde shape (`run_started`/
+      `block`/`run_finished`/`run_error`, snake_case). Added a `run_id ->
+      messageId` map to ChatState since the wire event only carries run_id, not
+      a message id, and the single GEN_UI_CHAT_EVENT channel carries every
+      concurrent run. `npx tsc --noEmit`: 0 errors in any file this task touched;
+      6 pre-existing errors remain in unrelated files (ChatTranscript.tsx,
+      CoreFlintSurface.tsx, flintSurfaceStore.ts, types.ts) because
+      @prometheus-ags/gen-ui-react and @flint/react — file:-linked local
+      packages — have never been built (no dist/ output), and gen-ui-react's own
+      build fails on a missing @types/react in its standalone workspace. Flagged
+      as a separate pre-existing blocker, not fixed here (out of scope — whole
+      other package's build config, unrelated to chat's streaming plumbing).
+
+      Race condition (documented in T6/T7's commit as a known gap): mitigated
+      but NOT fully closed on both platforms — chat_send/chat_subscribe (or
+      chat_events on mobile) are called back-to-back with no intervening await
+      once the run_id is known, but chat_send must complete before that run_id
+      exists, so a residual window remains for extremely fast responses/errors.
+      Documented inline at each call site.
+
+      Web PGlite config store (T5): NOT wired — deliberately deprioritized per
+      the task brief's own guidance to prioritize the streaming plumbing fix
+      over config-store completeness. No PGlite-backed ConfigStore exists on the
+      TS side yet; the web build's chat path still resolves through
+      NoopConfigStore's graceful-degrade ("no provider configured") until this
+      lands. Left as explicit follow-up work, not silently skipped.
+
+      Desktop pglite-oxide ConfigStore startup wiring: also NOT wired (same
+      NoopConfigStore graceful-degrade applies to desktop until a future task
+      installs a real ConfigStore via gen_ui_agent::install_chat_agent in
+      tauri-plugin-gen-ui's `.setup()` hook).
 - [ ] T9. Verify: cargo check --workspace, flutter analyze, tsc --noEmit all clean
 - [ ] T10. Run live on macOS Tauri (first real provider round-trip) and capture the
       result

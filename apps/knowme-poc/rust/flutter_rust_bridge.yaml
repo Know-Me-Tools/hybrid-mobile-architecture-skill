@@ -8,3 +8,12 @@ dart_output: ../mobile/lib/bridge
 dart_entrypoint_class_name: GenUiCore
 # Keep the generated Rust glue beside the api it wraps.
 rust_output: crates/gen_ui_ffi/src/frb_generated.rs
+# T8: `api::streams` (chat_events/entity_changes/sync_status — the StreamSink<T>
+# surface) is gated behind gen_ui_ffi's `frb-streams` feature because its
+# signatures reference the codegen-emitted StreamSink type, which does not
+# exist before the first codegen run. `cargo expand` (which this codegen tool
+# shells out to) needs the feature ACTIVE to see that module at all, so it must
+# be enabled here — otherwise `chat_events` silently never gets generated and
+# api/streams.dart never appears, even though codegen exits 0.
+rust_features:
+  - frb-streams

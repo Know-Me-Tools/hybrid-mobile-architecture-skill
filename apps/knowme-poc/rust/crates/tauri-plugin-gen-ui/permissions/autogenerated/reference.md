@@ -5,6 +5,7 @@ Default gen-ui permissions: read + chat intents. Mutating entity commands requir
 #### This default permission set includes the following:
 
 - `allow-chat-send`
+- `allow-chat-subscribe`
 - `allow-entity-list`
 - `allow-entity-get`
 - `allow-memory-search`
@@ -41,6 +42,32 @@ Enables the chat_send command without any pre-configured scope.
 <td>
 
 Denies the chat_send command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:allow-chat-subscribe`
+
+</td>
+<td>
+
+Enables the chat_subscribe command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-chat-subscribe`
+
+</td>
+<td>
+
+Denies the chat_subscribe command without any pre-configured scope.
 
 </td>
 </tr>
