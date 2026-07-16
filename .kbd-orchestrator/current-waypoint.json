@@ -15,12 +15,12 @@
     },
     {
       "id": "2026-07-15-c103-chat-live-e2e",
-      "status": "pending",
+      "status": "merged",
       "wave": 1
     },
     {
       "id": "2026-07-15-c104-memory-graph-rag",
-      "status": "pending",
+      "status": "in_progress",
       "wave": 1
     },
     {
@@ -35,12 +35,12 @@
     },
     {
       "id": "2026-07-15-c107-whisper-scribe",
-      "status": "pending",
+      "status": "in_progress",
       "wave": 1
     },
     {
       "id": "2026-07-15-c110-ci",
-      "status": "pending",
+      "status": "in_progress",
       "wave": 1
     },
     {
@@ -54,10 +54,10 @@
       "wave": 2
     }
   ],
-  "completedChanges": 2,
+  "completedChanges": 3,
   "totalChanges": 10,
   "startedAt": "2026-07-15T22:04:29Z",
-  "nextCommand": "/kbd-apply 2026-07-15-c103-chat-live-e2e",
+  "nextCommand": "/kbd-apply 2026-07-15-c104-memory-graph-rag",
   "firstChange": "2026-07-15-c101-bootstrap-pillars",
-  "nextChange": "2026-07-15-c103-chat-live-e2e"
+  "nextChange": "2026-07-15-c104-memory-graph-rag"
 }

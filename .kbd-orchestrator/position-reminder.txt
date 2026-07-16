@@ -2,7 +2,7 @@ POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: phase-codegen-and-ci-verification
 Step: 3 of 10
 Stage: execute_ready
-Next command: /kbd-apply 2026-07-15-c103-chat-live-e2e
+Next command: /kbd-apply 2026-07-15-c104-memory-graph-rag
 
 Required signal format (emit BEFORE any tool call):
   Starting <kbd-skill> — phase-codegen-and-ci-verification (step 3 of 10)
