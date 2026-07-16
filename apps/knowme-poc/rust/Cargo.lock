@@ -10749,6 +10749,7 @@ dependencies = [
  "gen_ui_audio",
  "gen_ui_db",
  "gen_ui_db_graph",
+ "gen_ui_inference",
  "gen_ui_protocol",
  "gen_ui_runtime",
  "gen_ui_types",

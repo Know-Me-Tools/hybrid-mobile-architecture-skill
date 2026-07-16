@@ -9,6 +9,7 @@ use std::sync::Arc;
 
 use gen_ui_db_graph::GraphStore;
 use gen_ui_types::events::A2uiEvent;
+use gen_ui_types::inference::InferenceProvider;
 use once_cell::sync::OnceCell;
 use tokio::sync::broadcast;
 
@@ -23,6 +24,13 @@ const EVENT_CHANNEL_CAPACITY: usize = 256;
 pub struct AgentState {
     pub config: ConfigBackend,
     pub memory: Arc<GraphStore>,
+    /// Local-inference engine, when this platform has one. `None` on surfaces
+    /// with no local lane (web drives WebLLM from JS; a build without the
+    /// engine feature), in which case a `"local"` model pref resolves to
+    /// `AgentError::NoLocalEngine` rather than silently answering from cloud —
+    /// a user who asked for on-device inference must never be quietly switched
+    /// to a network provider.
+    pub inference: Option<Arc<dyn InferenceProvider>>,
     events: broadcast::Sender<A2uiEvent>,
 }
 
@@ -44,8 +52,20 @@ static STATE: OnceCell<AgentState> = OnceCell::new();
 /// now logged loudly, since silently swallowing it previously masked exactly
 /// this kind of programming error during development.
 pub fn init(config: ConfigBackend, memory: Arc<GraphStore>) {
+    init_with_inference(config, memory, None)
+}
+
+/// `init`, plus a local-inference engine for platforms that have one (desktop
+/// passes `gen_ui_inference::MistralEngine`). Kept as a separate constructor
+/// rather than a fourth `init` parameter: the engine is genuinely optional and
+/// platform-specific, and every existing `init` call site stays correct.
+pub fn init_with_inference(
+    config: ConfigBackend,
+    memory: Arc<GraphStore>,
+    inference: Option<Arc<dyn InferenceProvider>>,
+) {
     let (tx, _rx) = broadcast::channel(EVENT_CHANNEL_CAPACITY);
-    if STATE.set(AgentState { config, memory, events: tx }).is_err() {
+    if STATE.set(AgentState { config, memory, inference, events: tx }).is_err() {
         tracing::warn!(
             "gen_ui_agent::state::init called more than once in this process; \
              ignoring the second call and keeping the original config backend, \
@@ -78,4 +98,11 @@ pub(crate) fn config() -> Result<&'static ConfigBackend, AgentError> {
 
 pub(crate) fn memory() -> Result<&'static Arc<GraphStore>, AgentError> {
     Ok(&get()?.memory)
+}
+
+/// The local-inference engine, or `NoLocalEngine` when this build/platform has
+/// none. Deliberately an error rather than a cloud fallback — see the
+/// `inference` field's doc comment.
+pub(crate) fn inference() -> Result<&'static Arc<dyn InferenceProvider>, AgentError> {
+    get()?.inference.as_ref().ok_or(AgentError::NoLocalEngine)
 }

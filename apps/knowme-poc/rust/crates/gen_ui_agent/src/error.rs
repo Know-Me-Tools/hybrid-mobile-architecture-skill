@@ -15,6 +15,10 @@ pub enum AgentError {
     Client(String),
     #[error("agent runtime not initialised — call gen_ui_agent::state::init first")]
     NotInitialised,
+    #[error("no local inference engine on this platform/build")]
+    NoLocalEngine,
+    #[error("local inference: {0}")]
+    LocalInference(#[from] CoreError),
 }
 
 impl From<AgentError> for CoreError {
@@ -25,6 +29,11 @@ impl From<AgentError> for CoreError {
             AgentError::DanglingProvider(m) => CoreError::Terminal(m),
             AgentError::Client(m) => CoreError::Transient(m),
             AgentError::NotInitialised => CoreError::Terminal(e.to_string()),
+            AgentError::NoLocalEngine => CoreError::Terminal(e.to_string()),
+            // The engine already classified this (out-of-memory → Transient, bad
+            // model id → Terminal); pass its verdict through rather than
+            // flattening the distinction the engine worked to establish.
+            AgentError::LocalInference(inner) => inner,
         }
     }
 }

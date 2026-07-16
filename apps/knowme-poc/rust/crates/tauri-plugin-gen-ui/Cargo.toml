@@ -15,6 +15,10 @@ gen_ui_agent    = { path = "../gen_ui_agent" }
 gen_ui_db       = { path = "../gen_ui_db", features = ["pglite"] }
 gen_ui_db_graph = { path = "../gen_ui_db_graph", features = ["embed-native"] }
 gen_ui_audio    = { path = "../gen_ui_audio" }
+# Desktop is the surface that HAS a local-inference engine, so it's the leaf that
+# enables the lane and hands the concrete MistralEngine to gen_ui_agent as a trait
+# object. gen_ui_agent itself never names an engine (see its Cargo.toml note).
+gen_ui_inference = { path = "../gen_ui_inference", features = ["local-mistral"] }
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

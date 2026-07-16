@@ -1,10 +1,13 @@
 ## Default Permission
 
-Default gen-ui permissions: startup/read/chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.
+Default gen-ui permissions: startup/read/chat intents. Mutating ENTITY commands require the gen-ui:allow-write set explicitly. set-active-lane writes an app setting (a user preference), not entity data, so it belongs here alongside the other chat intents — same category as memory-ingest.
 
 #### This default permission set includes the following:
 
 - `allow-stream-agent-a2ui`
+- `allow-get-active-lane`
+- `allow-set-active-lane`
+- `allow-has-local-engine`
 - `allow-run-migrations`
 - `allow-load-seeds`
 - `allow-attach-sync-shapes`
@@ -238,6 +241,32 @@ Denies the entity_update command without any pre-configured scope.
 <tr>
 <td>
 
+`gen-ui:allow-get-active-lane`
+
+</td>
+<td>
+
+Enables the get_active_lane command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-get-active-lane`
+
+</td>
+<td>
+
+Denies the get_active_lane command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
 `gen-ui:allow-graph-expand`
 
 </td>
@@ -257,6 +286,32 @@ Enables the graph_expand command without any pre-configured scope.
 <td>
 
 Denies the graph_expand command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:allow-has-local-engine`
+
+</td>
+<td>
+
+Enables the has_local_engine command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-has-local-engine`
+
+</td>
+<td>
+
+Denies the has_local_engine command without any pre-configured scope.
 
 </td>
 </tr>
@@ -413,6 +468,32 @@ Enables the scribe_stop command without any pre-configured scope.
 <td>
 
 Denies the scribe_stop command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:allow-set-active-lane`
+
+</td>
+<td>
+
+Enables the set_active_lane command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`gen-ui:deny-set-active-lane`
+
+</td>
+<td>
+
+Denies the set_active_lane command without any pre-configured scope.
 
 </td>
 </tr>

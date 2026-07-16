@@ -37,17 +37,22 @@ impl From<SurrealProvider> for Provider {
 pub struct ModelPref {
     pub provider_id: Option<String>,
     pub model_id: String,
+    /// Engine-specific sampling knobs (temperature, top_p, max_tokens,
+    /// context_len). Free-form because the two lanes want different keys and the
+    /// cloud lane mostly defers to the provider's server-side defaults; the local
+    /// lane reads what it needs and falls back per-key.
+    pub params: serde_json::Value,
 }
 
 impl From<PgModelPref> for ModelPref {
     fn from(p: PgModelPref) -> Self {
-        Self { provider_id: p.provider_id, model_id: p.model_id }
+        Self { provider_id: p.provider_id, model_id: p.model_id, params: p.params }
     }
 }
 
 impl From<SurrealModelPref> for ModelPref {
     fn from(p: SurrealModelPref) -> Self {
-        Self { provider_id: p.provider_id, model_id: p.model_id }
+        Self { provider_id: p.provider_id, model_id: p.model_id, params: p.params }
     }
 }
 
@@ -71,6 +76,30 @@ impl ConfigBackend {
                 .await
                 .map_err(|e| AgentError::Config(e.to_string()))?
                 .map(ModelPref::from)),
+        }
+    }
+
+    /// Read an app setting. `None` when unset — callers apply their own default
+    /// rather than this layer inventing one.
+    pub async fn get_setting(&self, key: &str) -> Result<Option<serde_json::Value>, AgentError> {
+        match self {
+            ConfigBackend::Postgres(store) => {
+                store.get_setting(key).await.map_err(|e| AgentError::Config(e.to_string()))
+            }
+            ConfigBackend::Surreal(store) => {
+                store.get_setting(key).await.map_err(|e| AgentError::Config(e.to_string()))
+            }
+        }
+    }
+
+    pub async fn set_setting(&self, key: &str, value: serde_json::Value) -> Result<(), AgentError> {
+        match self {
+            ConfigBackend::Postgres(store) => {
+                store.set_setting(key, value).await.map_err(|e| AgentError::Config(e.to_string()))
+            }
+            ConfigBackend::Surreal(store) => {
+                store.set_setting(key, value).await.map_err(|e| AgentError::Config(e.to_string()))
+            }
         }
     }
 

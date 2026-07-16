@@ -28,6 +28,9 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("gen-ui")
         .invoke_handler(tauri::generate_handler![
             commands::stream_agent_a2ui,
+            commands::get_active_lane,
+            commands::set_active_lane,
+            commands::has_local_engine,
             commands::run_migrations,
             commands::load_seeds,
             commands::attach_sync_shapes,

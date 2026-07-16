@@ -391,6 +391,18 @@
           "markdownDescription": "Denies the entity_update command without any pre-configured scope."
         },
         {
+          "description": "Enables the get_active_lane command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-active-lane",
+          "markdownDescription": "Enables the get_active_lane command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_active_lane command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-active-lane",
+          "markdownDescription": "Denies the get_active_lane command without any pre-configured scope."
+        },
+        {
           "description": "Enables the graph_expand command without any pre-configured scope.",
           "type": "string",
           "const": "allow-graph-expand",
@@ -401,6 +413,18 @@
           "type": "string",
           "const": "deny-graph-expand",
           "markdownDescription": "Denies the graph_expand command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the has_local_engine command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-has-local-engine",
+          "markdownDescription": "Enables the has_local_engine command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the has_local_engine command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-has-local-engine",
+          "markdownDescription": "Denies the has_local_engine command without any pre-configured scope."
         },
         {
           "description": "Enables the load_seeds command without any pre-configured scope.",
@@ -475,6 +499,18 @@
           "markdownDescription": "Denies the scribe_stop command without any pre-configured scope."
         },
         {
+          "description": "Enables the set_active_lane command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-set-active-lane",
+          "markdownDescription": "Enables the set_active_lane command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the set_active_lane command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-set-active-lane",
+          "markdownDescription": "Denies the set_active_lane command without any pre-configured scope."
+        },
+        {
           "description": "Enables the stream_agent_a2ui command without any pre-configured scope.",
           "type": "string",
           "const": "allow-stream-agent-a2ui",
@@ -487,10 +523,10 @@
           "markdownDescription": "Denies the stream_agent_a2ui command without any pre-configured scope."
         },
         {
-          "description": "Default gen-ui permissions: startup/read/chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.\n#### This default permission set includes:\n\n- `allow-stream-agent-a2ui`\n- `allow-run-migrations`\n- `allow-load-seeds`\n- `allow-attach-sync-shapes`\n- `allow-memory-ingest`\n- `allow-entity-runtime-start`\n- `allow-entity-runtime-stop`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`\n- `allow-scribe-start`\n- `allow-scribe-stop`",
+          "description": "Default gen-ui permissions: startup/read/chat intents. Mutating ENTITY commands require the gen-ui:allow-write set explicitly. set-active-lane writes an app setting (a user preference), not entity data, so it belongs here alongside the other chat intents — same category as memory-ingest.\n#### This default permission set includes:\n\n- `allow-stream-agent-a2ui`\n- `allow-get-active-lane`\n- `allow-set-active-lane`\n- `allow-has-local-engine`\n- `allow-run-migrations`\n- `allow-load-seeds`\n- `allow-attach-sync-shapes`\n- `allow-memory-ingest`\n- `allow-entity-runtime-start`\n- `allow-entity-runtime-stop`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`\n- `allow-scribe-start`\n- `allow-scribe-stop`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default gen-ui permissions: startup/read/chat intents. Mutating entity commands require the gen-ui:allow-write set explicitly.\n#### This default permission set includes:\n\n- `allow-stream-agent-a2ui`\n- `allow-run-migrations`\n- `allow-load-seeds`\n- `allow-attach-sync-shapes`\n- `allow-memory-ingest`\n- `allow-entity-runtime-start`\n- `allow-entity-runtime-stop`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`\n- `allow-scribe-start`\n- `allow-scribe-stop`"
+          "markdownDescription": "Default gen-ui permissions: startup/read/chat intents. Mutating ENTITY commands require the gen-ui:allow-write set explicitly. set-active-lane writes an app setting (a user preference), not entity data, so it belongs here alongside the other chat intents — same category as memory-ingest.\n#### This default permission set includes:\n\n- `allow-stream-agent-a2ui`\n- `allow-get-active-lane`\n- `allow-set-active-lane`\n- `allow-has-local-engine`\n- `allow-run-migrations`\n- `allow-load-seeds`\n- `allow-attach-sync-shapes`\n- `allow-memory-ingest`\n- `allow-entity-runtime-start`\n- `allow-entity-runtime-stop`\n- `allow-entity-list`\n- `allow-entity-get`\n- `allow-memory-search`\n- `allow-graph-expand`\n- `allow-scribe-start`\n- `allow-scribe-stop`"
         },
         {
           "description": "Allow entity create/update/delete. Grant only to capabilities that own writes.",

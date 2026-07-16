@@ -7,6 +7,7 @@
 //! adapting the response stream into ContentBlocks.
 use gen_ui_protocol::A2uiAdapter;
 use gen_ui_types::events::StreamEvent;
+use gen_ui_types::inference::{LocalModelSpec, SampleParams};
 use liter_llm::client::ClientBuilder;
 use liter_llm::types::chat::ChatCompletionRequest;
 use liter_llm::types::common::{Message, UserContent, UserMessage};
@@ -17,6 +18,21 @@ use crate::{secrets, state};
 
 const SURFACE_CHAT: &str = "chat";
 const LANE_CLOUD: &str = "cloud";
+/// On-device inference. A `model_pref` row with this lane carries the local
+/// model id in `model_id` and no `provider_id` (there is no remote provider).
+const LANE_LOCAL: &str = "local";
+
+/// Which lane a chat turn should run on. Read from the `active_lane` app
+/// setting, defaulting to cloud — an install that has never touched the toggle
+/// keeps its existing behaviour.
+const SETTING_ACTIVE_LANE: &str = "active_lane";
+
+/// Sampling defaults for the local lane, used when a model_pref's `params`
+/// object omits them. Mirrors the middle-of-the-road values the cloud providers
+/// apply server-side, so switching lanes doesn't silently change answer style.
+const DEFAULT_TEMPERATURE: f32 = 0.7;
+const DEFAULT_TOP_P: f32 = 0.95;
+const DEFAULT_MAX_TOKENS: u32 = 2048;
 
 /// Start a chat turn. Returns the run_id whose events are published on the
 /// shared A2uiEvent broadcast (see `state::subscribe`); the actual generation
@@ -24,6 +40,18 @@ const LANE_CLOUD: &str = "cloud";
 /// resolved, matching the frb/Tauri contract's fire-and-subscribe shape.
 pub async fn send(user_message: String, history: Vec<String>) -> Result<String, AgentError> {
     let run_id = uuid::Uuid::new_v4().to_string();
+
+    // Which lane? Unset → cloud, so an install that never touches the toggle
+    // behaves exactly as before.
+    let lane = state::config()?
+        .get_setting(SETTING_ACTIVE_LANE)
+        .await?
+        .and_then(|v| v.as_str().map(str::to_owned))
+        .unwrap_or_else(|| LANE_CLOUD.to_string());
+
+    if lane == LANE_LOCAL {
+        return send_local(user_message, history, run_id).await;
+    }
 
     let pref = state::config()?
         .get_model_pref(SURFACE_CHAT, LANE_CLOUD)
@@ -57,6 +85,145 @@ pub async fn send(user_message: String, history: Vec<String>) -> Result<String, 
     });
 
     Ok(run_id)
+}
+
+/// Which lane chat turns currently run on: `"cloud"` or `"local"`. Defaults to
+/// cloud when unset.
+pub async fn active_lane() -> Result<String, AgentError> {
+    Ok(state::config()?
+        .get_setting(SETTING_ACTIVE_LANE)
+        .await?
+        .and_then(|v| v.as_str().map(str::to_owned))
+        .unwrap_or_else(|| LANE_CLOUD.to_string()))
+}
+
+/// Switch lanes. Rejects unknown values rather than persisting a string that
+/// would silently fall back to cloud on the next turn — a user who asked for
+/// on-device inference must not be quietly answered by a network provider.
+///
+/// Selecting `local` on a build with no engine fails here, at the toggle, rather
+/// than at the next chat turn — the UI can then keep the switch off and say why.
+pub async fn set_active_lane(lane: &str) -> Result<(), AgentError> {
+    match lane {
+        LANE_CLOUD => {}
+        LANE_LOCAL => {
+            state::inference()?;
+        }
+        other => {
+            return Err(AgentError::Config(format!(
+                "unknown lane '{other}' — expected '{LANE_CLOUD}' or '{LANE_LOCAL}'"
+            )))
+        }
+    }
+    state::config()?.set_setting(SETTING_ACTIVE_LANE, serde_json::Value::String(lane.to_string())).await
+}
+
+/// Whether this build/platform has a local-inference engine at all. The UI uses
+/// this to show or hide the lane toggle instead of offering a switch that errors.
+pub fn has_local_engine() -> bool {
+    state::inference().is_ok()
+}
+
+/// Local-lane counterpart of `send`. Same contract: resolve the model, spawn the
+/// generation, return the run_id immediately — events arrive on the shared A2UI
+/// broadcast exactly as they do for cloud, so no caller can tell the lanes apart.
+async fn send_local(
+    user_message: String,
+    history: Vec<String>,
+    run_id: String,
+) -> Result<String, AgentError> {
+    let engine = state::inference()?;
+
+    // A `local` pref carries the model id; provider_id is None (no remote
+    // provider). Absent → NoProvider, same as an unconfigured cloud lane.
+    let pref = state::config()?
+        .get_model_pref(SURFACE_CHAT, LANE_LOCAL)
+        .await?
+        .ok_or(AgentError::NoProvider)?;
+
+    let params = SampleParams {
+        temperature: param_f32(&pref.params, "temperature", DEFAULT_TEMPERATURE),
+        top_p: param_f32(&pref.params, "top_p", DEFAULT_TOP_P),
+        max_tokens: param_u32(&pref.params, "max_tokens", DEFAULT_MAX_TOKENS),
+    };
+    let spec = LocalModelSpec {
+        model: pref.model_id.clone(),
+        context_len: pref.params.get("context_len").and_then(|v| v.as_u64()).map(|v| v as u32),
+    };
+
+    // Load before returning the run_id: a first-run model download is minutes
+    // long, and reporting "started" before the model exists would leave the UI
+    // streaming nothing. Idempotent, so subsequent turns fall straight through.
+    engine.load(&spec).await.map_err(AgentError::LocalInference)?;
+
+    let prompt = build_local_prompt(&history, &user_message);
+    let engine = engine.clone();
+    let run_id_for_task = run_id.clone();
+    gen_ui_runtime::spawn(async move {
+        let mut adapter = A2uiAdapter::new(run_id_for_task);
+        for event in adapter.ingest(&StreamEvent::MessageStart) {
+            state::publish(event);
+        }
+
+        let stream = match engine.generate(&prompt, &params).await {
+            Ok(s) => s,
+            Err(e) => {
+                for event in adapter.ingest(&StreamEvent::Error { message: e.to_string() }) {
+                    state::publish(event);
+                }
+                return;
+            }
+        };
+
+        // The engine already emits StreamEvents (the seam's whole point), so the
+        // adapter ingests them verbatim — identical handling to the cloud lane.
+        use futures::StreamExt;
+        let mut stream = std::pin::pin!(stream);
+        while let Some(event) = stream.next().await {
+            let terminal = matches!(event, StreamEvent::Done | StreamEvent::Error { .. });
+            for a2ui in adapter.ingest(&event) {
+                state::publish(a2ui);
+            }
+            if terminal {
+                return;
+            }
+        }
+        // Stream ended without Done (engine dropped the sender) — still close the
+        // run so the UI stops spinning.
+        for event in adapter.ingest(&StreamEvent::Done) {
+            state::publish(event);
+        }
+    });
+
+    Ok(run_id)
+}
+
+fn param_f32(params: &serde_json::Value, key: &str, default: f32) -> f32 {
+    params.get(key).and_then(|v| v.as_f64()).map(|v| v as f32).unwrap_or(default)
+}
+
+fn param_u32(params: &serde_json::Value, key: &str, default: u32) -> u32 {
+    params.get(key).and_then(|v| v.as_u64()).map(|v| v as u32).unwrap_or(default)
+}
+
+/// Flatten history + the new turn into a single prompt string.
+///
+/// Unlike the cloud lane (structured Messages), the InferenceProvider seam takes
+/// one `&str` — the engine applies the model's own chat template underneath, so
+/// roles are marked in plain text and the template does the rest.
+fn build_local_prompt(history: &[String], user_message: &str) -> String {
+    let mut prompt = String::new();
+    for pair in history.chunks_exact(2) {
+        let [role, text] = pair else { continue };
+        if matches!(role.as_str(), "user" | "assistant") {
+            prompt.push_str(role);
+            prompt.push_str(": ");
+            prompt.push_str(text);
+            prompt.push('\n');
+        }
+    }
+    prompt.push_str(user_message);
+    prompt
 }
 
 /// User + prior turns (role/text pairs, oldest first) into liter-llm Messages.

@@ -63,13 +63,38 @@ export function entityRuntimeStop(): Promise<void> {
 export function memoryIngest(text: string): Promise<string> {
   return invoke<string>(cmd("memory_ingest"), { text });
 }
+/** Chat inference lane: the liter-llm cloud gateway, or an on-device model. */
+export type ChatLane = "cloud" | "local";
+
 /**
- * Start a chat turn through the liter-llm gateway. Returns the run_id whose
- * ContentBlock events arrive on {@link onChatEvent}. `messages` is the prior
- * turn history flattened to alternating role/text pairs, oldest first.
+ * Start a chat turn on the currently active lane ({@link getActiveLane}).
+ * Returns the run_id whose ContentBlock events arrive on {@link onChatEvent} —
+ * identical event shape on both lanes, so callers never branch on lane.
+ * `messages` is the prior turn history flattened to alternating role/text
+ * pairs, oldest first.
+ *
+ * On the local lane the first call may take minutes: the model downloads before
+ * the run_id returns, so a resolved promise means generation is genuinely
+ * underway rather than still fetching weights.
  */
 export function streamAgentA2ui(userMessage: string, messages: string[]): Promise<string> {
   return invoke<string>(cmd("stream_agent_a2ui"), { userMessage, messages });
+}
+/** Which lane chat turns currently run on. Defaults to "cloud". */
+export function getActiveLane(): Promise<ChatLane> {
+  return invoke<ChatLane>(cmd("get_active_lane"));
+}
+/**
+ * Switch lanes. Rejects if `lane` is "local" on a build with no local engine,
+ * rather than silently answering from the cloud on the next turn — check
+ * {@link hasLocalEngine} before offering the switch.
+ */
+export function setActiveLane(lane: ChatLane): Promise<void> {
+  return invoke<void>(cmd("set_active_lane"), { lane });
+}
+/** Whether this build has a local-inference engine — gate the toggle on this. */
+export function hasLocalEngine(): Promise<boolean> {
+  return invoke<boolean>(cmd("has_local_engine"));
 }
 export function entityList(view: ViewDescriptor): Promise<ListResult> {
   return invoke<ListResult>(cmd("entity_list"), { view });

@@ -28,6 +28,33 @@ pub async fn stream_agent_a2ui(user_message: String, messages: Vec<String>) -> R
         .map_err(Into::into)
 }
 
+/// Current chat lane: "cloud" or "local".
+#[tauri::command]
+pub async fn get_active_lane() -> Result<String> {
+    gen_ui_agent::chat::active_lane()
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
+}
+
+/// Switch chat lanes. Errors on an unknown lane, or on "local" where this build
+/// has no engine — the toggle fails loudly here rather than silently answering
+/// from the cloud at the next turn.
+#[tauri::command]
+pub async fn set_active_lane(lane: String) -> Result<()> {
+    gen_ui_agent::chat::set_active_lane(&lane)
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
+}
+
+/// Whether a local-inference engine exists on this build — the UI shows the lane
+/// toggle only when it does.
+#[tauri::command]
+pub async fn has_local_engine() -> Result<bool> {
+    Ok(gen_ui_agent::chat::has_local_engine())
+}
+
 /// Boot-order invariant, step 1: open the config store (pglite-oxide) AND the
 /// memory/graph-RAG store (embedded SurrealDB — a separate concern from config
 /// storage, see gen_ui_agent::state::init's doc comment: memory is
@@ -66,9 +93,16 @@ pub async fn run_migrations<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> 
     .await
     .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
 
-    gen_ui_agent::state::init(
+    // Desktop's local-inference lane. Constructing the engine is cheap — no model
+    // is touched until a `local`-lane chat turn calls load() — so this is
+    // unconditional; the cost is only paid by users who switch to local.
+    let inference: Arc<dyn gen_ui_types::inference::InferenceProvider> =
+        Arc::new(gen_ui_inference::MistralEngine::new());
+
+    gen_ui_agent::state::init_with_inference(
         ConfigBackend::Postgres(Arc::new(config_store)),
         Arc::new(memory_store),
+        Some(inference),
     );
     Ok(())
 }

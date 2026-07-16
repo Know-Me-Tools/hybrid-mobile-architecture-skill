@@ -4,6 +4,9 @@
 //! in src/lib.rs.
 const COMMANDS: &[&str] = &[
     "stream_agent_a2ui",
+    "get_active_lane",
+    "set_active_lane",
+    "has_local_engine",
     "run_migrations",
     "load_seeds",
     "attach_sync_shapes",
