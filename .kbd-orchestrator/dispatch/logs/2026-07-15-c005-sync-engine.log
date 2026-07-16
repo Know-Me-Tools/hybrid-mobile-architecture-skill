@@ -1,5 +1,5 @@
-[dispatch] 2026-07-15-c005-sync-engine → claude/claude-opus-4-8  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c005-sync-engine
-Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+[dispatch] 2026-07-15-c005-sync-engine → claude/claude-opus-4-8  worktree=~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c005-sync-engine
+Permission allow rule (~/.claude/settings.json): Write(~/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(~/.claude/**) instead (Edit rules cover all file-editing tools).
 Position: scaffold-full-hybrid-project | status: c005 complete
 
 C-005 sync-engine is implemented and verified. I extended `scripts/scaffold-rust-core.sh` with an `emit_gen_ui_db()` function that lays down the full `gen_ui_db::sync` module behind the frozen `SyncTransport` seam:

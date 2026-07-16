@@ -27,7 +27,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `phase-codegen-and-ci-verification`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.claude/worktrees/gallant-blackburn-b9ccea`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src/.claude/worktrees/gallant-blackburn-b9ccea`
 - **Captured:** `2026-07-16T11:27:29Z`
 - **Phase source record:** `manual:Hybrid Mobile Architecture/phase-codegen-and-ci-verification`
 - **Position:** `phase-codegen-and-ci-verification`

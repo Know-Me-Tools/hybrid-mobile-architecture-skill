@@ -151,7 +151,7 @@ Selection principles (applied, not vibes):
    patterned, or documentation lanes — per performance.md model-selection strategy.
 4. **Long-context models** (Kimi K2.7) where the task is digesting large existing
    codebases more than novel synthesis.
-5. All harnesses share `/Users/gqadonis/Projects/prometheus/prometheus-skill-pack`.
+5. All harnesses share `~/Projects/prometheus/prometheus-skill-pack`.
 
 | Change | Harness · Model | Rationale | Key skills |
 |---|---|---|---|

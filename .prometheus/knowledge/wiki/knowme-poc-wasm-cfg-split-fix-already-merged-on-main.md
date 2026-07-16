@@ -27,7 +27,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `phase-codegen-and-ci-verification`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.claude/worktrees/pensive-greider-2e206c`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src/.claude/worktrees/pensive-greider-2e206c`
 - **Captured:** `2026-07-16T11:41:10Z`
 - **Position:** `phase-codegen-and-ci-verification`
 - **Status:** `executing`
@@ -83,7 +83,7 @@ No code commit or PR is needed for the wasm-related fix discussed in this sessio
 ### Verified repository state
 
 - The `embed_blocking` cfg-split in `gen_ui_db_graph/src/store.rs` was applied in the main checkout:
-  - `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+  - `~/Projects/hybrid-mobile-architecture-src`
 - Another session already included the fix in commit:
   - `60cb949` — `feat(c103): live chat e2e on desktop + iOS…`
 - That commit is already on `main` and pushed to:

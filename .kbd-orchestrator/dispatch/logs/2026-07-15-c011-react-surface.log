@@ -1,11 +1,11 @@
-[dispatch] 2026-07-15-c011-react-surface → codex/gpt-5.6-sol  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+[dispatch] 2026-07-15-c011-react-surface → codex/gpt-5.6-sol  worktree=~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
 Reading additional input from stdin...
-2026-07-15T20:23:08.420511Z ERROR codex_core::session::session: failed to load skill /Users/gqadonis/.TOOLS/skills/codex/skill-tester/assets/sample-skill/SKILL.md: missing YAML frontmatter delimited by ---
-2026-07-15T20:23:08.421236Z ERROR codex_core::session::session: failed to load skill /Users/gqadonis/.TOOLS/skills/codex/engineering/skill-tester/assets/sample-skill/SKILL.md: missing YAML frontmatter delimited by ---
+2026-07-15T20:23:08.420511Z ERROR codex_core::session::session: failed to load skill ~/.TOOLS/skills/codex/skill-tester/assets/sample-skill/SKILL.md: missing YAML frontmatter delimited by ---
+2026-07-15T20:23:08.421236Z ERROR codex_core::session::session: failed to load skill ~/.TOOLS/skills/codex/engineering/skill-tester/assets/sample-skill/SKILL.md: missing YAML frontmatter delimited by ---
 2026-07-15T20:23:08.578472Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when UnexpectedServerResponse("HTTP 405: ")
 OpenAI Codex v0.144.4
 --------
-workdir: /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+workdir: ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
 model: gpt-5.6-sol
 provider: openai
 approval: never
@@ -36,7 +36,7 @@ AUTHORITY — read these first, in order (all relative to your working directory
 4. .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md — library verdicts,
    per-platform data matrix, version pins.
 
-SKILLS: the shared skill pack is at /Users/gqadonis/Projects/prometheus/prometheus-skill-pack.
+SKILLS: the shared skill pack is at ~/Projects/prometheus/prometheus-skill-pack.
 Invoke the skills named for your change BEFORE writing code (emit good code first-shot).
 
 SCOPE DISCIPLINE (Rule 40): implement ONLY your assigned change. Do not touch
@@ -57,7 +57,7 @@ warning: Exceeded skills context budget of 2%. All skill descriptions were remov
 codex
 I’ll first load the four authority files, the change proposal, and the matching plan section. Then I’ll identify and invoke the required skills before making any edits.
 exec
-/usr/local/bin/bash -lc "sed -n '1,260p' CLAUDE.md && sed -n '1,260p' .kbd-orchestrator/constraints.md && sed -n '1,320p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md && sed -n '1,320p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md && sed -n '1,260p' openspec/changes/2026-07-15-c011-react-surface/proposal.md" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "sed -n '1,260p' CLAUDE.md && sed -n '1,260p' .kbd-orchestrator/constraints.md && sed -n '1,320p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md && sed -n '1,320p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md && sed -n '1,260p' openspec/changes/2026-07-15-c011-react-surface/proposal.md" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 # CLAUDE.md
 
@@ -505,7 +505,7 @@ Selection principles (applied, not vibes):
    patterned, or documentation lanes — per performance.md model-selection strategy.
 4. **Long-context models** (Kimi K2.7) where the task is digesting large existing
    codebases more than novel synthesis.
-5. All harnesses share `/Users/gqadonis/Projects/prometheus/prometheus-skill-pack`.
+5. All harnesses share `~/Projects/prometheus/prometheus-skill-pack`.
 
 | Change | Harness · Model | Rationale | Key skills |
 |---|---|---|---|
@@ -840,111 +840,111 @@ codex
 The combined read was truncated, so I’m narrowing to C-011 and the React-specific references, while also checking the current scaffold/template state. This change explicitly requires UI skills; I’ll resolve the exact named skill files from the shared pack before editing.
 2026-07-15T20:23:19.194056Z ERROR rmcp::transport::streamable_http_client: fail to get common stream: Client error: HTTP request failed: http/request failed: error sending request for url (http://127.0.0.1:9010/mcp)
 exec
-/usr/local/bin/bash -lc "rg -n -A28 -B4 'C-011|c011|React surface' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md && sed -n '1,280p' references/tauri/patterns.md && find /Users/gqadonis/Projects/prometheus/prometheus-skill-pack -path '*/SKILL.md' | rg '/(frontend-design|react-best-practices|web-design-guidelines|ui-ux-pro-max|shadcn["'^/]*)/SKILL.md$'"' && rg --files | rg '("'^scripts/|assets/templates|package.json|vite|react|tauri)'"' | head -250 && git status --short" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "rg -n -A28 -B4 'C-011|c011|React surface' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md && sed -n '1,280p' references/tauri/patterns.md && find ~/Projects/prometheus/prometheus-skill-pack -path '*/SKILL.md' | rg '/(frontend-design|react-best-practices|web-design-guidelines|ui-ux-pro-max|shadcn["'^/]*)/SKILL.md$'"' && rg --files | rg '("'^scripts/|assets/templates|package.json|vite|react|tauri)'"' | head -250 && git status --short" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  exited 1 in 4654ms:
 exec
-/usr/local/bin/bash -lc "find /Users/gqadonis/Projects/prometheus/prometheus-skill-pack -name SKILL.md -print | rg '(prometheus-entity|react-vite|frontend-design|react-best|web-design|ui-ux|shadcn)' | head -100; printf '%s\\n' '--- files ---'; rg --files scripts assets/templates | sort | sed -n '1,280p'; printf '%s\\n' '--- scaffold ---'; sed -n '1,320p' scripts/scaffold-tauri.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "find ~/Projects/prometheus/prometheus-skill-pack -name SKILL.md -print | rg '(prometheus-entity|react-vite|frontend-design|react-best|web-design|ui-ux|shadcn)' | head -100; printf '%s\\n' '--- files ---'; rg --files scripts assets/templates | sort | sed -n '1,280p'; printf '%s\\n' '--- scaffold ---'; sed -n '1,320p' scripts/scaffold-tauri.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 2325ms:
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/tauri/tauri-react-vite/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/artifact-refiner/skills/scaffold-react-vite-tauri/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/artifact-refiner/skills/scaffold-react-vite/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-realtime-surreal-live/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-optimize/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-optimize/skills/entity-gc/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-optimize/skills/entity-perf/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-optimize/skills/entity-audit/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-graphql/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-graphql/skills/entity-gql-hooks/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-graphql/skills/entity-gql-subscription/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-graphql/skills/entity-gql-setup/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/skills/entity-graph-init/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/skills/entity-graph-migrate/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/skills/entity-graph-detect/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/skills/entity-realtime-local-first/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/skills/entity-realtime-channel/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/skills/entity-realtime-setup/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/skills/entity-prisma-generator/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/skills/entity-prisma-setup/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/skills/entity-prisma-api/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/skills/entity-prisma-migrate/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/skills/entity-crud-form/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/skills/entity-crud-relations/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/skills/entity-crud-page/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/skills/entity-crud-table/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-apply-change/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-a2ui/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/artifact-refiner/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-ui/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-image/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-validate/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-status/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-logo/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-content/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-explore/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/skills/extend/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/skills/validate/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/skills/clone/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/skills/create/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-verify-change/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-assess/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-report/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-plan/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-analyze/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-execute/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-status/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-plan/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-status/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-init/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-reflect/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-execute/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-assess/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-new-change/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-archive-change/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-onboard/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-bulk-archive-change/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-continue-change/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-sync-specs/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-ff-change/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/data-loading/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/type-safety/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/not-found-and-errors/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/navigation/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/auth-and-guards/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/search-params/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/ssr/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/path-params/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/code-splitting/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/openspec-apply-change/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-a2ui/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/artifact-refiner/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-ui/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-image/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-validate/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-status/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-logo/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-content/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/openspec-explore/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/skills/extend/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/skills/validate/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/skills/clone/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/skills/create/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/openspec-verify-change/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/iterative-evolver/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/iterative-evolver/skills/evolve-assess/SKILL.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/iterative-evolver/skills/evolve-report/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/tauri/tauri-react-vite/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/artifact-refiner/skills/scaffold-react-vite-tauri/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/artifact-refiner/skills/scaffold-react-vite/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-realtime-surreal-live/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-optimize/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-optimize/skills/entity-gc/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-optimize/skills/entity-perf/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-optimize/skills/entity-audit/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-graphql/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-graphql/skills/entity-gql-hooks/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-graphql/skills/entity-gql-subscription/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-graphql/skills/entity-gql-setup/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/skills/entity-graph-init/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/skills/entity-graph-migrate/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/skills/entity-graph-detect/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/skills/entity-realtime-local-first/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/skills/entity-realtime-channel/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/skills/entity-realtime-setup/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/skills/entity-prisma-generator/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/skills/entity-prisma-setup/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/skills/entity-prisma-api/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-prisma/skills/entity-prisma-migrate/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/skills/entity-crud-form/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/skills/entity-crud-relations/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/skills/entity-crud-page/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-crud/skills/entity-crud-table/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-apply-change/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-a2ui/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/artifact-refiner/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-ui/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-image/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-validate/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-status/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-logo/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/artifact-refiner/skills/refine-content/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-explore/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/skills/extend/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/skills/validate/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/skills/clone/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/pmpo-skill-creator/skills/create/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-verify-change/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-assess/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-report/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-plan/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-analyze/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-execute/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/iterative-evolver/skills/evolve-status/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-plan/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-status/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-init/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-reflect/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-execute/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/kbd-process-orchestrator/skills/kbd-assess/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-new-change/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-archive-change/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-onboard/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-bulk-archive-change/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-continue-change/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-sync-specs/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.cursor/skills/openspec-ff-change/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/data-loading/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/type-safety/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/not-found-and-errors/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/navigation/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/auth-and-guards/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/search-params/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/ssr/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/path-params/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@tanstack+router-core@1.168.7/node_modules/@tanstack/router-core/skills/router-core/code-splitting/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/openspec-apply-change/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-a2ui/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/artifact-refiner/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-ui/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-image/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-validate/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-status/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-logo/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/artifact-refiner/skills/refine-content/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/openspec-explore/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/skills/extend/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/skills/validate/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/skills/clone/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/pmpo-skill-creator/skills/create/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/openspec-verify-change/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/iterative-evolver/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/iterative-evolver/skills/evolve-assess/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/.claude/skills/iterative-evolver/skills/evolve-report/SKILL.md
 --- files ---
 assets/templates/content-block/block-template.tmpl
 assets/templates/content-block/README.md
@@ -1290,7 +1290,7 @@ export type ContentBlock =
 codex
 I found the two skills named by the plan: `react/prometheus-entity-skills` and `tauri/tauri-react-vite`. I’m invoking both now; their guidance will govern PEM local-first wiring and the Tauri/Vite scaffold structure.
 exec
-/usr/local/bin/bash -lc "sed -n '1,400p' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/SKILL.md; sed -n '1,400p' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/tauri/tauri-react-vite/SKILL.md" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "sed -n '1,400p' ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/SKILL.md; sed -n '1,400p' ~/Projects/prometheus/prometheus-skill-pack/skills/tauri/tauri-react-vite/SKILL.md" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 ---
 license: MIT
@@ -1602,7 +1602,7 @@ export default defineConfig({
 codex
 The umbrella PEM skill routes this task to its setup and local-first sub-skills. I’m following that routing now because C-011 specifically requires schema registration, transport registration, Electric tenancy, and PGlite persistence.
 exec
-/usr/local/bin/bash -lc "sed -n '1,420p' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/SKILL.md; sed -n '1,520p' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/skills/entity-realtime-local-first/SKILL.md; sed -n '320,760p' scripts/scaffold-tauri.sh; rg -n 'shared DDL|CREATE TABLE|registerEntityFromSql|startLocalFirstGraph|Quarry|Electric' assets scripts references openspec .kbd-orchestrator --glob '"'!docs/*.html'"'" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "sed -n '1,420p' ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-setup/SKILL.md; sed -n '1,520p' ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/prometheus-entity-skills/entity-graph-realtime/skills/entity-realtime-local-first/SKILL.md; sed -n '320,760p' scripts/scaffold-tauri.sh; rg -n 'shared DDL|CREATE TABLE|registerEntityFromSql|startLocalFirstGraph|Quarry|Electric' assets scripts references openspec .kbd-orchestrator --glob '"'!docs/*.html'"'" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 ---
 name: entity-graph-setup
@@ -2248,86 +2248,86 @@ openspec/changes/2026-07-15-c002-wasm32-spike/spike-artifacts/gen_ui_wasm/spike_
 references/tauri/testing.md:16:  and HTTP (Supabase/Electric on web). Stub `invoke` / use **MSW** for those; everything above
 
 exec
-/usr/local/bin/bash -lc "rg -n 'registerEntityFromSql|registerEntityTransport|startLocalFirstGraph|createPGlitePersistenceAdapter|createTenantScopedElectricAdapter' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages --glob '*.{ts,tsx}' | head -160; rg -n 'CREATE TABLE IF NOT EXISTS (projects|notes)|CREATE TABLE (projects|notes)|shared DDL|entity' scripts/scaffold-rust-core.sh | head -100; find .. -maxdepth 3 -type d -iname '*flint*' -o -iname '*gen-ui-react*'; git log --oneline -8 -- scripts/scaffold-tauri.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "rg -n 'registerEntityFromSql|registerEntityTransport|startLocalFirstGraph|createPGlitePersistenceAdapter|createTenantScopedElectricAdapter' ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages --glob '*.{ts,tsx}' | head -160; rg -n 'CREATE TABLE IF NOT EXISTS (projects|notes)|CREATE TABLE (projects|notes)|shared DDL|entity' scripts/scaffold-rust-core.sh | head -100; find .. -maxdepth 3 -type d -iname '*flint*' -o -iname '*gen-ui-react*'; git log --oneline -8 -- scripts/scaffold-tauri.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.test.ts:4:  registerEntityFromSql,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.test.ts:94:describe("registerEntityFromSql", () => {
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.test.ts:96:    const config = registerEntityFromSql({
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.test.ts:120:    const config = registerEntityFromSql({
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-alpine/src/types.ts:79: * provided by the transport registered via `registerEntityTransport` at boot.
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-alpine/src/plugin.ts:76: * import { registerEntityTransport, makeRestTransport } from "@prometheus-ags/entity-graph-core";
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-alpine/src/plugin.ts:79: * registerEntityTransport("Invoice", makeRestTransport({ supabase, table: "invoice" }));
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/local-first-runtime.ts:194:export function startLocalFirstGraph(opts: StartLocalFirstGraphOptions): LocalFirstGraphRuntime {
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:19:  registerEntityTransport,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:61:  startLocalFirstGraph, hydrateGraphFromStorage, persistGraphToStorage, replayActionWithRetry, useGraphSyncStatus,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:139:export { createTenantScopedElectricAdapter, buildTenantWhere } from "./adapters/electricsql-tenant";
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:141:export { createPGlitePersistenceAdapter } from "./adapters/pglite-persistence";
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:157:export { registerEntityFromSql, parseCreateTable, sqlTypeToJsonSchema } from "./schema-from-sql";
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.ts:221:export function registerEntityFromSql(
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-solid/src/create-entity.test.ts:69:  registerEntityTransport,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks.ts:105: * Register a transport: `registerEntityTransport("Foo", makeRestTransport({ supabase, table: "foo" }))`
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks.ts:116:      `Register a transport at boot: registerEntityTransport("${String(opts.type)}", makeRestTransport(...))\n` +
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/tauri-sql-persistence.ts:9: *   - This pairs with `createPGlitePersistenceAdapter` (browser/wasm) so the
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/tauri-sql-persistence.ts:49: * import { startLocalFirstGraph, createTauriSqlPersistenceAdapter } from "@prometheus-ags/prometheus-entity-management";
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/tauri-sql-persistence.ts:53: * const runtime = startLocalFirstGraph({ storage, key: "app:graph" });
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:7:  registerEntityTransport,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:112:  startLocalFirstGraph,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:312:  createTenantScopedElectricAdapter,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:323:  createPGlitePersistenceAdapter,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:341:  registerEntityFromSql,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/schema-local-first.test.ts:15:  startLocalFirstGraph,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/schema-local-first.test.ts:93:    const runtime = startLocalFirstGraph({
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:4:  createTenantScopedElectricAdapter,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:58:describe("createTenantScopedElectricAdapter", () => {
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:61:      createTenantScopedElectricAdapter({
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:78:      createTenantScopedElectricAdapter({
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:102:    createTenantScopedElectricAdapter({
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/view/use-entity-view.ts:76: * Register a transport: `registerEntityTransport("Foo", makeRestTransport({ supabase, table: "foo" }))`
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/view/use-entity-view.ts:86:      `Register a transport at boot: registerEntityTransport("${String(opts.type)}", makeRestTransport(...))\n` +
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.ts:157:export function createTenantScopedElectricAdapter(
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:53: * import { startLocalFirstGraph, createPGlitePersistenceAdapter } from "@prometheus-ags/prometheus-entity-management";
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:56: * const storage = await createPGlitePersistenceAdapter(pglite);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:57: * const runtime = startLocalFirstGraph({ storage, key: "hotseaters:graph" });
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:60:export async function createPGlitePersistenceAdapter(
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:68:    throw new Error(`createPGlitePersistenceAdapter: invalid tableName "${tableName}"`);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/index.ts:12:  registerEntityTransport,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:18:import { registerEntityTransport, __resetEntityTransports } from "@prometheus-ags/entity-graph-core";
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:126:    registerEntityTransport("Foo", transport);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:150:    registerEntityTransport("Foo", transport);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:172:    registerEntityTransport("Foo", transport);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:190:    registerEntityTransport("Foo", transport);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:220:    registerEntityTransport("Foo", transport);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:241:    registerEntityTransport("Foo", transport);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:261:    registerEntityTransport("Foo", first);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:262:    registerEntityTransport("Foo", second);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:2:import { createPGlitePersistenceAdapter, type PGlitePersistenceClient } from "./pglite-persistence";
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:27:describe("createPGlitePersistenceAdapter", () => {
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:30:    await createPGlitePersistenceAdapter(client);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:37:    await createPGlitePersistenceAdapter(client, { tableName: "my_snapshots" });
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:44:      createPGlitePersistenceAdapter(client, { tableName: "evil; DROP TABLE x" }),
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:50:    const adapter = await createPGlitePersistenceAdapter(client);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:57:    const adapter = await createPGlitePersistenceAdapter(client);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:64:    const adapter = await createPGlitePersistenceAdapter(client);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:74:    const adapter = await createPGlitePersistenceAdapter(client);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.ts:32:export function registerEntityTransport<T extends object>(
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.ts:55:      `Call registerEntityTransport("${type}", ...) at app boot.`,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:13:import { registerEntityTransport, __resetEntityTransports } from "@prometheus-ags/entity-graph-core";
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:104:    registerEntityTransport<FooRow>("Bar", {
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:125:    registerEntityTransport<FooRow>("Bar", {
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:141:    registerEntityTransport<FooRow>("Bar", {
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:157:    registerEntityTransport<FooRow>("Bar", {
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:221:    registerEntityTransport<FooRow>("Bar", {
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:3:  registerEntityTransport,
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:25:    registerEntityTransport("Client", t);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:32:    registerEntityTransport("Foo", t1);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:33:    registerEntityTransport("Foo", t2);
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:44:    registerEntityTransport("A", makeNoopTransport());
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:45:    registerEntityTransport("B", makeNoopTransport());
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:50:    registerEntityTransport("A", makeNoopTransport());
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.ts:8: *      `registerEntityTransport("Invoice", makeRestTransport({ supabase, table: "invoice" }))`
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/rest.ts:7: *   registerEntityTransport("Client",
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/types.ts:11: * via `registerEntityTransport(type, transport)`. Hooks
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.ts:9: *   registerEntityTransport("Client", makeRestTransport({ supabase, table: "client" }));
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.test.ts:4:  registerEntityFromSql,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.test.ts:94:describe("registerEntityFromSql", () => {
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.test.ts:96:    const config = registerEntityFromSql({
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.test.ts:120:    const config = registerEntityFromSql({
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-alpine/src/types.ts:79: * provided by the transport registered via `registerEntityTransport` at boot.
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-alpine/src/plugin.ts:76: * import { registerEntityTransport, makeRestTransport } from "@prometheus-ags/entity-graph-core";
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-alpine/src/plugin.ts:79: * registerEntityTransport("Invoice", makeRestTransport({ supabase, table: "invoice" }));
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/local-first-runtime.ts:194:export function startLocalFirstGraph(opts: StartLocalFirstGraphOptions): LocalFirstGraphRuntime {
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:19:  registerEntityTransport,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:61:  startLocalFirstGraph, hydrateGraphFromStorage, persistGraphToStorage, replayActionWithRetry, useGraphSyncStatus,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:139:export { createTenantScopedElectricAdapter, buildTenantWhere } from "./adapters/electricsql-tenant";
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:141:export { createPGlitePersistenceAdapter } from "./adapters/pglite-persistence";
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/index.ts:157:export { registerEntityFromSql, parseCreateTable, sqlTypeToJsonSchema } from "./schema-from-sql";
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.ts:221:export function registerEntityFromSql(
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-solid/src/create-entity.test.ts:69:  registerEntityTransport,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks.ts:105: * Register a transport: `registerEntityTransport("Foo", makeRestTransport({ supabase, table: "foo" }))`
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks.ts:116:      `Register a transport at boot: registerEntityTransport("${String(opts.type)}", makeRestTransport(...))\n` +
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/tauri-sql-persistence.ts:9: *   - This pairs with `createPGlitePersistenceAdapter` (browser/wasm) so the
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/tauri-sql-persistence.ts:49: * import { startLocalFirstGraph, createTauriSqlPersistenceAdapter } from "@prometheus-ags/prometheus-entity-management";
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/tauri-sql-persistence.ts:53: * const runtime = startLocalFirstGraph({ storage, key: "app:graph" });
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:7:  registerEntityTransport,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:112:  startLocalFirstGraph,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:312:  createTenantScopedElectricAdapter,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:323:  createPGlitePersistenceAdapter,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/index.ts:341:  registerEntityFromSql,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/schema-local-first.test.ts:15:  startLocalFirstGraph,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/schema-local-first.test.ts:93:    const runtime = startLocalFirstGraph({
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:4:  createTenantScopedElectricAdapter,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:58:describe("createTenantScopedElectricAdapter", () => {
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:61:      createTenantScopedElectricAdapter({
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:78:      createTenantScopedElectricAdapter({
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.test.ts:102:    createTenantScopedElectricAdapter({
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/view/use-entity-view.ts:76: * Register a transport: `registerEntityTransport("Foo", makeRestTransport({ supabase, table: "foo" }))`
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/view/use-entity-view.ts:86:      `Register a transport at boot: registerEntityTransport("${String(opts.type)}", makeRestTransport(...))\n` +
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.ts:157:export function createTenantScopedElectricAdapter(
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:53: * import { startLocalFirstGraph, createPGlitePersistenceAdapter } from "@prometheus-ags/prometheus-entity-management";
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:56: * const storage = await createPGlitePersistenceAdapter(pglite);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:57: * const runtime = startLocalFirstGraph({ storage, key: "hotseaters:graph" });
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:60:export async function createPGlitePersistenceAdapter(
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.ts:68:    throw new Error(`createPGlitePersistenceAdapter: invalid tableName "${tableName}"`);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/index.ts:12:  registerEntityTransport,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:18:import { registerEntityTransport, __resetEntityTransports } from "@prometheus-ags/entity-graph-core";
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:126:    registerEntityTransport("Foo", transport);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:150:    registerEntityTransport("Foo", transport);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:172:    registerEntityTransport("Foo", transport);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:190:    registerEntityTransport("Foo", transport);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:220:    registerEntityTransport("Foo", transport);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:241:    registerEntityTransport("Foo", transport);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:261:    registerEntityTransport("Foo", first);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.test.ts:262:    registerEntityTransport("Foo", second);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:2:import { createPGlitePersistenceAdapter, type PGlitePersistenceClient } from "./pglite-persistence";
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:27:describe("createPGlitePersistenceAdapter", () => {
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:30:    await createPGlitePersistenceAdapter(client);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:37:    await createPGlitePersistenceAdapter(client, { tableName: "my_snapshots" });
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:44:      createPGlitePersistenceAdapter(client, { tableName: "evil; DROP TABLE x" }),
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:50:    const adapter = await createPGlitePersistenceAdapter(client);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:57:    const adapter = await createPGlitePersistenceAdapter(client);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:64:    const adapter = await createPGlitePersistenceAdapter(client);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/pglite-persistence.test.ts:74:    const adapter = await createPGlitePersistenceAdapter(client);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.ts:32:export function registerEntityTransport<T extends object>(
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.ts:55:      `Call registerEntityTransport("${type}", ...) at app boot.`,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:13:import { registerEntityTransport, __resetEntityTransports } from "@prometheus-ags/entity-graph-core";
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:104:    registerEntityTransport<FooRow>("Bar", {
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:125:    registerEntityTransport<FooRow>("Bar", {
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:141:    registerEntityTransport<FooRow>("Bar", {
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:157:    registerEntityTransport<FooRow>("Bar", {
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.test.ts:221:    registerEntityTransport<FooRow>("Bar", {
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:3:  registerEntityTransport,
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:25:    registerEntityTransport("Client", t);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:32:    registerEntityTransport("Foo", t1);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:33:    registerEntityTransport("Foo", t2);
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:44:    registerEntityTransport("A", makeNoopTransport());
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:45:    registerEntityTransport("B", makeNoopTransport());
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/registry.test.ts:50:    registerEntityTransport("A", makeNoopTransport());
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entities.ts:8: *      `registerEntityTransport("Invoice", makeRestTransport({ supabase, table: "invoice" }))`
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/rest.ts:7: *   registerEntityTransport("Client",
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/types.ts:11: * via `registerEntityTransport(type, transport)`. Hooks
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/src/hooks/use-entity-query.ts:9: *   registerEntityTransport("Client", makeRestTransport({ supabase, table: "client" }));
 387:    pub entity_type: String,
 409:# Transport trait — the entity data-access seam (impl'd by gen_ui_db, gen_ui_client).
 412://! EntityTransport — the entity data-access seam. Implemented per entity type in
@@ -2432,7 +2432,7 @@ exec
 cd54877 initial
 
 exec
-/usr/local/bin/bash -lc "sed -n '1,140p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/library-candidates.json; sed -n '200,280p' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.ts; sed -n '1,150p' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/types.ts; sed -n '1,220p' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.ts; rg -n '\"name\"|version' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/package.json /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/package.json | head -30" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "sed -n '1,140p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/library-candidates.json; sed -n '200,280p' ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/schema-from-sql.ts; sed -n '1,150p' ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/transport/types.ts; sed -n '1,220p' ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/adapters/electricsql-tenant.ts; rg -n '\"name\"|version' ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/package.json ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/package.json | head -30" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 {
   "phase": "scaffold-full-hybrid-project",
@@ -2924,25 +2924,25 @@ export function createTenantScopedElectricAdapter(
 
   return createElectricAdapter({ pglite, tables: wired, onSynced });
 }
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/package.json:2:  "name": "@prometheus-ags/prometheus-entity-management",
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/package.json:3:  "version": "3.0.0-alpha.0",
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/package.json:2:  "name": "@prometheus-ags/entity-graph-workspace",
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/package.json:3:  "version": "0.0.0",
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/package.json:16:    "version-packages": "changeset version",
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/package.json:2:  "name": "@prometheus-ags/prometheus-entity-management",
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-react/package.json:3:  "version": "3.0.0-alpha.0",
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/package.json:2:  "name": "@prometheus-ags/entity-graph-workspace",
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/package.json:3:  "version": "0.0.0",
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/package.json:16:    "version-packages": "changeset version",
 
 exec
-/usr/local/bin/bash -lc "git -C /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management remote -v; rg -n '\"@flint/react\"|name.*flint/react|@prometheus-ags/gen-ui-react' /Users/gqadonis/Projects/prometheus -g package.json -g '*.md' 2>/dev/null | head -60" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "git -C ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management remote -v; rg -n '\"@flint/react\"|name.*flint/react|@prometheus-ags/gen-ui-react' ~/Projects/prometheus -g package.json -g '*.md' 2>/dev/null | head -60" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 545ms:
-/Users/gqadonis/Projects/prometheus/flint-forge/openspec/changes/p5-c010-react-sdk/proposal.md:64:├── package.json                         # name: "@flint/react", peerDeps: react@^19, react-dom@^19
-/Users/gqadonis/Projects/prometheus/flint-forge/openspec/changes/p8-c001-react-sdk-completeness/proposal.md:10:- All 55 A2UI catalog slugs available as named exports from `@flint/react`
-/Users/gqadonis/Projects/prometheus/flint-forge/openspec/changes/p5-c014-sdk-schema-extensions/proposal.md:27:  ADD COLUMN react_pkg  text,          -- npm package name if custom (default: @flint/react)
-/Users/gqadonis/Projects/prometheus/flint-forge/skills/flint-ui/SKILL.md:146:- **Never** import from `@flint/react/dist/...` — always use named exports from `@flint/react`
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/package.json:2:  "name": "@flint/react",
-/Users/gqadonis/Projects/prometheus/flint-forge/.kbd-orchestrator/phases/p8-sdk-completeness/assessment.md:33:- Catalog slugs (`container`, `row`, `column`, `grid`, `stack`, `divider`, `spacer`, `scroll-area`, …) are not directly exported as named exports — agents calling `import { DataGrid } from '@flint/react'` work, but `import { container } from '@flint/react'` does not
-/Users/gqadonis/Projects/prometheus/flint-forge/MIGRATION.md:100:    "@flint/react": "^1.0.0"
+~/Projects/prometheus/flint-forge/openspec/changes/p5-c010-react-sdk/proposal.md:64:├── package.json                         # name: "@flint/react", peerDeps: react@^19, react-dom@^19
+~/Projects/prometheus/flint-forge/openspec/changes/p8-c001-react-sdk-completeness/proposal.md:10:- All 55 A2UI catalog slugs available as named exports from `@flint/react`
+~/Projects/prometheus/flint-forge/openspec/changes/p5-c014-sdk-schema-extensions/proposal.md:27:  ADD COLUMN react_pkg  text,          -- npm package name if custom (default: @flint/react)
+~/Projects/prometheus/flint-forge/skills/flint-ui/SKILL.md:146:- **Never** import from `@flint/react/dist/...` — always use named exports from `@flint/react`
+~/Projects/prometheus/flint-forge/packages/flint-react/package.json:2:  "name": "@flint/react",
+~/Projects/prometheus/flint-forge/.kbd-orchestrator/phases/p8-sdk-completeness/assessment.md:33:- Catalog slugs (`container`, `row`, `column`, `grid`, `stack`, `divider`, `spacer`, `scroll-area`, …) are not directly exported as named exports — agents calling `import { DataGrid } from '@flint/react'` work, but `import { container } from '@flint/react'` does not
+~/Projects/prometheus/flint-forge/MIGRATION.md:100:    "@flint/react": "^1.0.0"
 
 exec
-/usr/local/bin/bash -lc "cat /Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/package.json; sed -n '1,220p' /Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts; rg -n 'A2UI|Surface|Renderer|render' /Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts /Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src -g '*.tsx' | head -100; rg -n 'gen-ui-react' scripts/scaffold-packages.sh; sed -n '1,260p' scripts/scaffold-packages.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "cat ~/Projects/prometheus/flint-forge/packages/flint-react/package.json; sed -n '1,220p' ~/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts; rg -n 'A2UI|Surface|Renderer|render' ~/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts ~/Projects/prometheus/flint-forge/packages/flint-react/src -g '*.tsx' | head -100; rg -n 'gen-ui-react' scripts/scaffold-packages.sh; sed -n '1,260p' scripts/scaffold-packages.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 {
   "name": "@flint/react",
@@ -3055,60 +3055,60 @@ export { NavMenu, CommandPalette, FilterBar, Breadcrumb } from './components/nav
 
 // Base component registration (call once at app init)
 export { registerBaseComponents } from './registry/baseComponents';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:8:// Surface
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:9:export { FlintSurface } from './surface/FlintSurface';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:10:export { SurfaceContext, useSurfaceContext } from './surface/SurfaceContext';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:11:export { useSurface } from './surface/useSurface';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:28:export type { AgUiEvent, A2uiSurfaceEvent, A2uiComponentSpec } from './ag-ui/AgUiEventHandlers';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:29:export { isA2uiSurfaceEvent } from './ag-ui/AgUiEventHandlers';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:3:import { render, screen } from '@testing-library/react';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:10:  it('renders children without error given valid endpoint + applicationId', () => {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:11:    render(
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:20:    const { container } = render(
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:29:    const { container } = render(
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:3:import { render, screen } from '@testing-library/react';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:13:  it('renders with primary variant by default', () => {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:14:    render(<Button>Submit</Button>);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:19:    render(<Button loading>Submit</Button>);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:24:    const btn = render(<Button disabled>Click</Button>).container.querySelector('button');
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:36:  it('renders column headers', () => {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:37:    render(<DataGrid columns={cols} data={data} />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:42:  it('renders all rows', () => {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:43:    render(<DataGrid columns={cols} data={data} />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:49:    render(<DataGrid columns={cols} data={[]} loading />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:55:  it('renders label and input', () => {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:56:    render(<TextField label="Email" name="email" />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:61:    render(<TextField label="Email" name="email" error="Required" />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:69:  it('renders text content', () => {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:70:    render(<StreamingText text="Hello world" />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:75:    const { container } = render(<StreamingText text="Hello" streaming />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:81:  it('renders all items with separators', () => {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:82:    render(<Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Products', href: '/products' }, { label: 'Widget' }]} />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:89:    render(<Breadcrumb items={[{ label: 'Home' }, { label: 'Current' }]} />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:97:  it('renders children in a flex container', () => {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:98:    const { container } = render(<Stack><span>A</span><span>B</span></Stack>);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:105:  it('renders messages', () => {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:107:    render(<AgentChat messages={msgs} />);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:3:interface Column<T> { field: keyof T; header: string; sortable?: boolean; render?: (val: T[keyof T], row: T) => React.ReactNode }
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:36:                  {col.render ? col.render(row[col.field], row) : String(row[col.field] ?? '')}
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:118:interface KanbanProps<T extends { id: string; title: string }> { columns: KanbanColumn<T>[]; renderCard?: (card: T) => React.ReactNode }
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:119:export function Kanban<T extends { id: string; title: string }>({ columns, renderCard }: KanbanProps<T>): React.ReactElement {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:128:                {renderCard ? renderCard(card) : <div style={{ padding: 'var(--flint-space-2)', background: 'white', borderRadius: 'var(--flint-radius-sm)', boxShadow: '0 1px 4px color-mix(in oklch, black 8%, transparent)' }}>{card.title}</div>}
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:2:import { SurfaceContext } from './SurfaceContext';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:3:import { useSurface } from './useSurface';
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:8:interface FlintSurfaceProps {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:35:export function FlintSurface({ surfaceId, className }: FlintSurfaceProps): React.ReactElement {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:37:  const state = useSurface(surfaceId, adapter);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:40:    <SurfaceContext.Provider value={{ surfaceId, ...state }}>
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:56:    </SurfaceContext.Provider>
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/components/navigation/index.tsx:6:  const renderItem = (item: NavItem, depth = 0): React.ReactElement => (
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/components/navigation/index.tsx:18:        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>{item.children.map((child) => renderItem(child, depth + 1))}</ul>
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/components/navigation/index.tsx:25:        {items.map((item) => renderItem(item))}
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:4:export interface SurfaceState {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:11:export const SurfaceContext = createContext<SurfaceState | null>(null);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:13:export function useSurfaceContext(): SurfaceState {
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:14:  const ctx = useContext(SurfaceContext);
-/Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:16:    throw new Error('useSurfaceContext must be called inside <FlintSurface>');
+~/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:8:// Surface
+~/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:9:export { FlintSurface } from './surface/FlintSurface';
+~/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:10:export { SurfaceContext, useSurfaceContext } from './surface/SurfaceContext';
+~/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:11:export { useSurface } from './surface/useSurface';
+~/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:28:export type { AgUiEvent, A2uiSurfaceEvent, A2uiComponentSpec } from './ag-ui/AgUiEventHandlers';
+~/Projects/prometheus/flint-forge/packages/flint-react/src/index.ts:29:export { isA2uiSurfaceEvent } from './ag-ui/AgUiEventHandlers';
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:3:import { render, screen } from '@testing-library/react';
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:10:  it('renders children without error given valid endpoint + applicationId', () => {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:11:    render(
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:20:    const { container } = render(
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/FlintProvider.test.tsx:29:    const { container } = render(
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:3:import { render, screen } from '@testing-library/react';
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:13:  it('renders with primary variant by default', () => {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:14:    render(<Button>Submit</Button>);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:19:    render(<Button loading>Submit</Button>);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:24:    const btn = render(<Button disabled>Click</Button>).container.querySelector('button');
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:36:  it('renders column headers', () => {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:37:    render(<DataGrid columns={cols} data={data} />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:42:  it('renders all rows', () => {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:43:    render(<DataGrid columns={cols} data={data} />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:49:    render(<DataGrid columns={cols} data={[]} loading />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:55:  it('renders label and input', () => {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:56:    render(<TextField label="Email" name="email" />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:61:    render(<TextField label="Email" name="email" error="Required" />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:69:  it('renders text content', () => {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:70:    render(<StreamingText text="Hello world" />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:75:    const { container } = render(<StreamingText text="Hello" streaming />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:81:  it('renders all items with separators', () => {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:82:    render(<Breadcrumb items={[{ label: 'Home', href: '/' }, { label: 'Products', href: '/products' }, { label: 'Widget' }]} />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:89:    render(<Breadcrumb items={[{ label: 'Home' }, { label: 'Current' }]} />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:97:  it('renders children in a flex container', () => {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:98:    const { container } = render(<Stack><span>A</span><span>B</span></Stack>);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:105:  it('renders messages', () => {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/__tests__/components.test.tsx:107:    render(<AgentChat messages={msgs} />);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:3:interface Column<T> { field: keyof T; header: string; sortable?: boolean; render?: (val: T[keyof T], row: T) => React.ReactNode }
+~/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:36:                  {col.render ? col.render(row[col.field], row) : String(row[col.field] ?? '')}
+~/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:118:interface KanbanProps<T extends { id: string; title: string }> { columns: KanbanColumn<T>[]; renderCard?: (card: T) => React.ReactNode }
+~/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:119:export function Kanban<T extends { id: string; title: string }>({ columns, renderCard }: KanbanProps<T>): React.ReactElement {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/components/data-display/index.tsx:128:                {renderCard ? renderCard(card) : <div style={{ padding: 'var(--flint-space-2)', background: 'white', borderRadius: 'var(--flint-radius-sm)', boxShadow: '0 1px 4px color-mix(in oklch, black 8%, transparent)' }}>{card.title}</div>}
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:2:import { SurfaceContext } from './SurfaceContext';
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:3:import { useSurface } from './useSurface';
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:8:interface FlintSurfaceProps {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:35:export function FlintSurface({ surfaceId, className }: FlintSurfaceProps): React.ReactElement {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:37:  const state = useSurface(surfaceId, adapter);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:40:    <SurfaceContext.Provider value={{ surfaceId, ...state }}>
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx:56:    </SurfaceContext.Provider>
+~/Projects/prometheus/flint-forge/packages/flint-react/src/components/navigation/index.tsx:6:  const renderItem = (item: NavItem, depth = 0): React.ReactElement => (
+~/Projects/prometheus/flint-forge/packages/flint-react/src/components/navigation/index.tsx:18:        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>{item.children.map((child) => renderItem(child, depth + 1))}</ul>
+~/Projects/prometheus/flint-forge/packages/flint-react/src/components/navigation/index.tsx:25:        {items.map((item) => renderItem(item))}
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:4:export interface SurfaceState {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:11:export const SurfaceContext = createContext<SurfaceState | null>(null);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:13:export function useSurfaceContext(): SurfaceState {
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:14:  const ctx = useContext(SurfaceContext);
+~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/SurfaceContext.tsx:16:    throw new Error('useSurfaceContext must be called inside <FlintSurface>');
 10:#   packages/gen-ui-react/                  @prometheus-ags/gen-ui-react (npm)
 33:# @prometheus-ags/gen-ui-react — ContentBlock React 19 components (npm)
 35:REACT_DIR="$ROOT/packages/gen-ui-react"
@@ -3380,7 +3380,7 @@ cat > "$WASM_PKG_DIR/package.json" << 'EOF'
     "access": "public"
 
 exec
-/usr/local/bin/bash -lc "rg -n 'scaffold-tauri|scaffold-packages' scripts/scaffold-hybrid.sh; git status --short; sed -n '1,100p' scripts/scaffold-hybrid.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "rg -n 'scaffold-tauri|scaffold-packages' scripts/scaffold-hybrid.sh; git status --short; sed -n '1,100p' scripts/scaffold-hybrid.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 40:bash "$(dirname "$0")/scaffold-tauri.sh" "desktop" "$PROJECT"
 47:bash "$(dirname "$0")/scaffold-packages.sh" "."
@@ -3487,7 +3487,7 @@ flutter_rust_bridge_codegen generate \\
 
 codex
 The current hybrid order scaffolds the desktop before its local npm libraries exist, and the existing React output has two compile blockers (`uuid` undeclared and CommonJS `require` in strict ESM). I’m correcting those within C-011, then adding the PEM/web-vs-desktop bootstrap and core-fed A2UI surface. The browser remains the only JS-owned PGlite/Electric path; desktop delegates persistence and streams to the Rust Tauri plugin.
-2026-07-15T20:24:46.803660Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-hybrid.sh:
+2026-07-15T20:24:46.803660Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-hybrid.sh:
 # ── Scaffold Tauri app ───────────────────────────────────────────────
 step "Scaffolding Tauri desktop app"
 bash "$(dirname "$0")/scaffold-tauri.sh" "desktop" "$PROJECT"
@@ -3495,7 +3495,7 @@ ok "Tauri app scaffolded in desktop/"
 
 # ── Scaffold publishable packages (C-007) ──────────────────────────────────────────
 exec
-/usr/local/bin/bash -lc "sed -n '30,58p' scripts/scaffold-hybrid.sh; sed -n '20,90p' scripts/scaffold-tauri.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "sed -n '30,58p' scripts/scaffold-hybrid.sh; sed -n '20,90p' scripts/scaffold-tauri.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 bash "$(dirname "$0")/scaffold-rust-core.sh" "rust" "$UAR_MODE"
 ok "gen_ui workspace scaffolded (12 crates, layered)"
@@ -3598,14 +3598,14 @@ cat > tsconfig.json << EOF
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
 
-2026-07-15T20:25:16.638417Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-hybrid.sh:
+2026-07-15T20:25:16.638417Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-hybrid.sh:
 # ── Scaffold Tauri app ─────────────────────────────────────────────────────────────────────────
 step "Scaffolding Tauri desktop app"
 bash "$(dirname "$0")/scaffold-tauri.sh" "desktop" "$PROJECT"
 ok "Tauri app scaffolded in desktop/"
 
 # ── Scaffold publishable packages (C-007) ─────────────────────────────────────────────────────────────────────────
-2026-07-15T20:25:35.762842Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-hybrid.sh:
+2026-07-15T20:25:35.762842Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-hybrid.sh:
 step "Scaffolding Tauri desktop app"
 bash "$(dirname "$0")/scaffold-tauri.sh" "desktop" "$PROJECT"
 ok "Tauri app scaffolded in desktop/"
@@ -3613,7 +3613,7 @@ ok "Tauri app scaffolded in desktop/"
 # ── Scaffold publishable packages (C-007) ───────────────────────────────────
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-tauri.sh b/scripts/scaffold-tauri.sh
 index ba7cf421982ccb44ebf648ecc358b954b565a9f5..7a1934015f90d7f2c4f25f59e5cebd5947a3c463
 --- a/scripts/scaffold-tauri.sh
@@ -3722,7 +3722,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..7a1934015f90d7f2c4f25f59e5cebd59
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-hybrid.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-hybrid.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -3882,7 +3882,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..7a1934015f90d7f2c4f25f59e5cebd59
  # ── App providers ──────────────────────────────────────────────────────────
 
 exec
-/usr/local/bin/bash -lc "sed -n '1,100p' /Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx; sed -n '1,100p' /Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/provider/FlintProvider.tsx; sed -n '1,90p' /Users/gqadonis/Projects/prometheus/flint-forge/packages/flint-react/src/surface/useSurface.ts" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "sed -n '1,100p' ~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/FlintSurface.tsx; sed -n '1,100p' ~/Projects/prometheus/flint-forge/packages/flint-react/src/provider/FlintProvider.tsx; sed -n '1,90p' ~/Projects/prometheus/flint-forge/packages/flint-react/src/surface/useSurface.ts" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 import React, { useMemo } from 'react';
 import { SurfaceContext } from './SurfaceContext';
@@ -4145,7 +4145,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..7a1934015f90d7f2c4f25f59e5cebd59
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -4361,7 +4361,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..cf8fc8f82a42b40e0981819f5040f8dc
          })
 
 exec
-/usr/local/bin/bash -lc 'rg -n "driver|applyA2ui" scripts/scaffold-tauri.sh' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc 'rg -n "driver|applyA2ui" scripts/scaffold-tauri.sh' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 249:import { applyA2uiEvent } from '@/bridge/a2ui/driver'
 305:          applyA2uiEvent(event.payload as never, store.streamBlock, store.finalizeMessage)
@@ -4475,7 +4475,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..cf8fc8f82a42b40e0981819f5040f8dc
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -4958,7 +4958,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..69ad411b3a581bef27be129ff5ece439
  cat > src/main.tsx << 'EOF'
  import { StrictMode } from 'react'
 
-2026-07-15T20:27:04.589495Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh:
+2026-07-15T20:27:04.589495Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh:
 cat > src/main.tsx << 'EOF'
 import { StrictMode } from 'react'
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
@@ -5203,7 +5203,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..69ad411b3a581bef27be129ff5ece439
  import { StrictMode } from 'react'
 
 exec
-/usr/local/bin/bash -lc "rg -n 'main.tsx|Installing dependencies' scripts/scaffold-tauri.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "rg -n 'main.tsx|Installing dependencies' scripts/scaffold-tauri.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 469:# ── main.tsx ───────────────────────────────────────────────────────────────
 470:cat > src/main.tsx << 'EOF'
@@ -5453,7 +5453,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..69ad411b3a581bef27be129ff5ece439
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -5967,7 +5967,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..b53347051f56a2d7514d333aaad44a7f
 codex
 The feature scaffold is now in place. I’m exercising the generated boundary (the scaffolding command itself) with dependency installation disabled, then inspecting the emitted manifest/layering and running shell syntax checks.
 exec
-/usr/local/bin/bash -lc 'bash -n scripts/scaffold-tauri.sh scripts/scaffold-hybrid.sh && tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo-react >/tmp/c011-scaffold.log && test -f "$tmp/desktop/src/features/entities/stores/entityRuntime.ts" && test -f "$tmp/desktop/src/features/entities/schema.sql" && test -f "$tmp/desktop/src/bridge/a2ui/driver.ts" && rg -n '"'vite.*8\\.0\\.0|prometheus-entity-management|@flint/react|gen-ui-react' \""'$tmp/desktop/package.json" && rg -n '"'registerEntityFromSql|registerEntityTransport|startLocalFirstGraph|PGlite|entity_runtime_start' \""'$tmp/desktop/src/features/entities/stores/entityRuntime.ts" && rg -n '"'invoke\\(' \""'$tmp/desktop/src/features/entities/hooks" "$tmp/desktop/src/features/entities/components" || true && tail -20 /tmp/c011-scaffold.log' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc 'bash -n scripts/scaffold-tauri.sh scripts/scaffold-hybrid.sh && tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo-react >/tmp/c011-scaffold.log && test -f "$tmp/desktop/src/features/entities/stores/entityRuntime.ts" && test -f "$tmp/desktop/src/features/entities/schema.sql" && test -f "$tmp/desktop/src/bridge/a2ui/driver.ts" && rg -n '"'vite.*8\\.0\\.0|prometheus-entity-management|@flint/react|gen-ui-react' \""'$tmp/desktop/package.json" && rg -n '"'registerEntityFromSql|registerEntityTransport|startLocalFirstGraph|PGlite|entity_runtime_start' \""'$tmp/desktop/src/features/entities/stores/entityRuntime.ts" && rg -n '"'invoke\\(' \""'$tmp/desktop/src/features/entities/hooks" "$tmp/desktop/src/features/entities/components" || true && tail -20 /tmp/c011-scaffold.log' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -6265,7 +6265,7 @@ codex
 The boundary check passes, but I’m tightening “working scaffold” beyond file presence: the old script omitted Vite’s `index.html` and `tsconfig.node.json`, and its package resolution needs a real install/typecheck proof. I’m adding those missing build inputs before the final verification.
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -6848,7 +6848,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..3f3dee4fc99d2a9bf7518ec23c39840e
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -7540,7 +7540,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..90b4ba7bad08f704be5039a14e215f39
  else
 
 exec
-/usr/local/bin/bash -lc "sed -n '325,390p' scripts/scaffold-tauri.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc "sed -n '325,390p' scripts/scaffold-tauri.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
           const store = useChatStore.getState()
           applyA2uiEvent(event.payload as never, store.streamBlock, store.finalizeMessage)
@@ -7954,7 +7954,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..90b4ba7bad08f704be5039a14e215f39
    ok "pnpm install"
  else
 
-2026-07-15T20:28:02.098438Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh:
+2026-07-15T20:28:02.098438Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh:
         const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: [{ type: 'text', text, isStreaming: false }], timestamp: new Date().toISOString() }
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
@@ -8303,7 +8303,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..90b4ba7bad08f704be5039a14e215f39
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -9048,7 +9048,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..380ed9ea297033e9c8b3ca93a6b7cb73
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -9793,7 +9793,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..499500e8022341b6ca4e3553d12a1ec4
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -10585,7 +10585,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..d883975f4009fd57184b1c3ba0a1c2a2
  else
 
 exec
-/usr/local/bin/bash -lc 'tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && cd "$tmp/desktop" && pnpm install --ignore-scripts && pnpm exec tsc --noEmit' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc 'tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && cd "$tmp/desktop" && pnpm install --ignore-scripts && pnpm exec tsc --noEmit' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -10991,7 +10991,7 @@ codex
 The first install attempt exposed an expected standalone-vs-hybrid edge: the React app’s local `gen-ui-react` package exists in a full hybrid scaffold but not when `scaffold-tauri.sh` is called alone. I’m making the standalone command self-sufficient without changing the hybrid layout, then rerunning install/typecheck.
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -11809,7 +11809,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..801b9e18da8217d751a63ace761b7bc7
  else
 
 exec
-/usr/local/bin/bash -lc 'tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && cd "$tmp/desktop" && pnpm install --ignore-scripts && pnpm exec tsc --noEmit' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc 'tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && cd "$tmp/desktop" && pnpm install --ignore-scripts && pnpm exec tsc --noEmit' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -12230,7 +12230,7 @@ An authorization header was used: Bearer npm_[hidden]
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -13054,7 +13054,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..4ab6672b9964b4be9f71ad7a088bf987
  else
 
 exec
-/usr/local/bin/bash -lc 'tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && cd "$tmp/desktop" && pnpm install --ignore-scripts && pnpm exec tsc --noEmit' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc 'tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && cd "$tmp/desktop" && pnpm install --ignore-scripts && pnpm exec tsc --noEmit' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -13881,7 +13881,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..4ab6672b9964b4be9f71ad7a088bf987
 Progress: resolved 1, reused 0, downloaded 0, added 0
 Progress: resolved 35, reused 24, downloaded 8, added 0
 Packages are cloned from the content-addressable store to the virtual store.
-  Content-addressable store is at: /Users/gqadonis/Library/pnpm/store/v11
+  Content-addressable store is at: ~/Library/pnpm/store/v11
   Virtual store is at:             node_modules/.pnpm
 Progress: resolved 37, reused 24, downloaded 13, added 0
 [WARN] The git-hosted package fetched from "https://codeload.github.com/Prometheus-AGS/prometheus-entity-management/tar.gz/74d72c7a3394a09c246d08aba833b903666a37d1" has to be built but the build scripts were ignored.
@@ -13903,18 +13903,18 @@ fatal: Could not read from remote repository.
 
 Please make sure you have the correct access rights
 and the repository exists.
-    at getFinalError (file:///Users/gqadonis/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:88085:14)
-    at makeError (file:///Users/gqadonis/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:90392:21)
-    at getAsyncResult (file:///Users/gqadonis/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:94565:159)
-    at handlePromise (file:///Users/gqadonis/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:94550:23)
-    at async getRepoRefs (file:///Users/gqadonis/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:137348:19)
-    at async resolveRef (file:///Users/gqadonis/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:137361:16)
-    at async resolveGit (file:///Users/gqadonis/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:137293:20)
-    at async Object.resolve (file:///Users/gqadonis/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:138803:224)
-    at async run2 (file:///Users/gqadonis/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:158810:31)
+    at getFinalError (file://~/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:88085:14)
+    at makeError (file://~/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:90392:21)
+    at getAsyncResult (file://~/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:94565:159)
+    at handlePromise (file://~/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:94550:23)
+    at async getRepoRefs (file://~/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:137348:19)
+    at async resolveRef (file://~/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:137361:16)
+    at async resolveGit (file://~/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:137293:20)
+    at async Object.resolve (file://~/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:138803:224)
+    at async run2 (file://~/.cache/node/corepack/v1/pnpm/11.13.0/dist/pnpm.mjs:158810:31)
 
 exec
-/usr/local/bin/bash -lc 'git -C /Users/gqadonis/Projects/prometheus/flint-forge remote -v | head -2; git -C /Users/gqadonis/Projects/prometheus/flint-forge rev-parse HEAD' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc 'git -C ~/Projects/prometheus/flint-forge remote -v | head -2; git -C ~/Projects/prometheus/flint-forge rev-parse HEAD' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 origin	git@github.com:Know-Me-Tools/flint-forge.git (fetch)
 origin	git@github.com:Know-Me-Tools/flint-forge.git (push)
@@ -14332,7 +14332,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..4ab6672b9964b4be9f71ad7a088bf987
  else
 
 exec
-/usr/local/bin/bash -lc 'git -C /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management rev-parse HEAD' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc 'git -C ~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management rev-parse HEAD' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
  succeeded in 0ms:
 74d72c7a3394a09c246d08aba833b903666a37d1
 
@@ -14749,7 +14749,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..4ab6672b9964b4be9f71ad7a088bf987
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/scripts/scaffold-tauri.sh
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -15573,7 +15573,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..8246392f0695b964acca495879750daa
  else
 
 exec
-/usr/local/bin/bash -lc 'tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && cd "$tmp/desktop" && pnpm install --ignore-scripts && pnpm exec tsc --noEmit' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc 'tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && cd "$tmp/desktop" && pnpm install --ignore-scripts && pnpm exec tsc --noEmit' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
 diff --git a/scripts/scaffold-hybrid.sh b/scripts/scaffold-hybrid.sh
 index 35875834afda19e55bbc77ff6cfd7d44c9c8ccaf..3fe5b569a0b38a5b2b6a009bb5d81d902a202c01
 --- a/scripts/scaffold-hybrid.sh
@@ -16400,7 +16400,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..8246392f0695b964acca495879750daa
 Progress: resolved 1, reused 0, downloaded 0, added 0
 Progress: resolved 38, reused 38, downloaded 0, added 0
 Packages are cloned from the content-addressable store to the virtual store.
-  Content-addressable store is at: /Users/gqadonis/Library/pnpm/store/v11
+  Content-addressable store is at: ~/Library/pnpm/store/v11
   Virtual store is at:             node_modules/.pnpm
 [WARN] The git-hosted package fetched from "https://codeload.github.com/Know-Me-Tools/flint-forge/tar.gz/1cae090d2cc02675eb99ba7a599735d339e53e38" has to be built but the build scripts were ignored.
 Progress: resolved 38, reused 38, downloaded 1, added 0
@@ -16414,7 +16414,7 @@ codex
 The corrected Flint repository resolves, but the install proof has now hit a genuine upstream packaging blocker: PEM’s git-hosted React package declares `@prometheus-ags/entity-graph-core@workspace:*`, and pnpm cannot install that subpackage outside its source monorepo. This matches the phase analysis (“unpublished git/path dep”), but means I cannot honestly claim a clean consumer install. I’m recording the exact blocker and preserving the implemented scaffold rather than masking it with a locally reimplemented entity library.
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/.kbd-orchestrator/dispatch/logs/2026-07-15-c011-react-surface.done.md
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface/.kbd-orchestrator/dispatch/logs/2026-07-15-c011-react-surface.done.md
 diff --git a/.kbd-orchestrator/dispatch/logs/2026-07-15-c011-react-surface.done.md b/.kbd-orchestrator/dispatch/logs/2026-07-15-c011-react-surface.done.md
 new file mode 100644
 index 0000000000000000000000000000000000000000..eb71f6ba4a676a7d46d62cc221f3762afd907cc8
@@ -17252,7 +17252,7 @@ index ba7cf421982ccb44ebf648ecc358b954b565a9f5..8246392f0695b964acca495879750daa
  else
 
 exec
-/usr/local/bin/bash -lc 'bash -n scripts/scaffold-tauri.sh scripts/scaffold-hybrid.sh && tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && test -f "$tmp/desktop/index.html" && test -f "$tmp/desktop/tsconfig.node.json" && test -f "$tmp/desktop/src/features/chat/components/ChatTranscript.tsx" && test -f "$tmp/desktop/src/features/chat/components/CoreFlintSurface.tsx" && test -f "$tmp/desktop/src/features/entities/stores/entityRuntime.ts" && ! rg -n '"'invoke\\(' \""'$tmp/desktop/src/features" -g '"'*.tsx' -g '*/hooks/*' && git diff --check && git status --short" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
+/usr/local/bin/bash -lc 'bash -n scripts/scaffold-tauri.sh scripts/scaffold-hybrid.sh && tmp=$(mktemp -d) && SKIP_INSTALL=1 bash scripts/scaffold-tauri.sh "$tmp/desktop" demo >/dev/null && test -f "$tmp/desktop/index.html" && test -f "$tmp/desktop/tsconfig.node.json" && test -f "$tmp/desktop/src/features/chat/components/ChatTranscript.tsx" && test -f "$tmp/desktop/src/features/chat/components/CoreFlintSurface.tsx" && test -f "$tmp/desktop/src/features/entities/stores/entityRuntime.ts" && ! rg -n '"'invoke\\(' \""'$tmp/desktop/src/features" -g '"'*.tsx' -g '*/hooks/*' && git diff --check && git status --short" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c011-react-surface
 diff --git a/.kbd-orchestrator/dispatch/logs/2026-07-15-c011-react-surface.done.md b/.kbd-orchestrator/dispatch/logs/2026-07-15-c011-react-surface.done.md
 new file mode 100644
 index 0000000000000000000000000000000000000000..eb71f6ba4a676a7d46d62cc221f3762afd907cc8

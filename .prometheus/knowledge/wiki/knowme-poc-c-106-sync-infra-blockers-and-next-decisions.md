@@ -26,7 +26,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `phase-codegen-and-ci-verification`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.claude/worktrees/pensive-greider-2e206c`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src/.claude/worktrees/pensive-greider-2e206c`
 - **Captured:** `2026-07-16T18:05:47Z`
 - **Position:** `phase-codegen-and-ci-verification`
 - **Status:** `executing`
@@ -145,7 +145,7 @@ Remaining local cleanup:
 - To clean local `main` after confirming no unrelated local work is needed:
 
 ```bash
-git -C /Users/gqadonis/Projects/hybrid-mobile-architecture-src reset --hard origin/main
+git -C ~/Projects/hybrid-mobile-architecture-src reset --hard origin/main
 ```
 
 No work should be lost because the C-106 changes are on `claude/c106-sync-infra` and in PR #5.

@@ -1,9 +1,9 @@
-[dispatch] 2026-07-15-c007-ffi-leaves-packaging → opencode/zai-coding-plan/glm-5.2  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging
+[dispatch] 2026-07-15-c007-ffi-leaves-packaging → opencode/zai-coding-plan/glm-5.2  worktree=~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging
 [0m
 > build · glm-5.2
 [0m
 [0m$ [0mpwd && ls -la
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging
 total 168
 drwxr-xr-x@ 23 gqadonis  staff    736 Jul 15 14:06 .
 drwxr-xr-x@ 10 gqadonis  staff    320 Jul 15 14:06 ..
@@ -238,10 +238,10 @@ Let me start by updating `scaffold-rust-core.sh` — first the workspace deps, t
 [ ] Write completion summary to .kbd-orchestrator/dispatch/logs/2026-07-15-c007-ffi-leaves-packaging.done.md
 [0m
 [0m← [0mEdit scripts/scaffold-rust-core.sh
-Index: /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+Index: ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 ===================================================================
---- /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
-+++ /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+--- ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
++++ ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 @@ -88,8 +88,23 @@
  dashmap           = "6.1"
  parking_lot       = "0.12"
@@ -269,10 +269,10 @@ Index: /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator
 
 [0m
 [0m← [0mEdit scripts/scaffold-rust-core.sh
-Index: /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+Index: ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 ===================================================================
---- /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
-+++ /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+--- ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
++++ ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 @@ -90,20 +90,16 @@
  once_cell         = "1.20"
  
@@ -311,10 +311,10 @@ Now the main work — replacing the three leaf stub emissions. Let me find the e
 [0m→ [0mRead scripts/scaffold-rust-core.sh[90m [limit=100, offset=655][0m
 [0m
 [0m← [0mEdit scripts/scaffold-rust-core.sh
-Index: /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+Index: ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 ===================================================================
---- /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
-+++ /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+--- ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
++++ ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 @@ -90,16 +90,17 @@
  once_cell         = "1.20"
  
@@ -376,7 +376,7 @@ Now the big leaf replacement. I'll write it as one edit:
 0000040  200 342 224 200 342 224 200 342 224 200 342 224 200 342 224 200
 [0m
 Let me use the filesystem edit tool which handles large blocks more reliably. I'll replace each leaf separately.
-[0m✗ [0mfilesystem_edit_file {"path":"/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh","edits":[{"oldText":"# ── LEAF crates ──────────────────────────────────────────────────────────────\nemit_crate gen_gui_ffi '\"cdylib\", \"staticlib\"'\ncat >> \"$OUT/crates/gen_gui_ffi/Cargo.toml\" << 'EOF'\ngen_ui_types    = { path = \"../gen_gui_types\" }\ngen_ui_runtime  = { path = \"../gen_gui_runtime\" }\ngen_ui_protocol = { path = \"../gen_gui_protocol\" }\ngen_ui_agent    = { path = \"../gen_ui_agent\" }\nflutter_rust_bridge.workspace = true\nanyhow.workspace = true\n\n[target.'cfg(target_os = \"android\")'.dependencies]\nandroid_logger = \"0.14\"\n[target.'cfg(target_os = \"ios\")'.dependencies]\noslog = \"0.2\"\nEOF\ncat > \"$OUT/crates/gen_gui_ffi/src/lib.rs\" << EOF\n$MARK\n//! gen_gui_ffi (LEAF) — flutter_rust_bridge surface. Thin: editing app logic here\n//! does not retrigger deep recompiles. Re-exports intent-level APIs + streams.\npub mod api;\nEOF\ncat > \"$OUT/crates/gen_gui_ffi/src/api.rs\" << EOF\n$MARK\n//! frb codegen target. Intent-level functions only (no raw SurrealQL / SQL across\n//! the bridge). Filled by C-007; C-001 lands the init seam.\nuse flutter_rust_bridge::frb;\n\n#[frb(init)]\npub fn init_core(worker_threads: Option<usize>) {\n    #[cfg(not(target_arch = \"wasm32\"))]\n    gen_gui_runtime::init(worker_threads);\n    let _ = worker_threads;\n}\nEOF\nok \"gen_gui_ffi: frb leaf\"\n\nemit_crate tauri-plugin-gen-ui \"\"\ncat >> \"$OUT/crates/tauri-plugin-gen-ui/Cargo.toml\" << 'EOF'\ngen_ui_types    = { path = \"../gen_gui_types\" }\ngen_ui_runtime  = { path = \"../gen_gui_runtime\" }\ngen_ui_agent    = { path = \"../gen_ui_agent\" }\nserde.workspace = true\n# tauri = { version = \"2\", features = [] }   # enabled by C-007\nEOF\ncat > \"$OUT/crates/tauri-plugin-gen-ui/src/lib.rs\" << EOF\n$MARK\n//! tauri-plugin-gen-ui (LEAF) — Tauri 2 plugin: commands, events, permissions.\n//! npm guest-js bindings package added by C-007. C-001 lands the crate seam.\nEOF\nok \"tauri-plugin-gen-ui: plugin leaf\"\n\nemit_crate gen_gui_wasm '\"cdylib\", \"rlib\"'\ncat >> \"$OUT/crates/gen_gui_wasm/Cargo.toml\" << 'EOF'\ngen_ui_types    = { path = \"../gen_gui_types\" }\ngen_ui_runtime  = { path = \"../gen_ui_runtime\" }\ngen_ui_protocol = { path = \"../gen_gui_protocol\" }\nwasm-bindgen = \"0.2\"\nserde.workspace = true\nserde_json.workspace = true\nEOF\ncat > \"$OUT/crates/gen_gui_wasm/src/lib.rs\" << EOF\n$MARK\n//! gen_gui_wasm (LEAF) — wasm-bindgen/web surface for browser embedding.\n//! Built with: cargo build --profile wasm-release --target wasm32-unknown-unknown\n//! then wasm-opt. Filled by C-002/C-007; C-001 lands the seam.\nuse wasm_bindgen::prelude::*;\n\n#[wasm_bindgen]\npub fn gen_ui_version() -> String { env!(\"CARGO_PKG_VERSION\").to_string() }\nEOF\nok \"gen_gui_wasm: web leaf\"","newText":"LEAF_CRATES_PLACEHOLDER"}]} failed
+[0m✗ [0mfilesystem_edit_file {"path":"~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh","edits":[{"oldText":"# ── LEAF crates ──────────────────────────────────────────────────────────────\nemit_crate gen_gui_ffi '\"cdylib\", \"staticlib\"'\ncat >> \"$OUT/crates/gen_gui_ffi/Cargo.toml\" << 'EOF'\ngen_ui_types    = { path = \"../gen_gui_types\" }\ngen_ui_runtime  = { path = \"../gen_gui_runtime\" }\ngen_ui_protocol = { path = \"../gen_gui_protocol\" }\ngen_ui_agent    = { path = \"../gen_ui_agent\" }\nflutter_rust_bridge.workspace = true\nanyhow.workspace = true\n\n[target.'cfg(target_os = \"android\")'.dependencies]\nandroid_logger = \"0.14\"\n[target.'cfg(target_os = \"ios\")'.dependencies]\noslog = \"0.2\"\nEOF\ncat > \"$OUT/crates/gen_gui_ffi/src/lib.rs\" << EOF\n$MARK\n//! gen_gui_ffi (LEAF) — flutter_rust_bridge surface. Thin: editing app logic here\n//! does not retrigger deep recompiles. Re-exports intent-level APIs + streams.\npub mod api;\nEOF\ncat > \"$OUT/crates/gen_gui_ffi/src/api.rs\" << EOF\n$MARK\n//! frb codegen target. Intent-level functions only (no raw SurrealQL / SQL across\n//! the bridge). Filled by C-007; C-001 lands the init seam.\nuse flutter_rust_bridge::frb;\n\n#[frb(init)]\npub fn init_core(worker_threads: Option<usize>) {\n    #[cfg(not(target_arch = \"wasm32\"))]\n    gen_gui_runtime::init(worker_threads);\n    let _ = worker_threads;\n}\nEOF\nok \"gen_gui_ffi: frb leaf\"\n\nemit_crate tauri-plugin-gen-ui \"\"\ncat >> \"$OUT/crates/tauri-plugin-gen-ui/Cargo.toml\" << 'EOF'\ngen_ui_types    = { path = \"../gen_gui_types\" }\ngen_ui_runtime  = { path = \"../gen_gui_runtime\" }\ngen_ui_agent    = { path = \"../gen_ui_agent\" }\nserde.workspace = true\n# tauri = { version = \"2\", features = [] }   # enabled by C-007\nEOF\ncat > \"$OUT/crates/tauri-plugin-gen-ui/src/lib.rs\" << EOF\n$MARK\n//! tauri-plugin-gen-ui (LEAF) — Tauri 2 plugin: commands, events, permissions.\n//! npm guest-js bindings package added by C-007. C-001 lands the crate seam.\nEOF\nok \"tauri-plugin-gen-ui: plugin leaf\"\n\nemit_crate gen_gui_wasm '\"cdylib\", \"rlib\"'\ncat >> \"$OUT/crates/gen_gui_wasm/Cargo.toml\" << 'EOF'\ngen_ui_types    = { path = \"../gen_gui_types\" }\ngen_ui_runtime  = { path = \"../gen_ui_runtime\" }\ngen_ui_protocol = { path = \"../gen_gui_protocol\" }\nwasm-bindgen = \"0.2\"\nserde.workspace = true\nserde_json.workspace = true\nEOF\ncat > \"$OUT/crates/gen_gui_wasm/src/lib.rs\" << EOF\n$MARK\n//! gen_gui_wasm (LEAF) — wasm-bindgen/web surface for browser embedding.\n//! Built with: cargo build --profile wasm-release --target wasm32-unknown-unknown\n//! then wasm-opt. Filled by C-002/C-007; C-001 lands the seam.\nuse wasm_bindgen::prelude::*;\n\n#[wasm_bindgen]\npub fn gen_ui_version() -> String { env!(\"CARGO_PKG_VERSION\").to_string() }\nEOF\nok \"gen_gui_wasm: web leaf\"","newText":"LEAF_CRATES_PLACEHOLDER"}]} failed
 [91m[1mError: [0m{"code":-32603,"message":"Could not find exact match for edit:\n# ── LEAF crates ──────────────────────────────────────────────────────────────\nemit_crate gen_gui_ffi '\"cdylib\", \"staticlib\"'\ncat >> \"$OUT/crates/gen_gui_ffi/Cargo.toml\" << 'EOF'\ngen_ui_types    = { path = \"../gen_gui_types\" }\ngen_ui_runtime  = { path = \"../gen_gui_runtime\" }\ngen_ui_protocol = { path = \"../gen_gui_protocol\" }\ngen_ui_agent    = { path = \"../gen_ui_agent\" }\nflutter_rust_bridge.workspace = true\nanyhow.workspace = true\n\n[target.'cfg(target_os = \"android\")'.dependencies]\nandroid_logger = \"0.14\"\n[target.'cfg(target_os = \"ios\")'.dependencies]\noslog = \"0.2\"\nEOF\ncat > \"$OUT/crates/gen_gui_ffi/src/lib.rs\" << EOF\n$MARK\n//! gen_gui_ffi (LEAF) — flutter_rust_bridge surface. Thin: editing app logic here\n//! does not retrigger deep recompiles. Re-exports intent-level APIs + streams.\npub mod api;\nEOF\ncat > \"$OUT/crates/gen_gui_ffi/src/api.rs\" << EOF\n$MARK\n//! frb codegen target. Intent-level functions only (no raw SurrealQL / SQL across\n//! the bridge). Filled by C-007; C-001 lands the init seam.\nuse flutter_rust_bridge::frb;\n\n#[frb(init)]\npub fn init_core(worker_threads: Option<usize>) {\n    #[cfg(not(target_arch = \"wasm32\"))]\n    gen_gui_runtime::init(worker_threads);\n    let _ = worker_threads;\n}\nEOF\nok \"gen_gui_ffi: frb leaf\"\n\nemit_crate tauri-plugin-gen-ui \"\"\ncat >> \"$OUT/crates/tauri-plugin-gen-ui/Cargo.toml\" << 'EOF'\ngen_ui_types    = { path = \"../gen_gui_types\" }\ngen_ui_runtime  = { path = \"../gen_gui_runtime\" }\ngen_ui_agent    = { path = \"../gen_ui_agent\" }\nserde.workspace = true\n# tauri = { version = \"2\", features = [] }   # enabled by C-007\nEOF\ncat > \"$OUT/crates/tauri-plugin-gen-ui/src/lib.rs\" << EOF\n$MARK\n//! tauri-plugin-gen-ui (LEAF) — Tauri 2 plugin: commands, events, permissions.\n//! npm guest-js bindings package added by C-007. C-001 lands the crate seam.\nEOF\nok \"tauri-plugin-gen-ui: plugin leaf\"\n\nemit_crate gen_gui_wasm '\"cdylib\", \"rlib\"'\ncat >> \"$OUT/crates/gen_gui_wasm/Cargo.toml\" << 'EOF'\ngen_ui_types    = { path = \"../gen_gui_types\" }\ngen_ui_runtime  = { path = \"../gen_ui_runtime\" }\ngen_ui_protocol = { path = \"../gen_gui_protocol\" }\nwasm-bindgen = \"0.2\"\nserde.workspace = true\nserde_json.workspace = true\nEOF\ncat > \"$OUT/crates/gen_gui_wasm/src/lib.rs\" << EOF\n$MARK\n//! gen_gui_wasm (LEAF) — wasm-bindgen/web surface for browser embedding.\n//! Built with: cargo build --profile wasm-release --target wasm32-unknown-unknown\n//! then wasm-opt. Filled by C-002/C-007; C-001 lands the seam.\nuse wasm_bindgen::prelude::*;\n\n#[wasm_bindgen]\npub fn gen_ui_version() -> String { env!(\"CARGO_PKG_VERSION\").to_string() }\nEOF\nok \"gen_gui_wasm: web leaf\""}
 [0m
 [0m$ [0mawk 'NR==659' scripts/scaffold-rust-core.sh | xxd | head -5
@@ -412,10 +412,10 @@ Let me use the filesystem edit tool which handles large blocks more reliably. I'
 [0m
 The crate name is `gen_ui_*` not `gen_gui_*` — I had a typo throughout my drafts. Let me retry with the correct names.
 [0m← [0mEdit scripts/scaffold-rust-core.sh
-Index: /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+Index: ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 ===================================================================
---- /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
-+++ /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+--- ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
++++ ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 @@ -657,15 +657,8 @@
  ok "gen_ui_agent: PMPO loop seam"
  
@@ -456,10 +456,10 @@ no changes added to commit (use "git add" and/or "git commit -a")
 [0m
 Restored. Now I'll redo this carefully — workspace deps first, then each leaf as a separate edit using small unique anchors.
 [0m← [0mEdit scripts/scaffold-rust-core.sh
-Index: /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+Index: ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 ===================================================================
---- /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
-+++ /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
+--- ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
++++ ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging/scripts/scaffold-rust-core.sh
 @@ -88,8 +88,20 @@
  dashmap           = "6.1"
  parking_lot       = "0.12"
@@ -490,8 +490,8 @@ Let me use Python for reliable multi-line splicing:
 [0m✗ [0mWrite /tmp/c007_splice.py failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
 [dispatch] 2026-07-15-c007-ffi-leaves-packaging done (exit 0)
-[dispatch] 2026-07-15-c007-ffi-leaves-packaging → claude/claude-sonnet-5  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging
-Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+[dispatch] 2026-07-15-c007-ffi-leaves-packaging → claude/claude-sonnet-5  worktree=~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging
+Permission allow rule (~/.claude/settings.json): Write(~/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(~/.claude/**) instead (Edit rules cover all file-editing tools).
 Position: scaffold-full-hybrid-project | status: execute_ready
 
 C-007 (FFI leaves + packaging) is complete and fully verified. The three leaf crates (`gen_ui_ffi`, `tauri-plugin-gen-ui`, `gen_ui_wasm`) and five publishable package skeletons are scaffolded, with full-workspace clippy `-D warnings` clean, cross-target checks passing (wasm32 + iOS), and TS/Dart typechecks clean. Completion log and durable memory written. Scope held strictly to C-007.

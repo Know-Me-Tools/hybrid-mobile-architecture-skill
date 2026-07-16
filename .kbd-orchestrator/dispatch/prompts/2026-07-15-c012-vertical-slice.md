@@ -19,7 +19,7 @@ AUTHORITY — read these first, in order (all relative to your working directory
 4. .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md — library verdicts,
    per-platform data matrix, version pins.
 
-SKILLS: the shared skill pack is at /Users/gqadonis/Projects/prometheus/prometheus-skill-pack.
+SKILLS: the shared skill pack is at ~/Projects/prometheus/prometheus-skill-pack.
 Invoke the skills named for your change BEFORE writing code (emit good code first-shot).
 
 SCOPE DISCIPLINE (Rule 40): implement ONLY your assigned change. Do not touch

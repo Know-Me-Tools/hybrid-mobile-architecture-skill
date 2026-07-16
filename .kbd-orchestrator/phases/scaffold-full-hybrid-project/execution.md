@@ -8,7 +8,7 @@
 `hybrid`: OpenSpec provides per-change traceability (`openspec/changes/2026-07-15-c0*/`);
 external harnesses execute the code in isolated git worktrees. Each change is dispatched
 to its plan-assigned harness/model, all sharing
-`/Users/gqadonis/Projects/prometheus/prometheus-skill-pack`.
+`~/Projects/prometheus/prometheus-skill-pack`.
 
 ## Verified harness invocations
 

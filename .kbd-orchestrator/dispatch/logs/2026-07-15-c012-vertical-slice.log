@@ -1,5 +1,5 @@
-[dispatch] 2026-07-15-c012-vertical-slice → claude/claude-opus-4-8  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c012-vertical-slice
-Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+[dispatch] 2026-07-15-c012-vertical-slice → claude/claude-opus-4-8  worktree=~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c012-vertical-slice
+Permission allow rule (~/.claude/settings.json): Write(~/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(~/.claude/**) instead (Edit rules cover all file-editing tools).
 <!-- prometheus-position -->
 Position: scaffold-full-hybrid-project | status: execute_ready
 <!-- /prometheus-position -->

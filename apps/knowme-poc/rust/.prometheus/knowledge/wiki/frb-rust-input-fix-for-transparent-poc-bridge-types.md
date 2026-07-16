@@ -30,7 +30,7 @@ revision: 0
 
 - **Phase:** `phase-codegen-and-ci-verification`
 - **Project:** Hybrid Mobile Architecture
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Captured:** `2026-07-16T12:39:13Z`
 - **Recorded status:** `executing`
 - **Source context:** `manual:Hybrid Mobile Architecture/phase-codegen-and-ci-verification`

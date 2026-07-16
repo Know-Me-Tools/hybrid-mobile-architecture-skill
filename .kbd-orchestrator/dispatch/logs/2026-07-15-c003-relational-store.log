@@ -1,10 +1,10 @@
-[dispatch] 2026-07-15-c003-relational-store → codex/gpt-5.6-sol  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+[dispatch] 2026-07-15-c003-relational-store → codex/gpt-5.6-sol  worktree=~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
 Reading additional input from stdin...
-2026-07-15T19:07:15.109817Z ERROR codex_core::session::session: failed to load skill /Users/gqadonis/.TOOLS/skills/codex/skill-tester/assets/sample-skill/SKILL.md: missing YAML frontmatter delimited by ---
-2026-07-15T19:07:15.110755Z ERROR codex_core::session::session: failed to load skill /Users/gqadonis/.TOOLS/skills/codex/engineering/skill-tester/assets/sample-skill/SKILL.md: missing YAML frontmatter delimited by ---
+2026-07-15T19:07:15.109817Z ERROR codex_core::session::session: failed to load skill ~/.TOOLS/skills/codex/skill-tester/assets/sample-skill/SKILL.md: missing YAML frontmatter delimited by ---
+2026-07-15T19:07:15.110755Z ERROR codex_core::session::session: failed to load skill ~/.TOOLS/skills/codex/engineering/skill-tester/assets/sample-skill/SKILL.md: missing YAML frontmatter delimited by ---
 OpenAI Codex v0.144.4
 --------
-workdir: /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+workdir: ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
 model: gpt-5.6-sol
 provider: openai
 approval: never
@@ -30,7 +30,7 @@ AUTHORITY — read these first, in order:
 4. .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md — library verdicts,
    per-platform data matrix, version pins.
 
-SKILLS: the shared skill pack is at /Users/gqadonis/Projects/prometheus/prometheus-skill-pack.
+SKILLS: the shared skill pack is at ~/Projects/prometheus/prometheus-skill-pack.
 Invoke the skills named for your change BEFORE writing code (emit good code first-shot).
 
 SCOPE DISCIPLINE (Rule 40): implement ONLY your assigned change. Do not touch
@@ -52,7 +52,7 @@ warning: Exceeded skills context budget of 2%. All skill descriptions were remov
 codex
 I’m using the `openspec-apply-change` skill because this is an explicitly identified OpenSpec implementation change. I’ll first load its workflow and the four authority documents in the required order, then inspect the proposal and implement only c003.
 exec
-/usr/local/bin/bash -lc "sed -n '1,240p' .codex/skills/openspec-apply-change/SKILL.md && sed -n '1,280p' CLAUDE.md && sed -n '1,260p' .kbd-orchestrator/constraints.md && sed -n '1,320p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md && sed -n '1,320p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "sed -n '1,240p' .codex/skills/openspec-apply-change/SKILL.md && sed -n '1,280p' CLAUDE.md && sed -n '1,260p' .kbd-orchestrator/constraints.md && sed -n '1,320p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md && sed -n '1,320p' .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  succeeded in 0ms:
 ---
 name: openspec-apply-change
@@ -679,7 +679,7 @@ Selection principles (applied, not vibes):
    patterned, or documentation lanes — per performance.md model-selection strategy.
 4. **Long-context models** (Kimi K2.7) where the task is digesting large existing
    codebases more than novel synthesis.
-5. All harnesses share `/Users/gqadonis/Projects/prometheus/prometheus-skill-pack`.
+5. All harnesses share `~/Projects/prometheus/prometheus-skill-pack`.
 
 | Change | Harness · Model | Rationale | Key skills |
 |---|---|---|---|
@@ -990,7 +990,7 @@ Key sources cited inline in the per-agent reports; version pins recorded in
 codex
 Using change: `2026-07-15-c003-relational-store` (override with `/opsx:apply <other>`). The combined authority read was truncated, so I’m re-reading the c003-specific sections and OpenSpec-provided context in focused calls before making any edits.
 exec
-/usr/local/bin/bash -lc "openspec status --change \"2026-07-15-c003-relational-store\" --json && openspec instructions apply --change \"2026-07-15-c003-relational-store\" --json && rg -n -C 12 'C-003|c003|relational' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md && sed -n '1,240p' openspec/changes/2026-07-15-c003-relational-store/proposal.md && if [ -f openspec/changes/2026-07-15-c003-relational-store/tasks.md ]; then sed -n '1,260p' openspec/changes/2026-07-15-c003-relational-store/tasks.md; fi && if [ -f openspec/changes/2026-07-15-c003-relational-store/design.md ]; then sed -n '1,300p' openspec/changes/2026-07-15-c003-relational-store/design.md; fi && find openspec/changes/2026-07-15-c003-relational-store/specs -type f -maxdepth 3 -print -exec sed -n '1,280p' {} \\; 2>/dev/null" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "openspec status --change \"2026-07-15-c003-relational-store\" --json && openspec instructions apply --change \"2026-07-15-c003-relational-store\" --json && rg -n -C 12 'C-003|c003|relational' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md && sed -n '1,240p' openspec/changes/2026-07-15-c003-relational-store/proposal.md && if [ -f openspec/changes/2026-07-15-c003-relational-store/tasks.md ]; then sed -n '1,260p' openspec/changes/2026-07-15-c003-relational-store/tasks.md; fi && if [ -f openspec/changes/2026-07-15-c003-relational-store/design.md ]; then sed -n '1,300p' openspec/changes/2026-07-15-c003-relational-store/design.md; fi && find openspec/changes/2026-07-15-c003-relational-store/specs -type f -maxdepth 3 -print -exec sed -n '1,280p' {} \\; 2>/dev/null" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  exited 1 in 521ms:
 
 ✖ Error: Invalid change name '2026-07-15-c003-relational-store': Change name must start with a letter
@@ -998,7 +998,7 @@ exec
 codex
 OpenSpec CLI cannot address this orchestrator-generated ID because the installed CLI rejects change names beginning with a date (“must start with a letter”). The artifacts are present, so I’ll follow the same apply workflow directly from those files and record the CLI incompatibility as a deviation if it remains relevant.
 exec
-/usr/local/bin/bash -lc "rg -n -C 18 'C-003|c003|relational-store|Relational' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md && find openspec/changes/2026-07-15-c003-relational-store -type f -maxdepth 4 -print && sed -n '1,280p' openspec/changes/2026-07-15-c003-relational-store/proposal.md && test "'! -f openspec/changes/2026-07-15-c003-relational-store/tasks.md || sed -n '"'1,320p' openspec/changes/2026-07-15-c003-relational-store/tasks.md && test "'! -f openspec/changes/2026-07-15-c003-relational-store/design.md || sed -n '"'1,360p' openspec/changes/2026-07-15-c003-relational-store/design.md && for f in openspec/changes/2026-07-15-c003-relational-store/specs/*/*.md; do test -f \""'$f" && { echo "$f"; sed -n '"'1,320p' \""'$f"; }; done' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "rg -n -C 18 'C-003|c003|relational-store|Relational' .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md && find openspec/changes/2026-07-15-c003-relational-store -type f -maxdepth 4 -print && sed -n '1,280p' openspec/changes/2026-07-15-c003-relational-store/proposal.md && test "'! -f openspec/changes/2026-07-15-c003-relational-store/tasks.md || sed -n '"'1,320p' openspec/changes/2026-07-15-c003-relational-store/tasks.md && test "'! -f openspec/changes/2026-07-15-c003-relational-store/design.md || sed -n '"'1,360p' openspec/changes/2026-07-15-c003-relational-store/design.md && for f in openspec/changes/2026-07-15-c003-relational-store/specs/*/*.md; do test -f \""'$f" && { echo "$f"; sed -n '"'1,320p' \""'$f"; }; done' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  exited 1 in 0ms:
 .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md-34-`docs/pglite-oxide-tauri-hybrid.md` (and the CLAUDE.md summary of it) contains two
 .kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md-35-**verified errors**:
@@ -1160,7 +1160,7 @@ exec
 .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md-151-   patterned, or documentation lanes — per performance.md model-selection strategy.
 .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md-152-4. **Long-context models** (Kimi K2.7) where the task is digesting large existing
 .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md-153-   codebases more than novel synthesis.
-.kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md-154-5. All harnesses share `/Users/gqadonis/Projects/prometheus/prometheus-skill-pack`.
+.kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md-154-5. All harnesses share `~/Projects/prometheus/prometheus-skill-pack`.
 .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md-155-
 .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md-156-| Change | Harness · Model | Rationale | Key skills |
 .kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md-157-|---|---|---|---|
@@ -1226,9 +1226,9 @@ See plan.md entry for this change ID. Tasks to be expanded at execute time
 codex
 The proposal has no expanded task artifact; its complete executable scope is the plan entry: feature-gated PostgreSQL/SQLite relational storage, migrations, and ordered startup orchestration. Before Rust edits, I’m invoking the two mandated skills (`rust/error-handling` and `postgres-patterns`) and inspecting the c001-generated workspace/templates to preserve its frozen seams.
 exec
-/usr/local/bin/bash -lc "find /Users/gqadonis/Projects/prometheus/prometheus-skill-pack -path '*/SKILL.md' | rg '(error-handling|postgres-patterns)/SKILL.md"'$'"' && git status --short && rg --files | sed -n '1,260p' && find . -name AGENTS.md -print" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "find ~/Projects/prometheus/prometheus-skill-pack -path '*/SKILL.md' | rg '(error-handling|postgres-patterns)/SKILL.md"'$'"' && git status --short && rg --files | sed -n '1,260p' && find . -name AGENTS.md -print" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  succeeded in 4468ms:
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/rust/error-handling/SKILL.md
+~/Projects/prometheus/prometheus-skill-pack/skills/rust/error-handling/SKILL.md
 openspec/changes/2026-07-15-c005-sync-engine/proposal.md
 openspec/changes/2026-07-15-c009-project-skills/proposal.md
 openspec/changes/2026-07-15-c011-react-surface/proposal.md
@@ -1284,64 +1284,64 @@ assets/templates/flutter-feature/README.md
 ./AGENTS.md
 
 exec
-/usr/local/bin/bash -lc "find /Users/gqadonis/Projects/prometheus/prometheus-skill-pack -iname '*postgres*' -o -iname '*error*handling*' | sed -n '1,160p' && sed -n '1,320p' /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/rust/error-handling/SKILL.md && sed -n '1,260p' references/arch-standard.md && sed -n '1,320p' references/rust/patterns.md && sed -n '1,360p' scripts/scaffold-rust-core.sh && sed -n '1,260p' scripts/scaffold-hybrid.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "find ~/Projects/prometheus/prometheus-skill-pack -iname '*postgres*' -o -iname '*error*handling*' | sed -n '1,160p' && sed -n '1,320p' ~/Projects/prometheus/prometheus-skill-pack/skills/rust/error-handling/SKILL.md && sed -n '1,260p' references/arch-standard.md && sed -n '1,320p' references/rust/patterns.md && sed -n '1,360p' scripts/scaffold-rust-core.sh && sed -n '1,260p' scripts/scaffold-hybrid.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  succeeded in 2464ms:
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/.prometheus/knowledge/wiki/flint-forge-p3-c019-postgrest-query-engine-foundation.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/.prometheus/knowledge/wiki/flint-forge-p3-c019-postgrest-engine-read-write-progress.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/.prometheus/knowledge/wiki/flint-forge-p3-5-ci-postgres-hardening-phase-setup.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/zig/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/go/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/python/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/elixir/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/dart/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/typescript/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/rust/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/wasm/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/java/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/kotlin/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/php/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/swift/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/csharp/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/ruby/guides/error_handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/content/docs/usage/error-handling.mdx
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/zig/src/error_handling_test.zig
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/go/error_handling_test.go
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/python/tests/test_error_handling.py
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/elixir/test/error_handling_test.exs
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/dart/test/error_handling_test.dart
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/rust/tests/error_handling_test.rs
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/wasm/tests/error_handling.test.ts
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/kotlin_android/src/test/kotlin/io/xberg/literllm/android/e2e/ErrorHandlingTest.kt
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/java/src/test/java/io/xberg/literllm/e2e/ErrorHandlingTest.java
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/php/tests/ErrorHandlingTest.php
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/csharp/tests/ErrorHandlingTests.cs
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/node/tests/error_handling.test.ts
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/c/test_error_handling.c
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/swift_e2e/Tests/LiterLlmE2ETests/ErrorHandlingTests.swift
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/ruby/spec/error_handling_spec.rb
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/fixtures/error-handling
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/zig/src/error_handling_test.zig
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/go/error_handling_test.go
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/python/tests/test_error_handling.py
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/elixir/test/error_handling_test.exs
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/dart/test/error_handling_test.dart
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/rust/tests/error_handling_test.rs
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/wasm/tests/error_handling.test.ts
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/kotlin_android/src/androidTest/kotlin/io/xberg/literllm/android/e2e/ErrorHandlingTest.kt
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/kotlin_android/src/test/kotlin/io/xberg/literllm/android/e2e/ErrorHandlingTest.kt
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/java/src/test/java/io/xberg/literllm/e2e/ErrorHandlingTest.java
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/php/tests/ErrorHandlingTest.php
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/csharp/tests/ErrorHandlingTests.cs
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/node/tests/error_handling.test.ts
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/c/test_error_handling.c
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/swift_e2e/Tests/LiterLlmE2ETests/ErrorHandlingTests.swift
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/ruby/spec/error_handling_spec.rb
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/rust/error-handling
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/docs/02-pages/03-building-your-application/06-configuring/12-error-handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/docs/01-app/01-getting-started/10-error-handling.md
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@reduxjs+toolkit@2.11.2_react-redux@9.2.0_@types+react@19.2.14_react@19.2.4_redux@5.0.1__react@19.2.4/node_modules/@reduxjs/toolkit/src/query/tests/errorHandling.test.tsx
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@reduxjs+toolkit@2.11.2_react-redux@9.2.0_@types+react@19.2.14_react@19.2.4_redux@5.0.1__react@19.2.4/node_modules/@reduxjs/toolkit/src/query/tests/errorHandling.test-d.tsx
-/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/error-handling.test.ts
+~/Projects/prometheus/prometheus-skill-pack/.prometheus/knowledge/wiki/flint-forge-p3-c019-postgrest-query-engine-foundation.md
+~/Projects/prometheus/prometheus-skill-pack/.prometheus/knowledge/wiki/flint-forge-p3-c019-postgrest-engine-read-write-progress.md
+~/Projects/prometheus/prometheus-skill-pack/.prometheus/knowledge/wiki/flint-forge-p3-5-ci-postgres-hardening-phase-setup.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/zig/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/go/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/python/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/elixir/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/dart/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/typescript/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/rust/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/wasm/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/java/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/kotlin/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/php/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/swift/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/csharp/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/snippets/ruby/guides/error_handling.md
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/docs-site/src/content/docs/usage/error-handling.mdx
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/zig/src/error_handling_test.zig
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/go/error_handling_test.go
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/python/tests/test_error_handling.py
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/elixir/test/error_handling_test.exs
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/dart/test/error_handling_test.dart
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/rust/tests/error_handling_test.rs
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/wasm/tests/error_handling.test.ts
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/kotlin_android/src/test/kotlin/io/xberg/literllm/android/e2e/ErrorHandlingTest.kt
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/java/src/test/java/io/xberg/literllm/e2e/ErrorHandlingTest.java
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/php/tests/ErrorHandlingTest.php
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/csharp/tests/ErrorHandlingTests.cs
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/node/tests/error_handling.test.ts
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/c/test_error_handling.c
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/swift_e2e/Tests/LiterLlmE2ETests/ErrorHandlingTests.swift
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/test_apps/ruby/spec/error_handling_spec.rb
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/fixtures/error-handling
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/zig/src/error_handling_test.zig
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/go/error_handling_test.go
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/python/tests/test_error_handling.py
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/elixir/test/error_handling_test.exs
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/dart/test/error_handling_test.dart
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/rust/tests/error_handling_test.rs
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/wasm/tests/error_handling.test.ts
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/kotlin_android/src/androidTest/kotlin/io/xberg/literllm/android/e2e/ErrorHandlingTest.kt
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/kotlin_android/src/test/kotlin/io/xberg/literllm/android/e2e/ErrorHandlingTest.kt
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/java/src/test/java/io/xberg/literllm/e2e/ErrorHandlingTest.java
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/php/tests/ErrorHandlingTest.php
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/csharp/tests/ErrorHandlingTests.cs
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/node/tests/error_handling.test.ts
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/c/test_error_handling.c
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/swift_e2e/Tests/LiterLlmE2ETests/ErrorHandlingTests.swift
+~/Projects/prometheus/prometheus-skill-pack/tools/liter-llm/e2e/ruby/spec/error_handling_spec.rb
+~/Projects/prometheus/prometheus-skill-pack/skills/rust/error-handling
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/docs/02-pages/03-building-your-application/06-configuring/12-error-handling.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/docs/01-app/01-getting-started/10-error-handling.md
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@reduxjs+toolkit@2.11.2_react-redux@9.2.0_@types+react@19.2.14_react@19.2.4_redux@5.0.1__react@19.2.4/node_modules/@reduxjs/toolkit/src/query/tests/errorHandling.test.tsx
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/node_modules/.pnpm/@reduxjs+toolkit@2.11.2_react-redux@9.2.0_@types+react@19.2.14_react@19.2.4_redux@5.0.1__react@19.2.4/node_modules/@reduxjs/toolkit/src/query/tests/errorHandling.test-d.tsx
+~/Projects/prometheus/prometheus-skill-pack/skills/imported/prometheus-entity-management/packages/entity-graph-core/src/error-handling.test.ts
 ---
 license: MIT
 name: error-handling
@@ -2250,7 +2250,7 @@ echo ""
 codex
 The mandated `rust/error-handling` skill is loaded and requires typed `thiserror` library errors with no production `unwrap`/`expect`. The named `postgres-patterns` skill is not present in the shared pack, so I’m proceeding from the binding plan/analysis and existing scaffold conventions. This affects generated scaffold output only; `gen_ui_types` remains untouched.
 exec
-/usr/local/bin/bash -lc "rg -n \"gen_ui_db|SyncTransport|Seed|startup|sqlx|refinery|pglite\" scripts/scaffold-rust-core.sh && sed -n '460,720p' scripts/scaffold-rust-core.sh && sed -n '1,220p' plugin.json && sed -n '1,220p' marketplace.json && sed -n '1,220p' CHANGELOG.md && sed -n '1,220p' assets/templates/rust-core/README.md" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "rg -n \"gen_ui_db|SyncTransport|Seed|startup|sqlx|refinery|pglite\" scripts/scaffold-rust-core.sh && sed -n '460,720p' scripts/scaffold-rust-core.sh && sed -n '1,220p' plugin.json && sed -n '1,220p' marketplace.json && sed -n '1,220p' CHANGELOG.md && sed -n '1,220p' assets/templates/rust-core/README.md" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  succeeded in 0ms:
 15:#   L2  gen_ui_db         relational (pg/sqlite) + graph (surreal) + sync
 46:    "crates/gen_ui_db",
@@ -2974,7 +2974,7 @@ I’ve reached the implementation seam. The generated crate will expose a small 
 web search: 
 web search: docs.rs pglite-oxide 0.5.1 PgliteServer API ...
 exec
-/usr/local/bin/bash -lc "sed -n '390,445p' scripts/scaffold-rust-core.sh && sed -n '1,220p' .kbd-orchestrator/constraints.md" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "sed -n '390,445p' scripts/scaffold-rust-core.sh && sed -n '1,220p' .kbd-orchestrator/constraints.md" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  succeeded in 0ms:
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum ChangeEvent {
@@ -3070,7 +3070,7 @@ codex
 This change necessarily modifies the backward-compatible scaffold script and adds the plan-approved dependencies (`sqlx`, `pglite-oxide`, `sqlite-vec`, migration support). The user’s explicit c003 authorization covers that warning-tier work; I will not touch the published plugin manifests because the change does not require their metadata to change.
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..149f80326eecdd2bd172f074f7aa8d6da6be3390
 --- a/scripts/scaffold-rust-core.sh
@@ -3732,7 +3732,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..149f80326eecdd2bd172f074f7aa8d6d
 codex
 The first implementation is in the scaffold generator. I’m now generating a disposable Rust workspace and running the required single-loop verifier (`cargo clippy`, separately for SQLite and PGlite/Postgres features); any fixes will be applied to the generator, not to the disposable output.
 exec
-/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && echo "$tmpdir/rust"' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && echo "$tmpdir/rust"' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..149f80326eecdd2bd172f074f7aa8d6da6be3390
 --- a/scripts/scaffold-rust-core.sh
@@ -4736,7 +4736,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..149f80326eecdd2bd172f074f7aa8d6d
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..dc99d93ede48814b16de4b16b954f07b55111950
 --- a/scripts/scaffold-rust-core.sh
@@ -5394,7 +5394,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..dc99d93ede48814b16de4b16b954f07b
  
 
 exec
-/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..dc99d93ede48814b16de4b16b954f07b55111950
 --- a/scripts/scaffold-rust-core.sh
@@ -5724,10 +5724,10 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..dc99d93ede48814b16de4b16b954f07b
  
 
  exited 101 in 872ms:
-error: could not find `Cargo.toml` in `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store` or any parent directory
+error: could not find `Cargo.toml` in `~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store` or any parent directory
 
 exec
-/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && cd "$tmpdir/rust" && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && cd "$tmpdir/rust" && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..dc99d93ede48814b16de4b16b954f07b55111950
 --- a/scripts/scaffold-rust-core.sh
@@ -6067,7 +6067,7 @@ referenced by workspace at `/private/tmp/c003-relational.xxDquV/rust/Cargo.toml`
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..16e919b36f7ddfa2dc845da08184e2e324ab9b45
 --- a/scripts/scaffold-rust-core.sh
@@ -6725,7 +6725,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..16e919b36f7ddfa2dc845da08184e2e3
  
 
 exec
-/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && echo "$tmpdir/rust" && cd "$tmpdir/rust" && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && echo "$tmpdir/rust" && cd "$tmpdir/rust" && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..16e919b36f7ddfa2dc845da08184e2e324ab9b45
 --- a/scripts/scaffold-rust-core.sh
@@ -12190,7 +12190,7 @@ error[E0433]: failed to resolve: could not find `migrate` in `sqlx`
    |                                                  ^^^^^^^ could not find `migrate` in `sqlx`
    |
 note: found an item that was configured out
-  --> /Users/gqadonis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.8.6/src/lib.rs:43:20
+  --> ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.8.6/src/lib.rs:43:20
    |
 42 | #[cfg(feature = "migrate")]
    |       ------------------- the item is gated behind the `migrate` feature
@@ -12204,7 +12204,7 @@ error[E0433]: failed to resolve: could not find `migrate` in `sqlx`
    |                             ^^^^^^^ could not find `migrate` in `sqlx`
    |
 note: found an item that was configured out
-  --> /Users/gqadonis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.8.6/src/lib.rs:43:20
+  --> ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.8.6/src/lib.rs:43:20
    |
 42 | #[cfg(feature = "migrate")]
    |       ------------------- the item is gated behind the `migrate` feature
@@ -12218,7 +12218,7 @@ error[E0433]: failed to resolve: could not find `migrate` in `sqlx`
    |                        ^^^^^^^ could not find `migrate` in `sqlx`
    |
 note: found an item that was configured out
-  --> /Users/gqadonis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.8.6/src/lib.rs:43:20
+  --> ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlx-0.8.6/src/lib.rs:43:20
    |
 42 | #[cfg(feature = "migrate")]
    |       ------------------- the item is gated behind the `migrate` feature
@@ -12237,7 +12237,7 @@ error[E0277]: expected a `FnOnce()` closure, found `unsafe extern "C" fn() {sqli
     = note: unsafe function cannot be called generically without an unsafe block
     = note: wrap the `unsafe extern "C" fn() {sqlite_vec::sqlite3_vec_init}` in a closure with no arguments: `|| { /* code */ }`
 note: required by a bound in `std::sync::Once::call_once`
-   --> /Users/gqadonis/.rustup/toolchains/1.93-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/sync/once.rs:151:12
+   --> ~/.rustup/toolchains/1.93-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/sync/once.rs:151:12
     |
 149 |     pub fn call_once<F>(&self, f: F)
     |            --------- required by a bound in this associated function
@@ -12584,7 +12584,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..16e919b36f7ddfa2dc845da08184e2e3
  
 
 exec
-/usr/local/bin/bash -lc "sed -n '1,160p' /Users/gqadonis/.cargo/registry/src/index.crates.io-*/sqlite-vec-0.1.9/src/lib.rs && rg -n 'auto_extension|sqlite3_vec_init' /Users/gqadonis/.cargo/registry/src/index.crates.io-*/sqlite-vec-0.1.9 -g '*.rs'" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "sed -n '1,160p' ~/.cargo/registry/src/index.crates.io-*/sqlite-vec-0.1.9/src/lib.rs && rg -n 'auto_extension|sqlite3_vec_init' ~/.cargo/registry/src/index.crates.io-*/sqlite-vec-0.1.9 -g '*.rs'" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  succeeded in 0ms:
 #[link(name = "sqlite_vec0")]
 extern "C" {
@@ -12612,10 +12612,10 @@ mod tests {
         assert!(result.starts_with("v"));
     }
 }
-/Users/gqadonis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlite-vec-0.1.9/src/lib.rs:3:    pub fn sqlite3_vec_init();
-/Users/gqadonis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlite-vec-0.1.9/src/lib.rs:10:    use rusqlite::{ffi::sqlite3_auto_extension, Connection};
-/Users/gqadonis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlite-vec-0.1.9/src/lib.rs:13:    fn test_rusqlite_auto_extension() {
-/Users/gqadonis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlite-vec-0.1.9/src/lib.rs:15:            sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
+~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlite-vec-0.1.9/src/lib.rs:3:    pub fn sqlite3_vec_init();
+~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlite-vec-0.1.9/src/lib.rs:10:    use rusqlite::{ffi::sqlite3_auto_extension, Connection};
+~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlite-vec-0.1.9/src/lib.rs:13:    fn test_rusqlite_auto_extension() {
+~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sqlite-vec-0.1.9/src/lib.rs:15:            sqlite3_auto_extension(Some(std::mem::transmute(sqlite3_vec_init as *const ())));
 
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..16e919b36f7ddfa2dc845da08184e2e324ab9b45
@@ -12947,7 +12947,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..16e919b36f7ddfa2dc845da08184e2e3
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..2adeaf939d52d7a078a62545f8e4e983b1f97e5c
 --- a/scripts/scaffold-rust-core.sh
@@ -13627,7 +13627,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..2adeaf939d52d7a078a62545f8e4e983
  
 
 exec
-/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && echo "$tmpdir/rust" && cd "$tmpdir/rust" && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc 'tmpdir=$(mktemp -d /tmp/c003-relational.XXXXXX) && bash scripts/scaffold-rust-core.sh "$tmpdir/rust" embedded >/tmp/c003-scaffold.log && echo "$tmpdir/rust" && cd "$tmpdir/rust" && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..2adeaf939d52d7a078a62545f8e4e983b1f97e5c
 --- a/scripts/scaffold-rust-core.sh
@@ -16890,7 +16890,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..2adeaf939d52d7a078a62545f8e4e983
  
 
 exec
-/usr/local/bin/bash -lc "rg -n 'pub fn sqlite3_auto_extension|type.*loadext' /Users/gqadonis/.cargo/registry/src/index.crates.io-*/libsqlite3-sys-0.30.1/src -g '*.rs' | head -20" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "rg -n 'pub fn sqlite3_auto_extension|type.*loadext' ~/.cargo/registry/src/index.crates.io-*/libsqlite3-sys-0.30.1/src -g '*.rs' | head -20" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  succeeded in 0ms:
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..2adeaf939d52d7a078a62545f8e4e983b1f97e5c
@@ -17233,7 +17233,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..2adeaf939d52d7a078a62545f8e4e983
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..b97648a7e6d6a6a6a7ab63c976128b10f8f683e1
 --- a/scripts/scaffold-rust-core.sh
@@ -17927,7 +17927,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..b97648a7e6d6a6a6a7ab63c976128b10
  
 
 exec
-/usr/local/bin/bash -lc 'bash /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in /tmp/c003-relational.qB5Bch/rust
+/usr/local/bin/bash -lc 'bash ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features sqlite -- -D warnings' in /tmp/c003-relational.qB5Bch/rust
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..b97648a7e6d6a6a6a7ab63c976128b10f8f683e1
 --- a/scripts/scaffold-rust-core.sh
@@ -23579,13 +23579,13 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..b97648a7e6d6a6a6a7ab63c976128b10
     Checking wasmer-journal v0.702.0-alpha.3
     Checking wasmer-wasix v0.702.0-alpha.3
 error[E0004]: non-exhaustive patterns: `NetworkError::MessageSize` not covered
-   --> /Users/gqadonis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmer-wasix-0.702.0-alpha.3/src/net/mod.rs:376:11
+   --> ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/wasmer-wasix-0.702.0-alpha.3/src/net/mod.rs:376:11
     |
 376 |     match net_error {
     |           ^^^^^^^^^ pattern `NetworkError::MessageSize` not covered
     |
 note: `NetworkError` defined here
-   --> /Users/gqadonis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/virtual-net-0.702.0/src/lib.rs:817:1
+   --> ~/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/virtual-net-0.702.0/src/lib.rs:817:1
     |
 817 | pub enum NetworkError {
     | ^^^^^^^^^^^^^^^^^^^^^
@@ -23606,7 +23606,7 @@ codex
 The PostgreSQL code has not yet been reached because pglite-oxide 0.5.1’s transitive Wasmer graph resolves an incompatible newer `virtual-net` release. I’m applying a narrow compatibility pin to the alpha version used by pglite-oxide’s own Wasmer family, then rerunning the same feature gate.
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..a6a09c7e317703b587100edcb9c8e5581f8c761c
 --- a/scripts/scaffold-rust-core.sh
@@ -24304,7 +24304,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..a6a09c7e317703b587100edcb9c8e558
  
 
 exec
-/usr/local/bin/bash -lc 'bash /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features pglite -- -D warnings' in /tmp/c003-relational.qB5Bch/rust
+/usr/local/bin/bash -lc 'bash ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features pglite -- -D warnings' in /tmp/c003-relational.qB5Bch/rust
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..a6a09c7e317703b587100edcb9c8e5581f8c761c
 --- a/scripts/scaffold-rust-core.sh
@@ -26814,7 +26814,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..a6a09c7e317703b587100edcb9c8e558
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..83ea7ec117b67b10fe4ea61b79b5c4a4bf8bdbd0
 --- a/scripts/scaffold-rust-core.sh
@@ -27514,7 +27514,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..83ea7ec117b67b10fe4ea61b79b5c4a4
  
 
 exec
-/usr/local/bin/bash -lc "sed -n '624,660p' scripts/scaffold-rust-core.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "sed -n '624,660p' scripts/scaffold-rust-core.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  succeeded in 0ms:
 }
 emit_crate gen_ui_client ""
@@ -27904,7 +27904,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..83ea7ec117b67b10fe4ea61b79b5c4a4
  
 
 exec
-/usr/local/bin/bash -lc 'bash /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features pglite -- -D warnings' in /tmp/c003-relational.qB5Bch/rust
+/usr/local/bin/bash -lc 'bash ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features pglite -- -D warnings' in /tmp/c003-relational.qB5Bch/rust
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..83ea7ec117b67b10fe4ea61b79b5c4a4bf8bdbd0
 --- a/scripts/scaffold-rust-core.sh
@@ -28637,7 +28637,7 @@ error: could not compile `gen_ui_db` (lib) due to 1 previous error
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..09f2de2174a3bd7bd960aaa35b2bfeded00a4243
 --- a/scripts/scaffold-rust-core.sh
@@ -29331,7 +29331,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..09f2de2174a3bd7bd960aaa35b2bfede
  
 
 exec
-/usr/local/bin/bash -lc 'bash /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features pglite -- -D warnings' in /tmp/c003-relational.qB5Bch/rust
+/usr/local/bin/bash -lc 'bash ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --features pglite -- -D warnings' in /tmp/c003-relational.qB5Bch/rust
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..09f2de2174a3bd7bd960aaa35b2bfeded00a4243
 --- a/scripts/scaffold-rust-core.sh
@@ -30034,7 +30034,7 @@ codex
 Both dialect feature sets are clippy-clean. Following the repository’s “tests later” rule, I’m adding exactly three public-boundary behavior tests in one integration-test binary: bundled seed resolution, invalid IPFS seed rejection, and an actual SQLite connection proving sqlite-vec is loaded.
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..e1ee495b95bf27e527f838feb5135598e8c46667
 --- a/scripts/scaffold-rust-core.sh
@@ -30822,7 +30822,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..e1ee495b95bf27e527f838feb5135598
  
 
 exec
-/usr/local/bin/bash -lc 'bash /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --all-targets --features sqlite -- -D warnings && cargo test -p gen_ui_db --features sqlite --test it' in /tmp/c003-relational.qB5Bch/rust
+/usr/local/bin/bash -lc 'bash ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh /tmp/c003-relational.qB5Bch/rust embedded >/tmp/c003-scaffold.log && cargo clippy -p gen_ui_db --all-targets --features sqlite -- -D warnings && cargo test -p gen_ui_db --features sqlite --test it' in /tmp/c003-relational.qB5Bch/rust
 diff --git a/scripts/scaffold-rust-core.sh b/scripts/scaffold-rust-core.sh
 index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..e1ee495b95bf27e527f838feb5135598e8c46667
 --- a/scripts/scaffold-rust-core.sh
@@ -32478,7 +32478,7 @@ test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 codex
 The completed feature passes all three boundary tests and both feature-specific clippy gates. I’m doing the final repository hygiene checks now, then writing the required one-paragraph c003 completion record and stopping.
 exec
-/usr/local/bin/bash -lc "bash -n scripts/scaffold-rust-core.sh && git diff --check && git status --short && git diff --stat && rg -n 'gen_ui_db: pg/sqlite|virtual-net|pub struct Startup|sqlite_store_loads_vec' scripts/scaffold-rust-core.sh" in /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
+/usr/local/bin/bash -lc "bash -n scripts/scaffold-rust-core.sh && git diff --check && git status --short && git diff --stat && rg -n 'gen_ui_db: pg/sqlite|virtual-net|pub struct Startup|sqlite_store_loads_vec' scripts/scaffold-rust-core.sh" in ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store
  succeeded in 0ms:
  M scripts/scaffold-rust-core.sh
  scripts/scaffold-rust-core.sh | 374 +++++++++++++++++++++++++++++++++++++++++-
@@ -32885,7 +32885,7 @@ index 3d0ad2c3b8ac8340355f898bc4ba497e1858fa85..e1ee495b95bf27e527f838feb5135598
 
 apply patch
 patch: completed
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md
+~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md
 diff --git a/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md b/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md
 new file mode 100644
 index 0000000000000000000000000000000000000000..931dd32ecbd8c6640832a48e948cdf1375f88507
@@ -33698,8 +33698,8 @@ Implemented `2026-07-15-c003-relational-store`.
 
 Files:
 
-- [scripts/scaffold-rust-core.sh](/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh)
-- [completion log](/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md)
+- [scripts/scaffold-rust-core.sh](~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh)
+- [completion log](~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md)
 diff --git a/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md b/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md
 new file mode 100644
 index 0000000000000000000000000000000000000000..931dd32ecbd8c6640832a48e948cdf1375f88507
@@ -34114,6 +34114,6 @@ Implemented `2026-07-15-c003-relational-store`.
 
 Files:
 
-- [scripts/scaffold-rust-core.sh](/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh)
-- [completion log](/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md)
+- [scripts/scaffold-rust-core.sh](~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/scripts/scaffold-rust-core.sh)
+- [completion log](~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c003-relational-store/.kbd-orchestrator/dispatch/logs/2026-07-15-c003-relational-store.done.md)
 [dispatch] 2026-07-15-c003-relational-store done (exit 0)

@@ -5,7 +5,7 @@
 # Creates an isolated worktree, seeds the prompt, invokes the harness non-interactively.
 set -euo pipefail
 
-REPO="/Users/gqadonis/Projects/hybrid-mobile-architecture-src"
+REPO="~/Projects/hybrid-mobile-architecture-src"
 DISPATCH="$REPO/.kbd-orchestrator/dispatch"
 CHANGE="${1:?change-id required}"
 HARNESS="${2:?harness required}"

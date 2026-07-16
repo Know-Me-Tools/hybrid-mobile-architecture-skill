@@ -1,30 +1,30 @@
-[dispatch] 2026-07-15-c008-docs-refs-correction → opencode/kimi-for-coding/k2p6  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
+[dispatch] 2026-07-15-c008-docs-refs-correction → opencode/kimi-for-coding/k2p6  worktree=~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
 [0m
 > build · k2p6
 [0m
 I'll read the authority files and the change proposal first.
-[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/*); auto-rejecting
-[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/CLAUDE.md failed
+[93m[1m! [0mpermission requested: external_directory (~/Projects/hybrid-mobile-architecture-src/*); auto-rejecting
+[0m✗ [0mRead ~/Projects/hybrid-mobile-architecture-src/CLAUDE.md failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
-[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/*); auto-rejecting
-[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/constraints.md failed
+[93m[1m! [0mpermission requested: external_directory (~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/*); auto-rejecting
+[0m✗ [0mRead ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/constraints.md failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
-[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/*); auto-rejecting
-[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md failed
+[93m[1m! [0mpermission requested: external_directory (~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/*); auto-rejecting
+[0m✗ [0mRead ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/plan.md failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
-[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/*); auto-rejecting
-[93m[1m! [0mpermission requested: external_directory (/Users/gqadonis/Projects/hybrid-mobile-architecture-src/openspec/changes/2026-07-15-c008-docs-refs-correction/*); auto-rejecting
-[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md failed
+[93m[1m! [0mpermission requested: external_directory (~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/*); auto-rejecting
+[93m[1m! [0mpermission requested: external_directory (~/Projects/hybrid-mobile-architecture-src/openspec/changes/2026-07-15-c008-docs-refs-correction/*); auto-rejecting
+[0m✗ [0mRead ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/phases/scaffold-full-hybrid-project/analysis.md failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
-[0m✗ [0mRead /Users/gqadonis/Projects/hybrid-mobile-architecture-src/openspec/changes/2026-07-15-c008-docs-refs-correction/proposal.md failed
+[0m✗ [0mRead ~/Projects/hybrid-mobile-architecture-src/openspec/changes/2026-07-15-c008-docs-refs-correction/proposal.md failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
 [dispatch] 2026-07-15-c008-docs-refs-correction done (exit 0)
-[dispatch] 2026-07-15-c008-docs-refs-correction → opencode/kimi-for-coding/k2p6  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
+[dispatch] 2026-07-15-c008-docs-refs-correction → opencode/kimi-for-coding/k2p6  worktree=~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
 [0m
 > build · k2p6
 [0m
-[dispatch] 2026-07-15-c008-docs-refs-correction → claude/claude-sonnet-5  worktree=/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
-Permission allow rule (/Users/gqadonis/.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+[dispatch] 2026-07-15-c008-docs-refs-correction → claude/claude-sonnet-5  worktree=~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c008-docs-refs-correction
+Permission allow rule (~/.claude/settings.json): Write(~/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(~/.claude/**) instead (Edit rules cover all file-editing tools).
 Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.
 Position: scaffold-full-hybrid-project | status: execute_complete (c008)
 

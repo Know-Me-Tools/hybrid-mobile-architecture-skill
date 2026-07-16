@@ -27,7 +27,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `phase-codegen-and-ci-verification`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.claude/worktrees/pensive-greider-2e206c`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src/.claude/worktrees/pensive-greider-2e206c`
 - **Captured:** `2026-07-16T17:06:17Z`
 - **Position:** `phase-codegen-and-ci-verification`
 - **Status:** `executing`
