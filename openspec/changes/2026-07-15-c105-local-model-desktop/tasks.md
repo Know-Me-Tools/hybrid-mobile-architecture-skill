@@ -60,14 +60,29 @@
       shape; binds run-scoped events to the store's message id; accumulates
       per-token deltas into one growing block, matching the WebLLM lane) plus
       5 tests covering the contract that had gone unverified.
-- [x] T12a — Live no-engine guard test: **passing**. `set_active_lane("local")`
-      with no engine fails loudly instead of falling through to cloud.
-- [ ] T12b — Live local-model test (`chat_send_streams_a_real_local_response`):
-      real ~1GB GGUF download + Metal generation through the public `chat::send`
-      path. `#[ignore]`d and feature-gated (`test-local-mistral`) following the
-      `ollama_live.rs` precedent — the only honest verification, since the fork's
-      own crates failed to build together until the candle patch and no
-      type-check would have caught that.
-- [ ] T12c — Verify the WebLLM lane in a real browser.
+- [x] T12a — `tests/local_lane_guard.rs`: **passing**. `set_active_lane("local")`
+      with no engine fails loudly instead of falling through to cloud; a rejected
+      switch doesn't half-apply; unknown lanes are refused. Own binary —
+      `state::init` is a process-wide OnceCell, so it can't share a process with
+      the with-engine test (one live test per binary, as `ollama_live.rs` does).
+- [x] T12b — `tests/local_inference_live.rs`: **passing**. Real GGUF download +
+      Metal generation through the public `chat::send` path, answering "Hello"
+      in ~2s after a ~2s warm load.
+      **Found two real bugs, neither ours** (details in design.md):
+        1. `RequestBuilder::new()` defaults to `top_k = 1` (greedy), silently
+           overriding temperature/top_p → now sets `DEFAULT_TOP_K = 40`.
+        2. **K-quants are broken for Qwen2.5 on the pinned fork** — Q4_K_M and
+           Q5_K_M emit degenerate loops; Q4_0/Q8_0 work; TinyLlama Q4_K_M works.
+           Catalog switched to **Q4_0** (same ~1GB class). Isolated by driving
+           mistral.rs's own API directly, bypassing all our code.
+      The test first PASSED on that garbage — it only asserted "text is
+      non-empty". It now asserts the answer doesn't echo the prompt, isn't a
+      repetition loop, and actually greets.
+- [ ] T12c — **Verify the WebLLM lane in a real browser.** Not yet done: it
+      typechecks and follows the verified 0.2.84 API, but no browser has actually
+      loaded the model. Given that the native lane's plausible-looking code hid
+      two real bugs until a model really ran, this is the one remaining claim
+      resting on inspection rather than evidence.
 - [ ] T12d — Confirm mistral.rs's internal spawn_blocking behaviour empirically
-      (design.md flags it as unverified).
+      (design.md flags it as unverified — generation does not stall the runtime in
+      practice, but the mechanism is unconfirmed).
