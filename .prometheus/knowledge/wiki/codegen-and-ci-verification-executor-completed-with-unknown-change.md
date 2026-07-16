@@ -12,7 +12,6 @@ tags:
 - unknown-change
 links:
 - executor-scaffold-full-hybrid-project-completed-with-unknown-change
-- scaffold-full-hybrid-project-executor-completed-with-unknown-change
 sources:
 - stdin
 timestamp: 2026-07-16T16:28:55.719047+00:00
@@ -29,6 +28,10 @@ timestamp: 2026-07-16T11:49:44.975486+00:00
 created_at: 2026-07-16T11:49:44.975486+00:00
 updated_at: 2026-07-16T11:49:44.975486+00:00
 revision: 0
+timestamp: 2026-07-16T16:54:19.714404+00:00
+created_at: 2026-07-16T16:54:19.713935+00:00
+updated_at: 2026-07-16T16:54:19.714404+00:00
+revision: 1
 ---
 
 ## Context
@@ -63,17 +66,19 @@ Because the recorded change is `unknown`, do not treat code generation output or
 - Repository diff, commit hash, or working-tree state after completion.
 - Failures, skipped checks, flaky jobs, or required remediation tasks.
 This is a completion-only executor metadata record. Because the recorded change is `unknown`, do not treat code generation or CI verification as accepted solely from this record. This should be handled with the same caution as other completion-only records such as [Executor scaffold-full-hybrid-project completed with unknown change](/executor-scaffold-full-hybrid-project-completed-with-unknown-change.md) and [Scaffold full hybrid project executor completed with unknown change](/scaffold-full-hybrid-project-executor-completed-with-unknown-change.md).
+This is a completion-only executor metadata record. Treat it similarly to other completion-only records with unknown changes, such as [Executor scaffold-full-hybrid-project completed with unknown change](/executor-scaffold-full-hybrid-project-completed-with-unknown-change.md), but note that this record applies to the code generation and CI verification phase rather than scaffold generation.
 
 ## Verification requirements
 
-Before relying on this phase as complete, verify concrete evidence such as:
+Because the recorded change is `unknown`, do not treat code generation or CI verification as accepted until a later assessment identifies and validates concrete evidence, such as:
 
-- Generated source files or bindings expected from the codegen phase.
-- Clean repository diff or documented generated artifacts.
-- Successful CI run identifiers, logs, or status checks.
-- Passing build, test, lint, formatting, and type-check commands relevant to the project.
-- Absence of uncommitted or unexplained generated output.
+- Generated or modified source files
+- Updated bindings, schemas, clients, or build artifacts
+- CI workflow execution results
+- Test, lint, format, or build logs
+- Repository diffs proving expected phase outputs
+- Any failed checks requiring follow-up remediation
 
 # Citations
 
-1. [1] stdin
+1. stdin

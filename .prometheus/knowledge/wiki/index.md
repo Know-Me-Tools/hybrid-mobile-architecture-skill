@@ -137,6 +137,7 @@
 * [KnowMe PoC PGlite config DB startup lock error](/knowme-poc-pglite-config-db-startup-lock-error.md)
 * [KnowMe PoC phase analysis complete with README and reference docs](/knowme-poc-phase-analysis-complete-with-readme-and-reference-docs.md)
 * [KnowMe PoC phase awaits architecture map for DB startup plan](/knowme-poc-phase-awaits-architecture-map-for-db-startup-plan.md)
+* [KnowMe PoC phase goals and C-105 research wait state](/knowme-poc-phase-goals-and-c-105-research-wait-state.md)
 * [KnowMe PoC phase waits for background completion signal](/knowme-poc-phase-waits-for-background-completion-signal.md)
 * [KnowMe PoC router wired to ChatScreen index route](/knowme-poc-router-wired-to-chatscreen-index-route.md)
 * [KnowMe PoC spec and wiki handoff after first codegen run](/knowme-poc-spec-and-wiki-handoff-after-first-codegen-run.md)
