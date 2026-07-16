@@ -26,6 +26,11 @@ tracing.workspace = true
 keyring.workspace = true
 uuid.workspace = true
 futures.workspace = true
+# C-106: assembling the forge/Quarry WriteSink here keeps the platform leaves thin —
+# they would otherwise each need these two just to construct a client. Both are already
+# in gen_ui_client's graph, so this adds no new third-party code to the build.
+reqwest = { workspace = true, default-features = false, features = ["rustls-tls", "json"] }
+parking_lot.workspace = true
 
 [target.'cfg(target_os = "ios")'.dependencies]
 # Cargo feature-unifies this into the same apple-native-keyring-store instance

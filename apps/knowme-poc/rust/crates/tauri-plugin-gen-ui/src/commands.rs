@@ -80,11 +80,106 @@ pub async fn load_seeds() -> Result<()> {
     Ok(())
 }
 
-/// Boot-order invariant, step 3: attach sync shapes. C-106's job — real no-op
-/// until then (migrations+seeds must still run first even without live sync).
+/// Boot-order invariant, step 3: attach sync (C-106).
+///
+/// Starts the FRF-backed [`FrfSyncTransport`]: the read lane materialises server row
+/// changes into the local pglite store, and the write queue replays local mutations
+/// through forge/Quarry. MUST run after `run_migrations` — a change cannot be applied to
+/// a table that does not exist yet, which is the whole reason boot order is an invariant
+/// here and not a suggestion.
+///
+/// **Sync is opt-in and absent-by-default.** With no `sync.frf` settings in the config
+/// DB this returns `Ok(())` and the app runs purely local. That is the correct default
+/// for a PoC whose fabric is a private cross-org service most developers cannot reach —
+/// failing startup because an optional backend is unconfigured would make the app
+/// unrunnable for everyone who is not doing sync work today.
 #[tauri::command]
-pub async fn attach_sync_shapes() -> Result<()> {
+pub async fn attach_sync_shapes<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> {
+    use gen_ui_db::sync::{FrfSyncTransport, PgLocalStore, SyncTransport};
+
+    let data_dir = app.path().app_data_dir()?;
+    let Some(cfg) = read_sync_config(&data_dir).await? else {
+        log::info!("sync: not configured (no `sync.frf` setting) — running local-only");
+        return Ok(());
+    };
+
+    // The pool the read lane writes into is the SAME pglite store `run_migrations`
+    // opened — `PgliteStore::open` is a per-process singleton, so this hands back the
+    // live server rather than racing a second one against the same directory.
+    let store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    let local = Arc::new(PgLocalStore::new(store.store().pool().clone()));
+
+    let sink = gen_ui_agent::sync_sink::forge_write_sink(
+        cfg.forge_base.clone(),
+        "public",
+        cfg.token.clone(),
+    )?;
+
+    let transport = FrfSyncTransport::new(cfg.into_transport_config(), local, sink);
+    transport.start().await?;
+
+    // Hold the transport for the process lifetime: dropping it stops the drain loop and
+    // the read lane (they only live as long as the Arcs they captured).
+    SYNC
+        .set(Arc::new(transport))
+        .map_err(|_| gen_ui_types::CoreError::Terminal("sync already attached".into()))?;
     Ok(())
+}
+
+/// The live sync transport. `OnceCell` mirrors `gen_ui_agent::state`'s process-lifetime
+/// pattern and makes a second `attach_sync_shapes` a loud error rather than a silent
+/// second engine competing for the same channel.
+static SYNC: OnceCell<Arc<gen_ui_db::sync::FrfSyncTransport>> = OnceCell::new();
+
+/// Sync settings as stored in the config DB under `sync.frf`.
+#[derive(serde::Deserialize)]
+struct SyncSettings {
+    endpoint: String,
+    tenant_id: String,
+    channel_path: String,
+    consumer_id: String,
+    forge_base: String,
+    #[serde(default)]
+    token: Option<String>,
+}
+
+impl SyncSettings {
+    fn into_transport_config(self) -> gen_ui_db::sync::FrfSyncConfig {
+        gen_ui_db::sync::FrfSyncConfig {
+            endpoint: self.endpoint,
+            token: self.token,
+            tenant_id: self.tenant_id,
+            channel_path: self.channel_path,
+            consumer_id: self.consumer_id,
+            write_batch: 32,
+            max_write_attempts: 5,
+        }
+    }
+}
+
+/// Read `sync.frf` from the config DB. `Ok(None)` = not configured (the default).
+///
+/// A malformed setting IS an error: someone tried to configure sync and got it wrong,
+/// and silently falling back to local-only would hide that from them.
+async fn read_sync_config(data_dir: &std::path::Path) -> Result<Option<SyncSettings>> {
+    use gen_ui_db::relational::ConfigStore;
+
+    let store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    let Some(raw) = store
+        .store()
+        .get_setting("sync.frf")
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?
+    else {
+        return Ok(None);
+    };
+    let parsed = serde_json::from_value(raw)
+        .map_err(|e| gen_ui_types::CoreError::Serde(format!("sync.frf setting: {e}")))?;
+    Ok(Some(parsed))
 }
 
 /// C-104 wires the real memory graph-RAG ingest; stub keeps the app booting.
