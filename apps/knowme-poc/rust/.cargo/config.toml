@@ -25,3 +25,11 @@
 # the browser target — it no longer auto-detects JS availability. See:
 # https://docs.rs/getrandom/latest/getrandom/#webassembly-support
 rustflags = ["--cfg", "getrandom_backend=\"wasm_js\""]
+
+[net]
+# C-106: the FRF crates are a private git dep (ssh://git@github.com/...). Cargo's
+# built-in libgit2 SSH transport fails against it ("attempted ssh-agent authentication,
+# but no usernames succeeded") while the git CLI authenticates fine, so delegate fetching
+# to the CLI — it honours ~/.ssh/config, agent forwarding, and keychain/1Password agents.
+# This is Cargo's own documented remedy for private SSH deps.
+git-fetch-with-cli = true

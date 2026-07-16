@@ -59,7 +59,7 @@
 - [x] T3d — Postgres schema + CDC publication: notes/memories tables (carry T3's PK and
       soft-delete design forward) + the `CREATE PUBLICATION` / replication-slot config
       `frf-postgres-cdc` requires, and the `channel_path` its rows land on.
-- [ ] T4b — Un-stub the `frf` feature: real `frf-sdk-rust` git dep at the pinned rev
+- [x] T4b — Un-stub the `frf` feature: real `frf-sdk-rust` git dep at the pinned rev
       (`9ba04ae…`, Rule 22/23) in the workspace + gen_ui_client Cargo.tomls; keep it
       native-only and wasm-excluded (tonic/HTTP-2 does not build for wasm32 — the
       existing cfg-gating already anticipates this). Verify wasm32 still checks clean.
