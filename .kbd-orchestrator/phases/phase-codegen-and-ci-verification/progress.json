@@ -64,11 +64,11 @@
     },
     {
       "id": "2026-07-16-c113-mobile-platform-navigation",
-      "status": "pending",
+      "status": "merged",
       "wave": 2
     }
   ],
-  "completedChanges": 5,
+  "completedChanges": 8,
   "totalChanges": 10,
   "previousPhase": "scaffold-full-hybrid-project",
   "startedAt": "2026-07-15T22:04:11Z",

@@ -361,3 +361,61 @@ SupabaseClient supabase(Ref ref) => Supabase.instance.client;
 Stream<AuthState> authState(Ref ref) =>
     ref.watch(supabaseProvider).auth.onAuthStateChange;
 ```
+
+## Navigation placement (C-113)
+
+**Top-level destinations go in a bottom `NavigationBar`.** Not a top tab bar.
+
+This is not a stylistic preference and it is not a per-platform branch — it is what
+both platforms' own guidance says:
+
+- **iOS HIG** ([Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars)):
+  a tab bar "lets people navigate between **top-level sections**" and "floats above
+  content at the **bottom of the screen**". Top-placed tab bars on iPhone aren't
+  discouraged — they're never contemplated. The HIG's explicit prohibition is about
+  *purpose*: "Use a tab bar to support navigation, not to provide actions."
+- **Material 3** ([Navigation bar](https://m3.material.io/components/navigation-bar/guidelines)):
+  navigation bars are "**always placed at the bottom**", carry "**three to five**"
+  destinations, and "should be used for **top-level destinations**".
+
+### The trap: M3 tabs are not navigation
+
+Android has a top tabs component, which makes it *look* like the platforms disagree.
+They don't. M3 draws the line by purpose, not placement
+([Tabs](https://m3.material.io/components/tabs/guidelines)):
+
+> Use navigation for distinct pages and **tabs for related content within a page**.
+
+M3's own illustration puts tabs *inside* a navigation-bar destination. So:
+
+- App-level destinations (Chat, Notes, Memory) → bottom `NavigationBar`. Both platforms.
+- Switching content *within* one destination → `TabBar` under the app bar. Android idiom;
+  on iOS prefer a segmented control.
+
+M3 also says <3 destinations → use tabs instead of a nav bar, and >5 → tabs or a rail.
+
+### Where the platform check goes: nowhere
+
+There is no platform check. One bottom `NavigationBar` satisfies HIG and M3
+simultaneously, so `Platform.isIOS` in navigation code is a smell — it implies a
+divergence that doesn't exist at phone width, and it's a branch nobody tests both sides
+of.
+
+### What DOES change: form factor, not OS
+
+Both platforms abandon bottom placement as the window widens — Apple moves the tab bar
+to the top on iPad; M3 swaps the bar for a `NavigationRail`. Branch on **width**, never
+on OS:
+
+```dart
+// Scope the switch to layout, not platform.
+final useRail = MediaQuery.sizeOf(context).width >= 600; // M3 compact→medium
+```
+
+### Layer contract
+
+Navigation state belongs to the router, not a Riverpod provider. `GoRouter`'s
+`ShellRoute` owns the shell; the selected index is *derived* from
+`GoRouterState.of(context).matchedLocation` rather than stored — two sources of truth
+for "where am I" is how the bar and the route drift apart. Keep one destinations list
+so labels, icons, and paths cannot disagree (see the PoC's `lib/app/router.dart`).

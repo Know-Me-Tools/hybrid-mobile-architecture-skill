@@ -37,6 +37,15 @@ SKILLS = {
         "traffic lights", "window controls", "minimize", "maximize", "close button",
         "frameless", "drag region", "custom header",
     ],
+    "mobile-navigation": [
+        "navigation", "nav bar", "navigation bar", "bottom nav", "tab bar", "tabs",
+        "navigationbar", "navigationrail", "bottomnavigationbar", "tabbar", "rail",
+        "sidebar", "app shell", "destinations", "shellroute", "router layout",
+        "pwa navigation", "mobile layout", "responsive nav",
+        # The wrong turn this skill exists to prevent: branching nav on OS rather
+        # than width. Catch the check itself, not just the nav vocabulary.
+        "platform.isios", "platform.isandroid", "useragent", "user agent",
+    ],
     "flutter-golden-ui": [
         "flutter widget", "flutter screen", "golden test", "golden file",
         "widget test", "visual regression", "shadcn_flutter", "consumerwidget",

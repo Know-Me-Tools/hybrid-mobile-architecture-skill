@@ -375,3 +375,65 @@ export function renderBlock(block: ContentBlock): React.ReactNode {
   }
 }
 ```
+
+## Navigation placement — mobile web / PWA (C-113)
+
+The React bundle serves Tauri desktop **and** mobile-web/PWA, where it runs on iOS and
+Android browsers. The rule:
+
+**One convention: bottom navigation at phone width, rail above it. No platform
+detection.**
+
+### Why not adapt to the detected platform
+
+1. **Nothing to adapt to.** iOS and Android converge on bottom placement for top-level
+   destinations at phone width — Apple's HIG puts the tab bar at the **bottom** for
+   "top-level sections"; M3 says navigation bars are "**always placed at the bottom**"
+   for "top-level destinations". One bottom bar satisfies both. Android's top tabs are a
+   different component for a different purpose ("navigation for distinct pages and tabs
+   for related content within a page"), not a rival placement.
+2. **No authority backs the alternative.** web.dev's PWA
+   [App design](https://web.dev/learn/pwa/app-design) chapter — the closest candidate —
+   doesn't address navigation placement at all. Its only platform-adaptation advice is
+   cosmetic and internally inconsistent (icons platform-*agnostic*, fonts
+   platform-*native*).
+3. **Detection is unreliable.** OS detection on the web is UA-sniffing, and Client Hints
+   deliberately reduce that signal. Adaptive nav means shipping and testing two nav trees
+   keyed off a fragile input, for no guidance-backed benefit.
+
+### Branch on width, never on OS
+
+Both platforms abandon bottom placement as windows widen (Apple → top tab bar/sidebar on
+iPad; M3 → `NavigationRail`). That's a **form-factor** split, and it's the only one:
+
+```css
+/* index.css — make `sm:` mean M3's compact→medium boundary, not Tailwind's 640px.
+   https://m3.material.io/foundations/layout/applying-layout/window-size-classes */
+@theme { --breakpoint-sm: 600px; }
+```
+
+```tsx
+// One destinations list, two chromes. Never a platform check.
+<nav aria-label="Main (rail)"   className="hidden sm:flex …">…</nav>
+<main>{children}</main>
+<nav aria-label="Main (bottom bar)" className="flex sm:hidden …">…</nav>
+```
+
+Label the two navs distinctly — only one is visible, but two identically-named "Main"
+landmarks are ambiguous to a screen reader.
+
+### PWA specifics
+
+- `pb-[env(safe-area-inset-bottom)]` on the bottom bar, or it sits under the iOS home
+  indicator when installed.
+- Derive the active destination from the router
+  (`useRouterState({ select: s => s.location.pathname })`), don't mirror it into a store —
+  that's a second source of truth for "where am I".
+- Exact-match the index route (`path === '/' ? pathname === '/' : pathname.startsWith(path)`),
+  or `/` lights up on every route.
+
+### Layer contract
+
+The shell is a component that reads the router's own hooks — it needs no store. Keep one
+destinations list (see the PoC's `src/app/navigation.ts`) so a destination can't drift
+between the bar and the rail.

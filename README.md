@@ -150,7 +150,7 @@ hybrid-mobile-architecture/
     new-feature.sh / add-auth.sh / audit.sh
   templates/project-skills/         # content-block-ui · hybrid-design-tokens ·
                                     #   tauri-ui-review · tauri-custom-titlebar ·
-                                    #   flutter-golden-ui · a11y-gate
+                                    #   mobile-navigation · flutter-golden-ui · a11y-gate
   apps/                             # Proof-of-concept applications (knowme-poc upcoming)
   openspec/                         # OpenSpec change management (active + archive)
 ```
