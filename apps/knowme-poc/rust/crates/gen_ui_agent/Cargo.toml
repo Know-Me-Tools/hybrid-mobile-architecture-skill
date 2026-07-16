@@ -14,11 +14,17 @@ gen_ui_protocol = { path = "../gen_ui_protocol" }
 gen_ui_client   = { path = "../gen_ui_client", default-features = false, features = ["native-http"] }
 gen_ui_db_graph = { path = "../gen_ui_db_graph", features = ["embed-native"] }
 gen_ui_mcp      = { path = "../gen_ui_mcp" }
-# NOTE: no gen_ui_inference dependency here, deliberately. This crate drives local
-# inference purely through the `gen_ui_types::inference::InferenceProvider` trait
-# object handed to `state::init_with_inference`; the concrete engine is selected by
-# the platform leaf (tauri-plugin-gen-ui enables `local-mistral`). That keeps the
-# mobile llama-cpp-2 lane from ever touching this crate.
+# The library NEVER names a concrete engine: it drives local inference purely
+# through the `gen_ui_types::inference::InferenceProvider` trait object handed to
+# `state::init_with_inference`, and the platform leaf picks the engine
+# (tauri-plugin-gen-ui enables `local-mistral`). That keeps the mobile llama-cpp-2
+# lane from ever touching this crate.
+#
+# This optional dep exists ONLY for the `test-local-mistral` feature, which the
+# C-105 T12 live test uses to drive a real model through the public chat::send
+# path. Off in every normal build — including mobile's, which must not resolve
+# mistral.rs at all.
+gen_ui_inference = { path = "../gen_ui_inference", features = ["local-mistral"], optional = true }
 liter-llm.workspace = true
 async-trait.workspace = true
 anyhow.workspace = true
@@ -57,6 +63,13 @@ apple-native-keyring-store.workspace = true
 gen_ui_db = { path = "../gen_ui_db", features = ["pglite"] }
 [target.'cfg(any(target_os = "ios", target_os = "android"))'.dependencies]
 gen_ui_db = { path = "../gen_ui_db" }
+
+[features]
+# Pulls the concrete desktop engine in as a DEV dependency so the C-105 T12 live
+# test can drive chat::send's local lane end-to-end. Not a library feature: the
+# crate itself never names an engine (see the note on the dependencies above), and
+# nothing in a normal build turns this on.
+test-local-mistral = ["dep:gen_ui_inference"]
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }

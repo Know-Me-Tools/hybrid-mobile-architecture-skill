@@ -53,7 +53,28 @@ const QWEN_TOK_REPO: &str = "Qwen/Qwen2.5-1.5B-Instruct";
 /// an absolute path (trait contract), so the catalog stays a lookup, not a type.
 const CATALOG_QWEN_1_5B: &str = "qwen2.5-1.5b-instruct-q4";
 const CATALOG_QWEN_1_5B_REPO: &str = "Qwen/Qwen2.5-1.5B-Instruct-GGUF";
-const CATALOG_QWEN_1_5B_FILE: &str = "qwen2.5-1.5b-instruct-q4_k_m.gguf";
+/// Q4_0, NOT the Q4_K_M the C-105 plan originally named.
+///
+/// K-quants are BROKEN for Qwen2.5 on the pinned mistral.rs fork: Q4_K_M and
+/// Q5_K_M both emit degenerate repetition loops that echo the prompt back
+/// ("Say hello in exactly word `` `` ``…"), while Q4_0 and Q8_0 answer
+/// correctly. TinyLlama's Q4_K_M is fine, so this is Qwen-architecture-specific
+/// K-quant dequantization — almost certainly the same candle version skew that
+/// broke safetensors (see the [patch] note in the workspace Cargo.toml; that fix
+/// made it compile, but the quant kernels are evidently still mismatched).
+///
+/// Verified directly against the engine's own API, bypassing all of our code, so
+/// this is not a bug in this crate. Q4_0 is the same ~1GB size class and is the
+/// honest choice until the fork re-syncs its candle. Re-test the K-quants after
+/// any candle/mistral.rs bump — the evidence table is in the C-105 design doc.
+const CATALOG_QWEN_1_5B_FILE: &str = "qwen2.5-1.5b-instruct-q4_0.gguf";
+
+/// Top-k candidate pool. The `InferenceProvider` seam's `SampleParams` carries
+/// only temperature/top_p/max_tokens (it's frozen — see gen_ui_types), so this
+/// lane picks its own: 40 is the long-standing llama.cpp/HF default and is what
+/// Qwen2.5's own generation_config recommends. It exists mainly to displace
+/// mistral.rs's `top_k = 1` default — see the comment at the call site.
+const DEFAULT_TOP_K: usize = 40;
 
 /// mistral.rs-backed engine. `load` is idempotent per the trait contract: loading
 /// the spec that is already resident is a no-op rather than a re-download.
@@ -127,8 +148,13 @@ impl InferenceProvider for MistralEngine {
         // no sequence-length override (verified against the API at our pinned rev) —
         // a GGUF's context length is baked into the file's own metadata. The field
         // stays in the trait for the llama-cpp-2 mobile lane, which does accept one.
-        let model = GgufModelBuilder::new(repo, vec![file])
-            .with_tok_model_id(QWEN_TOK_REPO)
+        let mut builder = GgufModelBuilder::new(repo, vec![file]).with_tok_model_id(QWEN_TOK_REPO);
+        // Opt-in engine logging (chat-template resolution, device mapping, load
+        // progress). Gated on an env var so a normal run stays quiet.
+        if std::env::var_os("GEN_UI_INFERENCE_LOG").is_some() {
+            builder = builder.with_logging();
+        }
+        let model = builder
             .build()
             .await
             // The builder returns anyhow::Error (NOT mistralrs::error::Error — the
@@ -158,6 +184,14 @@ impl InferenceProvider for MistralEngine {
             .add_message(TextMessageRole::User, prompt)
             .set_sampler_temperature(params.temperature as f64)
             .set_sampler_topp(params.top_p as f64)
+            // MUST be set explicitly. RequestBuilder::new() starts from
+            // SamplingParams::deterministic(), which pins top_k = 1 — pure greedy
+            // decoding that overrides temperature and top_p entirely (there is
+            // only ever one candidate to sample from). Left at the default, a
+            // 1.5B model degenerates into a repetition loop that echoes the
+            // prompt back forever, and no temperature value changes it.
+            // Verified against a real model: see tests/local_inference_live.rs.
+            .set_sampler_topk(DEFAULT_TOP_K)
             .set_sampler_max_len(params.max_tokens as usize);
 
         // mistral.rs's `Stream<'a>` borrows the `Model` it came from, but the trait

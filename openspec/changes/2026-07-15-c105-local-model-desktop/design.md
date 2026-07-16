@@ -159,6 +159,40 @@ workspace those belong in git regardless, but here it is load-bearing:
 
 The rule was narrowed to genuine build-tool scratch locks (Gradle, build_runner).
 
+## K-quants are broken for Qwen2.5 on this fork (found at T12, 2026-07-16)
+
+The plan named **Q4_K_M**. It does not work. The live test initially "passed" while
+the model emitted a repetition loop echoing the prompt back — the assertion was only
+`!text.is_empty()`, which a well-formed garbage stream satisfies.
+
+Isolated by driving mistral.rs's own API directly, bypassing every line of our code:
+
+| Model | Quant | Type | Output |
+|---|---|---|---|
+| Qwen2.5-1.5B-Instruct | Q4_K_M | K-quant | `"Say hello in exactly word `` `` ``…"` ❌ |
+| Qwen2.5-1.5B-Instruct | Q5_K_M | K-quant | `"/distributed you/your/your/your…"` ❌ |
+| Qwen2.5-1.5B-Instruct | Q4_0 | legacy | `"Hello"` ✅ |
+| Qwen2.5-1.5B-Instruct | Q8_0 | legacy | `"Hello"` ✅ |
+| TinyLlama-1.1B-Chat | Q4_K_M | K-quant | `"Ho!"` ✅ |
+
+So: **not** our code, **not** the chat template, **not** sampling, and **not** K-quants
+in general — it is Qwen-architecture-specific K-quant dequantization on the pinned
+fork. Almost certainly the same candle version skew that broke `safetensors`: the
+`[patch]` made the workspace compile, but the quant kernels are evidently still
+mismatched against what mistralrs-quant expects.
+
+**Resolution:** the catalog ships **Q4_0** — same ~1GB size class, verified correct.
+Re-test the K-quants after any candle/mistral.rs bump.
+
+### A second real bug, found the same way
+
+`RequestBuilder::new()` starts from `SamplingParams::deterministic()`, which pins
+**`top_k = 1`**. That is greedy decoding, and it silently overrides temperature and
+top_p — there is only ever one candidate to sample from. `SampleParams` (frozen in
+gen_ui_types) carries no top_k, so the lane now sets `DEFAULT_TOP_K = 40` explicitly.
+Changing temperature had no effect until this was fixed, which is what first made the
+"it must be the template" hypothesis look plausible.
+
 ## Verified so far
 
 - `cargo clippy -p gen_ui_inference --features local-mistral --all-targets -D warnings` — clean.

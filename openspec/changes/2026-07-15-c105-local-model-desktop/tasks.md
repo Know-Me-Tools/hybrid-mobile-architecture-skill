@@ -33,12 +33,41 @@
       `CoreA2uiEvent`s as the Tauri path so the store stays lane-agnostic;
       `navigator.gpu` gate with visible cloud degrade; dynamic import; idempotent
       load that does not cache failures. `tsc --noEmit` clean.
-- [ ] T9 — `tauri-plugin-gen-ui`: depend on `gen_ui_inference`
-      (`features = ["local-mistral"]`), add local-inference commands + permissions.
-- [ ] T10 — `gen_ui_agent` lane selection: local slots in behind the existing
-      `get_model_pref(surface, lane)` lookup alongside `LANE_CLOUD`, reusing
-      `run_stream`'s A2UI adaptation rather than duplicating it.
-- [ ] T11 — Desktop cloud↔local toggle in the chat store + tok/s display.
-- [ ] T12 — End-to-end smoke test: real model load + generation on desktop Tauri,
-      and the WebLLM lane in a browser. Confirm mistral.rs's internal
-      spawn_blocking behaviour empirically (design.md flags it as unverified).
+- [x] T9 — `tauri-plugin-gen-ui`: depends on `gen_ui_inference`
+      (`features = ["local-mistral"]`); constructs `MistralEngine` in
+      `run_migrations` and hands it to `state::init_with_inference`. Added
+      get/set_active_lane + has_local_engine commands, registered in build.rs's
+      COMMANDS (permissions autogenerate from it) and the default permission set.
+- [x] T10 — `gen_ui_agent` lane selection: `chat::send` reads the `active_lane`
+      app setting (unset → cloud, so existing installs are unchanged) and routes
+      to `send_local`, which resolves the `chat`/`local` model_pref and drives the
+      `InferenceProvider` trait object. Local `load()` runs before `send` returns
+      the run_id — a first-run download is minutes long, and reporting "started"
+      before the model exists would leave the UI streaming nothing.
+      Selecting `local` with no engine is `NoLocalEngine`, never a silent cloud
+      fallback. `ModelPref` gained `params` (both storage engines already carried
+      it) for temperature/top_p/max_tokens/context_len with per-key fallbacks.
+- [x] T11 — LaneSwitcher + laneStore/useLane: toggle hidden entirely when no
+      local lane exists; download progress; tok/s on local runs only (on cloud it
+      would measure the network and the provider's load, not this machine);
+      failed switches surface the error rather than silently reverting.
+- [x] T11b — **Fixed a pre-existing desktop A2UI bug found while wiring tok/s**:
+      the plugin emits `A2uiEvent` verbatim (`{"type":"block"}` /
+      `{"type":"run_finished"}`), but `driver.ts` switched on
+      `contentBlock`/`messageComplete` — matching neither, so the desktop lane
+      rendered nothing and had not since C-103. An `as never` cast at the call
+      site hid it from tsc. Added `createA2uiWireAdapter` (maps the real wire
+      shape; binds run-scoped events to the store's message id; accumulates
+      per-token deltas into one growing block, matching the WebLLM lane) plus
+      5 tests covering the contract that had gone unverified.
+- [x] T12a — Live no-engine guard test: **passing**. `set_active_lane("local")`
+      with no engine fails loudly instead of falling through to cloud.
+- [ ] T12b — Live local-model test (`chat_send_streams_a_real_local_response`):
+      real ~1GB GGUF download + Metal generation through the public `chat::send`
+      path. `#[ignore]`d and feature-gated (`test-local-mistral`) following the
+      `ollama_live.rs` precedent — the only honest verification, since the fork's
+      own crates failed to build together until the candle patch and no
+      type-check would have caught that.
+- [ ] T12c — Verify the WebLLM lane in a real browser.
+- [ ] T12d — Confirm mistral.rs's internal spawn_blocking behaviour empirically
+      (design.md flags it as unverified).
