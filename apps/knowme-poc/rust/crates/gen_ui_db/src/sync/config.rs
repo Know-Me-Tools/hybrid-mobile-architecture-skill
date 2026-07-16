@@ -1,4 +1,7 @@
 // TJ-ARCH-MOB-001 compliant
+//! **LEGACY (Electric lane)** — `SyncConfig`/`ShapeSpec` configure the superseded
+//! `SyncEngine`. The FRF path uses `FrfSyncConfig` (frf_transport.rs). `SyncConfig` is
+//! still read by `WriteQueue` for its batch/attempt limits, so it is not dead yet.
 //! Sync engine configuration. Pure data; no IO.
 
 /// One Electric shape to consume. Kept minimal — the shape `where`/`columns`

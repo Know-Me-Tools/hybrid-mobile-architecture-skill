@@ -5,7 +5,9 @@ use async_trait::async_trait;
 use gen_ui_types::error::CoreResult;
 use serde::{Deserialize, Serialize};
 
-/// A single row change decoded from an Electric shape message.
+/// A single decoded row change — from an FRF spine `EntityChange` (current) or an
+/// Electric shape message (legacy lane). Substrate-neutral by design: it is the seam
+/// both read lanes converge on before touching a [`LocalStore`].
 #[derive(Debug, Clone, PartialEq)]
 pub struct RowChange {
     pub table: String,

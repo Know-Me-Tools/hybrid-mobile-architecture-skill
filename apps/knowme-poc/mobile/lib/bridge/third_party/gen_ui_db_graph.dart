@@ -13,21 +13,28 @@ abstract class GraphError implements RustOpaqueInterface {}
 abstract class GraphStore implements RustOpaqueInterface {
   /// INTENT: create (or upsert) a graph entity node. `id` is the record key
   /// (e.g. `project_x`); `label`/`entity_type` are indexed graph metadata.
-  Future<String> createEntity(
-      {required String id, required String entityType, required String label});
+  Future<String> createEntity({
+    required String id,
+    required String entityType,
+    required String label,
+  });
 
   /// INTENT: expand the graph outward from `entity_id` up to `depth` RELATE hops,
   /// fusing per-depth neighbour lists with Rust RRF (nearer hops rank higher).
-  Future<List<RelatedEntity>> graphExpand(
-      {required String entityId, required int depth});
+  Future<List<RelatedEntity>> graphExpand({
+    required String entityId,
+    required int depth,
+  });
 
   /// INTENT: ingest a memory. Embeds `text`, stores row + vector, returns the id.
   Future<String> memoryIngest({required MemoryRecord record});
 
   /// INTENT: hybrid semantic + lexical search. Embeds `query`, runs the vector
   /// and BM25 lanes, fuses them with native `search::rrf`, returns top-`k`.
-  Future<List<MemoryHit>> memorySearch(
-      {required String query, required BigInt k});
+  Future<List<MemoryHit>> memorySearch({
+    required String query,
+    required BigInt k,
+  });
 
   /// Open (or return/await the already-opening) singleton embedded store for
   /// this process, selecting ns/db and applying the schema on first open.
@@ -39,8 +46,11 @@ abstract class GraphStore implements RustOpaqueInterface {
 
   /// INTENT: create a directed RELATE edge `from -> to` with a relation label.
   /// Edges are what `graph_expand` traverses.
-  Future<void> relate(
-      {required String from, required String to, required String rel});
+  Future<void> relate({
+    required String from,
+    required String to,
+    required String rel,
+  });
 }
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GraphStoreConfig>>

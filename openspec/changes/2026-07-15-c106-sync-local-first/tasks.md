@@ -117,11 +117,35 @@
       the other surface, desktop ↔ iOS sim. Record what was OBSERVED, not intended.
       **Blocked on Docker registry auth on this host** (`docker pull hello-world` fails
       identically — stale credential, not our compose).
-- [ ] T7b — Rewrite `gen_ui_db/src/sync/README.md`: the browser path is frf-wasm /
+- [x] T7b — DONE. README rewritten for FRF (architecture diagram, per-platform status
+      table, why writes bypass the spine, how to enable the read lane); mod.rs docs, the
+      wasm stub note, and seam.rs's RowChange doc de-Electric-ised; shapes.rs + config.rs
+      marked LEGACY so the next reader is not misled. ORIGINAL:: the browser path is frf-wasm /
       Connect-web, not `@electric-sql/pglite-sync`. Remove the Electric shape-consumer
       docs from the native path or mark `shapes.rs` dead.
-- [ ] T8 — Boundary tests (3-5 per CLAUDE.md, not coverage-driven): write-queue replay
+- [x] T8 — DONE. 5 write-queue boundary tests (19/19 green in the sync module): offline
+      write replays on reconnect; give-up quarantine after max attempts; terminal 4xx
+      poisons on the first attempt without burning retries; idempotency key stable across
+      replays; retried write keeps its place ahead of later writes. Fakes at the IO
+      boundary only. tokio test-util added so backoff costs zero wall-clock. ORIGINAL: write-queue replay
       after reconnect, idempotent-key dedupe, poison handling. Fakes only at the IO
       boundary — no mocks of internal code.
-- [ ] T9 — Verify: `cargo clippy --workspace -D warnings`, `tsc --noEmit`, `dart analyze`
+- [x] T9 — DONE, and it found a REAL CI BUG rather than just passing.
+      * `cargo clippy --workspace -D warnings` — **green** (first time; see below).
+      * wasm32 (`gen_ui_wasm`) — green, sync still compiled out.
+      * **CI's Rust job could never have passed**: it runs `clippy --workspace` from a
+        bare checkout, but `gen_ui_ffi`'s `mod frb_generated;` is auto-injected by
+        flutter_rust_bridge and the generated file is NOT committed. Confirmed failing on
+        `main` with E0583 across every recent run. Fixed by adding the codegen step (the
+        Mobile job already had it). Codegen also needs the Dart/Flutter toolchain —
+        verified by running it with a Flutter-free PATH ("Dart/Flutter toolchain not
+        available") — so the Rust job gets `subosito/flutter-action` too.
+      * **Desktop Vitest job also fixed**: `pnpm/action-setup` with no version and no
+        `packageManager` field failed with "No pnpm version is specified" on every run.
+        Pinned explicitly.
+      * `tsc --noEmit` — still FAILS (12 errors), **pre-existing and unrelated**: the
+        `@prometheus-ags/tauri-plugin-gen-ui` guest-js package is unbuilt/unlinked.
+        Verified by stashing all my changes and reproducing on a clean tree. NOT fixed
+        here — out of C-106's scope, and silently folding an unrelated packaging fix into
+        a sync change is how a diff becomes unreviewable. ORIGINAL: `cargo clippy --workspace -D warnings`, `tsc --noEmit`, `dart analyze`
       clean; wasm32 still builds (FRF stays compiled out there).

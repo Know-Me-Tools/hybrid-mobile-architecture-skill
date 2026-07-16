@@ -1,4 +1,8 @@
 // TJ-ARCH-MOB-001 compliant
+//! **LEGACY (Electric lane).** Superseded by `frf_transport.rs` — the substrate moved
+//! to flint-realtime-fabric on 2026-07-16 (C-106) and nothing on the FRF path uses this.
+//! Kept until its removal is scheduled; do not build on it.
+//!
 //! Electric HTTP shape consumer. Long-polls the Electric `/v1/shape` endpoint,
 //! tracks `(handle, offset)`, and applies decoded rows to a [`LocalStore`].
 //!
