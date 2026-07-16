@@ -23,9 +23,9 @@
       CRUD in gen_ui_db_graph (mobile). Removed the sqlite scaffold entirely
       (Cargo.toml, relational/sqlite.rs, migrations/sqlite/, tests/it.rs test,
       scaffold-rust-core.sh) per user correction.
-- [ ] T4. (folded into T3 — desktop config store is pglite-oxide via ConfigStore,
+- [x] T4. (folded into T3 — desktop config store is pglite-oxide via ConfigStore,
       done)
-- [ ] T5. (folded into T6/T8 — web config store is PGlite on the TS side; wire
+- [x] T5. (folded into T6/T8 — web config store is PGlite on the TS side; wire
       alongside the web chat feature, not as separate Rust work)
 - [x] T6. Replace chat.rs's stub chat_send with a real liter-llm-backed call reading
       provider/model selection from the config DB; graceful degrade when no provider
@@ -79,5 +79,5 @@
       and runs stably (verified via `simctl`/`launchctl`, stable PID, no crash).
       Full chat functionality not tested since no LLM provider is configured in
       this fresh app — that's consistent with T10's graceful-degradation scope.
-- [ ] T12. Update decision-log.md / wiki with pinned SHAs for both forks and any
+- [x] T12. Update decision-log.md / wiki with pinned SHAs for both forks and any
       defects found (Rule 22/23 provenance)

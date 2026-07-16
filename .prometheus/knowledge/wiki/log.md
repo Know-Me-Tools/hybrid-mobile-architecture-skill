@@ -81,6 +81,8 @@
 * **Creation**: [KnowMe PoC Flutter Android device launch in progress](/knowme-poc-flutter-android-device-launch-in-progress.md)
 * **Creation**: [KnowMe PoC Ollama live-test port pending verification](/knowme-poc-ollama-live-test-port-pending-verification.md)
 * **Creation**: [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md)
+* **Creation**: [KnowMe PoC wasm cfg-split fix already merged on main](/knowme-poc-wasm-cfg-split-fix-already-merged-on-main.md)
+* **Creation**: [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md)
 * **Creation**: [KnowMe PoC Tauri launch wait-loop pending interactive verification](/knowme-poc-tauri-launch-wait-loop-pending-interactive-verification.md)
 * **Creation**: [KnowMe PoC live boot verification passed on fresh Tauri config DB](/knowme-poc-live-boot-verification-passed-on-fresh-tauri-config-db.md)
 * **Creation**: [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md)
