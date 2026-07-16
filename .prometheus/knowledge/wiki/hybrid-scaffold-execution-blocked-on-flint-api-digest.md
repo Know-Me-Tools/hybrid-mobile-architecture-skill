@@ -30,7 +30,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `scaffold-full-hybrid-project`
-- **KBD worktree:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c006-flint-integration`
+- **KBD worktree:** `~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c006-flint-integration`
 - **Captured:** `2026-07-15T19:21:15Z`
 - **Status:** `executing`
 - **Position:** `scaffold-full-hybrid-project`

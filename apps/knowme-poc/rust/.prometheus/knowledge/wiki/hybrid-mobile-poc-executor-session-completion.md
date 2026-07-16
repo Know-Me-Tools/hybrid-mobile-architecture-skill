@@ -25,7 +25,7 @@ revision: 0
 
 - **Phase:** `phase-codegen-and-ci-verification`
 - **Project:** Hybrid Mobile Architecture
-- **Repository root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **Repository root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Executor status:** session complete
 - **Recorded change:** unknown
 

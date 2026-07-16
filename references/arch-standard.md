@@ -24,7 +24,7 @@
 - Anthropic API client (reqwest HTTP/2 + rustls, SSE streaming, prompt caching)
 - A2UI protocol adapter (StreamEvent → A2uiEvent, 27 variants)
 - AG-UI protocol adapter (A2uiEvent → AguiEvent, bidirectional)
-- Local inference engine (candle GGUF, Metal/BLAS, 7 model catalog)
+- Local inference engines behind the `InferenceProvider` trait (mistral.rs desktop Metal / llama-cpp-2 mobile / WebLLM web — versions.toml [inference])
 - SurrealDB embedded (RocksDB, MemoryStore + ToolCache + EntityGraph)
 - MCP client registry (SSE + stdio transports, JSON-RPC 2.0)
 - Universal Agent Runtime (PMPO loop, max_turns guard, tool routing)
@@ -78,3 +78,20 @@ Every A2UI event maps to exactly one ContentBlock variant:
 | Artifact/generative UI | ★★★ | ★★★★★ | ★★★★★ |
 | Binary/install size | ★★★ | ★★★★★ | ★★★★ |
 | WebView fragmentation risk | None | Significant (mobile) | None on mobile |
+
+## Maintenance ownership (binding for multi-product rollout)
+
+The shared-core/two-shells pattern is a **permanent engineering function, not a
+one-time scaffold**. The strongest production precedent (1Password: one Rust
+core under Swift/Kotlin/TypeScript shells) maintains a dedicated squad whose
+job is the bridge layer between shells and core, plus purpose-built type-sync
+tooling — for a single product. Before committing a second product to this
+architecture, name the owner (person, fraction of a person, or an agent-run
+process with a human accountable) for:
+
+- the frb + Tauri-plugin bridge surfaces (codegen, type sync, streaming seams)
+- the embedded-engine lifecycle contracts (see `docs/pglite-oxide-tauri-hybrid.md`)
+- `versions.toml` currency and the `audit.sh doc-consistency` gate
+
+If no one owns the bridge, the two-shell strategy silently becomes two
+codebases. (Source: 2026-07-16 independent assessment, rec #10.)

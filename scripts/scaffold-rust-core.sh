@@ -218,16 +218,7 @@ cat > "$OUT/bacon.toml" << 'EOF'
 default_job = "clippy"
 
 [jobs.clippy]
-# NOT --all-features: gen_ui_ffi's `frb-streams` feature references the
-# codegen-emitted StreamSink<T> and only compiles after
-# `flutter_rust_bridge_codegen generate` has run. Enabling it before codegen
-# would break the inner loop. Run `bacon clippy-frb` after codegen to include it.
 command = ["cargo", "clippy", "--all-targets", "--", "-D", "warnings"]
-need_stdout = false
-
-[jobs.clippy-frb]
-# Post-codegen: lint the full FFI surface including the generated stream sinks.
-command = ["cargo", "clippy", "--all-targets", "--features", "gen_ui_ffi/frb-streams", "--", "-D", "warnings"]
 need_stdout = false
 
 [jobs.check-wasm]
@@ -3810,12 +3801,6 @@ flutter_rust_bridge.workspace = true
 anyhow.workspace = true
 log = "0.4"
 
-[features]
-# Enable AFTER `flutter_rust_bridge_codegen generate` has produced frb_generated.rs
-# (the project build turns it on). The stream fns reference the codegen-emitted
-# crate-local `StreamSink<T>`, so pre-codegen `cargo check` leaves this off.
-frb-streams = []
-
 [lints.rust]
 # `#[frb(...)]` expands to code guarded by `cfg(frb_expand)`, a cfg name that only
 # codegen defines. Declare it expected so the pre-codegen build is warning-clean
@@ -3844,12 +3829,14 @@ $MARK
 //! frb codegen root. Intent-level functions only (no raw SurrealQL / SQL across
 //! the bridge). init + submodules for streams and CRUD.
 //!
-//! \`streams\` is gated behind the \`frb-streams\` feature: its \`StreamSink<T>\`
-//! signatures reference the per-crate \`StreamSink\` type that
-//! \`flutter_rust_bridge_codegen generate\` emits into \`frb_generated.rs\`. Enable
-//! the feature after running codegen (the project build does this). The scaffold's
-//! pre-codegen \`cargo check\` gate leaves it off so the workspace checks clean.
-#[cfg(feature = "frb-streams")]
+//! \`streams\`'s \`StreamSink<T>\` signatures reference the per-crate \`StreamSink\`
+//! type that \`flutter_rust_bridge_codegen generate\` emits into
+//! \`frb_generated.rs\` — this crate is unbuildable before the first codegen run
+//! (see references/rust/new-block-type.md's codegen-first-run note). Codegen
+//! itself must run with \`--rust-features frb-streams\` gone (removed entirely,
+//! 2026-07: the module is no longer feature-gated) so it actually sees these
+//! functions and generates their SseEncode impls + Dart stream bindings —
+//! there is no build of this crate, gated or not, that doesn't need them.
 pub mod streams;
 pub mod entity;
 pub mod chat;
@@ -3892,9 +3879,12 @@ $MARK
 //! unqualified \`StreamSink\` name is the idiomatic frb 2.x form (see the frb
 //! README's streaming example).
 use crate::frb_generated::StreamSink;
-use gen_ui_types::events::A2uiEvent;
-use gen_ui_types::sync::SyncStatus;
-use gen_ui_types::transport::ChangeEvent;
+// \`pub use\` (not \`use\`) — frb_generated.rs re-exports this module's types via
+// \`use crate::api::streams::*\`, which only sees items visible through a public
+// path (same fix as api/chat.rs and api/entity.rs).
+pub use gen_ui_types::events::A2uiEvent;
+pub use gen_ui_types::sync::SyncStatus;
+pub use gen_ui_types::transport::ChangeEvent;
 
 /// Subscribe to the A2UI event stream for a chat run. The core produces
 /// ContentBlock-bearing events; the transport layer (\`@flint/react\`, flint_genui)

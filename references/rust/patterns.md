@@ -1,11 +1,11 @@
 # Rust Core Patterns Reference
-> gen_ui_core · Rust 1.95+ · Tokio 1.40 · candle 0.7 · **SurrealDB 3.2** · flutter_rust_bridge 2.12 · Tauri 2.x
+> gen_ui_core · Rust 1.96+ · Tokio 1.40 · mistral.rs (desktop) / llama-cpp-2 (mobile) · **SurrealDB 3.2** · flutter_rust_bridge 2.12 · Tauri 2.x
 
 ## Workspace layout (layered — compile-cache friendly)
 
 The Rust code is a **layered workspace**, not a single crate. Trait boundaries live in
 `gen_ui_types` (frozen after c001) so downstream crates develop in parallel worktrees without
-conflicts, and heavy dependencies (SurrealDB, candle) sit in leaf crates that cache
+conflicts, and heavy dependencies (SurrealDB, inference engines) sit in leaf crates that cache
 independently. See `references/rust/compile-speed.md` for the caching rationale — SurrealDB is
 isolated in its own crate specifically because `surrealdb-core`'s `build.rs` re-run issue
 (#6954) causes long recompiles otherwise.
@@ -15,7 +15,7 @@ rust/
   gen_ui_types/        # shared traits + newtypes + enums (FROZEN seam — c001)
   gen_ui_protocol/     # A2UI / AG-UI adapters, ProtocolPipeline
   gen_ui_client/       # Anthropic HTTP/2 + SSE client
-  gen_ui_inference/    # candle InferenceEngine (CPU-bound → spawn_blocking)
+  gen_ui_inference/    # InferenceProvider impls: mistral.rs desktop / llama-cpp-2 mobile (CPU-bound → spawn_blocking)
   gen_ui_mcp/          # McpClient + McpRegistry (SSE / stdio transports)
   gen_ui_db/           # SurrealDB 3.2 (MemoryStore, EntityGraph) — ISOLATED for caching
   gen_ui_agent/        # PMPO loop (UAR embedded)
@@ -44,7 +44,7 @@ resolver = "2"
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.95"
+rust-version = "1.96"
 
 [workspace.dependencies]
 tokio          = { version = "1.40",  features = ["full"] }
@@ -55,9 +55,11 @@ reqwest        = { version = "0.12",  features = ["json", "stream", "rustls-tls"
 reqwest-eventsource = "0.6"
 serde          = { version = "1.0",   features = ["derive"] }
 serde_json     = "1.0"
-candle-core    = { version = "0.7",   features = ["metal", "accelerate"] }
-candle-nn      = "0.7"
-candle-transformers = "0.7"
+# Inference engines are per-lane (versions.toml [inference]): mistral.rs on
+# desktop (Metal), llama-cpp-2 on mobile — both consumed ONLY by gen_ui_inference
+# behind gen_ui_types::inference::InferenceProvider. Pin by git SHA per Rule 22.
+# mistral-rs   = { git = "...", rev = "<sha>" }         # desktop lane
+# llama-cpp-2  = "<version>"                            # mobile lane
 hf-hub         = { version = "0.3",   features = ["tokio"] }
 tokenizers     = { version = "0.20",  features = ["http"] }
 # SurrealDB 3.2 — native uses kv-rocksdb; wasm32 uses kv-indxdb (set per-crate/target).
@@ -322,3 +324,17 @@ pub async fn memory_search(query: &str, k: usize) -> anyhow::Result<Vec<EntityHi
 pub async fn graph_expand(id: &RecordId, depth: u8) -> anyhow::Result<Vec<EntityHit>>;
 pub async fn upsert_entity(name: &str, kind: &str, embedding: Vec<f32>) -> anyhow::Result<RecordId>;
 ```
+
+### Embedded engine lifecycle (PGlite, SurrealDB, and any future engine)
+
+Both `gen_ui_db`'s PGlite-backed config store and this crate's SurrealDB store take
+an exclusive lock on their data directory when they start, the same way a
+standalone PostgreSQL server does. Open each one through a **coalesced** async
+singleton — `tokio::sync::OnceCell::get_or_try_init` (`PgliteStore::open`,
+`GraphStore::open`), never a check-then-act `get()`→start→`set()` cell, which
+loses to concurrent callers (React StrictMode double-invokes startup in dev) —
+and pair it with a single-instance guard at the app-shell level on desktop.
+Stale locks cannot occur (the OS advisory lock dies with the process), so no
+lock-file cleanup code belongs anywhere. See "Embedded engine lifecycle:
+singleton ownership and lock recovery" in `docs/pglite-oxide-tauri-hybrid.md`
+for the full pattern and the incident that motivated it.

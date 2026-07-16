@@ -18,7 +18,7 @@ links:
 sources:
 - stdin
 - manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project
-- /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging
+- ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging
 timestamp: 2026-07-15T20:21:06.490459+00:00
 created_at: 2026-07-15T20:21:06.490459+00:00
 updated_at: 2026-07-15T20:21:06.490459+00:00
@@ -30,7 +30,7 @@ revision: 0
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `scaffold-full-hybrid-project`
 - **Lane/change:** `C-007` FFI leaves + packaging
-- **KBD worktree:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging`
+- **KBD worktree:** `~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging`
 - **Captured:** `2026-07-15T20:09:42Z`
 - **Position:** `scaffold-full-hybrid-project`
 - **Status:** `execute_ready`
@@ -88,4 +88,4 @@ For adjacent in-progress lane state, see [Hybrid scaffold c004 awaits graph RAG 
 
 1. stdin
 2. manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project
-3. /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging
+3. ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c007-ffi-leaves-packaging

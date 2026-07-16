@@ -7,14 +7,14 @@ tags:
 - ci-verification
 - executor-session
 - unknown-change
-- build-validation
+- completion-record
 links:
-- codegen-and-ci-verification-executor-completed-with-unknown-change
+- executor-scaffold-full-hybrid-project-completed-with-unknown-change
 sources:
 - stdin
-timestamp: 2026-07-16T03:00:07.085389+00:00
-created_at: 2026-07-16T03:00:07.085331+00:00
-updated_at: 2026-07-16T03:00:07.085389+00:00
+timestamp: 2026-07-16T11:21:15.697766+00:00
+created_at: 2026-07-16T11:21:15.697719+00:00
+updated_at: 2026-07-16T11:21:15.697766+00:00
 revision: 1
 ---
 
@@ -26,19 +26,19 @@ revision: 1
 
 ## Record
 
-The executor session for `phase-codegen-and-ci-verification` completed. The source record does not identify concrete file changes, generated artifacts, CI workflow results, or repository state transitions.
+The executor session for `phase-codegen-and-ci-verification` completed. The source record does not identify concrete file changes, generated artifacts, CI results, or repository state transitions.
 
-This is a completion-only executor metadata record. Treat it consistently with the existing [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md) record.
+This is a completion-only executor metadata record. Treat it similarly to other completion-only records with unknown changes, such as [Executor scaffold-full-hybrid-project completed with unknown change](/executor-scaffold-full-hybrid-project-completed-with-unknown-change.md), while preserving that this record applies to the code generation and CI verification phase rather than scaffolding.
 
 ## Verification requirements
 
-Because the recorded change is `unknown`, do not treat code generation or CI verification as validated until later evidence identifies and confirms:
+Because the recorded change is `unknown`, do not treat code generation output or CI verification as accepted until later evidence identifies and validates concrete results, such as:
 
-- Generated code artifacts, if any.
-- Codegen, formatting, regeneration, or build commands that were executed.
-- CI workflow names, job IDs, logs, and pass/fail outcomes.
-- Repository diff or commit state after the executor completed.
-- Any failures, skipped checks, or follow-up remediation tasks.
+- Generated source files, bindings, schemas, or other codegen artifacts.
+- CI workflow execution records and pass/fail status.
+- Test, lint, typecheck, build, or formatting command output.
+- Repository diffs proving the expected phase outputs were created or updated.
+- Any follow-up fixes required by failed verification steps.
 
 # Citations
 

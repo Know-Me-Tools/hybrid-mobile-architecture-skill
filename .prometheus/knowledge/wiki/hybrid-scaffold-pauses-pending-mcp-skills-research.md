@@ -30,7 +30,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `scaffold-full-hybrid-project`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Captured:** `2026-07-15T20:42:22Z`
 - **Source:** `manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project`
 - **Status:** waiting on research

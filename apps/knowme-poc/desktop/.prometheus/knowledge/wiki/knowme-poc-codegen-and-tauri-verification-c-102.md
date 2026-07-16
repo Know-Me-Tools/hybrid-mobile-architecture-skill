@@ -23,7 +23,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `phase-codegen-and-ci-verification`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Captured:** 2026-07-16T00:43:21Z
 - **Status:** `execute_in_progress`
 - **Latest completed checkpoint:** C-102 merged; loop stopped by user choice

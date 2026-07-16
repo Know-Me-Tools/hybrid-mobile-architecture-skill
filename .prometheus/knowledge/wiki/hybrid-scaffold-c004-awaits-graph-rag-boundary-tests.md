@@ -26,7 +26,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `scaffold-full-hybrid-project`
-- **KBD worktree:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c004-graph-rag-store`
+- **KBD worktree:** `~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c004-graph-rag-store`
 - **Captured:** `2026-07-15T19:30:29Z`
 - **Position:** `scaffold-full-hybrid-project`
 - **Status:** `executing`

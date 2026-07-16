@@ -39,7 +39,7 @@ one-workflow-at-scale; Jan/LM Studio's download→load→chat loop). The demo na
 |----|---------|----------------|
 | M1 | **Chat** with streamed responses from **any of 142+ providers** via liter-llm — text/thinking/code/citation blocks rendered live; provider/model selected from the config DB | The ContentBlock spine: liter-llm gateway → gen_ui_client → ProtocolPipeline → frb stream / Tauri events → exhaustive UI switch |
 | M2 | **Memory**: ingest → hybrid search → cited answer + related-graph panel, with a pre-baked seed corpus | SurrealDB HNSW + BM25 + graph traversal, fastembed 384-dim — the architecture's biggest differentiator |
-| M3 | **Local-first sync** of one entity type (memories/notes): offline edit on mobile → appears on desktop | PEM + Electric read-path + DIY write queue; the airplane-mode demo moment |
+| M3 | **Local-first sync** of one entity type (memories/notes): offline edit on mobile → appears on desktop | PEM + **our own write-path sync engine** (first-class custom code) with Electric as the read cache; the airplane-mode demo moment |
 | M4 | **Local model, minimal**: download one model (Qwen2.5-1.5B-Instruct Q4_K_M class) via mistral.rs, cloud↔local switch, local chat on macOS Metal + **in-browser via WebLLM (WebGPU)**, tok/s display | mistral.rs inference engine made tangible on native; WebLLM proves the same UX on web; spawn_blocking discipline |
 | M5 | **Provider/settings config DB**: pglite-oxide (Tauri/mobile Rust layer) + PGlite (web) storing provider credentials, model prefs, and app settings, administered from a Settings surface | The prometheus-db backend-selection pattern (real Postgres semantics on every target) carrying real app state |
 
@@ -70,8 +70,8 @@ one-workflow-at-scale; Jan/LM Studio's download→load→chat loop). The demo na
 Coverage check: MUST+SHOULD exercises every headline crate except vision — all 11
 ContentBlock variants reachable, streamed inference from any of 142+ providers
 (liter-llm), protocol pipeline, PEM graph, SurrealDB graph-RAG, config DB
-(pglite-oxide/PGlite), Electric sync, Flint, mistral.rs (Metal desktop + CPU mobile),
-WebLLM (WebGPU web), whisper, MCP, PMPO.
+(pglite-oxide/PGlite), Electric sync, Flint, mistral.rs (Metal desktop) + llama.cpp
+(mobile, via `llama-cpp-2`), WebLLM (WebGPU web), whisper, MCP, PMPO.
 
 ---
 
@@ -138,7 +138,8 @@ Sync shapes fail on unknown columns, so ordering is enforced, not hoped for.
 | Lane | Engine | Targets | Notes |
 |------|--------|---------|-------|
 | **Cloud (any provider)** | [liter-llm](https://github.com/GQAdonis/liter-llm) (GQAdonis fork) wrapped by `gen_ui_client` | desktop, mobile, web | Universal LLM client — **142+ providers**, streaming, tool calling. `native-http` feature (reqwest/rustls) on native; **`liter-llm-wasm`** (fetch-based, no tokio multithread) on web — one Rust dependency serves all three targets. Provider choice, credentials, and model prefs come from the config DB, not env vars; graceful degrade to local-only when no provider is configured. |
-| **Local — native** | [mistral.rs](https://github.com/GQAdonis/mistral.rs) (GQAdonis fork) via `gen_ui_inference` | desktop (Metal), mobile (CPU) | The `mistralrs` library crate (candle-based) provides model download (HF hub), GGUF/ISQ loading, and streaming generation behind one API. Same crate covers M4 desktop (Qwen2.5-1.5B Q4_K_M on Metal) and S4 mobile "sovereign mode" (Qwen-0.5B Q4 CPU). Replaces direct candle wiring; `spawn_blocking` discipline unchanged. Fork extras (mistralrs-audio/vision/mcp) available but not in PoC scope. |
+| **Local — desktop** | [mistral.rs](https://github.com/GQAdonis/mistral.rs) (GQAdonis fork) via `gen_ui_inference` | desktop (Metal) | The `mistralrs` library crate (candle-based) provides model download (HF hub), GGUF/ISQ loading, and streaming generation behind the `InferenceProvider` trait (gen_ui_types). Covers M4 desktop (Qwen2.5-1.5B Q4_K_M on Metal). Replaces direct candle wiring; `spawn_blocking` discipline unchanged. Fork extras (mistralrs-audio/vision/mcp) available but not in PoC scope. |
+| **Local — mobile** | llama.cpp via [`llama-cpp-2`](https://crates.io/crates/llama-cpp-2) bindings, via `gen_ui_inference` | mobile (iOS/Android CPU) | S4 "sovereign mode" (Qwen-0.5B Q4 CPU). Lane changed from mistral.rs per the 2026-07-16 assessment §3.3: mistral.rs documents no iOS/Android deployment path anywhere, while the shipped mobile-LLM ecosystem (LLMFarm, LLM.swift, Sherpa) runs on llama.cpp. Same `InferenceProvider` trait — the seam absorbs the engine difference; revisit if mistral.rs publishes a mobile story. Gate: C-105 on-device tok/s benchmark. |
 | **Local — web** | [WebLLM](https://webllm.mlc.ai/) (MLC), WebGPU | web only | Researched 2026-07 (firecrawl): WebLLM is the consensus in-browser chat engine — WebGPU-accelerated, OpenAI-compatible streaming API, curated quantized models including **Qwen2.5-1.5B-Instruct-q4f16_1-MLC** (same family as the native lane), models cached in browser storage. Feature-gated on WebGPU availability; degrade to the liter-llm cloud lane when absent (wllama/WASM rejected as primary: CPU-only speeds don't demo well; transformers.js reserved as the web option for embeddings/whisper-class tasks, not chat). |
 
 **Documented exception to the Rust-core invariant:** WebLLM is a TypeScript
@@ -170,8 +171,12 @@ PostgreSQL-semantics store on every target, per the prometheus-db selection patt
 
 - **On-device graph:** SurrealDB 3.2 embedded (memory/entity graph, HNSW vector +
   BM25 + recursive RELATE traversal, RRF-fused hybrid search in Rust).
-- **Relational/sync path:** PGlite (web, IndexedDB) / Postgres semantics; Electric
-  read-path + DIY write queue for M3, run from `infra/docker-compose.yml`
+- **Relational/sync path:** PGlite (web, IndexedDB) / Postgres semantics. **The
+  write path is first-class custom software we own** — ElectricSQL deliberately
+  dropped write-path sync in its `electric-next` rewrite and is a read-path
+  engine only; our `gen_ui_db::sync` write queue IS the sync engine, with
+  Electric as the read cache. Staff, test, and estimate it as owned product
+  code, not integration glue. For M3 it runs from `infra/docker-compose.yml`
   (Postgres + Electric) so the whole demo works on one machine.
 - **PEM (prometheus-entity-management):** families-as-normalization entity layer on
   both surfaces (Dart port + npm packages).
@@ -226,11 +231,41 @@ WAVE 2 (finish):   C-108 mcp+agent ─► C-109 settings + mobile model → refl
 | C-103 | M1+M5 foundation — chat live e2e through the **liter-llm gateway** (142+ providers; native-http on desktop/mobile, liter-llm-wasm on web) + **config DB v1** (pglite-oxide native / PGlite web: providers, model_prefs, app_settings schemas + migrations); graceful degrade when no provider configured; ProtocolPipeline → ContentBlock stream over frb + Tauri events; first iOS-simulator run | ⬜ pending (revised) |
 | C-104 | M2 memory graph-RAG: intent APIs wired to gen_ui_db_graph + fastembed, seeded corpus, cited answers, related-graph panel | ⬜ pending |
 | C-105 | M4 local model, desktop + web: **mistral.rs** library — model download (HF hub) + GGUF load + Metal streaming on desktop; **WebLLM (WebGPU)** adapter on web behind the same intent seam, feature-gated on WebGPU with cloud-lane degrade; cloud↔local switch, tok/s | ⬜ pending (revised) |
-| C-106 | M3 sync local-first: docker-compose Postgres+Electric, one entity synced desktop↔mobile-sim, airplane-mode demo | ⬜ pending |
+| C-106 | M3 sync local-first: our write-path sync engine (gen_ui_db::sync) + Electric read cache via docker-compose Postgres+Electric, one entity synced desktop↔mobile-sim, airplane-mode demo | ⬜ pending |
 | C-107 | S1 whisper scribe (whisper-rs, feature-gated), all 3 native platforms; evaluate fork's mistralrs-audio as alternative; web scribe (transformers.js whisper) as stretch | ⬜ pending (parallel lane) |
 | C-108 | S2+S3: one MCP SSE server + one canned Hands agent with live step-stream | ⬜ pending |
-| C-109 | C3+S4: Settings surface grows the **provider/model admin UI over the config DB** (add/edit/disable providers, pick per-lane models, keychain-backed secrets) + Qwen-0.5B mobile "sovereign mode" via mistral.rs CPU | ⬜ pending (revised) |
+| C-109 | C3+S4: Settings surface grows the **provider/model admin UI over the config DB** (add/edit/disable providers, pick per-lane models, keychain-backed secrets) + Qwen-0.5B mobile "sovereign mode" via **llama.cpp (`llama-cpp-2`) CPU** behind `InferenceProvider` (lane changed from mistral.rs — see §3.5 Local—mobile row) | ⬜ pending (revised) |
 | C-110 | CI: clippy -D warnings, audit.sh all, boundary tests, Vitest, dart analyze, macOS PoC build job | ⬜ pending (parallel lane) |
+
+### Benchmark gates (added 2026-07-16 per independent assessment)
+
+The plan previously verified *that things build*; these gates verify *that the
+architecture's claims are true on hardware*. Each gate is a blocking plan item
+with a pre-named fallback — a gate failure triggers the fallback, not a debate.
+
+| Gate | When | Measures | Pass condition | Named fallback |
+|------|------|----------|----------------|----------------|
+| G1 frb streaming | **C-103**, first iOS-simulator/on-device run | flutter_rust_bridge StreamSink throughput + latency under sustained A2UI token streaming (the full-matrix frb claim was *refuted* in adversarial verification — this is the program's highest-information action) | Smooth streaming render at realistic token rates on device | Tauri-events-style polling bridge on mobile chat, or scope mobile to non-streaming views for the PoC |
+| G2 SurrealDB embedded | **before C-104 implementation starts** | Graph-RAG workload (HNSW + BM25 + RELATE traversal, RRF fusion) latency + memory on a mobile-class RAM budget, seeded corpus | Interactive-grade hybrid search (sub-second on the demo corpus) without abnormal memory | sqlite-vec + FTS5 + recursive CTEs covering the demo's search/graph subset |
+| G3 mobile llama.cpp | **C-109** (S4 sovereign mode) | Qwen-0.5B Q4 CPU tok/s on a real device via `llama-cpp-2` | Demo-usable generation speed | Cut S4 from the PoC demo; local inference stays desktop(M4)+web |
+
+### Decision log (2026-07-16 assessment remediation)
+
+- **Config DB stays on pglite-oxide for the PoC** (user decision). The
+  assessment's rec #6 — collapse the DB matrix, SQLite for the config DB,
+  pglite-oxide as a post-PoC desktop upgrade — is recorded as the **post-PoC
+  simplification option**, to be revisited at phase reflection. The pglite lane
+  now has bundled runtime assets, a coalesced singleton open, and a concurrent
+  regression test; the remaining risk it carries is currency (pre-1.0 crate on
+  a moving PGlite core).
+- **Sync reclassified** as first-class custom code (§3.7) — Electric is a read
+  cache; the write path is ours.
+- **Mobile inference lane switched** to llama.cpp (`llama-cpp-2`) behind the
+  new `InferenceProvider` trait seam (gen_ui_types) — see §3.5.
+- **Open question, no evidence either way:** paying demand for the $200/mo
+  sovereign tier. No market comps survived adversarial verification. Validate
+  with a landing page and buyer conversations **before** building tier
+  machinery; do not treat the tier as a settled requirement.
 
 ### Success criteria (phase completes when)
 
@@ -334,8 +369,10 @@ Verified: the debug bundle shows the correct KnowMe monogram.
 2. **Provider config at demo time** — chat degrades gracefully to local-only when
    the config DB has no enabled provider (design requirement, not yet implemented);
    keys entered through Settings, never env vars.
-3. **Electric overrun fallback** stands: SyncStatus stub with the write queue proven
-   by boundary tests if C-106 integration overruns.
+3. **Sync overrun fallback** stands: if C-106 integration overruns, ship the
+   write-path engine (ours, proven by boundary tests) with a SyncStatus stub and
+   defer only the Electric read-cache wiring — the custom write path is the
+   load-bearing deliverable, not the Electric integration.
 4. **PEM corepack fix** needed in the PEM monorepo to re-enable the tarball
    pre-resolve path (currently on the strip-PEM fallback).
 5. **Model download size** (~1GB Qwen-1.5B Q4 native; ~900MB q4f16 MLC on web) —

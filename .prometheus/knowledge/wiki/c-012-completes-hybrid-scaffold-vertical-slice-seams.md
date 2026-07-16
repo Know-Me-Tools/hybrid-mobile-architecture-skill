@@ -27,7 +27,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `scaffold-full-hybrid-project`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c012-vertical-slice`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c012-vertical-slice`
 - **Captured:** `2026-07-15T21:40:37Z`
 - **Position:** `scaffold-full-hybrid-project`
 - **Status:** `execute_ready`

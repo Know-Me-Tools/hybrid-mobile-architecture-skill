@@ -24,7 +24,7 @@ revision: 0
 
 Phase: `sdk-ecosystem-and-docs`  
 Project: `flint-gate`  
-KBD root: `/Users/gqadonis/Projects/prometheus/flint-gate`  
+KBD root: `~/Projects/prometheus/flint-gate`  
 Captured: `2026-07-14T23:18:01Z`
 
 ## Objective

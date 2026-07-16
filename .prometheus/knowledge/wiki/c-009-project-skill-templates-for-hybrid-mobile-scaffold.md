@@ -29,7 +29,7 @@ revision: 0
 - **Phase:** `scaffold-full-hybrid-project`
 - **Position:** `scaffold-full-hybrid-project`
 - **Status:** `c009 complete`
-- **KBD worktree:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c009-project-skills`
+- **KBD worktree:** `~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c009-project-skills`
 - **Captured:** `2026-07-15T18:44:52Z`
 
 This entry records completion of change **C-009 (`project-skills`)** within the scaffold phase initialized by [Hybrid Mobile Architecture Scaffold Phase Initialization](/hybrid-mobile-architecture-scaffold-phase-initialization.md). It follows the broader scaffold assessment flow, including [Hybrid Mobile scaffold phase assessment readiness](/hybrid-mobile-scaffold-phase-assessment-readiness.md) and later assessment updates.

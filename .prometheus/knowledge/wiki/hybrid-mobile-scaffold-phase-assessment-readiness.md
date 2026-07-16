@@ -25,7 +25,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `scaffold-full-hybrid-project`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Captured:** `2026-07-15T16:29:29Z`
 - **Source:** `manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project`
 - **Position:** `scaffold-full-hybrid-project`
@@ -56,7 +56,7 @@ This record advances the phase described in [Hybrid Mobile Architecture Scaffold
 
 Before accepting the scaffolded project:
 
-- Inspect generated or modified files under `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`.
+- Inspect generated or modified files under `~/Projects/hybrid-mobile-architecture-src`.
 - Confirm the project includes Flutter, Rust FFI, Tauri, and React 19 components.
 - Run or review the scaffolding scripts used to produce the instance.
 - Validate structure, interfaces, and generated artifacts against `TJ-ARCH-MOB-001`.

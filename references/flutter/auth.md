@@ -1,5 +1,5 @@
 # Flutter Auth Reference
-> flutter_secure_storage · Riverpod 2.6+ · Ory Kratos · Supabase · GoRouter guards
+> flutter_secure_storage · Riverpod 3.3 · Ory Kratos · Supabase · GoRouter guards
 
 ## Auth provider tree (main.dart)
 

@@ -24,6 +24,10 @@
 
 ## Toolchain / MSRV finding (BLOCKING for C-004, action for C-008)
 
+> **Resolved 2026-07-16:** the pin has since moved to **1.96** and the authority
+> docs (CLAUDE.md/AGENTS.md/SKILL.md/README, `versions.toml`) now state 1.96+.
+> The narrative below is the original finding, kept for the rationale.
+
 The workspace `rust-toolchain.toml` pins **1.93**, but SurrealDB 3.2.1 pulls a
 transitive dep that fails to build on it:
 

@@ -1,0 +1,89 @@
+---
+type: Reference
+id: knowme-poc-tauri-dev-build-wait-loop-handoff
+title: KnowMe PoC Tauri dev build wait-loop handoff
+tags:
+- hybrid-mobile-architecture
+- knowme-poc
+- tauri
+- wait-loop
+- codegen
+- ci-verification
+links:
+- knowme-poc-codegen-and-ci-verification-phase-goals
+- knowme-poc-phase-waits-for-background-completion-signal
+- poc-focused-codegen-and-ci-phase-assessment-update
+- hybrid-codegen-and-ci-verification-assessment-readiness
+sources:
+- stdin
+- manual:Hybrid Mobile Architecture/phase-codegen-and-ci-verification
+timestamp: 2026-07-16T09:56:43.565912+00:00
+created_at: 2026-07-16T09:56:43.565912+00:00
+updated_at: 2026-07-16T09:56:43.565912+00:00
+revision: 0
+---
+
+## Context
+
+- **Project:** Hybrid Mobile Architecture
+- **Phase:** `phase-codegen-and-ci-verification`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src`
+- **Captured:** `2026-07-16T09:52:57Z`
+- **Position:** `phase-codegen-and-ci-verification`
+- **Status:** `executing`
+
+This entry continues the PoC-first execution scope summarized in [KnowMe PoC codegen and CI verification phase goals](/knowme-poc-codegen-and-ci-verification-phase-goals.md) and immediately follows [KnowMe PoC phase waits for background completion signal](/knowme-poc-phase-waits-for-background-completion-signal.md). The revised phase direction comes from [PoC-focused codegen and CI phase assessment update](/poc-focused-codegen-and-ci-phase-assessment-update.md), which superseded the earlier pipeline-only framing in [Hybrid codegen and CI verification assessment readiness](/hybrid-codegen-and-ci-verification-assessment-readiness.md).
+
+## Phase goal
+
+The phase deliverable is a working proof-of-concept application, not only pipeline verification.
+
+### Primary goal
+
+Build a proof-of-concept app in `apps/<name>/` using the repository scaffolds and skills, based on KnowMe reference documentation in `docs/reference-app/`:
+
+- Functional specification
+- Moodboard
+- User journeys
+
+The PoC must prove the skill package end-to-end and showcase the broadest practical range of supported capabilities:
+
+- Streaming `ContentBlock` chat
+- PEM entity management
+- SurrealDB graph-RAG memory
+- Local-first sync
+- Cross-platform Flutter, Tauri, and web surfaces from one Rust core
+
+The feature subset is selected through web research on showcase-app best practices and 2026 on-device AI feasibility.
+
+### Supporting verification goals
+
+The original codegen and CI goals remain supporting objectives proven through the PoC:
+
+- Run the real codegen pipeline on the PoC:
+  - `flutter_rust_bridge_codegen generate`
+  - `dart run build_runner build`
+  - full `flutter pub get`
+  - full `pnpm install`
+- Confirm pre-codegen warnings clear once generated code and sibling packages exist.
+- Resolve or work around the PEM install blocker: `@prometheus-ags/entity-graph-core@workspace:*` is unresolvable outside the PEM monorepo.
+- Verify the PoC builds and runs on at least one real target per surface:
+  - macOS Tauri desktop
+  - iOS simulator or Android emulator for Flutter
+- Wire CI to run on every push:
+  - `cargo clippy --workspace`
+  - `audit.sh all`
+  - boundary test suites against the PoC
+
+## Current execution state
+
+The phase is waiting for a background wait-loop to report the result of `tauri dev`:
+
+- Success condition: build completes and opens the desktop window.
+- Failure condition: build exits with an error.
+- Next action: report the result and hand off manual testing once the wait-loop completes.
+
+# Citations
+
+1. [1] stdin
+2. [2] manual:Hybrid Mobile Architecture/phase-codegen-and-ci-verification

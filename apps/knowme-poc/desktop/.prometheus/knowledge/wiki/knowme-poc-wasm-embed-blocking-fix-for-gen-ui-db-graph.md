@@ -25,7 +25,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `phase-codegen-and-ci-verification`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.claude/worktrees/pensive-greider-2e206c`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src/.claude/worktrees/pensive-greider-2e206c`
 - **Captured:** `2026-07-16T10:45:24Z`
 - **Source phase record:** `manual:Hybrid Mobile Architecture/phase-codegen-and-ci-verification`
 - **Position:** `phase-codegen-and-ci-verification`
@@ -99,7 +99,7 @@ apps/knowme-poc/rust/crates/gen_ui_db_graph/src/store.rs:110
 in the main repository checkout:
 
 ```text
-/Users/gqadonis/Projects/hybrid-mobile-architecture-src
+~/Projects/hybrid-mobile-architecture-src
 ```
 
 ## Implementation detail

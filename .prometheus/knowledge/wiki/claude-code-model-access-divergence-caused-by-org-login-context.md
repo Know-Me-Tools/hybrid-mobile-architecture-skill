@@ -29,7 +29,7 @@ Established facts:
 - Sonnet 5 is missing from all Claude Code surfaces: CLI and desktop app.
 - No `managed-settings.json` was found, ruling out local MDM/enterprise managed settings as the immediate cause; see [Diagnosing Claude Code model list restrictions without managed settings](/diagnosing-claude-code-model-list-restrictions-without-managed-settings.md).
 - Claude Code occasionally emits an error paraphrased as **"your account doesn't allow this change"** with remediation instructions that do not match the user's UI.
-- Bash and filesystem MCP access are sandboxed to `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`, so they cannot inspect `~/.claude/` or global Claude Code config.
+- Bash and filesystem MCP access are sandboxed to `~/Projects/hybrid-mobile-architecture-src`, so they cannot inspect `~/.claude/` or global Claude Code config.
 
 ## Likely root cause
 

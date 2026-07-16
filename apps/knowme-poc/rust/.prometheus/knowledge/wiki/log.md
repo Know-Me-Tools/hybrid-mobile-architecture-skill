@@ -1,6 +1,8 @@
 # Update Log
 
 ## 2026-07-16
+* **Creation**: [Executor Completion Marker for Codegen and CI Phase](/executor-completion-marker-for-codegen-and-ci-phase.md)
+* **Creation**: [Hybrid Mobile PoC phase goals and verification scope](/hybrid-mobile-poc-phase-goals-and-verification-scope.md)
 * **Creation**: [Executor Completion Marker for Codegen and CI Verification Phase](/executor-completion-marker-for-codegen-and-ci-verification-phase.md)
 * **Creation**: [KnowMe PoC Scribe feature and CI workflow verification status](/knowme-poc-scribe-feature-and-ci-workflow-verification-status.md)
 * **Creation**: [Hybrid Mobile PoC phase goals for codegen and CI verification](/hybrid-mobile-poc-phase-goals-for-codegen-and-ci-verification.md)

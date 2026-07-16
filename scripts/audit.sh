@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # scripts/audit.sh
 # Audit a codebase for TJ-ARCH-MOB-001 architectural compliance.
-# Usage: bash scripts/audit.sh <platform: flutter|tauri|rust|all> [project-root]
+# Usage: bash scripts/audit.sh <platform: flutter|tauri|rust|doc-consistency|all> [project-root]
+#
+# `doc-consistency` audits the PACK's own authority docs (SKILL.md, CLAUDE.md,
+# AGENTS.md, README.md, references/*.md) against versions.toml — the pack's
+# instructions to agents must not contradict themselves.
 #
 # `all` audits every surface of a hybrid project from its root, auto-detecting
 # mobile/ (Flutter), desktop/ (Tauri), and rust/gen_ui_core — and verifies the
@@ -51,6 +55,13 @@ if [[ "$PLATFORM" == "all" ]]; then
     echo "  → layered workspace detected (rust/crates/*): module invariants are"
     echo "    enforced per-crate at compile time; run 'cargo clippy' at the rust root."
   fi
+
+  # Doc-consistency is pack-global, not per-surface: run once. It self-skips
+  # when the authority docs aren't present (i.e. inside a scaffolded project).
+  echo ""
+  echo -e "\033[0;36m########## Doc consistency (pack authority docs) ##########\033[0m"
+  bash "$SELF" "doc-consistency" || RC=1
+  ran_any=1
 
   if [[ "$ran_any" == "0" ]]; then
     echo "Error: no surfaces found under $HYBRID_ROOT (expected mobile/, desktop/, or rust/gen_ui_core)"
@@ -388,6 +399,73 @@ elif [[ "$PLATFORM" == "rust" ]]; then
   echo ""
   echo -e "${CYAN}[04] Build targets${NC}"
   grep -q "cdylib\|staticlib" "$ROOT/Cargo.toml" 2>/dev/null && pass "Both cdylib and staticlib crate-types present" || warn "Check crate-type = [\"cdylib\", \"staticlib\"]"
+
+# ── Doc-consistency audit ──────────────────────────────────────────────────
+# The pack's product is authoritative instruction to agents: divergent authority
+# docs are defects (assessment 2026-07-16 §5). versions.toml is the single
+# source of truth; this mode fails on any stale version/engine string in the
+# authority docs. Paths resolve relative to the SCRIPT (the pack repo), not the
+# audited project — scaffolded projects without these docs skip cleanly.
+elif [[ "$PLATFORM" == "doc-consistency" ]]; then
+  PACK_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+  VERSIONS="$PACK_ROOT/versions.toml"
+
+  echo -e "${CYAN}[01] Single source of truth${NC}"
+  if [[ -f "$VERSIONS" ]]; then
+    pass "versions.toml present at pack root"
+  else
+    fail "versions.toml MISSING — authority docs have no source of truth"
+  fi
+
+  # Authority docs subject to the drift gate. wasm-targets.md is excluded: it is
+  # a bannered historical finding that legitimately quotes superseded versions.
+  AUTHORITY_DOCS=()
+  for doc in SKILL.md CLAUDE.md AGENTS.md README.md; do
+    [[ -f "$PACK_ROOT/$doc" ]] && AUTHORITY_DOCS+=("$PACK_ROOT/$doc")
+  done
+  while IFS= read -r -d '' ref; do
+    [[ "$ref" == *"wasm-targets.md" ]] && continue
+    AUTHORITY_DOCS+=("$ref")
+  done < <(find "$PACK_ROOT/references" -name '*.md' -print0 2>/dev/null)
+
+  if [[ ${#AUTHORITY_DOCS[@]} -eq 0 ]]; then
+    warn "No authority docs found relative to the script — skipping (scaffolded project?)"
+  else
+    echo ""
+    echo -e "${CYAN}[02] Stale version strings${NC}"
+    # pattern|human label — each is a value versions.toml has superseded.
+    STALE_CHECKS=(
+      '1\.80\+|Rust 1.80+ (now 1.96+)'
+      '1\.95\+|Rust 1.95+ (now 1.96+)'
+      'Node\.js[^0-9]*22|Node 22 (now 24+)'
+      '22\+ LTS|Node 22+ LTS (now 24+)'
+      'Riverpod 2\.[x6]|Riverpod 2.x/2.6 (now 3.3)'
+      '2\.3\+.*flutter_rust_bridge|flutter_rust_bridge_codegen.*2\.3\+|frb 2.3+ (now 2.12+)'
+      'Vite 7|Vite 7 (now 8)'
+      '"vite": "\^7|vite ^7 dep pin (now ^8)'
+      'Flutter (SDK \| )?3\.29\+|Flutter 3.29+ (now beta channel)'
+    )
+    for entry in "${STALE_CHECKS[@]}"; do
+      pattern="${entry%|*}"; label="${entry##*|}"
+      hits=$(grep -lE "$pattern" "${AUTHORITY_DOCS[@]}" 2>/dev/null || true)
+      if [[ -n "$hits" ]]; then
+        fail "Stale: $label — in: $(echo "$hits" | xargs -n1 basename | tr '\n' ' ')"
+      else
+        pass "No stale '$label' strings"
+      fi
+    done
+
+    echo ""
+    echo -e "${CYAN}[03] Inference-engine authority${NC}"
+    # Per-lane engines (versions.toml [inference]): desktop=mistral.rs,
+    # mobile=llama-cpp-2, web=WebLLM. 'candle' as a current-engine claim is stale.
+    hits=$(grep -lE 'candle' "${AUTHORITY_DOCS[@]}" 2>/dev/null || true)
+    if [[ -n "$hits" ]]; then
+      fail "Stale 'candle' engine references — in: $(echo "$hits" | xargs -n1 basename | tr '\n' ' ')"
+    else
+      pass "No stale candle engine references"
+    fi
+  fi
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────

@@ -16,7 +16,7 @@ links:
 sources:
 - stdin
 - manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project
-- /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c002-wasm32-spike
+- ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c002-wasm32-spike
 timestamp: 2026-07-15T19:30:47.973342+00:00
 created_at: 2026-07-15T19:30:47.973342+00:00
 updated_at: 2026-07-15T19:30:47.973342+00:00
@@ -27,7 +27,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `scaffold-full-hybrid-project`
-- **KBD worktree:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c002-wasm32-spike`
+- **KBD worktree:** `~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c002-wasm32-spike`
 - **Captured:** `2026-07-15T19:26:59Z`
 - **Position:** `scaffold-full-hybrid-project`
 - **Status:** `execute_ready`
@@ -83,4 +83,4 @@ This requirement is especially relevant to the C-004 graph RAG / SurrealDB work 
 
 1. stdin
 2. manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project
-3. /Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c002-wasm32-spike
+3. ~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c002-wasm32-spike

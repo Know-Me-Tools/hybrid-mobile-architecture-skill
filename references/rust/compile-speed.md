@@ -39,7 +39,7 @@ The layered split in `references/rust/patterns.md` exists partly to cache well:
 - **`gen_ui_types` holds the frozen trait seams.** Downstream crates depend on stable
   signatures, so editing app logic in one crate doesn't invalidate the others — and parallel
   worktrees don't fight.
-- **Heavy deps (candle, SurrealDB) live in leaves**, not in the crate you edit most.
+- **Heavy deps (inference engines, SurrealDB) live in leaves**, not in the crate you edit most.
 
 ## Profiles: dependencies compile well once, app code iterates fast
 

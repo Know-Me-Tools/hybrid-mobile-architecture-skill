@@ -1,5 +1,5 @@
 # Tauri + React 19 Patterns Reference
-> Tauri 2.10.3 · React 19 · Vite 7 · Zustand 5 · TanStack · shadcn/ui · Tailwind 4
+> Tauri 2.10+ · React 19 · Vite 8 · Zustand 5 · TanStack · shadcn/ui · Tailwind 4
 
 ## Package versions (package.json — current March 2026)
 
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.10.3",
-    "vite": "^7.0.0",
+    "vite": "^8.0.0",
     "@vitejs/plugin-react": "^4.0.0",
     "typescript": "^5.4.0",
     "@types/react": "^19.0.0",

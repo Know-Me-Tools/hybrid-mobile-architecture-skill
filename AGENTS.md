@@ -56,7 +56,7 @@ One global Tokio runtime per process. CPU-bound work (GGUF loading, inference fo
 
 | Tool | Required (four-pillar bootstrap — `bash scripts/check-env.sh --install`) |
 |---|---|
-| Rust + Cargo | 1.95+ (+ wasm32-unknown-unknown target) |
+| Rust + Cargo | 1.96+ (+ wasm32-unknown-unknown target) — SurrealDB 3.2's `fastnum` transitive dependency requires rustc ≥1.94; the wasm32 target only compiled cleanly on 1.96 (see `references/rust/wasm-targets.md`) |
 | Flutter SDK | **beta channel**, latest (ships the Dart MCP server) |
 | Dart | latest beta (tracks Flutter beta) |
 | Node.js | 24+ (Active LTS — pin, do not use `--lts`) |
@@ -228,8 +228,8 @@ automatically from this directory — no per-user global setup required:
 `.claude/skills/`, `.codex/skills/`, `.opencode/skills/`, `.kimi/skills/`, `.agents/skills/`,
 and `.kimi-code/skills/` are kept in sync (copies, not symlinks, for cross-OS/harness
 portability) — when adding a new project-local skill, copy it into all of them. The
-Dart MCP server requires Dart 3.9+/Flutter 3.35+ (this repo develops against 3.13/3.45,
-comfortably above the floor).
+Dart MCP server requires Dart 3.9+/Flutter 3.35+ (this repo develops against the beta
+channel — currently Dart 3.13 / Flutter 3.45 — comfortably above the floor).
 
 ## Repo-local OpenCode extensions
 

@@ -30,7 +30,7 @@ revision: 0
 ## Project Context
 
 - **Project:** Hybrid Mobile Architecture
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Captured:** `2026-07-16T00:43:21Z`
 - **Latest completed checkpoint:** C-102 merged
 - **Commit:** `86e7d1d` pushed to `main`

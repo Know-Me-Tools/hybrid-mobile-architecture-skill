@@ -54,11 +54,11 @@ Before any scaffolding or transformation, verify the environment. Run
 
 | Tool | Minimum Version | Install command |
 |------|----------------|-----------------|
-| Rust + Cargo | 1.80+ | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
-| Flutter SDK | 3.29+ | See `scripts/install-flutter.sh` |
-| Node.js | 22+ LTS | `curl -fsSL https://fnm.vercel.app/install \| bash && fnm use --lts` |
-| Tauri CLI | 2.10.3 | `cargo install tauri-cli --version "^2"` |
-| flutter_rust_bridge_codegen | 2.3+ | `cargo install flutter_rust_bridge_codegen` |
+| Rust + Cargo | 1.96+ | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
+| Flutter SDK | beta channel, latest | See `scripts/install-flutter.sh` |
+| Node.js | 24+ (Active LTS — pin, not `--lts`) | `curl -fsSL https://fnm.vercel.app/install \| bash && fnm install 24` |
+| Tauri CLI | 2.10+ | `cargo install tauri-cli --version "^2"` |
+| flutter_rust_bridge_codegen | 2.12+ | `cargo install flutter_rust_bridge_codegen` |
 | cargo-ndk | latest | `cargo install cargo-ndk` (Android only) |
 | create-tauri-app | latest | `npm create tauri-app@latest` |
 
@@ -110,7 +110,7 @@ These are invariants. Violating them makes code non-compliant with the standard.
 4. All CPU-bound work (inference forward passes, GGUF loading) uses `spawn_blocking`.
 5. ContentBlock model + A2UI/AG-UI protocol pipeline is the canonical event contract between Rust and UI.
 
-### Flutter state management (Riverpod 2.x)
+### Flutter state management (Riverpod 3.3)
 
 Read `references/flutter/patterns.md` for the full Riverpod architecture.
 
@@ -197,7 +197,7 @@ For embedded mode, `gen_ui_core` already contains the full UAR implementation:
 - `agent/mod.rs` — PMPO loop
 - `mcp/` — MCP client + registry
 - `protocol/` — A2UI + AG-UI pipeline
-- `inference/` — local candle inference
+- `inference/` — local inference behind the `InferenceProvider` trait (mistral.rs desktop Metal / llama-cpp-2 mobile / WebLLM web — see `versions.toml` `[inference]`)
 
 For external mode, configure the URL in `gen_ui_core/src/config.rs` and the crate switches to HTTP client mode.
 

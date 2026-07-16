@@ -27,7 +27,7 @@ revision: 0
 
 - **Phase:** `phase-codegen-and-ci-verification`
 - **Project:** Hybrid Mobile Architecture
-- **Repository root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **Repository root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Captured:** `2026-07-16T08:31:04Z`
 - **Source:** `manual:Hybrid Mobile Architecture/phase-codegen-and-ci-verification`
 - **Recorded status:** `executing`

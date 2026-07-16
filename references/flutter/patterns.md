@@ -1,5 +1,5 @@
 # Flutter Patterns Reference
-> Flutter 3.29+ · Dart 3.4+ · **Riverpod 3.3** · flutter_rust_bridge 2.12+
+> Flutter beta channel (latest) · **Riverpod 3.3** · flutter_rust_bridge 2.12+
 
 ## Dependency versions (always use latest)
 

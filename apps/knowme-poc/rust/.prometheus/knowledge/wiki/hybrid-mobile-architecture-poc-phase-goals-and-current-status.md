@@ -24,7 +24,7 @@ revision: 0
 
 - **Phase:** `phase-codegen-and-ci-verification`
 - **Project:** Hybrid Mobile Architecture
-- **Repository root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **Repository root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Captured:** `2026-07-16T00:45:26Z`
 - **Status:** `execute_in_progress`
 - **Current state:** Tauri development app is running and visible in a native window titled `knowme-poc`.

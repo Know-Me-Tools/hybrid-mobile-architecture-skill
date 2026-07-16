@@ -10,7 +10,7 @@ platform** — Flutter iOS/Android, Tauri macOS/Windows/Linux, and web via WASM.
 ## What this skill does
 
 - **Scaffolds** complete hybrid projects: Flutter mobile + Tauri desktop + web/WASM sharing a layered 13-crate Rust workspace
-- **Bootstraps** the full toolchain (Rust 1.95+ w/ WASM target, Flutter/Dart beta channel + Dart MCP server, Node 24 LTS + bun + pnpm + TypeScript 7, OpenSpec, Prometheus Skill System)
+- **Bootstraps** the full toolchain (Rust 1.96+ w/ WASM target, Flutter/Dart beta channel + Dart MCP server, Node 24 LTS + bun + pnpm + TypeScript 7, OpenSpec, Prometheus Skill System)
 - **Enforces** the 40 Prometheus Base Rules ([AGENT_BASE_RULES.md](AGENT_BASE_RULES.md)), feature-based clean architecture, strict layering, and component contracts — for humans, coding agents, and generated projects alike
 - **Generates** feature modules, ContentBlock variants, authentication flows, MCP integrations, publishable packages (crates.io / pub.dev / npm), and project-local UI/UX skills with activation hooks
 - **Audits** codebases for TJ-ARCH-MOB-001 compliance (`audit.sh all` — layer contracts, per-surface checks)
@@ -34,7 +34,7 @@ flutter_rust_bridge 2.12   Tauri IPC (invoke/emit)         @prometheus-ags/gen-u
    ║  gen_ui_mcp        MCP registry (JSON-RPC 2.0 + SSE)           ║
    ║  gen_ui_db         relational (pg/sqlite) + sync + startup     ║
    ║  gen_ui_db_graph   SurrealDB 3.2 hybrid graph-RAG (HNSW+BM25)  ║
-   ║  gen_ui_inference  candle GGUF (Metal desktop / CPU mobile)    ║
+   ║  gen_ui_inference  InferenceProvider (mistral.rs / llama.cpp)  ║
    ║  gen_ui_agent      Universal Agent Runtime (PMPO loop)         ║
    ║  leaves: gen_ui_ffi · tauri-plugin-gen-ui · gen_ui_wasm        ║
    ╚═══════════════════════════════════════════════════════════════╝

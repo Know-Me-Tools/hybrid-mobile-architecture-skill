@@ -29,7 +29,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `phase-codegen-and-ci-verification`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Captured:** `2026-07-16T01:42:02Z`
 - **Status:** `execute_ready`
 - **Commit:** [`a74dd6f`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/commit/a74dd6f)

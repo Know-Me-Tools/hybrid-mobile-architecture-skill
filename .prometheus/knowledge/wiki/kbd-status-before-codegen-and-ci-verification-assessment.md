@@ -25,7 +25,7 @@ revision: 0
 
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `phase-codegen-and-ci-verification`
-- **KBD root:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src`
+- **KBD root:** `~/Projects/hybrid-mobile-architecture-src`
 - **Captured:** `2026-07-15T22:14:03Z`
 - **Source:** `manual:Hybrid Mobile Architecture/phase-codegen-and-ci-verification`
 - **Status command completed:** `kbd-status`
@@ -62,7 +62,7 @@ This is the immediate pre-assessment status for the codegen/CI verification phas
 ```text
 KBD STATUS — Hybrid Mobile Architecture
 phase: phase-codegen-and-ci-verification
-worktree: /Users/gqadonis/Projects/hybrid-mobile-architecture-src  ⚠ outside worktreeRoot (/Users/gqadonis/.claude/worktrees)
+worktree: ~/Projects/hybrid-mobile-architecture-src  ⚠ outside worktreeRoot (~/.claude/worktrees)
 Last updated by: claude-code (2026-07-15T22:04:57Z)
 
 Goals:

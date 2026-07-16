@@ -212,6 +212,97 @@ repository trait, not the connection string, as the portability seam.
 
 ---
 
+## Embedded engine lifecycle: singleton ownership and lock recovery
+
+Every embedded engine described above (`PgliteServer` on desktop, Electric PGlite
+on web, SurrealDB's `kv-rocksdb`/`kv-indxdb` for graph RAG on every tier) takes an
+**exclusive lock on its own data directory** when it starts — the same mechanism
+a standalone PostgreSQL server uses (`postmaster.pid`). A second process, or a
+second in-process open call, that points at the same data directory will fail to
+start with a lock-contention error until the first owner releases it.
+
+This is not a hypothetical: the KnowMe PoC hit exactly this on desktop
+(`embedded PGlite server failed: PGlite root is already in use: <path>/config-db`)
+before this section existed. The verified lock semantics (read from
+pglite-oxide 0.5.1 source, `src/pglite/base.rs` `RootLock::acquire`):
+
+- **In-process registry first**: a process-global set of locked canonical
+  paths. A second `start()` on the same directory *within one process* fails
+  immediately with "PGlite root is already in use" — no second process needed.
+- **OS advisory lock second**: a `try_lock()` on `.pglite-oxide.lock`. Advisory
+  locks are released by the OS when the process exits — even on `kill -9` — and
+  `Drop` unlocks synchronously. **Stale locks are therefore impossible**: the
+  on-disk `.pglite-oxide.lock` file is inert between runs and must never be
+  "cleaned up" as a remedy. SurrealDB's RocksDB backend behaves equivalently.
+
+Two real trigger conditions follow:
+
+1. **Two processes** — a second app launch (double-click, or a dev relaunch
+   before the previous instance fully exited) racing the live first instance.
+2. **Two in-process opens racing** — concurrent calls to the same
+   `open()`/`connect()` function. This is not exotic: React StrictMode
+   double-invokes the mounting effect in dev, so a Tauri frontend fires the
+   startup command **twice concurrently on every dev launch**. A
+   check-then-act singleton (`get()` → async start → `set()`) does NOT stop
+   this — both callers see the empty cell, both start a server, and the loser
+   fails startup even though the winner succeeds.
+
+### The pattern to apply to any embedded engine added to this architecture
+
+**1. Single-instance guard at the app-shell level (desktop only).** Register
+`tauri-plugin-single-instance` as the *first* plugin in the Tauri builder. A
+second launch attempt is redirected to focus the existing window instead of
+racing the first instance for any embedded engine's lock. This removes
+condition 1 outright, and is unrelated to which specific engine is involved.
+
+**2. Coalesced async initialization via `tokio::sync::OnceCell::get_or_try_init`
+— never check-then-act.** Concurrent callers await the winner's in-flight
+initialization and share its handle; a failed init leaves the cell unset so a
+later retry works (no permanent poisoning on transient failure):
+
+```rust
+static ENGINE: tokio::sync::OnceCell<Handle> = tokio::sync::OnceCell::const_new();
+
+pub async fn open(path: impl AsRef<Path>) -> Result<Handle> {
+    let path = path.as_ref().to_path_buf();
+    ENGINE
+        .get_or_try_init(|| async move {
+            /* start the server / connect — runs at most once concurrently */
+        })
+        .await
+        .cloned() // Handle must be Clone (Arc-backed internally)
+}
+```
+
+Both `PgliteStore` (`gen_ui_db::relational::postgres`) and `GraphStore`
+(`gen_ui_db_graph::store`) follow this shape. (`gen_ui_runtime::native::RT`
+uses the synchronous `once_cell` equivalent, which is correct there because
+runtime construction is synchronous — the async engines cannot use it.)
+
+**3. Frontend startup idempotency.** The store that drives the boot sequence
+(`startupStore.run()`) deduplicates concurrent invocations onto one in-flight
+promise. Do not disable StrictMode to "fix" this — StrictMode is the canary
+proving the whole path is double-invoke safe.
+
+**4. Never silently swallow a double-init.** If a resource's *process-lifetime
+state* (not just its storage engine) is also guarded by a `OnceCell` — e.g.
+`gen_ui_agent::state`'s `AgentState` — a second `init()` call should be logged
+(`tracing::warn!`), not silently ignored via `let _ = cell.set(...)`. A silent
+swallow makes a real double-init bug invisible during development.
+
+**5. Do not add lock-file cleanup or PID-checking recovery code.** Because the
+lock is advisory and dies with the process, there is no stale-lock state to
+recover from. Deleting the data directory or lock file in response to this
+error destroys data to fix a symptom whose real cause is one of the two
+conditions above.
+
+This pattern generalizes beyond PGlite: any future embedded engine added to
+`gen_ui_core` (a new SurrealDB namespace, a local vector index, a cache file)
+should follow the same four steps rather than reintroducing the ad hoc,
+per-call-site opening this section was written to close.
+
+---
+
 ## Related documents
 
 - `references/rust/patterns.md` — `gen_ui_core` module + workspace layout, SurrealDB 3.2

@@ -782,7 +782,7 @@
   <h2>What KnowMe is.</h2>
 
   <p>
-    KnowMe is a single application that ships on macOS, Windows, Linux, iOS, and Android from one Rust + React 19 codebase. It runs language models on the user's own hardware — Gemma, Qwen, Phi, and Mistral families — using <strong>candle-vllm</strong> on desktop and <strong>llama.cpp</strong> on mobile. It bundles eight thinking tools the user reaches for daily, six autonomous-agent templates that work without supervision, and a content-addressed plugin system that lets third parties extend the surface without ever touching user data.
+    KnowMe is a single application that ships on macOS, Windows, Linux, iOS, and Android from one Rust + React 19 codebase. It runs language models on the user's own hardware — Gemma, Qwen, Phi, and Mistral families — using <strong>mistral.rs</strong> on desktop (Metal) and <strong>llama.cpp</strong> on mobile, both behind the <code>InferenceProvider</code> trait (see versions.toml [inference]). It bundles eight thinking tools the user reaches for daily, six autonomous-agent templates that work without supervision, and a content-addressed plugin system that lets third parties extend the surface without ever touching user data.
   </p>
 
   <p>
@@ -1668,18 +1668,23 @@
   </p>
 
   <ul>
-    <li><strong>host</strong> — capabilities the runtime exposes to plugins: <code>log</code>, <code>storage-{get,set,delete}</code>, <code>uar-invoke</code>, <code>librefang-call</code>, <code>register-navigation</code>, <code>emit-event</code>.</li>
+    <li><strong>host</strong> — capabilities the runtime exposes to plugins in <strong>v0.1</strong>: <code>log</code>, <code>storage-{get,set,delete}</code>, <code>uar-invoke</code>, <code>emit-event</code>. Deliberately few, typed, and boring — the only successful consumer-app precedent for Rust→WASM extensions (Zed, Wasmtime + WIT in production since 2024) shipped a similarly restricted surface and expanded only with ecosystem pull.</li>
     <li><strong>plugin</strong> — lifecycle hooks the plugin must implement: <code>init</code>, <code>handle-event</code>, <code>shutdown</code>.</li>
   </ul>
 
+  <h4>v0.2 candidates (not in the v0.1 contract)</h4>
   <p>
-    The contract is versioned. Plugins compiled against <code>@0.1.0</code> work against any host running <code>0.1.x</code> for any <code>x ≥ 0</code>. Backwards-compatible additions bump patch; breaking changes bump minor.
+    Deferred until real plugins demonstrate the need, each with its own threat-model review (2026-07-16 assessment, rec #9): <code>librefang-call</code> (direct library surface), <code>register-navigation</code> (app-shell navigation injection), and the sandboxed-iframe plugin UI surface (<code>window.knowme.invoke()</code>/<code>subscribe()</code> bridge). Until then, plugins are headless capabilities reached through UAR skills and events.
+  </p>
+
+  <p>
+    The contract is versioned. Plugins compiled against <code>@0.1.0</code> work against any host running <code>0.1.x</code> for any <code>x ≥ 0</code>. Backwards-compatible additions bump patch. Because the contract is pre-1.0, a <em>minor</em> bump (<code>0.2.0</code>) signals a breaking change, per standard 0.x semver.
   </p>
 
   <h3>The plugin manifest</h3>
 
   <p>
-    A plugin lives in IPFS as a directory: <code>manifest.json</code>, <code>plugin.wasm</code>, and <code>ui-bundle.tar.gz</code>. The manifest declares everything the host needs to install, render, sandbox, and govern the plugin.
+    A plugin lives in IPFS as a directory: <code>manifest.json</code>, <code>plugin.wasm</code>, and (v0.2, once the iframe UI surface lands) <code>ui-bundle.tar.gz</code>. The manifest declares everything the host needs to install, sandbox, and govern the plugin.
   </p>
 
   <table class="spec-table">
@@ -1689,9 +1694,9 @@
     <tbody>
       <tr><td class="k">id</td><td>Globally unique. Reverse-DNS recommended.</td></tr>
       <tr><td class="k">wasm.cid + sha256</td><td>Content address of the WASM blob. SHA-256 verified after fetch.</td></tr>
-      <tr><td class="k">ui.cid + entry</td><td>Content address of the UI bundle (HTML / CSS / JS) and entry file.</td></tr>
-      <tr><td class="k">navigation</td><td>Up to 10 entries the host injects into the app shell. Plugins do not control top-level routing.</td></tr>
-      <tr><td class="k">permissions</td><td>storage · network · uar_skills · librefang. The user reviews these at install time.</td></tr>
+      <tr><td class="k">ui.cid + entry</td><td><em>v0.2 candidate</em> — reserved; ignored by v0.1 hosts. Content address of the UI bundle (HTML / CSS / JS) and entry file.</td></tr>
+      <tr><td class="k">navigation</td><td><em>v0.2 candidate</em> — reserved; ignored by v0.1 hosts. (Up to 10 entries the host would inject into the app shell; plugins never control top-level routing.)</td></tr>
+      <tr><td class="k">permissions</td><td>v0.1: storage · uar_skills (network is reached only via <code>uar-invoke("web-fetch", …)</code>, governed by Cedar). <em>v0.2 candidates:</em> librefang. The user reviews these at install time.</td></tr>
       <tr><td class="k">signature</td><td>Optional Ed25519 signature over the canonical JSON. Unsigned plugins install with a warning.</td></tr>
     </tbody>
   </table>
@@ -1713,7 +1718,7 @@
   </p>
 
   <p>
-    The plugin's UI bundle renders in an <code>&lt;iframe sandbox="allow-scripts allow-same-origin"&gt;</code>. The host injects a small <code>plugin-bridge.js</code> that exposes <code>window.knowme.invoke()</code> and <code>window.knowme.subscribe()</code>, both of which translate to <code>postMessage</code> events routed to the plugin's WASM <code>handle-event</code> export. The plugin UI never touches the host's React state directly.
+    <em>(v0.2 candidate — the plugin UI surface is not in the v0.1 contract.)</em> When it lands, the plugin's UI bundle renders in an <code>&lt;iframe sandbox="allow-scripts allow-same-origin"&gt;</code>. The host injects a small <code>plugin-bridge.js</code> that exposes <code>window.knowme.invoke()</code> and <code>window.knowme.subscribe()</code>, both of which translate to <code>postMessage</code> events routed to the plugin's WASM <code>handle-event</code> export. The plugin UI never touches the host's React state directly.
   </p>
 
   <div class="callout cyan">

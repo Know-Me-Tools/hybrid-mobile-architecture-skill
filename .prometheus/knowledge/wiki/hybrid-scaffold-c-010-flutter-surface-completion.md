@@ -30,7 +30,7 @@ revision: 0
 - **Project:** Hybrid Mobile Architecture
 - **Phase:** `scaffold-full-hybrid-project`
 - **Lane/change:** `C-010` Flutter surface
-- **KBD worktree:** `/Users/gqadonis/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c010-flutter-surface`
+- **KBD worktree:** `~/Projects/hybrid-mobile-architecture-src/.kbd-orchestrator/dispatch/worktrees/2026-07-15-c010-flutter-surface`
 - **Captured:** `2026-07-15T20:41:21Z`
 - **Position:** `scaffold-full-hybrid-project`
 - **Status:** `execute_ready`

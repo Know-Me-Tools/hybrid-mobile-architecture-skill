@@ -206,11 +206,13 @@ Variants: `text`, `thinking`, `code`, `citation`, `memory`, `toolUse`, `toolResu
 
 When adding a new ContentBlock type, follow all 7 steps in `references/rust/new-block-type.md`. Skipping steps produces compile errors by design.
 
+> **Protocol naming note (2026-07-16):** the "A2UI" used throughout this repo is gen_ui's **internal** agent-to-UI event protocol. It is **not** Google's A2UI standard ([a2ui.org](https://a2ui.org/), Apache 2.0, v1.0 RC — declarative generative-UI with shipped Flutter and React renderers), and it was previously misattributed to Anthropic (Anthropic has no protocol named A2UI; its related work is MCP + the MCP Apps extension). Whether to adopt Google's A2UI as the wire format or rename the internal protocol is an **open decision** — see `docs/corrections-2026-07-16.md`. Until decided, do not describe this repo's A2UI as an external standard in any generated code or docs.
+
 ---
 
 ## State management — layer contracts
 
-### Flutter (Riverpod 2.6+)
+### Flutter (Riverpod 3.3)
 
 ```
 Widget (ConsumerWidget) → @riverpod provider → Repository/Service (via FFI) → gen_ui_core
@@ -408,7 +410,7 @@ Enable RLS on every Supabase table. Never expose the service role key to clients
 
 | Tool | Required (four-pillar bootstrap — `bash scripts/check-env.sh --install`) |
 |---|---|
-| Rust + Cargo | 1.95+ (+ wasm32-unknown-unknown target) |
+| Rust + Cargo | 1.96+ (+ wasm32-unknown-unknown target) — SurrealDB 3.2's `fastnum` transitive dependency requires rustc ≥1.94; the wasm32 target only compiled cleanly on 1.96 (see `references/rust/wasm-targets.md`) |
 | Flutter SDK | **beta channel**, latest (ships the Dart MCP server) |
 | Dart | latest beta (tracks Flutter beta) |
 | Node.js | 24+ (Active LTS — pin, do not use `--lts`) |
@@ -453,14 +455,17 @@ All generated files must include `// TJ-ARCH-MOB-001 compliant` at the top.
 
 ## Embedded PostgreSQL (pglite-oxide)
 
-For applications needing full PostgreSQL semantics on-device (vector search via `pgvector`, full-text search via `pg_trgm`, JSONB operators, triggers), use **pglite-oxide** — a real PostgreSQL 17.5 binary packaged as a Rust crate. It exposes a standard connection string, making it compatible with SQLx, tokio-postgres, Diesel, or SeaORM.
+For applications needing full PostgreSQL semantics on-device (vector search via `pgvector`, full-text search via `pg_trgm`, JSONB operators, triggers) on **desktop**, use **pglite-oxide** — a Rust crate that runs ElectricSQL's PGlite WASI build (PostgreSQL 17.5 compiled to WASM) inside a WASM runtime hosted by the Rust process. It exposes a standard PostgreSQL wire-protocol connection string, making it compatible with SQLx, tokio-postgres, Diesel, or SeaORM. It is **not** a natively-compiled PostgreSQL binary.
 
-Distinct from ElectricSQL's PGlite (WASM for browsers). pglite-oxide is Rust-native and runs in the Tauri/Flutter Rust layer.
+Distinct from ElectricSQL's PGlite (the browser/JS build). Runtime assets are published for **macOS arm64, Windows x64, and Linux x64/arm64 only** — **there is no iOS/Android support**; iOS structurally cannot run stock PostgreSQL (no child processes, no JIT).
 
-The recommended abstraction — a `prometheus-db` crate — selects the backend automatically:
+The recommended abstraction — a `prometheus-db` crate — selects the backend per target:
 - Browser → Electric PGlite (WASM)
-- Mobile/Desktop → pglite-oxide
+- Desktop → pglite-oxide
+- **Mobile (iOS/Android) → SQLite + sqlite-vec** (not pglite-oxide)
 - Cloud → PostgreSQL 18 / Supabase
+
+Graph RAG (memory, entity graph) is uniform across every tier via embedded SurrealDB 3.2 — see `references/rust/patterns.md`. Full details, including the embedded-engine lifecycle/singleton pattern required to open any of these safely, are in `docs/pglite-oxide-tauri-hybrid.md`.
 
 ---
 
