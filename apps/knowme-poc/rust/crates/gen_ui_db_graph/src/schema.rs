@@ -41,6 +41,26 @@ DEFINE INDEX OVERWRITE memory_ft ON memory
 -- relates_to: typed graph edges between entities, traversed by graph_expand.
 DEFINE TABLE IF NOT EXISTS relates_to SCHEMALESS TYPE RELATION FROM entity TO entity;
 DEFINE FIELD IF NOT EXISTS rel ON relates_to TYPE string DEFAULT 'related';
+
+-- Config DB v1 (mobile only — desktop/web use the Postgres-dialect schema in
+-- gen_ui_db instead; see gen_ui_db::relational::config). api_key_ref is a
+-- reference into platform-secure storage, never a plaintext secret.
+DEFINE TABLE IF NOT EXISTS provider SCHEMALESS;
+DEFINE FIELD IF NOT EXISTS kind        ON provider TYPE string;
+DEFINE FIELD IF NOT EXISTS base_url    ON provider TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS api_key_ref ON provider TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS enabled     ON provider TYPE bool DEFAULT true;
+
+-- One record per (surface, lane), e.g. surface='chat', lane='cloud'|'local'.
+DEFINE TABLE IF NOT EXISTS model_pref SCHEMALESS;
+DEFINE FIELD IF NOT EXISTS surface     ON model_pref TYPE string;
+DEFINE FIELD IF NOT EXISTS lane        ON model_pref TYPE string;
+DEFINE FIELD IF NOT EXISTS provider_id ON model_pref TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS model_id    ON model_pref TYPE string;
+DEFINE FIELD IF NOT EXISTS params      ON model_pref FLEXIBLE TYPE option<object>;
+
+DEFINE TABLE IF NOT EXISTS app_setting SCHEMALESS;
+DEFINE FIELD IF NOT EXISTS value ON app_setting FLEXIBLE TYPE option<object>;
 "#;
 
 /// Hybrid recall: vector lane + BM25 lane, fused by native `search::rrf`.

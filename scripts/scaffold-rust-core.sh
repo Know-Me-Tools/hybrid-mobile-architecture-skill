@@ -12,7 +12,7 @@
 #   L1  gen_ui_protocol   A2UI/AG-UI adapters over futures channels. wasm-safe.
 #   L2  gen_ui_client     Flint gate(auth)/forge(Quarry+MCP+AG-UI)/frf(spine, feat)
 #   L2  gen_ui_mcp        MCP client registry (JSON-RPC 2.0 + HTTP/SSE; forge a2ui seam)
-#   L2  gen_ui_db         relational (pg/sqlite) + graph (surreal) + sync
+#   L2  gen_ui_db         relational (pg/pglite) + graph (surreal) + sync
 #   L2  gen_ui_inference  candle GGUF (native accel; wasm feature-gated off)
 #   L3  gen_ui_agent      PMPO loop over L0-L2 abstractions
 #   LEAF gen_ui_ffi              flutter_rust_bridge surface
@@ -101,8 +101,6 @@ surrealdb         = { version = "3.2",  default-features = false }
 sqlx              = { version = "0.8",  default-features = false, features = ["runtime-tokio-rustls", "macros", "migrate"] }
 pglite-oxide       = { version = "0.5.1", default-features = false }
 refinery           = { version = "0.8", default-features = false }
-sqlite-vec         = "0.1"
-libsqlite3-sys     = "0.30"
 virtual-net        = "=0.702.0-alpha.3"
 candle-core       = "0.7"
 candle-nn         = "0.7"
@@ -2614,7 +2612,7 @@ emit_flint_client
 # ── gen_ui_db (L2) — UNIFIED emitter: C-003 relational + C-005 sync ───────────
 # Two parallel worktree lanes each rewrote this crate from the same base. This
 # integrator composes both into ONE crate:
-#   relational → C-003 (sqlx pg/sqlite + migrations + typestate startup orchestrator)
+#   relational → C-003 (sqlx pg/pglite + migrations + typestate startup orchestrator)
 #   sync       → C-005 (Electric shape consumer + DIY write queue + SyncTransport)
 # Graph RAG stays in its own crate (gen_ui_db_graph, C-004). Every heredoc body is
 # preserved verbatim from the lane that authored and verified it.
@@ -2624,7 +2622,10 @@ emit_gen_ui_db() {
   # ── Unioned Cargo.toml ──────────────────────────────────────────────────────
   # Shared deps (both lanes): gen_ui_types/gen_ui_runtime paths + async-trait,
   # serde, serde_json, tracing. C-003 adds anyhow/thiserror/sqlx/refinery/reqwest +
-  # the sqlite-vec/pglite-oxide optional stack and the pg/sqlite/pglite features.
+  # the pglite-oxide optional stack and the pg/pglite features. Desktop uses
+  # pglite-oxide (real embedded PostgreSQL); web drives PGlite (WASM Postgres)
+  # from TypeScript against the same schema; mobile uses embedded SurrealDB
+  # instead (gen_ui_db_graph) — one embedded-DB story per platform only.
   # C-005 adds futures + a native-only (cfg(not(wasm32))) tokio/tokio-stream block;
   # its reqwest need is already covered by C-003's unconditional reqwest, so the
   # target block carries only tokio + tokio-stream (reqwest dedup'd).
@@ -2641,15 +2642,12 @@ tracing.workspace     = true
 sqlx.workspace        = true
 refinery.workspace    = true
 reqwest.workspace     = true
-sqlite-vec = { workspace = true, optional = true }
-libsqlite3-sys = { workspace = true, optional = true }
 pglite-oxide = { workspace = true, optional = true }
 virtual-net = { workspace = true, optional = true }
 
 [features]
 default = []
 pg = ["sqlx/postgres"]
-sqlite = ["sqlx/sqlite", "dep:sqlite-vec", "dep:libsqlite3-sys"]
 pglite = ["pg", "dep:pglite-oxide", "dep:virtual-net"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
@@ -2664,18 +2662,17 @@ EOF
   mkdir -p "$dir/src/relational" \
     "$dir/src/sync" \
     "$dir/migrations/postgres" \
-    "$dir/migrations/sqlite" \
     "$dir/tests"
 
   # ── lib.rs — both module trees (C-005 doc comment, both `pub mod`s) ──────────
   cat > "$dir/src/lib.rs" << EOF
 $MARK
-//! gen_ui_db (L2) — relational (pg/sqlite) + sync + startup orchestrator.
+//! gen_ui_db (L2) — relational (pg/pglite) + sync + startup orchestrator.
 //! Graph RAG lives in the sibling gen_ui_db_graph crate (C-004).
 //! Trait seams (EntityTransport / SyncTransport) are defined in gen_ui_types.
 //!
 //! Module ownership (parallel worktree lanes, see plan.md):
-//!   relational  → C-003 (sqlx pg/sqlite + migrations + typestate startup)
+//!   relational  → C-003 (sqlx pg/pglite + migrations + typestate startup)
 //!   sync        → C-005 (Electric shape consumer + DIY write queue)
 //!
 //! The sync engine writes read-path rows into a \`sync::LocalStore\` and flushes the
@@ -2694,7 +2691,9 @@ EOF
   cat > "$dir/src/relational/mod.rs" << EOF
 $MARK
 //! Feature-gated relational storage and ordered application startup.
-//! Enable exactly one of \`pg\` or \`sqlite\`; add \`pglite\` for embedded desktop PG.
+//! Postgres dialect only (\`pg\`; add \`pglite\` for embedded desktop PG via
+//! pglite-oxide) — desktop and web. Mobile uses embedded SurrealDB instead
+//! (gen_ui_db_graph), not this crate's relational store.
 
 mod error;
 mod seed;
@@ -2702,8 +2701,6 @@ mod startup;
 
 #[cfg(feature = "pg")]
 mod postgres;
-#[cfg(feature = "sqlite")]
-mod sqlite;
 
 pub use error::{RelationalError, RelationalResult};
 #[cfg(feature = "pglite")]
@@ -2711,12 +2708,7 @@ pub use postgres::PgliteStore;
 #[cfg(feature = "pg")]
 pub use postgres::PostgresStore;
 pub use seed::{SeedBundle, SeedSource};
-#[cfg(feature = "sqlite")]
-pub use sqlite::SqliteStore;
 pub use startup::{Migrated, Ready, Startup, Uninitialized};
-
-#[cfg(all(feature = "pg", feature = "sqlite"))]
-compile_error!("gen_ui_db relational dialect features are mutually exclusive");
 EOF
   cat > "$dir/src/relational/error.rs" << EOF
 $MARK
@@ -2911,60 +2903,6 @@ impl PgliteStore {
     pub fn store(&self) -> &PostgresStore { &self.store }
 }
 EOF
-  cat > "$dir/src/relational/sqlite.rs" << EOF
-$MARK
-//! Mobile SQLite store. sqlite-vec is registered before any SQLx connection opens.
-
-use std::{path::Path, str::FromStr, sync::Once};
-
-use sqlx::{SqlitePool, sqlite::{SqliteConnectOptions, SqlitePoolOptions}};
-
-use super::{RelationalResult, startup::StartupStore};
-
-static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("./migrations/sqlite");
-static REGISTER_VEC: Once = Once::new();
-
-#[derive(Clone)]
-pub struct SqliteStore { pool: SqlitePool }
-
-impl SqliteStore {
-    pub async fn open(path: impl AsRef<Path>) -> RelationalResult<Self> {
-        REGISTER_VEC.call_once(|| {
-            // SAFETY: sqlite-vec exposes SQLite's documented extension entry point.
-            // Register it once, before SQLx opens any connection; both crates link
-            // the same libsqlite3-sys version through Cargo feature unification.
-            unsafe {
-                libsqlite3_sys::sqlite3_auto_extension(Some(std::mem::transmute::<
-                    *const (),
-                    unsafe extern "C" fn(
-                        *mut libsqlite3_sys::sqlite3,
-                        *mut *mut std::ffi::c_char,
-                        *const libsqlite3_sys::sqlite3_api_routines,
-                    ) -> std::ffi::c_int,
-                >(
-                    sqlite_vec::sqlite3_vec_init as *const (),
-                )));
-            }
-        });
-        let options = SqliteConnectOptions::from_str(&format!("sqlite://{}", path.as_ref().display()))?
-            .create_if_missing(true)
-            .foreign_keys(true);
-        let pool = SqlitePoolOptions::new().max_connections(1).connect_with(options).await?;
-        Ok(Self { pool })
-    }
-
-    pub fn pool(&self) -> &SqlitePool { &self.pool }
-}
-
-#[async_trait::async_trait]
-impl StartupStore for SqliteStore {
-    async fn migrate(&self) -> RelationalResult<()> { MIGRATOR.run(&self.pool).await.map_err(Into::into) }
-    async fn execute_seed(&self, sql: &str) -> RelationalResult<()> {
-        sqlx::raw_sql(sql).execute(&self.pool).await?;
-        Ok(())
-    }
-}
-EOF
   cat > "$dir/migrations/postgres/0001_relational.sql" << 'EOF'
 -- TJ-ARCH-MOB-001 compliant
 CREATE TABLE IF NOT EXISTS app_seed_versions (
@@ -2972,14 +2910,6 @@ CREATE TABLE IF NOT EXISTS app_seed_versions (
     version BIGINT NOT NULL CHECK (version >= 0),
     applied_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-EOF
-  cat > "$dir/migrations/sqlite/0001_relational.sql" << 'EOF'
--- TJ-ARCH-MOB-001 compliant
-CREATE TABLE IF NOT EXISTS app_seed_versions (
-    name TEXT PRIMARY KEY,
-    version INTEGER NOT NULL CHECK (version >= 0),
-    applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-) STRICT;
 EOF
 
   # ══════════════════════════════════════════════════════════════════════════════
@@ -3806,7 +3736,7 @@ EOF
   # ══════════════════════════════════════════════════════════════════════════════
   cat > "$dir/tests/it.rs" << EOF
 $MARK
-//! Public-boundary behavior tests for relational startup inputs and SQLite+vec.
+//! Public-boundary behavior tests for relational startup inputs.
 
 use gen_ui_db::relational::{RelationalError, SeedBundle, SeedSource};
 
@@ -3831,23 +3761,9 @@ async fn empty_ipfs_cid_is_rejected_before_network_io() {
     let error = bundle.sql(&reqwest::Client::new()).await.unwrap_err();
     assert!(matches!(error, RelationalError::EmptyCid { .. }));
 }
-
-#[cfg(feature = "sqlite")]
-#[tokio::test]
-async fn sqlite_store_loads_vec_extension() {
-    use gen_ui_db::relational::SqliteStore;
-
-    let directory = tempfile::tempdir().unwrap();
-    let store = SqliteStore::open(directory.path().join("app.sqlite")).await.unwrap();
-    let version: String = sqlx::query_scalar("SELECT vec_version()")
-        .fetch_one(store.pool())
-        .await
-        .unwrap();
-    assert!(version.starts_with('v'));
-}
 EOF
 
-  ok "gen_ui_db: relational (pg/sqlite + migrations + startup) [C-003] + sync (Electric consumer + write queue + SyncTransport) [C-005]"
+  ok "gen_ui_db: relational (pg/pglite + migrations + startup) [C-003] + sync (Electric consumer + write queue + SyncTransport) [C-005]"
 }
 
 emit_crate gen_ui_db ""

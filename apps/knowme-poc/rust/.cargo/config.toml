@@ -18,3 +18,10 @@
 # sccache: CI + branch-switching only (cannot cache incremental crates, so it is
 # NOT an inner-loop tool). Enable in ~/.cargo/config.toml, not here:
 #   [build] rustc-wrapper = "sccache"
+
+[target.wasm32-unknown-unknown]
+# getrandom 0.3 (pulled in transitively via liter-llm -> ahash) requires this cfg
+# alongside the `wasm_js` feature (enabled in gen_ui_wasm/Cargo.toml) to build for
+# the browser target — it no longer auto-detects JS availability. See:
+# https://docs.rs/getrandom/latest/getrandom/#webassembly-support
+rustflags = ["--cfg", "getrandom_backend=\"wasm_js\""]

@@ -64,8 +64,6 @@ surrealdb         = { version = "3.2",  default-features = false }
 sqlx              = { version = "0.8",  default-features = false, features = ["runtime-tokio-rustls", "macros", "migrate"] }
 pglite-oxide       = { version = "0.5.1", default-features = false }
 refinery           = { version = "0.8", default-features = false }
-sqlite-vec         = "0.1"
-libsqlite3-sys     = "0.30"
 virtual-net        = "=0.702.0-alpha.3"
 candle-core       = "0.7"
 candle-nn         = "0.7"
@@ -75,6 +73,11 @@ flutter_rust_bridge = { version = "2.12", features = ["anyhow"] }
 dashmap           = "6.1"
 parking_lot       = "0.12"
 once_cell         = "1.20"
+# Universal LLM gateway (142+ providers) — user's fork, pinned by SHA (Rule 22/23).
+# native-http (reqwest/tokio) for desktop+mobile; wasm-http (reqwest/fetch, no
+# tokio multithread) for the wasm32 web target — same crate, feature-gated.
+#     ── VERIFIED HEAD (2026-07-16): 78b7496ca7b09a1aa6c3c666af0a149bbdf5249f ──
+liter-llm         = { git = "https://github.com/GQAdonis/liter-llm.git", rev = "78b7496ca7b09a1aa6c3c666af0a149bbdf5249f", default-features = false }
 
 # Feature-unification pin (cargo-hakari): all real crates depend on this so a
 # switch between desktop/mobile/wasm invocations doesn't churn shared deps.

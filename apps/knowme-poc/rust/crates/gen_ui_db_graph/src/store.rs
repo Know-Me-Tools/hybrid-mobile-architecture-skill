@@ -276,6 +276,15 @@ pub struct GraphStore {
     embedder: Arc<dyn Embedder>,
 }
 
+impl GraphStore {
+    // config.rs (config-DB CRUD) is a separate `impl GraphStore` block in this
+    // same crate, so it needs access to the connection without making `db` a
+    // public field on every other consumer of this struct.
+    pub(crate) fn db(&self) -> &Surreal<Any> {
+        &self.db
+    }
+}
+
 // SurrealDB 3.2's `IndexedResults::take` deserializes into `SurrealValue`, not
 // serde — so the row structs read back from `.query()` derive `SurrealValue`.
 // (The public API types — MemoryRecord/MemoryHit/RelatedEntity — stay serde-based

@@ -35,5 +35,15 @@ worktrees per plan.md.
 
 ## Current step
 
-C-101 (bootstrap-pillars) executing in-session — the environment upgrade must happen
-in THIS shell (not an isolated worktree) since it changes the host toolchain.
+C-101 and C-102 **merged** (bootstrap pillars run live on this box; PoC scaffolded,
+first full codegen pipeline run, ~25 defects found and fixed in the scaffold scripts,
+verified building/running on Tauri desktop + web — commits 86e7d1d, 2c169a6). A
+follow-up desktop branding/UX round (titlebar, menu, icon, migrations stub commands)
+landed in 2c169a6/a74dd6f. The inference architecture for C-103/C-105/C-109 was
+revised by the user post-C-102 (liter-llm gateway, mistral.rs, WebLLM web lane,
+config DB) — see decision-log.md and the updated plan.md; commit 4ed2d08.
+
+**Now starting C-103** (`2026-07-15-c103-chat-live-e2e`, REVISED scope): wire the
+liter-llm gateway + config DB v1 + live ContentBlock streaming, in-session (same
+rationale as C-101/C-102 — this is foundational, highest-information work best done
+directly rather than dispatched to an isolated-worktree lane).

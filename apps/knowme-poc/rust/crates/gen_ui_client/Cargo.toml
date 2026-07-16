@@ -19,9 +19,19 @@ tracing.workspace     = true
 reqwest.workspace     = true
 reqwest-eventsource.workspace = true
 jsonwebtoken.workspace = true
+liter-llm.workspace   = true
 
 [features]
-default = []
+# Default to native-http: this crate's flint gate/forge module already needs
+# reqwest/tokio unconditionally, so native is the sane default for every consumer
+# except the wasm32 leaf (gen_ui_wasm), which opts out via default-features=false
+# and requests wasm-http instead. Liter-llm's native-http and wasm-http are NOT
+# safe to unify together (their reqwest/tokio cfg-gated code paths conflict) —
+# always select exactly one explicitly per build, never leave this unset.
+default = ["native-http"]
+native-http = ["liter-llm/native-http"]
+# wasm32 target (web): liter-llm's fetch-based client — no tokio multithread.
+wasm-http = ["liter-llm/wasm-http"]
 # FRF peer-sync spine (tonic gRPC over HTTP/2). Native-only — tonic's transport does
 # not build for wasm32-unknown-unknown. The browser surface uses frf-wasm/Connect-web
 # from the JS side (see references), NOT this crate. Off by default so the common

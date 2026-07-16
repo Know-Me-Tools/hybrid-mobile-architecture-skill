@@ -1,6 +1,10 @@
 # Update Log
 
 ## 2026-07-16
+* **Creation**: [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md)
+* **Creation**: [Hybrid inference architecture revision for KnowMe PoC](/hybrid-inference-architecture-revision-for-knowme-poc.md)
+* **Creation**: [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md)
+* **Creation**: [KnowMe PoC spec and wiki handoff after first codegen run](/knowme-poc-spec-and-wiki-handoff-after-first-codegen-run.md)
 * **Creation**: [Codegen and CI verification session completed with unknown change](/codegen-and-ci-verification-session-completed-with-unknown-change.md)
 * **Creation**: [KnowMe PoC C-102 desktop/web branding milestone](/knowme-poc-c-102-desktop-web-branding-milestone.md)
 * **Creation**: [KnowMe POC first codegen run and Tauri desktop fixes](/knowme-poc-first-codegen-run-and-tauri-desktop-fixes.md)

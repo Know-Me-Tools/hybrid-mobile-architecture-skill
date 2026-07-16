@@ -22,12 +22,14 @@
 //!      in Rust (`rrf`) because it is not one SurrealQL statement
 #![forbid(unsafe_code)]
 
+mod config;
 mod embed;
 mod error;
 mod rrf;
 mod schema;
 mod store;
 
+pub use config::{ModelPref, Provider};
 pub use embed::{Embedder, EmbeddingModelInfo, EMBED_DIM};
 pub use error::GraphError;
 pub use rrf::{rrf_fuse, RrfConfig};

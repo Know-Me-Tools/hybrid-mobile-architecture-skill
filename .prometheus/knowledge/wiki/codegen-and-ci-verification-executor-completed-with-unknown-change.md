@@ -12,9 +12,9 @@ links:
 - codegen-and-ci-verification-executor-completed-with-unknown-change
 sources:
 - stdin
-timestamp: 2026-07-16T00:43:56.336089+00:00
-created_at: 2026-07-16T00:43:56.336025+00:00
-updated_at: 2026-07-16T00:43:56.336089+00:00
+timestamp: 2026-07-16T03:00:07.085389+00:00
+created_at: 2026-07-16T03:00:07.085331+00:00
+updated_at: 2026-07-16T03:00:07.085389+00:00
 revision: 1
 ---
 
@@ -42,4 +42,4 @@ Because the recorded change is `unknown`, do not treat code generation or CI ver
 
 # Citations
 
-1. stdin
+1. [1] stdin

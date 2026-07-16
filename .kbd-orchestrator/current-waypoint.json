@@ -1,16 +1,16 @@
 {
   "phase": "phase-codegen-and-ci-verification",
-  "status": "execute_ready",
+  "status": "executing",
   "previousPhase": "scaffold-full-hybrid-project",
   "changes": [
     {
       "id": "2026-07-15-c101-bootstrap-pillars",
-      "status": "pending",
+      "status": "merged",
       "wave": 0
     },
     {
       "id": "2026-07-15-c102-poc-scaffold-first-codegen",
-      "status": "pending",
+      "status": "merged",
       "wave": 0
     },
     {
@@ -54,9 +54,10 @@
       "wave": 2
     }
   ],
-  "completedChanges": 0,
+  "completedChanges": 2,
   "totalChanges": 10,
   "startedAt": "2026-07-15T22:04:29Z",
-  "nextCommand": "/kbd-execute",
-  "firstChange": "2026-07-15-c101-bootstrap-pillars"
+  "nextCommand": "/kbd-apply 2026-07-15-c103-chat-live-e2e",
+  "firstChange": "2026-07-15-c101-bootstrap-pillars",
+  "nextChange": "2026-07-15-c103-chat-live-e2e"
 }
