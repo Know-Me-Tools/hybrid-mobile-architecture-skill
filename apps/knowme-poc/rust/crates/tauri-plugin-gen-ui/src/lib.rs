@@ -12,6 +12,7 @@ use tauri::{
 };
 
 mod commands;
+mod dev_ollama;
 mod error;
 
 pub use error::{Error, Result};
@@ -40,6 +41,11 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             // One global Tokio runtime per process (never a second). Desktop
             // shares gen_ui_core in-process, so init here rather than via FFI.
             gen_ui_runtime::init(None);
+            // T10 dev-only smoke test: installs a real ConfigStore pointing at
+            // a local Ollama instance IFF GEN_UI_DEV_OLLAMA_MODEL is set — see
+            // dev_ollama.rs. No-op (falls back to the graceful-degrade
+            // NoopConfigStore) when unset, i.e. in every non-smoke-test run.
+            dev_ollama::install_if_requested();
             let _ = app.app_handle();
             Ok(())
         })

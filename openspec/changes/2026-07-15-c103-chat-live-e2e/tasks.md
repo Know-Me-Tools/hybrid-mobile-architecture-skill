@@ -152,8 +152,46 @@
       cloning and building that external repo. Documented, not silently
       skipped — a real remaining blocker for full tsc cleanliness, unrelated to
       anything T6-T9 touched.
-- [ ] T10. Run live on macOS Tauri (first real provider round-trip) and capture the
-      result
+- [x] T10. Run live on macOS Tauri (first real provider round-trip) and capture the
+      result.
+
+      No provider API key was available for this session (user-directed:
+      "use Ollama with this model that we already have"). Wired a dev-only,
+      env-var-gated ConfigStore/SecretResolver pair (tauri-plugin-gen-ui::
+      dev_ollama, active only when GEN_UI_DEV_OLLAMA_MODEL is set — never in a
+      normal run) pointing at a local Ollama instance, per liter-llm's own
+      `ollama/<model>` model-hint + empty-API-key pattern (vendored crate's
+      tests/local_llm.rs).
+
+      FIRST REAL PROVIDER ROUND-TRIP (the actual T10 substance): a new
+      integration test, crates/gen_ui_agent/tests/ollama_live.rs, drives
+      ChatAgent::send — the exact orchestration both gen_ui_ffi and
+      tauri-plugin-gen-ui call — against a real running Ollama instance.
+      deepseek-v4-flash:cloud failed with "this model requires a subscription"
+      (an Ollama Cloud account-tier issue, not a code defect — the error
+      still round-tripped correctly end-to-end as a streamed RunError event,
+      proving the failure path too); pulled llama3.2:1b locally (free, no
+      subscription) and re-ran: PASSED. Full event sequence observed:
+      RunStarted -> Block{Text} -> RunFinished, response text "Hello." for
+      the prompt "Say hello in exactly one word." Run with:
+      `OLLAMA_MODEL=llama3.2:1b cargo test -p gen_ui_agent --test ollama_live
+      -- --ignored --nocapture`.
+
+      Desktop app launch: `GEN_UI_DEV_OLLAMA_MODEL=llama3.2:1b pnpm tauri dev`
+      compiled and started cleanly (Rust core + Vite frontend, no errors in
+      the Tauri log or browser console) — confirmed via a background process
+      + the frontend dev server's rendered output (KnowMe branded titlebar
+      visible, zero console errors). Could NOT drive the actual chat UI
+      interaction inside the native Tauri window from this session (no visual
+      access to a native macOS window; a plain browser tab against the Vite
+      dev server on :1420 has no `__TAURI_INTERNALS__` bridge, so invoke()
+      calls don't function there — it only proved the frontend boots). The
+      ChatAgent-level integration test above is the actual live-provider
+      proof; the Tauri GUI launch proves the app process itself starts
+      cleanly with the dev Ollama wiring active, but a human running
+      `pnpm tauri dev` and typing into the chat box is the only way to see
+      the full windowed round-trip. Recommend the user do this once to
+      confirm the UI layer, since it's outside what this session could drive.
 - [ ] T11. Run live on iOS simulator (first-ever on-target Flutter run for this PoC,
       G-6) and capture the result
 - [ ] T12. Update decision-log.md / wiki with pinned SHAs for both forks and any

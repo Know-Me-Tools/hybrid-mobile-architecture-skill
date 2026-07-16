@@ -12,6 +12,11 @@ gen_ui_types    = { path = "../gen_ui_types" }
 gen_ui_runtime  = { path = "../gen_ui_runtime" }
 gen_ui_protocol = { path = "../gen_ui_protocol" }
 gen_ui_agent    = { path = "../gen_ui_agent" }
+# ConfigStore trait only (default features, no pg/pglite) — dev_ollama.rs's
+# in-memory smoke-test ConfigStore needs the trait, not a real backend (T10).
+gen_ui_db       = { path = "../gen_ui_db" }
+async-trait.workspace = true
+log = "0.4"
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
