@@ -48,6 +48,7 @@ cat > package.json << PKGEOF
     "@tauri-apps/api":        "^2.0.0",
     "@tauri-apps/plugin-shell": "^2.0.0",
     "@tauri-apps/plugin-store": "^2.0.0",
+    "@tauri-apps/plugin-os":  "^2.0.0",
     "zustand":                "^5.0.0",
     "immer":                  "^10.0.0",
     "@tanstack/react-query":  "^5.0.0",
@@ -996,6 +997,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = ["devtools"] }
 tauri-plugin-shell = "2"
 tauri-plugin-store = "2"
+tauri-plugin-os = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # Add path to shared gen_ui_core:
@@ -1042,12 +1044,41 @@ fn main() {
 }
 RSEOF
 
+cat > src-tauri/src/commands.rs << 'RSEOF'
+// TJ-ARCH-MOB-001 compliant
+// Tauri command surface. Stub bodies today — wire these into gen_ui_core once
+// the shared Rust crate is linked as a dependency of this crate (uncomment the
+// path dep in Cargo.toml). Signatures should match the frontend's invoke()
+// contract (src/features/*/stores/*.ts) so wiring a real backend never changes
+// the frontend call sites. Registering stubs now (rather than leaving the
+// invoke_handler commented out) lets the app boot end-to-end before any
+// backend logic lands — an unregistered command the frontend calls
+// unconditionally at startup is a silent "Startup failed" trap otherwise.
+
+#[tauri::command]
+pub async fn run_migrations() -> Result<(), String> {
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn load_seeds() -> Result<(), String> {
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn attach_sync_shapes() -> Result<(), String> {
+    Ok(())
+}
+RSEOF
+
 cat > src-tauri/src/lib.rs << 'RSEOF'
 // TJ-ARCH-MOB-001 compliant
 // Tauri application entry point
 // gen_ui_core commands are registered here
 
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
+mod commands;
+
+use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -1055,21 +1086,24 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_os::init())
         // .manage(AppState::new())          // Uncomment when gen_ui_core is wired
-        // .invoke_handler(tauri::generate_handler![  // Register commands
-        //     commands::stream_agent_a2ui,
-        //     commands::entity_list, commands::entity_get,
-        //     commands::entity_create, commands::entity_update, commands::entity_delete,
-        //     commands::entity_runtime_start, commands::entity_runtime_stop,
-        //     commands::memory_ingest, commands::memory_search, commands::graph_expand,
-        //     commands::run_migrations, commands::load_seeds, commands::attach_sync_shapes,
-        //     commands::mcp_call_tool,
-        // ])
+        .invoke_handler(tauri::generate_handler![
+            commands::run_migrations,
+            commands::load_seeds,
+            commands::attach_sync_shapes,
+            // Add entity/memory/chat commands here as gen_ui_core wires them —
+            // see gen_ui_ffi's api/chat.rs + api/entity.rs for their signatures.
+        ])
         .setup(|app| {
+            let quit = MenuItem::with_id(app, "quit", "Quit", true, Some("CmdOrCtrl+Q"))?;
+            let file_menu = Submenu::with_items(app, "File", true, &[&quit])?;
+
             // Native View menu with a Toggle Developer Tools item — the only
             // discoverable way to reach devtools (console/elements/network) on a
             // packaged build; right-click "Inspect Element" is undiscoverable and
             // absent entirely in release builds without this menu wiring.
+            // Toggle Developer Tools is deliberately the LAST item in View.
             let toggle_devtools = MenuItem::with_id(
                 app,
                 "toggle_devtools",
@@ -1087,11 +1121,15 @@ pub fn run() {
                     &toggle_devtools,
                 ],
             )?;
-            let menu = Menu::with_items(app, &[&view_menu])?;
+
+            let about = PredefinedMenuItem::about(app, None, Some(AboutMetadata::default()))?;
+            let help_menu = Submenu::with_items(app, "Help", true, &[&about])?;
+
+            let menu = Menu::with_items(app, &[&file_menu, &view_menu, &help_menu])?;
             app.set_menu(menu)?;
 
-            app.on_menu_event(move |app_handle, event| {
-                if event.id() == "toggle_devtools" {
+            app.on_menu_event(move |app_handle, event| match event.id().as_ref() {
+                "toggle_devtools" => {
                     if let Some(window) = app_handle.get_webview_window("main") {
                         if window.is_devtools_open() {
                             window.close_devtools();
@@ -1100,6 +1138,8 @@ pub fn run() {
                         }
                     }
                 }
+                "quit" => app_handle.exit(0),
+                _ => {}
             });
 
             Ok(())
@@ -1154,7 +1194,16 @@ cat > src-tauri/capabilities/default.json << 'EOF'
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["core:default", "shell:default", "store:default"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging",
+    "shell:default",
+    "store:default",
+    "os:default"
+  ]
 }
 EOF
 ok "src-tauri/capabilities/default.json"

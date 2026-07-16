@@ -1,16 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
+/* KnowMe brand tokens — sourced from docs/reference-app/*.html (functional
+   spec + moodboard). Dark is the default; body.light overrides for light mode. */
 @theme {
-  --color-background: #0D0D18;
-  --color-surface: #121220;
+  --color-bg: #0B0F14;
+  --color-bg-2: #111620;
+  --color-surface: #161D29;
+  --color-card: #1C2535;
+  --color-card-hov: #202B40;
+  --color-border: #1F2D40;
+  --color-border-soft: #233041;
+  --color-muted: #253044;
+  --color-muted-fg: #4B6080;
+  --color-fg: #E8EDF3;
+  --color-fg-sub: #A7B0BC;
+  --color-fg-faint: #6B7280;
   --color-ember: #FF6A3D;
-  --color-violet: #8B78FF;
-  --color-text-primary: #F2F2FF;
-  --color-text-secondary: #9898C0;
+  --color-ember-2: #E04E28;
+  --color-cyan: #00C2DC;
+  --color-green: #22C55E;
+  --color-amber: #F59E0B;
+  --color-red: #EF4444;
+
   --font-sans: 'Inter', sans-serif;
   --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Roboto', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 :root { color-scheme: dark; }
-body { background: var(--color-background); color: var(--color-text-primary); font-family: var(--font-sans); }
+
+body.light {
+  --color-bg: #F7F7F8;
+  --color-bg-2: #FFFFFF;
+  --color-surface: #FAFBFC;
+  --color-card: #FFFFFF;
+  --color-card-hov: #F2F4F7;
+  --color-border: #E5E8ED;
+  --color-border-soft: #EEF0F3;
+  --color-muted: #F2F4F7;
+  --color-muted-fg: #9AA3B0;
+  --color-fg: #0B0F14;
+  --color-fg-sub: #4B5563;
+  --color-fg-faint: #6B7280;
+  --color-ember: #E04E28;
+  --color-ember-2: #C13E1E;
+  --color-cyan: #0891B2;
+  --color-green: #16A34A;
+  --color-amber: #D97706;
+  --color-red: #DC2626;
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  transition: background 0.3s, color 0.3s;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ember);
+}

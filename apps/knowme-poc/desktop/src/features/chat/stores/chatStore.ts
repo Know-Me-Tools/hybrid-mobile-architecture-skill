@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { listen } from '@tauri-apps/api/event'
-import { invoke } from '@tauri-apps/api/core'
+import { invoke, isTauri } from '@tauri-apps/api/core'
 import type { ContentBlock, Message, MessageUsage } from '@/bridge/a2ui/types'
 import { applyA2uiEvent } from '@/bridge/a2ui/driver'
 
@@ -58,7 +58,10 @@ export const useChatStore = create<ChatState & ChatActions>()(
       },
 
       initListeners: () => {
-        // Wire A2UI events from Rust to store
+        // Wire A2UI events from Rust to store — no-op outside a real Tauri
+        // context (this bundle also serves as a plain web page with no
+        // __TAURI_INTERNALS__ bridge, where listen() throws synchronously).
+        if (!isTauri()) return () => {}
         const unlistenPromise = listen('a2ui_event', (event: { payload: unknown }) => {
           const store = useChatStore.getState()
           applyA2uiEvent(event.payload as never, store.streamBlock, store.finalizeMessage)

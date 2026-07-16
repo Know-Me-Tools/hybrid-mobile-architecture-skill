@@ -12,12 +12,12 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "knowme-poc",
+        "title": "KnowMe",
         "width": 1280,
         "height": 820,
         "minWidth": 800,
         "minHeight": 600,
-        "decorations": true,
+        "decorations": false,
         "transparent": false
       }
     ],
