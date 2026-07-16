@@ -3,6 +3,8 @@
 ## 2026-07-16
 * **Creation**: [Codegen and CI verification executor completed with unknown change](/codegen-and-ci-verification-executor-completed-with-unknown-change.md)
 * **Creation**: [Codegen and CI verification session ended at 17:17 with no changes](/codegen-and-ci-verification-session-ended-at-17-17-with-no-changes.md)
+* **Creation**: [Codegen and CI verification session completed unknown change](/codegen-and-ci-verification-session-completed-unknown-change.md)
+* **Creation**: [PR #2 session log close-out during KnowMe PoC codegen phase](/pr-2-session-log-close-out-during-knowme-poc-codegen-phase.md)
 * **Creation**: [Codegen and CI verification session completed with unknown change](/codegen-and-ci-verification-session-completed-with-unknown-change.md)
 * **Creation**: [Codegen and CI verification session ended at 16:57 with no changes](/codegen-and-ci-verification-session-ended-at-16-57-with-no-changes.md)
 * **Creation**: [KnowMe PoC phase awaits mistral.rs and WebLLM API research](/knowme-poc-phase-awaits-mistral-rs-and-webllm-api-research.md)
