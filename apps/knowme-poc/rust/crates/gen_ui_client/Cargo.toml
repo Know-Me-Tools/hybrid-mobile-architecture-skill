@@ -44,11 +44,11 @@ wasm-http = ["liter-llm/wasm-http"]
 # then change these two lines to pull them in:
 #     frf = ["dep:frf-sdk-rust"]
 #     peer-crdt = ["frf", "dep:frf-crdt", "dep:frf-store-redb"]
-frf = []
+frf = ["dep:frf-sdk-rust"]
 peer-crdt = ["frf"]
 
-# [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-# frf-sdk-rust   = { workspace = true, optional = true }
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+frf-sdk-rust   = { workspace = true, optional = true }
 # frf-crdt       = { workspace = true, optional = true }
 # frf-store-redb = { workspace = true, optional = true }
 

@@ -151,7 +151,8 @@ These rules override any global rules mandating TDD, coverage targets, or test-f
 - Flutter: Dart & Flutter MCP verify loop, flutter/skills, VGV golden tests,
   `shadcn-ui-flutter`. A11y agents on both surfaces.
 - Scaffolded projects ship project-local skills (`content-block-ui`, `hybrid-design-tokens`,
-  `tauri-ui-review`, `flutter-golden-ui`, `a11y-gate`) + an activation hook.
+  `tauri-ui-review`, `tauri-custom-titlebar`, `flutter-golden-ui`, `a11y-gate`) + an
+  activation hook.
 
 **Shared libraries — everything publishable:**
 - crates.io: `gen_ui_types/protocol/client/mcp/agent`, `tauri-plugin-gen-ui` (core crates

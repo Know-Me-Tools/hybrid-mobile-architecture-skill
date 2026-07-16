@@ -147,6 +147,31 @@
 - Verified clean before commit: `cargo clippy --workspace -- -D warnings`,
   `flutter analyze`, `npx tsc --noEmit` (desktop) — all zero warnings/errors.
 
+### 2026-07-16 — C-105 "research wait-state" resolved; C-112/C-113 UI scope added (user-directed)
+- **C-105 wait-state was stale, not blocking.** The wiki note
+  (`knowme-poc-phase-goals-and-c-105-research-wait-state`) recorded a phase snapshot, not
+  an open question: the research it waited on was already decided on 2026-07-15 (mistral.rs
+  GQAdonis fork native + WebLLM/MLC on web, both with sources in this log). A concurrent
+  session has since landed T1-T8 on main (`79bb7af`, `dddfe85`) — fork pinned at
+  `b7746a85cb2e78fb2cf11cfb6ea9abd0a167d1f3`, regex + safetensors/candle conflicts
+  resolved, `MistralEngine` + WebLLM lane implemented, design.md written. **Remaining:
+  T9-T12** (plugin commands, agent lane selection, cloud↔local toggle + tok/s, e2e smoke).
+  C-105 marked `in_progress`, NOT taken up here, to avoid racing that session.
+- **C-112 (new, delivered)**: the PoC's custom Tauri title bar
+  (`decorations: false` + `Titlebar.tsx`) extracted into a reusable project-local skill,
+  `tauri-custom-titlebar`. Captures the two non-obvious defects the PoC already solved:
+  `data-tauri-drag-region` alone leaves dead zones (explicit `startDragging()` needed for
+  the whole bar), and Tauri API imports throw at module scope in a plain web page
+  (`isTauri()` guard). Per user direction the skill treats **surface gating as a
+  first-class decision** — it must NOT default the desktop bar onto web/mobile, and offers
+  the alternatives (no bar / plain web header / mobile app bar) instead.
+- **C-113 (new, pending)**: mobile navigation must follow platform convention — iOS bottom
+  tab bar (HIG); Android top-or-bottom per Material 3 — across BOTH React and Flutter, and
+  extending to mobile-web PWA. Per user direction the PWA-by-platform rule must be a single
+  **consistent** documented choice (adaptive vs. one convention), recorded here at execute
+  time, not left to whichever component an agent reaches for. Research (T1) precedes the
+  decision (T2) precisely because the 2026 conventions are what bind the choice.
+
 ### 2026-07-16 — C-106 execution: infra landed (T1-T3); TWO BLOCKERS surfaced
 - **T2/T3 delivered**: `apps/knowme-poc/infra/` — docker-compose.yml (Postgres 18-alpine
   + Electric 1.7.7 pinned by multi-arch digest), postgres.conf (Electric's own required
@@ -171,3 +196,71 @@
   the sink at Postgres for the PoC and label it. NOT decided unilaterally.
 - Plan decision-2 fallback (SyncStatus + write queue proven by boundary tests, shape
   lane labeled honestly) remains available if T3b/T3c overrun.
+### 2026-07-16 — C-106 (T1) sync infra research + pins (Rule 22/23 provenance)
+- **Pinned (verified against Docker Hub API, 2026-07-16)**: `electricsql/electric:1.7.7`,
+  multi-arch digest `sha256:15e9a25d5f6c515ad9113392291e34c6751b8b31d563ee4c496fde499a5ce14f`
+  (arm64 + amd64 both present → runs on the dev Mac AND CI). 1.7.7 is the current release
+  (2026-07-08); `latest` points at the same build. `canary` deliberately NOT used.
+- **Wire-protocol compatibility CONFIRMED**: 1.7.x is the v1.x line our C-005 shape
+  consumer already targets (`/v1/shape`, `offset=-1` initial sync, `electric-handle` /
+  `electric-offset` headers, `must-refetch`/409 rotation). No consumer changes needed —
+  the engine was written against this contract.
+- **Postgres floor**: `postgres:18-alpine` per Electric's own dev compose
+  (`packages/sync-service/dev/docker-compose.yml` @ main). Matches the CLAUDE.md cloud
+  tier (PostgreSQL 18 / Supabase), so the PoC's local infra and its cloud target agree.
+- **Required PG settings** (from Electric's own `dev/postgres.conf`, not invented):
+  `wal_level = logical`, `max_replication_slots = 100`, `max_connections = 200`,
+  `listen_addresses = '*'`. Logical replication is Electric's hard requirement (README).
+- Sources: hub.docker.com/v2/repositories/electricsql/electric (tags + digest);
+  github.com/electric-sql/electric @ main — README.md, packages/sync-service/dev/
+  docker-compose.yml, packages/sync-service/dev/postgres.conf.
+- **Scope finding**: C-106's gap is NOT the engine. `gen_ui_db::sync` (C-005) already has
+  a real shape consumer, write queue (idempotent keys, backoff, poison handler),
+  SyncStatus broadcast, and the LocalStore/WriteSink seams. The gap is (a) no infra to
+  sync against and (b) BOTH `attach_sync_shapes` entry points are no-op `Ok(())` stubs
+  (`tauri-plugin-gen-ui::commands`, `gen_ui_ffi::api::boot`). Tasks scoped accordingly.
+
+### 2026-07-16 — DECISION (user, option B): FRF replaces ElectricSQL as the realtime substrate
+- **Decision**: flint-realtime-fabric (FRF) is the realtime substrate for C-106 and for
+  realtime generally. **ElectricSQL is dropped from this codebase.** C-106's T1-T3
+  (Electric compose/pins/schema, merged in PR #5) are SUPERSEDED, not reverted for
+  history's sake — `infra/` is rewritten onto FRF's own stack.
+- **The premise that prompted this was false, and the evidence is unambiguous.** The ask
+  was to "add ElectricSQL support to FRF, which also supports Electric SQL realtime
+  integration." Verified against a freshly-pulled FRF (`git pull`; branch
+  `sovereign-sfu-decode-proof` @ `9ba04ae`, 14 ahead of `origin/main` @ `d263ede`, 0
+  behind): **`grep -rli 'electric'` returns ZERO files** across the entire repo — no code,
+  no docs, no compose, no proto. FRF has never integrated Electric.
+- **Why it shouldn't**: `frf-postgres-cdc` opens a logical replication slot and reads
+  **`pgoutput`** directly via `tokio-postgres`/`pg_walstream`, publishing each decoded row
+  change onto the Iggy spine. That is *the same Postgres mechanism Electric itself
+  consumes*. FRF and Electric are alternative implementations of one job, not layers that
+  stack. Adding Electric would mean two CDC paths contending for replication slots on the
+  same WAL, for zero capability gain (`pgoutput` is `pgoutput` either way).
+- **Why the pivot is cheap**: `gen_ui_client/src/flint/frf.rs` ALREADY exists — a
+  `FrfSpine` façade over `frf-sdk-rust` documenting the SDK entry points as VERIFIED
+  against FRF HEAD and pinned at rev `9ba04ae`, which is *exactly* the HEAD pulled today.
+  The `frf` feature is stubbed (`frf = []`, dep commented out). The frozen
+  `gen_ui_types::sync::SyncTransport` seam is UNCHANGED by the swap — which is what
+  freezing it at C-001 was for.
+- **VERIFIED FRF mapping (read from FRF source, not assumed)**:
+  * READ = CDC → spine channel → `FrfClient::subscribe(channel_id, consumer_id, from)`
+    → `EventEnvelope` stream. **NOT `EntityService::WatchEntity`** — that takes a single
+    `entity_id` and watches ONE entity, not a table/shape feed. Easy and costly trap.
+  * WRITE = `FrfClient::publish(&EventEnvelope) -> Offset`, `ack(offset)` to consume.
+    Offsets replace Electric's `(handle, offset)` cursor.
+  * AUTH = gate-minted Bearer via the SDK `AuthInterceptor`; per-message `tenant_id`.
+    Strictly better than the `ELECTRIC_INSECURE=true` posture T2's compose shipped.
+- **Accepted cost**: the web lane's documented browser path was `@electric-sql/pglite-sync`
+  (`gen_ui_db/src/sync/README.md`); FRF's browser story is frf-wasm / Connect-web. Tracked
+  as T7b. Native desktop↔mobile is the demo's critical path, so this is not blocking.
+  `gen_ui_db::sync::shapes.rs` (the Electric HTTP shape consumer) becomes dead weight.
+- **Still true after the pivot**: C-005 left the engine with NO body — `impl LocalStore` /
+  `impl WriteSink` still have zero hits workspace-wide, so `SyncEngine::new` remains
+  uncallable. That work does not disappear with Electric; it moves to T5b/T6b and remains
+  the bulk of C-106.
+- **NOT done, deliberately**: FRF's own phase-36 / sovereign-SFU-decode work was left
+  untouched. Its `SFU_MODE=sovereign` gate is held OFF across phases 16→35 by an explicit
+  honesty discipline (no receiver has observed a decoded frame; `framesDecoded=0`), and
+  FRF's CLAUDE.md mandates halting at phase boundaries for approval. That work is WebRTC
+  media decode — unrelated to realtime *data* sync and of no use to the skills repo.

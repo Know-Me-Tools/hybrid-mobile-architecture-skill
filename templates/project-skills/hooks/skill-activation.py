@@ -31,6 +31,12 @@ SKILLS = {
         "responsive", "breakpoint", "screenshot", "visual check", "ui review",
         "web ui", "does it look",
     ],
+    "tauri-custom-titlebar": [
+        "titlebar", "title bar", "window chrome", "window decorations",
+        "decorations false", "startdragging", "data-tauri-drag-region",
+        "traffic lights", "window controls", "minimize", "maximize", "close button",
+        "frameless", "drag region", "custom header",
+    ],
     "flutter-golden-ui": [
         "flutter widget", "flutter screen", "golden test", "golden file",
         "widget test", "visual regression", "shadcn_flutter", "consumerwidget",

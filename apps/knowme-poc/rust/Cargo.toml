@@ -53,11 +53,11 @@ reqwest-eventsource = "0.6"
 #     FRF dependency and stays wasm-safe + offline-resolvable. To enable the `frf` /
 #     `peer-crdt` features, UNCOMMENT below and point at your vendored checkout —
 #     a `git`+`rev` pin (reproducible) or a `path` to a local clone:
-#       frf-sdk-rust = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b" }
+#       frf-sdk-rust = { git = "ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b" }
 #     ── VERIFIED HEAD (2026-07-15): 9ba04ae6ce41be796ae149609414b17a0d0d376b ──
-# frf-sdk-rust      = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
-# frf-crdt          = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
-# frf-store-redb    = { git = "ssh://git@github.com/prometheusags/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+frf-sdk-rust      = { git = "ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+# frf-crdt          = { git = "ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
+# frf-store-redb    = { git = "ssh://git@github.com/Prometheus-AGS/flint-realtime-fabric", rev = "9ba04ae6ce41be796ae149609414b17a0d0d376b", default-features = false }
 # JWT decode (inspect exp/role/tenant_id from gate-minted tokens; no local verify —
 # gate/forge own verification via JWKS). validation disabled for pure claim reads.
 jsonwebtoken      = { version = "9", default-features = false }

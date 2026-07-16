@@ -24,12 +24,12 @@
     },
     {
       "id": "2026-07-15-c105-local-model-desktop",
-      "status": "pending",
+      "status": "in_progress",
       "wave": 1
     },
     {
       "id": "2026-07-15-c106-sync-local-first",
-      "status": "pending",
+      "status": "in_progress",
       "wave": 1
     },
     {
@@ -54,6 +54,16 @@
     },
     {
       "id": "2026-07-16-c111-memory-ui-and-corpus",
+      "status": "pending",
+      "wave": 2
+    },
+    {
+      "id": "2026-07-16-c112-tauri-custom-titlebar-skill",
+      "status": "archived",
+      "wave": 2
+    },
+    {
+      "id": "2026-07-16-c113-mobile-platform-navigation",
       "status": "pending",
       "wave": 2
     }
