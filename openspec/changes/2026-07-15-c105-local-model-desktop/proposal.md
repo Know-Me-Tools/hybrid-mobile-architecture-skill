@@ -7,7 +7,7 @@
 
 ## Why
 
-M4 local GGUF (Qwen2.5-1.5B Q4) on Metal; cloud<->local switch; tok/s
+M4 local model on desktop AND web: mistral.rs library (GQAdonis fork — HF download + GGUF load + Metal streaming) natively; WebLLM (WebGPU, Qwen2.5-1.5B q4f16 MLC) on web behind the same intent seam; cloud<->local switch; tok/s. REVISED 2026-07-15 (user): replaces candle-direct; +web lane per firecrawl research.
 
 Derived from plan.md (full description, decisions, success criteria) and analysis.md /
 assessment.md (pillar research, MoSCoW selection, gap analysis). Follows the CLAUDE.md

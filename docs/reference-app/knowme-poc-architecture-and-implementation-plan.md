@@ -1,6 +1,6 @@
 # KnowMe PoC — Architecture, Functional Specification & Implementation Plan
 
-> Status: living document · Last revised 2026-07-15 (after C-101/C-102 completion + desktop branding/UX round)
+> Status: living document · Last revised 2026-07-15 (inference architecture revision: liter-llm gateway, mistral.rs local engine, WebLLM web lane, config DB — supersedes the Anthropic-SSE/candle-direct design)
 > Companion documents: [knowme-functional-specification-architecture.html](knowme-functional-specification-architecture.html) (product spec), [knowme-moodboard-user-journeys.html](knowme-moodboard-user-journeys.html) (brand + journeys)
 > Authority: [AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md) (all 40 rules) · [TJ-ARCH-MOB-001](../tj-arch-mob-001.html)
 > KBD phase: `phase-codegen-and-ci-verification` · Plan of record: `.kbd-orchestrator/phases/phase-codegen-and-ci-verification/plan.md`
@@ -37,10 +37,11 @@ one-workflow-at-scale; Jan/LM Studio's download→load→chat loop). The demo na
 
 | ID | Feature | What it proves |
 |----|---------|----------------|
-| M1 | **Chat** with streamed cloud responses — text/thinking/code/citation blocks rendered live | The ContentBlock spine: Anthropic SSE → gen_ui_client → ProtocolPipeline → frb stream / Tauri events → exhaustive UI switch |
+| M1 | **Chat** with streamed responses from **any of 142+ providers** via liter-llm — text/thinking/code/citation blocks rendered live; provider/model selected from the config DB | The ContentBlock spine: liter-llm gateway → gen_ui_client → ProtocolPipeline → frb stream / Tauri events → exhaustive UI switch |
 | M2 | **Memory**: ingest → hybrid search → cited answer + related-graph panel, with a pre-baked seed corpus | SurrealDB HNSW + BM25 + graph traversal, fastembed 384-dim — the architecture's biggest differentiator |
 | M3 | **Local-first sync** of one entity type (memories/notes): offline edit on mobile → appears on desktop | PEM + Electric read-path + DIY write queue; the airplane-mode demo moment |
-| M4 | **Local model, minimal**: download one GGUF (Qwen2.5-1.5B-Instruct Q4_K_M), cloud↔local switch, local chat on macOS Metal, tok/s display | candle inference engine made tangible; spawn_blocking discipline |
+| M4 | **Local model, minimal**: download one model (Qwen2.5-1.5B-Instruct Q4_K_M class) via mistral.rs, cloud↔local switch, local chat on macOS Metal + **in-browser via WebLLM (WebGPU)**, tok/s display | mistral.rs inference engine made tangible on native; WebLLM proves the same UX on web; spawn_blocking discipline |
+| M5 | **Provider/settings config DB**: pglite-oxide (Tauri/mobile Rust layer) + PGlite (web) storing provider credentials, model prefs, and app settings, administered from a Settings surface | The prometheus-db backend-selection pattern (real Postgres semantics on every target) carrying real app state |
 
 ### SHOULD
 
@@ -67,8 +68,10 @@ one-workflow-at-scale; Jan/LM Studio's download→load→chat loop). The demo na
   zero new crate coverage.
 
 Coverage check: MUST+SHOULD exercises every headline crate except vision — all 11
-ContentBlock variants reachable, SSE streaming, protocol pipeline, PEM graph, SurrealDB
-graph-RAG, Electric sync, Flint, candle (Metal desktop + CPU mobile), whisper, MCP, PMPO.
+ContentBlock variants reachable, streamed inference from any of 142+ providers
+(liter-llm), protocol pipeline, PEM graph, SurrealDB graph-RAG, config DB
+(pglite-oxide/PGlite), Electric sync, Flint, mistral.rs (Metal desktop + CPU mobile),
+WebLLM (WebGPU web), whisper, MCP, PMPO.
 
 ---
 
@@ -92,8 +95,10 @@ graph-RAG, Electric sync, Flint, candle (Metal desktop + CPU mobile), whisper, M
 │                                                                    │
 │  gen_ui_types (frozen seams)                                       │
 │    → gen_ui_runtime · gen_ui_protocol (A2UI/AG-UI) · gen_ui_client │
-│      (Anthropic SSE) · gen_ui_mcp · gen_ui_db · gen_ui_db_graph    │
-│      (SurrealDB 3.2: HNSW/BM25/graph) · gen_ui_inference (candle)  │
+│      (liter-llm gateway: 142+ providers) · gen_ui_mcp · gen_ui_db  │
+│      (+ config DB: pglite-oxide native / PGlite web) ·             │
+│      gen_ui_db_graph (SurrealDB 3.2: HNSW/BM25/graph) ·            │
+│      gen_ui_inference (mistral.rs)                                 │
 │        → gen_ui_agent (PMPO)                                       │
 │          → LEAVES: gen_ui_ffi (frb) · tauri-plugin-gen-ui ·        │
 │                    gen_ui_wasm · workspace-hack                    │
@@ -125,7 +130,43 @@ backend lights up.
 `migrations → seeds → shapes → ready`, made visible by a StartupGate on both surfaces.
 Sync shapes fail on unknown columns, so ordering is enforced, not hoped for.
 
-### 3.5 Data & sync
+### 3.5 Inference architecture (three lanes)
+
+> Revised 2026-07-15 (user-directed): generic Anthropic SSE replaced by the
+> liter-llm gateway; candle-direct replaced by mistral.rs; web local lane added.
+
+| Lane | Engine | Targets | Notes |
+|------|--------|---------|-------|
+| **Cloud (any provider)** | [liter-llm](https://github.com/GQAdonis/liter-llm) (GQAdonis fork) wrapped by `gen_ui_client` | desktop, mobile, web | Universal LLM client — **142+ providers**, streaming, tool calling. `native-http` feature (reqwest/rustls) on native; **`liter-llm-wasm`** (fetch-based, no tokio multithread) on web — one Rust dependency serves all three targets. Provider choice, credentials, and model prefs come from the config DB, not env vars; graceful degrade to local-only when no provider is configured. |
+| **Local — native** | [mistral.rs](https://github.com/GQAdonis/mistral.rs) (GQAdonis fork) via `gen_ui_inference` | desktop (Metal), mobile (CPU) | The `mistralrs` library crate (candle-based) provides model download (HF hub), GGUF/ISQ loading, and streaming generation behind one API. Same crate covers M4 desktop (Qwen2.5-1.5B Q4_K_M on Metal) and S4 mobile "sovereign mode" (Qwen-0.5B Q4 CPU). Replaces direct candle wiring; `spawn_blocking` discipline unchanged. Fork extras (mistralrs-audio/vision/mcp) available but not in PoC scope. |
+| **Local — web** | [WebLLM](https://webllm.mlc.ai/) (MLC), WebGPU | web only | Researched 2026-07 (firecrawl): WebLLM is the consensus in-browser chat engine — WebGPU-accelerated, OpenAI-compatible streaming API, curated quantized models including **Qwen2.5-1.5B-Instruct-q4f16_1-MLC** (same family as the native lane), models cached in browser storage. Feature-gated on WebGPU availability; degrade to the liter-llm cloud lane when absent (wllama/WASM rejected as primary: CPU-only speeds don't demo well; transformers.js reserved as the web option for embeddings/whisper-class tasks, not chat). |
+
+**Documented exception to the Rust-core invariant:** WebLLM is a TypeScript
+library living in the web surface layer — wasm-compiled mistral.rs is not viable
+(Metal/CUDA/CPU-native design). The seam stays honest: the surface-level intent API
+(`chat_send` with a local-model selection) is identical on all targets; only the web
+adapter fulfils it in TS. Everything else (cloud lane included) remains in Rust.
+
+### 3.6 Configuration database (new)
+
+Provider credentials, model preferences, and app settings live in a real
+PostgreSQL-semantics store on every target, per the prometheus-db selection pattern:
+
+- **Tauri desktop / mobile:** [pglite-oxide](../pglite-oxide-tauri-hybrid.md) —
+  PostgreSQL 17.5 as a Rust crate, standard connection string, accessed only from
+  the Rust core (`gen_ui_db`); settings never transit the FFI as raw SQL.
+- **Web:** ElectricSQL **PGlite** (WASM, IndexedDB-backed) — already a scaffold
+  dependency for the entity runtime; the config schema rides the same instance.
+- Schema v1: `providers` (id, kind, base_url, api_key_ref, enabled),
+  `model_prefs` (surface, lane, model_id, params), `app_settings` (key, value).
+  Administered from the Settings surface (C-109); read at startup after
+  migrations (the boot-order invariant §3.4 already covers it).
+- Secrets discipline (Rule: no plaintext keys): API keys stored via the platform
+  keychain where available (tauri-plugin-store/keychain on desktop,
+  flutter_secure_storage on mobile); the DB row keeps a reference, web falls back
+  to session-scoped entry with a visible warning.
+
+### 3.7 Data & sync
 
 - **On-device graph:** SurrealDB 3.2 embedded (memory/entity graph, HNSW vector +
   BM25 + recursive RELATE traversal, RRF-fused hybrid search in Rust).
@@ -135,7 +176,7 @@ Sync shapes fail on unknown columns, so ordering is enforced, not hoped for.
 - **PEM (prometheus-entity-management):** families-as-normalization entity layer on
   both surfaces (Dart port + npm packages).
 
-### 3.6 Desktop app shell (adjusted after execution — see §5)
+### 3.8 Desktop app shell (adjusted after execution — see §5)
 
 - **Custom branded titlebar** (`decorations: false`): KnowMe K-monogram + wordmark,
   platform-aware window controls (traffic-light left on macOS, controls right on
@@ -145,7 +186,7 @@ Sync shapes fail on unknown columns, so ordering is enforced, not hoped for.
 - **Tauri v2 capabilities:** explicit `capabilities/default.json` (core defaults +
   window controls + os plugin) — the ACL denies everything otherwise.
 
-### 3.7 Branding (single source of truth)
+### 3.9 Branding (single source of truth)
 
 Tokens extracted from the two reference HTML docs into `desktop/src/index.css`
 (`@theme` + `body.light` override) — to be mirrored into the Flutter ThemeData by a
@@ -182,13 +223,13 @@ WAVE 2 (finish):   C-108 mcp+agent ─► C-109 settings + mobile model → refl
 |----|-------|--------|
 | C-101 | Four-pillar bootstrap (`check-env.sh` rewrite): Rust 1.95+/wasm32 + Prometheus Skill System, OpenSpec ≥1.6 (`@fission-ai/openspec`), Flutter **beta** + Dart MCP server, Node 24+/bun/pnpm/TS 7.x; ran live on this box | ✅ **merged** |
 | C-102 | Scaffold `apps/knowme-poc`, run the full codegen pipeline for the first time ever, fix everything in the **scaffold scripts**, verify build+run on desktop (Tauri) and web | ✅ **merged** (see §5 for the ~25 defects fixed) |
-| C-103 | M1 chat live e2e: Anthropic SSE via gen_ui_client (graceful degrade without key), ProtocolPipeline → ContentBlock stream over frb + Tauri events; first iOS-simulator run | ⬜ pending |
+| C-103 | M1+M5 foundation — chat live e2e through the **liter-llm gateway** (142+ providers; native-http on desktop/mobile, liter-llm-wasm on web) + **config DB v1** (pglite-oxide native / PGlite web: providers, model_prefs, app_settings schemas + migrations); graceful degrade when no provider configured; ProtocolPipeline → ContentBlock stream over frb + Tauri events; first iOS-simulator run | ⬜ pending (revised) |
 | C-104 | M2 memory graph-RAG: intent APIs wired to gen_ui_db_graph + fastembed, seeded corpus, cited answers, related-graph panel | ⬜ pending |
-| C-105 | M4 local model desktop: GGUF download, candle Metal, cloud↔local switch, tok/s | ⬜ pending |
+| C-105 | M4 local model, desktop + web: **mistral.rs** library — model download (HF hub) + GGUF load + Metal streaming on desktop; **WebLLM (WebGPU)** adapter on web behind the same intent seam, feature-gated on WebGPU with cloud-lane degrade; cloud↔local switch, tok/s | ⬜ pending (revised) |
 | C-106 | M3 sync local-first: docker-compose Postgres+Electric, one entity synced desktop↔mobile-sim, airplane-mode demo | ⬜ pending |
-| C-107 | S1 whisper scribe (whisper-rs, feature-gated), all 3 platforms | ⬜ pending (parallel lane) |
+| C-107 | S1 whisper scribe (whisper-rs, feature-gated), all 3 native platforms; evaluate fork's mistralrs-audio as alternative; web scribe (transformers.js whisper) as stretch | ⬜ pending (parallel lane) |
 | C-108 | S2+S3: one MCP SSE server + one canned Hands agent with live step-stream | ⬜ pending |
-| C-109 | C3+S4: minimal Settings + Qwen-0.5B mobile "sovereign mode" | ⬜ pending |
+| C-109 | C3+S4: Settings surface grows the **provider/model admin UI over the config DB** (add/edit/disable providers, pick per-lane models, keychain-backed secrets) + Qwen-0.5B mobile "sovereign mode" via mistral.rs CPU | ⬜ pending (revised) |
 | C-110 | CI: clippy -D warnings, audit.sh all, boundary tests, Vitest, dart analyze, macOS PoC build job | ⬜ pending (parallel lane) |
 
 ### Success criteria (phase completes when)
@@ -290,12 +331,23 @@ Verified: the debug bundle shows the correct KnowMe monogram.
 
 1. **First on-target iOS run** still pending (C-103) — frb type-compat on device is
    the next highest-information step.
-2. **API keys at demo time** — chat degrades gracefully to local-only without
-   `ANTHROPIC_API_KEY` (design requirement, not yet implemented).
+2. **Provider config at demo time** — chat degrades gracefully to local-only when
+   the config DB has no enabled provider (design requirement, not yet implemented);
+   keys entered through Settings, never env vars.
 3. **Electric overrun fallback** stands: SyncStatus stub with the write queue proven
    by boundary tests if C-106 integration overruns.
 4. **PEM corepack fix** needed in the PEM monorepo to re-enable the tarball
    pre-resolve path (currently on the strip-PEM fallback).
-5. **Model download size** (~1GB Qwen-1.5B Q4) — pre-download in demo prep.
+5. **Model download size** (~1GB Qwen-1.5B Q4 native; ~900MB q4f16 MLC on web) —
+   pre-download / pre-cache in demo prep.
 6. **Flutter mobile branding parity** — the KnowMe tokens live only in the desktop
    CSS today; the token→ThemeData mirror lands with the first mobile-facing change.
+7. **Fork dependency hygiene** — liter-llm and mistral.rs enter the workspace as
+   git dependencies pinned to a SHA on the GQAdonis forks; note the pnpm git+path
+   lesson (§5.1) does not apply to cargo git deps, but pin SHAs and record them in
+   the decision log (Rule 22/23). liter-llm is also vendored inside
+   universal-agent-runtime as a submodule — the PoC consumes it directly from the
+   fork instead, keeping one source of truth.
+8. **WebGPU availability** — the web local lane requires WebGPU (Chrome/Edge
+   stable, Safari 26+); the feature gate + cloud degrade must be visible UI, not a
+   silent failure.

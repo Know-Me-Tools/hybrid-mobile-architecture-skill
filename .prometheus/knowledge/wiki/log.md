@@ -1,6 +1,8 @@
 # Update Log
 
 ## 2026-07-16
+* **Creation**: [Codegen and CI verification session completed with unknown change](/codegen-and-ci-verification-session-completed-with-unknown-change.md)
+* **Creation**: [KnowMe PoC C-102 desktop/web branding milestone](/knowme-poc-c-102-desktop-web-branding-milestone.md)
 * **Creation**: [KnowMe POC first codegen run and Tauri desktop fixes](/knowme-poc-first-codegen-run-and-tauri-desktop-fixes.md)
 * **Creation**: [Phase codegen and CI verification completed with unknown change](/phase-codegen-and-ci-verification-completed-with-unknown-change.md)
 * **Creation**: [KnowMe PoC Tauri Dock icon verification requires app bundle](/knowme-poc-tauri-dock-icon-verification-requires-app-bundle.md)

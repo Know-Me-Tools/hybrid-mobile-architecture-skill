@@ -58,12 +58,17 @@ clear (G-2); AGENT_BASE_RULES.md + CLAUDE/AGENTS + skills landed in the app; aud
 all passes; `cargo check` the app's workspace. Expect FFI-surface iteration.
 *Deps: C-101. Size: L-XL. Harness: claude/opus-4.8.*
 
-**C-103 `2026-07-15-c103-chat-live-e2e`** — M1: wire the real chat path end-to-end —
-Anthropic SSE via gen_ui_client (ANTHROPIC_API_KEY; graceful degrade to local-only when
-absent), ProtocolPipeline → ContentBlock stream over frb + Tauri events; run live on
-macOS Tauri AND iOS simulator (first on-target run, G-6). text/thinking/code blocks
-render streamed.
-*Deps: C-102. Size: M-L. Harness: claude/sonnet-5.*
+**C-103 `2026-07-15-c103-chat-live-e2e`** — M1+M5 foundation (REVISED 2026-07-15,
+user-directed): wire the real chat path end-to-end through the **liter-llm gateway**
+(GQAdonis/liter-llm fork, pinned SHA — 142+ providers; `native-http` on desktop/mobile,
+`liter-llm-wasm` on web) instead of a bespoke Anthropic SSE client, plus **config DB
+v1** (pglite-oxide in the Rust core for Tauri/mobile, PGlite on web: `providers`,
+`model_prefs`, `app_settings` schemas + migrations; keys via platform keychain,
+DB keeps refs). Provider/model selection reads the config DB, never env vars;
+graceful degrade to local-only when no provider enabled. ProtocolPipeline →
+ContentBlock stream over frb + Tauri events; run live on macOS Tauri AND iOS
+simulator (first on-target run, G-6). text/thinking/code blocks render streamed.
+*Deps: C-102. Size: L (grew: +config DB). Harness: claude/sonnet-5.*
 
 **C-104 `2026-07-15-c104-memory-graph-rag`** — M2: gen_ui_db_graph wired through the
 intent APIs (memory_ingest/search/graph_expand + fastembed 384-dim); seeded corpus
@@ -71,10 +76,18 @@ intent APIs (memory_ingest/search/graph_expand + fastembed 384-dim); seeded corp
 tappable citation/memory blocks + related-graph panel; hybrid-vs-vector dev toggle.
 *Deps: C-103. Size: L. Harness: claude/sonnet-5.*
 
-**C-105 `2026-07-15-c105-local-model-desktop`** — M4: GGUF download (Qwen2.5-1.5B-Instruct
-Q4_K_M), load via gen_ui_inference on Metal, cloud↔local model switch in chat, tok/s
-display. spawn_blocking discipline; graceful VRAM/size errors.
-*Deps: C-103. Size: M-L. Harness: claude/opus-4.8.*
+**C-105 `2026-07-15-c105-local-model-desktop`** — M4 (REVISED 2026-07-15,
+user-directed): local model on desktop AND web. Native: **mistral.rs** library
+(GQAdonis/mistral.rs fork, pinned SHA; `mistralrs` crate wraps download-from-HF +
+GGUF/ISQ load + streaming generation) behind gen_ui_inference — Qwen2.5-1.5B-Instruct
+Q4_K_M on Metal, spawn_blocking discipline, graceful VRAM/size errors; same crate
+serves C-109's mobile CPU lane. Web: **WebLLM (WebGPU)** adapter in the web surface
+(researched 2026-07 via firecrawl — consensus in-browser chat engine, OpenAI-compatible
+streaming, Qwen2.5-1.5B-Instruct-q4f16_1-MLC same-family model, browser-cached),
+feature-gated on WebGPU with visible degrade to the liter-llm cloud lane; documented
+exception to the Rust-core invariant (TS adapter fulfils the same intent seam).
+Cloud↔local switch in chat, tok/s display on both.
+*Deps: C-103. Size: L (grew: +web lane). Harness: claude/opus-4.8.*
 
 **C-106 `2026-07-15-c106-sync-local-first`** — M3: infra/docker-compose.yml (Postgres +
 Electric); notes/memories entity syncs desktop↔mobile-sim via Electric read-path +
@@ -95,10 +108,13 @@ agent ("summarize this week's memories") with Run-now + live step-stream
 scheduling (tokio interval) as C1 stretch, honestly labeled.
 *Deps: C-104 (+C-103 plumbing). Size: L. Harness: claude/sonnet-5.*
 
-**C-109 `2026-07-15-c109-settings-mobile-model`** — C3+S4: minimal Settings (UarMode
-switch, sync toggle, delete-local-data) + Qwen-0.5B Q4 CPU "sovereign mode" on iOS sim/
-Android, honest tok/s labeling.
-*Deps: C-105, C-106. Size: M. Harness: codex/gpt-5.6-sol.*
+**C-109 `2026-07-15-c109-settings-mobile-model`** — C3+S4 (REVISED 2026-07-15):
+Settings surface grows the **provider/model administration UI over the config DB**
+(add/edit/disable providers across the 142+ liter-llm catalog, per-lane model prefs,
+keychain-backed key entry) + UarMode switch, sync toggle, delete-local-data +
+Qwen-0.5B Q4 CPU "sovereign mode" on iOS sim/Android via mistral.rs, honest tok/s
+labeling.
+*Deps: C-105, C-106. Size: M-L (grew: +admin UI). Harness: codex/gpt-5.6-sol.*
 
 **C-110 `2026-07-15-c110-ci`** — G-7: GitHub Actions — `cargo clippy --workspace
 -D warnings`, `audit.sh all` on a scaffolded scratch app, Rust boundary tests,

@@ -7,7 +7,7 @@
 
 ## Why
 
-C3+S4: minimal Settings (UarMode/sync/delete-data) + Qwen-0.5B CPU sovereign mode on mobile
+C3+S4: Settings grows the provider/model admin UI over the config DB (liter-llm catalog, keychain-backed keys) + UarMode/sync/delete-data + Qwen-0.5B CPU sovereign mode on mobile via mistral.rs. REVISED 2026-07-15 (user).
 
 Derived from plan.md (full description, decisions, success criteria) and analysis.md /
 assessment.md (pillar research, MoSCoW selection, gap analysis). Follows the CLAUDE.md

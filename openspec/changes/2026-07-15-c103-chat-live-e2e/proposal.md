@@ -7,7 +7,7 @@
 
 ## Why
 
-M1 chat live end-to-end (Anthropic SSE -> ContentBlock stream), first on-target runs (macOS Tauri + iOS sim)
+M1+M5: chat live end-to-end through the liter-llm gateway (GQAdonis fork, 142+ providers; native-http on desktop/mobile, liter-llm-wasm on web) + config DB v1 (pglite-oxide native / PGlite web) -> ContentBlock stream; first on-target runs (macOS Tauri + iOS sim). REVISED 2026-07-15 (user): replaces bespoke Anthropic SSE.
 
 Derived from plan.md (full description, decisions, success criteria) and analysis.md /
 assessment.md (pillar research, MoSCoW selection, gap analysis). Follows the CLAUDE.md
