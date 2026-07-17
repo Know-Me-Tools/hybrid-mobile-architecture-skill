@@ -168,12 +168,12 @@ if [[ "$PLATFORM" == "flutter" ]]; then
   if find "$LIB" -name "*.g.dart" | head -1 | grep -q .; then
     pass "Code generation artifacts (.g.dart) present"
   else
-    warn "No .g.dart files found — run: dart run build_runner build"
+    warn "No .g.dart files found — run: flutter pub run build_runner build"
   fi
   if find "$LIB" -name "*.freezed.dart" | head -1 | grep -q .; then
     pass "Freezed artifacts (.freezed.dart) present"
   else
-    warn "No .freezed.dart files found — run: dart run build_runner build"
+    warn "No .freezed.dart files found — run: flutter pub run build_runner build"
   fi
 
   echo ""

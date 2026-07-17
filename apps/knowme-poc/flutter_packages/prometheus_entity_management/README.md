@@ -34,7 +34,7 @@ seam tests override.
 ## Codegen
 
 ```bash
-dart run build_runner build --delete-conflicting-outputs
+flutter pub run build_runner build
 ```
 
 Generates the `*.freezed.dart` and `*.g.dart` parts. All FFI-backed providers

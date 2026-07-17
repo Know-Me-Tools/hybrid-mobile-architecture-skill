@@ -68,7 +68,7 @@ in `references/rust/new-block-type.md` — skipping a step produces compile erro
 Do not stub a `default` case to "make it compile"; that silently drops the new variant.
 
 After adding a variant, re-run codegen on both surfaces:
-- Flutter: `flutter_rust_bridge_codegen generate …` then `dart run build_runner build`
+- Flutter: `flutter_rust_bridge_codegen generate …` then `flutter pub run build_runner build`
 - React: regenerate `src/bridge/a2ui/types.ts` from the Rust source
 
 Then verify a golden/screenshot for the new variant on each surface — see

@@ -892,7 +892,7 @@ enum FilterOp {
 }
 
 @freezed
-class FilterSpec with _\$FilterSpec {
+abstract class FilterSpec with _\$FilterSpec {
   const factory FilterSpec({
     required String field,
     required FilterOp op,
@@ -903,7 +903,7 @@ class FilterSpec with _\$FilterSpec {
 }
 
 @freezed
-class SortSpec with _\$SortSpec {
+abstract class SortSpec with _\$SortSpec {
   const factory SortSpec({
     required String field,
     @Default(false) bool descending,
@@ -913,7 +913,7 @@ class SortSpec with _\$SortSpec {
 }
 
 @freezed
-class ViewDescriptor with _\$ViewDescriptor {
+abstract class ViewDescriptor with _\$ViewDescriptor {
   const factory ViewDescriptor({
     required String entityType,
     @Default(<FilterSpec>[]) List<FilterSpec> filters,
@@ -939,7 +939,7 @@ part 'entity.freezed.dart';
 part 'entity.g.dart';
 
 @freezed
-class EntityRecord with _\$EntityRecord {
+abstract class EntityRecord with _\$EntityRecord {
   const factory EntityRecord({
     required String id,
     required String entityType,
@@ -950,7 +950,7 @@ class EntityRecord with _\$EntityRecord {
 }
 
 @freezed
-class ListResult with _\$ListResult {
+abstract class ListResult with _\$ListResult {
   const factory ListResult({
     @Default(<EntityRecord>[]) List<EntityRecord> items,
     String? nextCursor,
@@ -978,9 +978,8 @@ sealed class ChangeEvent with _\$ChangeEvent {
 EOF
 
 # ── sync.dart — SyncStatus mirror of gen_ui_types::sync ──────────────────────
-# frb generates its own Dart union across the FFI, so this mirror carries no
-# JSON codec — it exists so the app + tests compile standalone and so the sync
-# chip can switch exhaustively over a sealed type (compile-time contract).
+# FRB generates its own Dart union across the FFI. This mirror also decodes the
+# Rust enum's serde form so app and public-boundary tests behave consistently.
 cat > "$PEM_DIR/lib/src/sync.dart" << EOF
 $DART_MARK
 /// SyncStatus — Dart mirror of gen_ui_types::sync::SyncStatus. Drives the UI
@@ -991,6 +990,16 @@ sealed class SyncStatus {
   const factory SyncStatus.syncing(int pendingWrites) = SyncSyncing;
   const factory SyncStatus.live() = SyncLive;
   const factory SyncStatus.error(String message) = SyncError;
+
+  factory SyncStatus.fromJson(dynamic json) => switch (json) {
+        'offline' => const SyncStatus.offline(),
+        'live' => const SyncStatus.live(),
+        {'syncing': {'pending_writes': final int pendingWrites}} =>
+          SyncStatus.syncing(pendingWrites),
+        {'error': {'message': final String message}} =>
+          SyncStatus.error(message),
+        _ => throw FormatException('Unknown SyncStatus: \$json'),
+      };
 }
 
 class SyncOffline extends SyncStatus {
@@ -1250,12 +1259,24 @@ seam tests override.
 ## Codegen
 
 ```bash
-dart run build_runner build --delete-conflicting-outputs
+flutter pub run build_runner build
 ```
 
 Generates the `*.freezed.dart` and `*.g.dart` parts. All FFI-backed providers
 opt out of Riverpod 3 automatic retry (a Rust domain error is terminal).
 EOF
+
+if command -v flutter >/dev/null 2>&1; then
+  (
+    cd "$PEM_DIR"
+    flutter pub get
+    flutter pub run build_runner build
+  )
+  ok "prometheus_entity_management generated parts"
+else
+  echo "  ! Flutter unavailable; run codegen in $PEM_DIR before consuming it."
+fi
+
 ok "pub.dev: prometheus_entity_management (families-as-normalization, optimistic CRUD)"
 
 echo ""

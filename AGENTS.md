@@ -169,8 +169,8 @@ These rules override any global rules mandating TDD, coverage targets, or test-f
 
 ```bash
 # Code generation (required after @riverpod or freezed changes)
-dart run build_runner build
-dart run build_runner watch
+flutter pub run build_runner build
+flutter pub run build_runner watch
 
 # Regenerate Rust bridge after api.rs changes
 flutter_rust_bridge_codegen generate \

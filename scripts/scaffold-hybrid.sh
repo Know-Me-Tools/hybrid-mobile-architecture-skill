@@ -41,21 +41,19 @@ step "Scaffolding layered gen_ui workspace"
 bash "$SCRIPT_DIR/scaffold-rust-core.sh" "rust" "$UAR_MODE"
 ok "gen_ui workspace scaffolded (12 crates, layered)"
 
+# ── Scaffold publishable packages (C-007) ──────────────────────────────────
+# Emit path dependencies before either application surface so their first
+# package-manager run is real and code generation can complete immediately.
+step "Scaffolding publishable packages"
+bash "$SCRIPT_DIR/scaffold-packages.sh" "."
+ok "Package skeletons scaffolded (npm + pub.dev)"
+
 # ── Scaffold Flutter app ───────────────────────────────────────────────────
 step "Scaffolding Flutter mobile app"
 bash "$SCRIPT_DIR/scaffold-flutter.sh" "mobile" "$APP_NAME"
 ok "Flutter app scaffolded in mobile/"
 
 # ── Scaffold Tauri app ─────────────────────────────────────────────────────
-step "Deferring Tauri desktop/web app until local npm packages exist"
-
-# ── Scaffold publishable packages (C-007) ──────────────────────────────────
-# npm (gen-ui-react, gen-ui-wasm, tauri-plugin-gen-ui guest-js) + pub.dev
-# (gen_ui_flutter, gen_ui_widgets). Structured for publication from day one.
-step "Scaffolding publishable packages"
-bash "$SCRIPT_DIR/scaffold-packages.sh" "."
-ok "Package skeletons scaffolded (npm + pub.dev)"
-
 step "Scaffolding Tauri desktop/web app"
 bash "$SCRIPT_DIR/scaffold-tauri.sh" "desktop" "$APP_NAME"
 ok "Tauri desktop/web app scaffolded in desktop/"

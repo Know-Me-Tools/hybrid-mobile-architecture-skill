@@ -313,8 +313,8 @@ bash scripts/audit.sh rust ./rust/gen_ui_core
 
 ```bash
 # Run code generation (required after any @riverpod or freezed change)
-dart run build_runner build
-dart run build_runner watch   # continuous
+flutter pub run build_runner build
+flutter pub run build_runner watch   # continuous
 
 # Re-run flutter_rust_bridge codegen (after api.rs changes)
 flutter_rust_bridge_codegen generate \

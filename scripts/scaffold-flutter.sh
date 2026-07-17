@@ -1495,6 +1495,12 @@ ok "Native build scripts"
 # ═══════════════════════════════════════════════════════════════════════════
 step "Writing boundary + golden tests"
 
+cat > dart_test.yaml << 'EOF'
+# TJ-ARCH-MOB-001 compliant
+tags:
+  golden:
+EOF
+
 # Boundary test: ChatNotifier folds a canned A2uiEvent stream into ContentBlocks.
 # The A2uiContentDriver, folding, and ContentBlock types are ALL real — the only
 # thing supplied is a canned Rust-shaped stream (no internal mocks).
@@ -1683,17 +1689,21 @@ ok "5 boundary/golden tests (chat fold · ContentBlock golden · PEM rollback ·
 # ═══════════════════════════════════════════════════════════════════════════
 step "Resolving dependencies"
 if [[ -d ../flutter_packages/gen_ui_flutter && -d ../flutter_packages/prometheus_entity_management ]]; then
-  flutter pub get && ok "flutter pub get"
+  flutter pub get
+  flutter pub run build_runner build
+  FLUTTER_ROOT="$({ flutter --version --machine; } | python3 -c 'import json, sys; print(json.load(sys.stdin)["flutterRoot"])')"
+  "$FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart" fix --apply
+  flutter test --update-goldens test/features/chat/content_block_golden_test.dart
+  ok "Flutter dependencies + generated providers + analyzer fixes + golden baselines"
   echo ""
-  echo -e "${CYAN}Next: run codegen, then the app:${NC}"
-  echo "  dart run build_runner build --delete-conflicting-outputs   # riverpod/freezed"
+  echo -e "${CYAN}Next: generate the native bridge, then run the app:${NC}"
   echo "  # (build gen_ui_core, then) flutter_rust_bridge_codegen generate --config-file ../rust/flutter_rust_bridge.yaml"
   echo "  bash ../scripts/ios/patch-cargokit-ios.sh \"$(pwd)\""
   echo "  flutter run"
 else
   warn "flutter_packages/* not present yet — skipping pub get."
   warn "Run scaffold-packages.sh (or the hybrid scaffold) first, then:"
-  echo "     cd $OUT && flutter pub get && dart run build_runner build --delete-conflicting-outputs"
+  echo "     cd $OUT && flutter pub get && flutter pub run build_runner build"
 fi
 
 echo ""

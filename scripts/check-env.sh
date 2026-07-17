@@ -228,12 +228,17 @@ if command -v flutter &>/dev/null; then
       fi
     fi
   fi
-  DART_VER=$(dart --version 2>/dev/null | awk '{print $4}')
-  ok "dart $DART_VER"
-  if dart mcp-server --help &>/dev/null; then
-    ok "dart mcp-server: operational"
+  # Use Flutter's bundled Dart. A separately installed `dart` earlier on PATH
+  # can be a different channel and cannot resolve Flutter SDK dependencies.
+  FLUTTER_INFO=$(flutter --version --machine)
+  FLUTTER_SDK_ROOT=$(printf '%s' "$FLUTTER_INFO" | python3 -c 'import json, sys; print(json.load(sys.stdin)["flutterRoot"])')
+  FLUTTER_DART="$FLUTTER_SDK_ROOT/bin/cache/dart-sdk/bin/dart"
+  DART_VER=$("$FLUTTER_DART" --version 2>/dev/null | awk '{print $4}')
+  ok "Flutter-bundled dart $DART_VER"
+  if "$FLUTTER_DART" mcp-server --help &>/dev/null; then
+    ok "Flutter-bundled dart mcp-server: operational"
   else
-    warn "dart mcp-server: not available (needs Dart 3.9+/Flutter 3.35+)"
+    warn "Flutter-bundled dart mcp-server: not available (needs Dart 3.9+/Flutter 3.35+)"
   fi
 else
   fail "Flutter not found"

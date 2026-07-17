@@ -211,7 +211,7 @@ const factory ContentBlock.databaseResult({
 }) = DatabaseResultBlock;
 ```
 
-Run codegen: `dart run build_runner build`
+Run codegen: `flutter pub run build_runner build`
 
 **message_bubble.dart** — the Dart compiler enforces exhaustiveness:
 ```dart

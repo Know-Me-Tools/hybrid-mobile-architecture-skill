@@ -163,7 +163,7 @@ EOF
   echo ""
   ok "Flutter feature '$FEATURE' scaffolded in $FEAT_DIR"
   echo ""
-  echo "  Next: dart run build_runner build"
+  echo "  Next: flutter pub run build_runner build"
 
 elif [[ "$PLATFORM" == "tauri" ]]; then
   FEAT_DIR="$ROOT/src/features/$SNAKE"
