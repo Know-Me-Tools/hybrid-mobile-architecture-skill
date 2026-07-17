@@ -1,5 +1,12 @@
 # Update Log
 
+## 2026-07-17
+* **Creation**: [Codegen and CI verification session completed with unknown change](/codegen-and-ci-verification-session-completed-with-unknown-change.md)
+* **Creation**: [C-108 MCP bridge lands with KnowMe PoC phase at 9 of 13 changes](/c-108-mcp-bridge-lands-with-knowme-poc-phase-at-9-of-13-changes.md)
+* **Creation**: [Codegen and CI verification session ended at 04:02 with no changes](/codegen-and-ci-verification-session-ended-at-04-02-with-no-changes.md)
+* **Creation**: [Codegen and CI verification executor session complete unknown change](/codegen-and-ci-verification-executor-session-complete-unknown-change.md)
+* **Creation**: [Codegen and CI verification session ended at 03:39 with no changes](/codegen-and-ci-verification-session-ended-at-03-39-with-no-changes.md)
+
 ## 2026-07-16 (worktree consolidation)
 * **Update**: [SurrealDB RELATE endpoints need parenthesized type::record — chevrons silently corrupt edges](/surrealdb-relate-endpoints-need-parenthesized-type-record.md) — added the check_statements() follow-up and proof that the guard cannot catch this bug class
 * **Creation**: [FRF phase-36 SFU ICE fix paused with no local changes authored](/frf-phase-36-sfu-ice-fix-paused-with-no-local-changes-authored.md) (from worktree gallant-blackburn-b9ccea)
