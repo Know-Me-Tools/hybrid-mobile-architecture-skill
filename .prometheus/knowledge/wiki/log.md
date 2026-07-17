@@ -1,6 +1,11 @@
 # Update Log
 
 ## 2026-07-16
+* **Creation**: [SurrealDB RELATE endpoints need parenthesized type::record — chevrons silently corrupt edges](/surrealdb-relate-endpoints-need-parenthesized-type-record.md)
+* **Creation**: [Codegen and CI verification executor session complete unknown change](/codegen-and-ci-verification-executor-session-complete-unknown-change.md)
+* **Creation**: [Codegen and CI verification session ended at 23:58 with no changes](/codegen-and-ci-verification-session-ended-at-23-58-with-no-changes.md)
+* **Creation**: [Codegen and CI verification executor session complete unknown change](/codegen-and-ci-verification-executor-session-complete-unknown-change.md)
+* **Creation**: [Codegen and CI verification session ended at 21:40 with no changes](/codegen-and-ci-verification-session-ended-at-21-40-with-no-changes.md)
 * **Creation**: [Codegen and CI verification executor completed unknown change](/codegen-and-ci-verification-executor-completed-unknown-change.md)
 * **Creation**: [Codegen and CI verification session ended at 20:44 with no changes](/codegen-and-ci-verification-session-ended-at-20-44-with-no-changes.md)
 * **Creation**: [Codegen and CI verification session complete with unknown change](/codegen-and-ci-verification-session-complete-with-unknown-change.md)
