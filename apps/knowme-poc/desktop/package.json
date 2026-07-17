@@ -21,7 +21,6 @@
     "@codesandbox/sandpack-react": "^2.20.0",
     "@electric-sql/pglite": "0.5.4",
     "@electric-sql/pglite-sync": "^0.4.0",
-    "@flint/react": "git+https://github.com/Know-Me-Tools/flint-forge.git#1cae090d2cc02675eb99ba7a599735d339e53e38&path:packages/flint-react",
     "@mlc-ai/web-llm": "0.2.84",
     "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
     "@prometheus-ags/prometheus-entity-management": "3.0.0-alpha.0",

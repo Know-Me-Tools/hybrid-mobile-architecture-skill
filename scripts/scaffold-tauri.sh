@@ -60,7 +60,6 @@ cat > package.json << PKGEOF
     "@prometheus-ags/prometheus-entity-management": "3.0.0-alpha.0",
     "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
     "@prometheus-ags/tauri-plugin-gen-ui": "file:../rust/crates/tauri-plugin-gen-ui/guest-js",
-    "@flint/react": "git+https://github.com/Know-Me-Tools/flint-forge.git#1cae090d2cc02675eb99ba7a599735d339e53e38&path:packages/flint-react",
     "tailwindcss":            "^4.0.0",
     "@tailwindcss/vite":      "^4.0.0",
     "lucide-react":           "^0.400.0",
@@ -742,61 +741,6 @@ export function StartupGate({ children }: { children: ReactNode }) {
 }
 EOF
 ok "src/features/startup/components/StartupGate.tsx"
-
-cat > src/features/chat/stores/flintSurfaceStore.ts << 'EOF'
-// TJ-ARCH-MOB-001 compliant — core-fed A2UI surface state; no Flint network transport.
-import { listen } from '@tauri-apps/api/event'
-import { create } from 'zustand'
-import type { A2uiComponentSpec } from '@flint/react'
-
-interface SurfaceState {
-  surfaces: Record<string, A2uiComponentSpec[]>
-  start: () => () => void
-}
-
-export const useFlintSurfaceStore = create<SurfaceState>((set) => ({
-  surfaces: {},
-  start: () => {
-    const pending = listen<{ surfaceId: string; components: A2uiComponentSpec[] }>(
-      'a2ui_surface_event',
-      ({ payload }) => set((state) => ({ surfaces: { ...state.surfaces, [payload.surfaceId]: payload.components } })),
-    )
-    return () => { void pending.then((unlisten) => unlisten()) }
-  },
-}))
-EOF
-
-cat > src/features/chat/hooks/useFlintSurface.ts << 'EOF'
-// TJ-ARCH-MOB-001 compliant
-import { useEffect } from 'react'
-import { useFlintSurfaceStore } from '../stores/flintSurfaceStore'
-
-export function useFlintSurface(surfaceId: string) {
-  const components = useFlintSurfaceStore((state) => state.surfaces[surfaceId] ?? [])
-  const start = useFlintSurfaceStore((state) => state.start)
-  useEffect(() => start(), [start])
-  return { components }
-}
-EOF
-
-cat > src/features/chat/components/CoreFlintSurface.tsx << 'EOF'
-// TJ-ARCH-MOB-001 compliant
-import { registerBaseComponents, resolveFlintComponent, type A2uiComponentSpec } from '@flint/react'
-import { useFlintSurface } from '../hooks/useFlintSurface'
-
-registerBaseComponents()
-
-function CoreComponent({ spec }: { spec: A2uiComponentSpec }) {
-  const Component = resolveFlintComponent(spec.slug, {})
-  if (!Component) return <div role="alert">Unknown A2UI component: {spec.slug}</div>
-  return <Component {...spec.props}>{spec.children?.map((child) => <CoreComponent key={child.id} spec={child} />)}</Component>
-}
-
-export function CoreFlintSurface({ surfaceId }: { surfaceId: string }) {
-  const { components } = useFlintSurface(surfaceId)
-  return <section aria-label={`Generated surface ${surfaceId}`}>{components.map((spec) => <CoreComponent key={spec.id} spec={spec} />)}</section>
-}
-EOF
 
 cat > src/features/chat/hooks/useChat.ts << 'EOF'
 // TJ-ARCH-MOB-001 compliant
