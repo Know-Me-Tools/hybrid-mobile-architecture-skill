@@ -1175,7 +1175,10 @@ png += chunk(b'IEND', b'')
 with open('app-icon.png', 'wb') as f:
     f.write(png)
 PYEOF
-npx tauri icon app-icon.png > /dev/null 2>&1
+# The local npm CLI is installed later. The environment gate already requires
+# cargo-tauri, so use that deterministic bootstrap instead of an ambiguous
+# `npx tauri` registry lookup.
+cargo tauri icon app-icon.png > /dev/null
 ok "src-tauri/icons/ (placeholder — replace app-icon.png + rerun \`tauri icon\` with real branding)"
 
 # ── Capabilities (Tauri v2 ACL) ──────────────────────────────────────────────

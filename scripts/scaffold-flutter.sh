@@ -74,7 +74,9 @@ rm -f test/widget_test.dart
 
 # ── pubspec.yaml — Riverpod 3.3.2, frb 2.12, path-dep the three packages ─────
 step "Writing pubspec.yaml (Riverpod 3.3.2 / frb 2.12)"
-cat > pubspec.yaml << PUBEOF
+# Flutter/Dart tooling can watch pubspec.yaml while `flutter create` exits.
+# Replace it atomically so no watcher can observe a transient empty document.
+cat > pubspec.yaml.generated << PUBEOF
 name: ${SNAKE_NAME}
 description: "${APP_NAME} — Hybrid mobile application (Prometheus AGS / TJ-ARCH-MOB-001)"
 publish_to: none
@@ -153,6 +155,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 PUBEOF
+mv pubspec.yaml.generated pubspec.yaml
 ok "pubspec.yaml"
 
 # ── analysis_options.yaml ─────────────────────────────────────────────────
