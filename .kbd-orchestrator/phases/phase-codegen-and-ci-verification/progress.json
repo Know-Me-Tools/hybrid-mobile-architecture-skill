@@ -66,10 +66,15 @@
       "id": "2026-07-16-c113-mobile-platform-navigation",
       "status": "merged",
       "wave": 2
+    },
+    {
+      "id": "2026-07-16-c114-desktop-app-actually-runs",
+      "status": "in_progress",
+      "wave": 2
     }
   ],
   "completedChanges": 9,
-  "totalChanges": 13,
+  "totalChanges": 14,
   "previousPhase": "scaffold-full-hybrid-project",
   "startedAt": "2026-07-15T22:04:11Z",
   "assessment_complete": true,
