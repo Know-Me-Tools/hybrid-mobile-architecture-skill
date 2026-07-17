@@ -23,6 +23,15 @@ impl Default for RrfConfig {
 /// Each inner slice is one lane already in rank order (best first). Ids may repeat
 /// across lanes; their contributions sum. Ties break on id for determinism (so
 /// snapshot tests are stable).
+///
+/// Only for lanes that can AGREE, where intra-lane position is meaningful — a
+/// search lane's rank 0 really is its best hit, and summing contributions is what
+/// makes an item ranked by several lanes outrank one favoured by a single lane.
+///
+/// Do NOT use it for lanes that are disjoint and ordered, where lane membership
+/// alone is the contract: it cannot express "lane 0 always beats lane 1", since
+/// rank 0 of lane 1 (1/60) outscores rank 1 of lane 0 (1/61). `graph_expand` hit
+/// exactly that and now scores by hop distance instead — see the comment there.
 pub fn rrf_fuse(lanes: &[Vec<String>], cfg: RrfConfig) -> Vec<(String, f32)> {
     use std::collections::HashMap;
     let mut scores: HashMap<&str, f32> = HashMap::new();
