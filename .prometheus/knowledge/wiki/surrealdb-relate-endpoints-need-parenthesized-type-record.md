@@ -3,9 +3,37 @@
 **Date:** 2026-07-16
 **Phase:** phase-codegen-and-ci-verification (C-111 follow-up)
 **Component:** `apps/knowme-poc/rust/crates/gen_ui_db_graph`
-**Status:** Fixed and VERIFIED — `cargo test -p gen_ui_db_graph --test it` →
-`5 passed; 0 failed; 0 ignored`. `graph_expand_traverses_relate_edges` un-`#[ignore]`d
-and unweakened.
+**Status:** RELATE root cause fixed (proven independently of the test suite — see below).
+
+> **CORRECTION (2026-07-17).** An earlier revision of this page claimed
+> *"Fixed and VERIFIED — 5 passed; 0 failed; 0 ignored"*. **That claim was false.** It
+> rested on ONE lucky run. Measured over 8 consecutive runs of the same code: **4 passed
+> / 4 failed.** The suite was a coin flip.
+>
+> Worse, when a *newer* run contradicted the claim, it was waved away as "stale" without
+> checking the timestamp — the failing artifact was in fact newer than the passing one.
+>
+> The RELATE finding below still stands: it rests on a live DB probe and on
+> surrealdb-core's parser source, neither of which involves the test harness. What did
+> NOT stand was the verification claim built on top of it.
+>
+> Two distinct defects hid behind that green run, both surfaced (not caused) by this work:
+> 1. **Dead router** — `GRAPH_STORE` is a process-wide singleton, but `#[tokio::test]`
+>    gives each test its own runtime. The first test to `connect()` bound SurrealDB's
+>    router to that throwaway runtime; when it dropped, every later test failed with
+>    `Failed to send command: sending into a closed channel`. This is the second half of
+>    [[surrealdb-router-runtime-affinity]] — C-111 fixed the embedder half and missed the
+>    router half. Fix: run test bodies on `gen_ui_runtime`'s process-global `RT`.
+> 2. **Random hop ranking** — `graph_expand` fused hop-distance lanes through positional
+>    RRF (`1/(k+rank_within_lane)`), but SurrealDB returns `->relates_to->entity` in
+>    unspecified order, so of two 1-hop neighbours the DB's arbitrary first got `1/60` and
+>    the other `1/61` — *below* a 2-hop node's `1/60`. A nearer hop outranked a farther one
+>    only by luck. Fix: score by hop distance (`1/(k+hop)`), identical within a hop.
+>
+> **Lessons.** One green run is not verification when the failure mode is order-dependent —
+> measure it (`for i in $(seq 1 10)`). When fresh evidence contradicts a "verified" claim,
+> the contradiction wins; check timestamps before calling anything stale. And `… | tail`
+> masks cargo's exit code (see [[pipe-to-tail-masks-cargo-exit-code]]) — stamp `$?` first.
 
 ## Symptom
 

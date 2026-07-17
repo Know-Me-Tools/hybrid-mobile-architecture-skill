@@ -4,14 +4,14 @@
 //! module.
 use crate::embed::{Embedder, EMBED_DIM};
 use crate::error::GraphError;
-use crate::rrf::{rrf_fuse, RrfConfig};
+use crate::rrf::RrfConfig;
 use crate::schema::{HYBRID_SEARCH_QUERY, SCHEMA_DDL, VECTOR_SEARCH_QUERY};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tokio::sync::OnceCell;
 use surrealdb::engine::any::{connect, Any};
 use surrealdb::types::SurrealValue;
 use surrealdb::Surreal;
+use tokio::sync::OnceCell;
 
 /// Where the embedded store lives and how it is embedded.
 pub struct GraphStoreConfig {
@@ -108,7 +108,10 @@ impl GraphStore {
                 }
                 let db = connect(&cfg.endpoint).await?;
                 db.use_ns(&cfg.namespace).use_db(&cfg.database).await?;
-                let store = Self { db, embedder: cfg.embedder };
+                let store = Self {
+                    db,
+                    embedder: cfg.embedder,
+                };
                 store.init().await?;
                 Ok(store)
             })
@@ -206,7 +209,9 @@ impl GraphStore {
     /// Edges are what `graph_expand` traverses.
     pub async fn relate(&self, from: &str, to: &str, rel: &str) -> Result<(), GraphError> {
         if from.trim().is_empty() || to.trim().is_empty() {
-            return Err(GraphError::Invalid("relate endpoints must be non-empty".into()));
+            return Err(GraphError::Invalid(
+                "relate endpoints must be non-empty".into(),
+            ));
         }
         // Endpoints must be PARENTHESIZED. A bare `type::record('entity', $from)`
         // hits RELATE's record-id fallback and dies on `::`; the parens route it to
@@ -322,7 +327,36 @@ impl GraphStore {
             frontier = next;
         }
 
-        let fused = rrf_fuse(&lanes, RrfConfig::default());
+        // Score by HOP DISTANCE, not by position within a hop's neighbour list.
+        //
+        // `rrf_fuse` scores `1/(k + rank)` where rank is the index WITHIN a lane — right
+        // for search lanes (a vector lane's rank 0 really is its best hit), wrong here:
+        // a hop lane's members are all equidistant, and SurrealDB returns
+        // `->relates_to->entity` in unspecified order. So for 1-hop `[b, d]`, whichever
+        // the DB happened to list first scored 1/60 and the other 1/61 — and 1/61 sits
+        // BELOW a 2-hop node's 1/60. A nearer neighbour outranked a farther one only by
+        // luck of DB ordering (measured: 4 of 8 runs inverted b vs c).
+        //
+        // Every node at hop h therefore scores `1/(k + h)` — identical within a hop,
+        // strictly greater than any deeper hop, which is exactly what this function's
+        // doc comment promises. Ties inside a hop break on id, matching `rrf_fuse`'s own
+        // tiebreak, so output is deterministic.
+        let cfg = RrfConfig::default();
+        let mut fused: Vec<(String, f32)> = lanes
+            .iter()
+            .enumerate()
+            .flat_map(|(hop, ids)| {
+                let score = 1.0 / (cfg.k + hop as f32);
+                ids.iter().map(move |id| (id.clone(), score))
+            })
+            .collect();
+        // `seen` already deduped across hops, so an id appears in exactly one lane.
+        fused.sort_by(|a, b| {
+            b.1.partial_cmp(&a.1)
+                .unwrap_or(std::cmp::Ordering::Equal)
+                .then_with(|| a.0.cmp(&b.0))
+        });
+        fused.truncate(cfg.limit);
         if fused.is_empty() {
             return Ok(vec![]);
         }
@@ -391,7 +425,12 @@ struct HitRow {
 
 impl HitRow {
     fn into_hit(self) -> MemoryHit {
-        MemoryHit { id: self.id, text: self.text, kind: self.kind, score: self.score }
+        MemoryHit {
+            id: self.id,
+            text: self.text,
+            kind: self.kind,
+            score: self.score,
+        }
     }
 }
 
