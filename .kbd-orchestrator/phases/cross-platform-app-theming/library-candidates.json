@@ -1,0 +1,118 @@
+{
+  "phase": "cross-platform-app-theming",
+  "generatedAt": "2026-07-17T00:00:00Z",
+  "mode": "stack-specified",
+  "stack": "flutter + tauri/react19 + tailwind4 (fixed by TJ-ARCH-MOB-001)",
+  "candidates": [
+    {
+      "gap": "token-build-engine",
+      "verdict": "adopt",
+      "name": "style-dictionary",
+      "registry": "npm",
+      "version": "^5.5.0",
+      "evidence": {
+        "lastModified": "2026-06-21",
+        "stars": "4.7k",
+        "notes": "Industry-standard multi-platform token pipeline; DTCG-format parsing; custom format API is the designed extension point for the Dart output."
+      },
+      "confidence": "high"
+    },
+    {
+      "gap": "dart-output-format",
+      "verdict": "build",
+      "name": "first-party Style Dictionary custom Dart format",
+      "registry": null,
+      "version": null,
+      "evidence": {
+        "notes": "No adoptable candidate exists: gh search (tier 1) best hit 1-star demo (2024); all pub.dev token codegen packages are 1-like/pre-1.0/abandoned. Must emit explicit ColorScheme (never .fromSeed for brand colors), TextTheme, and a ThemeExtension<T> with copyWith/lerp, driven by an authored brand-to-Material semantic mapping."
+      },
+      "confidence": "high"
+    },
+    {
+      "gap": "web-output-format",
+      "verdict": "adopt-config",
+      "name": "style-dictionary built-in css/variables format",
+      "registry": "npm",
+      "version": "ships with style-dictionary",
+      "evidence": {
+        "notes": "Target shape already proven in apps/knowme-poc/desktop/src/index.css (@theme + body.light overrides) and by OpenDesign's token-first-tailwind migration."
+      },
+      "confidence": "high"
+    },
+    {
+      "gap": "figma-tokens-studio-ingest",
+      "verdict": "optional-later",
+      "name": "@tokens-studio/sd-transforms",
+      "registry": "npm",
+      "version": "^2.0.3",
+      "evidence": {
+        "lastModified": "2026-01-26",
+        "notes": "Only needed if/when Figma or Tokens Studio becomes a token authoring source; not part of P0."
+      },
+      "confidence": "medium"
+    },
+    {
+      "gap": "flutter-theme-consumer",
+      "verdict": "reject-for-now",
+      "name": "flex_color_scheme",
+      "registry": "pub.dev",
+      "version": "n/a",
+      "evidence": {
+        "likes": "3.2k",
+        "weeklyDownloads": "92.6k",
+        "notes": "Mature but solves internal Flutter widget-theming consistency, not token import. Revisit only if a real widget-coverage gap appears (Rule 2)."
+      },
+      "confidence": "high"
+    },
+    {
+      "gap": "flutter-token-codegen-packages",
+      "verdict": "reject",
+      "name": "design_builder / design_tokens_generator / design_tokens_builder / token_theme_kit / figma2flutter / style-dictionary-figma-flutter",
+      "registry": "pub.dev/npm",
+      "version": "various",
+      "evidence": {
+        "notes": "All low-adoption (typ. 1 like), pre-1.0 alpha, non-standard schemas, or abandoned (style-dictionary-figma-flutter last published 2022-05). Pattern references only; supply-chain risk as dependencies."
+      },
+      "confidence": "high"
+    },
+    {
+      "gap": "drift-audit",
+      "verdict": "build",
+      "name": "audit.sh extension + token-hash stamps in generated files",
+      "registry": null,
+      "version": null,
+      "evidence": {
+        "notes": "Compiler stamps sha256 of design/tokens.json into generated headers; audit recomputes + compares; lints ban ColorScheme.fromSeed( and raw Color(0xFF...) outside generated files. Mirrors OpenDesign's guard pattern."
+      },
+      "confidence": "high"
+    },
+    {
+      "gap": "runtime-theme-wiring",
+      "verdict": "build",
+      "name": "@riverpod Notifier<ThemeMode> + derived Provider<ThemeData>",
+      "registry": null,
+      "version": null,
+      "evidence": {
+        "notes": "Standard Riverpod 3.3 codegen pattern; no additional package required."
+      },
+      "confidence": "high"
+    },
+    {
+      "gap": "opendesign-integration",
+      "verdict": "adopt",
+      "name": "existing od mcp server (pull) + design-systems/<brand>/ plugin entry (attach)",
+      "registry": "open-design fork",
+      "version": "daemon MCP 0.2.0, plugin spec 1.0.0",
+      "evidence": {
+        "notes": "Pull via get_artifact/get_file works today, zero fork changes. Attach = one additive design-systems entry (open-design.json + DESIGN.md) following the existing ~150-entry convention; DESIGN.md becomes a generated compiler output. Bidirectional push and KB/wiki manifest fields DEFERRED - verified unsupported by docs/plugins-spec.md (daemon-only writes; od.context has exactly 7 fields)."
+      },
+      "confidence": "high"
+    }
+  ],
+  "openQuestions": [
+    "Semantic brand-to-Material mapping location in tokens.json ($extensions vs sibling mapping block)",
+    "Compiler invocation point (root pnpm script vs desktop/; run at scaffold time recommended)",
+    "rem-to-dp fixed mapping policy (1rem=16dp recommended, divergence documented)",
+    "Retrofit apps/knowme-poc/mobile in this phase (recommended: yes, as the worked example)"
+  ]
+}

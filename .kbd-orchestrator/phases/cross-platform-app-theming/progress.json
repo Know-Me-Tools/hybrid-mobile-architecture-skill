@@ -1,0 +1,42 @@
+{
+  "phase": "cross-platform-app-theming",
+  "status": "executing",
+  "changes": [
+    {
+      "id": "2026-07-17-c114-token-pipeline",
+      "status": "pending",
+      "wave": 0
+    },
+    {
+      "id": "2026-07-17-c115-theme-parity-skill",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-17-c116-scaffold-theme-wiring",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-17-c117-theme-drift-audit",
+      "status": "pending",
+      "wave": 1
+    },
+    {
+      "id": "2026-07-17-c118-knowme-mobile-retrofit",
+      "status": "pending",
+      "wave": 2
+    },
+    {
+      "id": "2026-07-17-c119-opendesign-design-system-entry",
+      "status": "pending",
+      "wave": 2
+    }
+  ],
+  "completedChanges": 0,
+  "totalChanges": 6,
+  "previousPhase": "phase-codegen-and-ci-verification",
+  "assessment_complete": true,
+  "analysis_complete": true,
+  "plan_complete": true
+}
