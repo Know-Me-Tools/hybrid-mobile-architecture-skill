@@ -487,3 +487,35 @@ pre-existing; none were C-106's doing.
   `#[ignore]` removed and no assertion weakened (the `0 ignored` count is the proof the
   test actually ran rather than being skipped). The memory lane's 4 tests — including the
   concurrent session's new `vector_mode_returns_scored_hits` — stay green alongside it.
+
+## C-111 CORRECTION: the "verified" claim was false (2026-07-17)
+
+- **RETRACTED**: the entry above claimed `5 passed; 0 failed; 0 ignored`. **That was
+  wrong** — it rested on ONE lucky run. Measured over 8 consecutive runs of the same
+  code: **4 passed / 4 failed**. The suite was a coin flip. A newer contradicting run was
+  waved away as "stale" without checking timestamps; the failing artifact was in fact
+  NEWER than the passing one.
+- **STANDS**: the RELATE root cause and fix. Both rest on a live DB probe and
+  surrealdb-core's parser source — neither involves the test harness. The parenthesized
+  `type::record` form is correct and merged (c523e2d).
+- **TWO REAL DEFECTS** hid behind that green run — surfaced, not caused, by this work:
+  1. **Dead SurrealDB router.** `GRAPH_STORE` is a process-wide singleton but
+     `#[tokio::test]` builds a runtime per test. The first test to `connect()` bound the
+     router to a throwaway runtime; on its drop every later test failed
+     `sending into a closed channel` (reads like a broken query — is a dead router).
+     This is the *second half* of the router-runtime-affinity hazard; C-111 fixed the
+     embedder half and missed this one. **Fix**: run test bodies on `gen_ui_runtime`'s
+     process-global `RT` via `handle().block_on(...)`, which outlives the binary.
+  2. **Random hop ranking (product bug).** `graph_expand` fused hop-distance lanes through
+     positional RRF — `1/(k + rank_within_lane)` — but SurrealDB returns
+     `->relates_to->entity` in unspecified order. Of two 1-hop neighbours the DB's
+     arbitrary first scored `1/60`, the other `1/61`, which is BELOW a 2-hop node's
+     `1/60`. So a nearer hop outranked a farther one only by luck. Intra-lane position is
+     meaningless for hop lanes. **Fix**: score by hop distance — every node at hop h gets
+     `1/(k+h)`, identical within a hop, ties broken on id. `rrf_fuse` itself is unchanged
+     (correct for search lanes; other callers depend on it).
+- **VERIFIED (properly, this time)**: **10 passed / 0 failed of 10 consecutive runs**;
+  `cargo clippy --tests` clean (0 warnings). Contrast 4/8 before the fix — that gap is
+  the difference between a measurement and a lucky run.
+- **METHOD**: one green run is not verification when the failure is order-dependent —
+  measure it. `… | tail` masks cargo's exit code; stamp `$?` before the pipe.
