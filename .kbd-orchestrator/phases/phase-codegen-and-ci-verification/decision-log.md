@@ -451,3 +451,39 @@ pre-existing; none were C-106's doing.
   bottom nav at phone width, desktop-appropriate layout above it, since Tauri desktop
   shares the bundle and both HIG/M3 abandon bottom placement as windows widen).
   Provenance: user.
+
+## C-111 follow-up: graph_expand root cause found (2026-07-16)
+
+- **BUG CLOSED**: `graph_expand` returned `[]` because `relate()` never wrote real edges.
+  The C-111 note framed this as either/or — edges not persisted **or** traversal not
+  reading them back under 3.2. It was the first. **The traversal query was correct all
+  along** and needed no change.
+- **ROOT CAUSE**: `RELATE entity:⟨$from⟩->relates_to->entity:⟨$to⟩`. The `⟨ ⟩` chevrons
+  are SurrealDB's escaped-**IDENTIFIER** syntax, not parameter interpolation, so every
+  edge was written between two junk records literally keyed `$from`/`$to`.
+  - Live probe: `SELECT * FROM relates_to` → `in: entity:$from`, `out: entity:$to`.
+  - Source (surrealdb-core-3.2.1): `syn/lexer/char.rs:16` lexes `⟨` as a surrounded
+    ident; `syn/parser/record_id.rs::parse_record_id_key` has **no `$param` arm** — its
+    default arm returns `RecordIdKeyLit::String(ident)` verbatim.
+- **FIX**: parenthesize the endpoints —
+  `RELATE (type::record('entity', $from))->relates_to->(type::record('entity', $to))`.
+  Per `syn/parser/stmt/relate.rs::parse_relate_expr`, endpoints accept a bare `$param`
+  or a parenthesized expression; a *bare* `type::record(...)` falls through to
+  `parse_record_id` and dies on `::` — which is what drove the original chevron
+  workaround. Parens chosen over `LET`-bound params: one statement, matches the
+  `type::record` idiom already used across store.rs.
+- **WHY IT HID**: `relate()` calls `.query().await?` and never checks
+  `Response::take_errors()`. SurrealDB reports statement failures per-statement, not as a
+  query-level `Err`, so `relate()` structurally cannot report a failed write — it wrote
+  plausible garbage and returned `Ok`. `init()` already guards this correctly. Spawned as
+  follow-up work (audit the other `.query()` sites in store.rs/config.rs the same way).
+- **`#[ignore]` REMOVED** from `graph_expand_traverses_relate_edges`; test unweakened.
+- **METHOD NOTE**: two moves beat guessing at 3.x syntax — probe the live DB and read
+  the `in`/`out` keys, and read surrealdb-core's parser source (its own error text names
+  the sanctioned route). Recorded in the wiki as
+  `surrealdb-relate-endpoints-need-parenthesized-type-record`.
+- **VERIFIED (2026-07-16)**: `cargo test -p gen_ui_db_graph --test it` →
+  `5 passed; 0 failed; 0 ignored`. `graph_expand_traverses_relate_edges` passes with the
+  `#[ignore]` removed and no assertion weakened (the `0 ignored` count is the proof the
+  test actually ran rather than being skipped). The memory lane's 4 tests — including the
+  concurrent session's new `vector_mode_returns_scored_hits` — stay green alongside it.
