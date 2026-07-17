@@ -8,6 +8,7 @@
 use std::sync::Arc;
 
 use gen_ui_db_graph::GraphStore;
+use gen_ui_mcp::McpRegistry;
 use gen_ui_types::events::A2uiEvent;
 use gen_ui_types::inference::InferenceProvider;
 use once_cell::sync::OnceCell;
@@ -31,6 +32,11 @@ pub struct AgentState {
     /// a user who asked for on-device inference must never be quietly switched
     /// to a network provider.
     pub inference: Option<Arc<dyn InferenceProvider>>,
+    /// Registered MCP servers (C-108). Empty is the normal state — an install with no
+    /// MCP server configured sends the model no tool definitions and behaves exactly as
+    /// it did before tools existed. Always present (not Option) because "no servers" and
+    /// "no registry" are the same thing to every caller.
+    pub mcp: McpRegistry,
     events: broadcast::Sender<A2uiEvent>,
 }
 
@@ -65,7 +71,8 @@ pub fn init_with_inference(
     inference: Option<Arc<dyn InferenceProvider>>,
 ) {
     let (tx, _rx) = broadcast::channel(EVENT_CHANNEL_CAPACITY);
-    if STATE.set(AgentState { config, memory, inference, events: tx }).is_err() {
+    let state = AgentState { config, memory, inference, mcp: McpRegistry::new(), events: tx };
+    if STATE.set(state).is_err() {
         tracing::warn!(
             "gen_ui_agent::state::init called more than once in this process; \
              ignoring the second call and keeping the original config backend, \
@@ -105,4 +112,9 @@ pub(crate) fn memory() -> Result<&'static Arc<GraphStore>, AgentError> {
 /// `inference` field's doc comment.
 pub(crate) fn inference() -> Result<&'static Arc<dyn InferenceProvider>, AgentError> {
     get()?.inference.as_ref().ok_or(AgentError::NoLocalEngine)
+}
+
+/// The MCP registry. Always present; empty until a server is registered.
+pub fn mcp() -> Result<&'static McpRegistry, AgentError> {
+    Ok(&get()?.mcp)
 }

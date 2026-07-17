@@ -77,7 +77,18 @@ pub async fn send(user_message: String, history: Vec<String>) -> Result<String, 
     let client = builder.build().map_err(|e| AgentError::Client(e.to_string()))?;
 
     let messages = build_messages(&history, &user_message);
-    let request = ChatCompletionRequest { model: pref.model_id.clone(), messages, ..Default::default() };
+    // Offer the model whatever MCP tools are registered (C-108). Empty registry → None,
+    // not an empty vec: some providers reject `tools: []`, and "no tools" should send the
+    // exact request shape that existed before tools did.
+    let tools = crate::tools::tool_definitions(state::mcp()?);
+    let tools = (!tools.is_empty()).then_some(tools);
+
+    let request = ChatCompletionRequest {
+        model: pref.model_id.clone(),
+        messages,
+        tools,
+        ..Default::default()
+    };
 
     let run_id_for_task = run_id.clone();
     gen_ui_runtime::spawn(async move {
@@ -267,6 +278,9 @@ async fn run_stream(client: impl LlmClient, request: ChatCompletionRequest, run_
     use futures::StreamExt;
     let mut stream = std::pin::pin!(stream);
     let mut index: u32 = 0;
+    // Maps a tool call's stream index -> its id. Argument fragments carry only the
+    // index; the id arrives once, in the call's opening chunk.
+    let mut tool_call_ids: std::collections::BTreeMap<u32, String> = Default::default();
     while let Some(chunk) = stream.next().await {
         match chunk {
             Ok(chunk) => {
@@ -279,7 +293,49 @@ async fn run_stream(client: impl LlmClient, request: ChatCompletionRequest, run_
                         }
                         index += 1;
                     }
+
+                    // Tool calls stream in fragments (C-108): the id + name arrive in the
+                    // first chunk for a call, then the arguments dribble in across later
+                    // ones. The adapter accumulates; we just translate the wire shape.
+                    for tc in choice.delta.tool_calls.iter().flatten() {
+                        // `id` present = this is the opening chunk for the call.
+                        if let (Some(id), Some(name)) =
+                            (&tc.id, tc.function.as_ref().and_then(|f| f.name.as_ref()))
+                        {
+                            for event in adapter.ingest(&StreamEvent::ToolCallStarted {
+                                id: id.clone(),
+                                name: name.clone(),
+                            }) {
+                                state::publish(event);
+                            }
+                            tool_call_ids.insert(tc.index, id.clone());
+                        }
+                        // Argument fragments carry only the index, so the id comes from
+                        // the opening chunk we recorded above.
+                        if let Some(args) = tc.function.as_ref().and_then(|f| f.arguments.as_ref())
+                        {
+                            if let Some(id) = tool_call_ids.get(&tc.index) {
+                                for event in adapter.ingest(&StreamEvent::ToolCallDelta {
+                                    id: id.clone(),
+                                    delta: args.clone(),
+                                }) {
+                                    state::publish(event);
+                                }
+                            }
+                        }
+                    }
+
+                    // `tool_calls` as the finish reason means every call is complete —
+                    // close them out (which is what emits the ToolUse blocks) before the
+                    // run ends, or the transcript shows a turn that called nothing.
                     if choice.finish_reason.is_some() {
+                        for id in tool_call_ids.values() {
+                            for event in
+                                adapter.ingest(&StreamEvent::ToolCallComplete { id: id.clone() })
+                            {
+                                state::publish(event);
+                            }
+                        }
                         for event in adapter.ingest(&StreamEvent::Done) {
                             state::publish(event);
                         }
