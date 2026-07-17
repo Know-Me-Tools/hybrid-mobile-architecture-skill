@@ -3793,6 +3793,7 @@ dependencies = [
  "once_cell",
  "oslog",
  "serde_json",
+ "tracing",
 ]
 
 [[package]]
@@ -10763,6 +10764,7 @@ dependencies = [
  "tauri-plugin",
  "thiserror 1.0.69",
  "tokio",
+ "tracing",
 ]
 
 [[package]]

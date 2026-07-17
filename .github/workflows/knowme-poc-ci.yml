@@ -24,6 +24,7 @@ jobs:
   rust:
     name: Rust — clippy + test
     runs-on: macos-15
+    timeout-minutes: 90
     defaults:
       run:
         working-directory: apps/knowme-poc/rust
@@ -35,7 +36,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: beta
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.96
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
@@ -45,8 +46,9 @@ jobs:
       # the generated file is NOT committed, so the workspace cannot compile from a
       # bare checkout — this job has never been able to pass without codegen. The
       # Mobile job already does exactly this; the Rust job needs it for the same reason.
-      - name: flutter_rust_bridge_codegen
-        run: cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: flutter_rust_bridge_codegen@2.12.0
       - name: Regenerate bridge
         # Must run from the hybrid project root — flutter_rust_bridge.yaml's
         # dart_output is relative to rust_root, itself relative to the invocation dir.
@@ -58,9 +60,10 @@ jobs:
   audit:
     name: audit.sh — scratch-scaffolded app
     runs-on: macos-15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.96
       - name: Scaffold a throwaway app
         # scaffold-hybrid.sh <project-path> — pass an absolute path outside the
         # checkout so the scratch app never gets committed or cached.
@@ -71,6 +74,7 @@ jobs:
   desktop-test:
     name: Desktop — Vitest
     runs-on: macos-15
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: apps/knowme-poc/desktop
@@ -85,31 +89,24 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 10
-      # ORDER IS LOAD-BEARING: the `file:` sibling packages resolve their types through
-      # `dist/`, and pnpm hard-copies a file: dep at install time. Installing before the
-      # siblings are built snapshots them WITHOUT dist/, so tsc then cannot find their
-      # type declarations no matter what runs afterwards. Build first, then install.
-      - name: "Build file: sibling packages (they publish types from dist/)"
-        working-directory: apps/knowme-poc
-        run: |
-          for pkg in packages/gen-ui-react rust/crates/tauri-plugin-gen-ui/guest-js; do
-            (cd "$pkg" && pnpm install --ignore-scripts && pnpm run build)
-          done
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc --noEmit
       - run: pnpm test
+      - run: pnpm build
 
   mobile-analyze:
     name: Mobile — dart analyze (post-codegen)
     runs-on: macos-15
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
         with:
           channel: beta
-      - uses: dtolnay/rust-toolchain@stable
-      - name: flutter_rust_bridge_codegen
-        run: cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+      - uses: dtolnay/rust-toolchain@1.96
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: flutter_rust_bridge_codegen@2.12.0
       - name: Regenerate bridge
         # Must run from the hybrid project root — flutter_rust_bridge.yaml's
         # dart_output (../mobile/lib/bridge) is relative to rust_root, itself
@@ -119,6 +116,8 @@ jobs:
       - working-directory: apps/knowme-poc/mobile
         run: flutter pub get
       - working-directory: apps/knowme-poc/mobile
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - working-directory: apps/knowme-poc/mobile
         # info-level style lints are a known, accepted baseline (462 at last
         # count) — fail only on warnings/errors, not infos.
         run: flutter analyze --no-fatal-infos --fatal-warnings
@@ -126,10 +125,11 @@ jobs:
   poc-build:
     name: PoC build — Tauri desktop + iOS simulator
     runs-on: macos-15
+    timeout-minutes: 120
     needs: [rust, desktop-test, mobile-analyze]
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.96
         with:
           targets: aarch64-apple-ios-sim
       - uses: Swatinem/rust-cache@v2
@@ -139,16 +139,27 @@ jobs:
         with:
           node-version: "24"
       - uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - uses: subosito/flutter-action@v2
         with:
           channel: beta
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: flutter_rust_bridge_codegen@2.12.0
+      - name: Regenerate bridge
+        working-directory: apps/knowme-poc
+        run: flutter_rust_bridge_codegen generate --config-file rust/flutter_rust_bridge.yaml
       - name: Tauri build (desktop)
         working-directory: apps/knowme-poc/desktop
         run: |
           pnpm install --frozen-lockfile
-          pnpm run tauri:build -- --no-bundle
+          pnpm exec tauri build --no-bundle
+      - name: Tauri real boot smoke
+        run: bash scripts/verify-tauri-boot.sh "apps/knowme-poc/desktop/src-tauri/target/release/knowme-poc" "${{ runner.temp }}/knowme-poc-app-data" 300
       - name: Flutter build (iOS simulator)
         working-directory: apps/knowme-poc/mobile
         run: |
           flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
           flutter build ios --simulator --no-codesign

@@ -136,7 +136,9 @@ impl AuthState {
     pub fn needs_refresh(&self, now_unix: i64) -> bool {
         match self {
             AuthState::Unauthenticated => false,
-            AuthState::Anon { token } | AuthState::Authenticated { token } => token.is_expired(now_unix),
+            AuthState::Anon { token } | AuthState::Authenticated { token } => {
+                token.is_expired(now_unix)
+            }
         }
     }
 }

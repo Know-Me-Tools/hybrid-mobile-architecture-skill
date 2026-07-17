@@ -22,13 +22,25 @@ pub struct Provider {
 
 impl From<PgProvider> for Provider {
     fn from(p: PgProvider) -> Self {
-        Self { id: p.id, kind: p.kind, base_url: p.base_url, api_key_ref: p.api_key_ref, enabled: p.enabled }
+        Self {
+            id: p.id,
+            kind: p.kind,
+            base_url: p.base_url,
+            api_key_ref: p.api_key_ref,
+            enabled: p.enabled,
+        }
     }
 }
 
 impl From<SurrealProvider> for Provider {
     fn from(p: SurrealProvider) -> Self {
-        Self { id: p.id, kind: p.kind, base_url: p.base_url, api_key_ref: p.api_key_ref, enabled: p.enabled }
+        Self {
+            id: p.id,
+            kind: p.kind,
+            base_url: p.base_url,
+            api_key_ref: p.api_key_ref,
+            enabled: p.enabled,
+        }
     }
 }
 
@@ -46,13 +58,21 @@ pub struct ModelPref {
 
 impl From<PgModelPref> for ModelPref {
     fn from(p: PgModelPref) -> Self {
-        Self { provider_id: p.provider_id, model_id: p.model_id, params: p.params }
+        Self {
+            provider_id: p.provider_id,
+            model_id: p.model_id,
+            params: p.params,
+        }
     }
 }
 
 impl From<SurrealModelPref> for ModelPref {
     fn from(p: SurrealModelPref) -> Self {
-        Self { provider_id: p.provider_id, model_id: p.model_id, params: p.params }
+        Self {
+            provider_id: p.provider_id,
+            model_id: p.model_id,
+            params: p.params,
+        }
     }
 }
 
@@ -64,7 +84,11 @@ pub enum ConfigBackend {
 }
 
 impl ConfigBackend {
-    pub async fn get_model_pref(&self, surface: &str, lane: &str) -> Result<Option<ModelPref>, AgentError> {
+    pub async fn get_model_pref(
+        &self,
+        surface: &str,
+        lane: &str,
+    ) -> Result<Option<ModelPref>, AgentError> {
         match self {
             ConfigBackend::Postgres(store) => Ok(store
                 .get_model_pref(surface, lane)
@@ -83,23 +107,27 @@ impl ConfigBackend {
     /// rather than this layer inventing one.
     pub async fn get_setting(&self, key: &str) -> Result<Option<serde_json::Value>, AgentError> {
         match self {
-            ConfigBackend::Postgres(store) => {
-                store.get_setting(key).await.map_err(|e| AgentError::Config(e.to_string()))
-            }
-            ConfigBackend::Surreal(store) => {
-                store.get_setting(key).await.map_err(|e| AgentError::Config(e.to_string()))
-            }
+            ConfigBackend::Postgres(store) => store
+                .get_setting(key)
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
+            ConfigBackend::Surreal(store) => store
+                .get_setting(key)
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
         }
     }
 
     pub async fn set_setting(&self, key: &str, value: serde_json::Value) -> Result<(), AgentError> {
         match self {
-            ConfigBackend::Postgres(store) => {
-                store.set_setting(key, value).await.map_err(|e| AgentError::Config(e.to_string()))
-            }
-            ConfigBackend::Surreal(store) => {
-                store.set_setting(key, value).await.map_err(|e| AgentError::Config(e.to_string()))
-            }
+            ConfigBackend::Postgres(store) => store
+                .set_setting(key, value)
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
+            ConfigBackend::Surreal(store) => store
+                .set_setting(key, value)
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
         }
     }
 

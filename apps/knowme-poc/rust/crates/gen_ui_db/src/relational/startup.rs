@@ -28,12 +28,20 @@ where
     S: StartupStore,
 {
     pub fn new(store: S) -> Self {
-        Self { store, http: reqwest::Client::new(), _state: PhantomData }
+        Self {
+            store,
+            http: reqwest::Client::new(),
+            _state: PhantomData,
+        }
     }
 
     pub async fn migrate(self) -> RelationalResult<Startup<S, Migrated>> {
         self.store.migrate().await?;
-        Ok(Startup { store: self.store, http: self.http, _state: PhantomData })
+        Ok(Startup {
+            store: self.store,
+            http: self.http,
+            _state: PhantomData,
+        })
     }
 }
 
@@ -50,11 +58,19 @@ where
             let sql = bundle.sql(&self.http).await?;
             self.store.execute_seed(&sql).await?;
         }
-        sync.start().await.map_err(|error| super::RelationalError::Sync(error.to_string()))?;
-        Ok(Startup { store: self.store, http: self.http, _state: PhantomData })
+        sync.start()
+            .await
+            .map_err(|error| super::RelationalError::Sync(error.to_string()))?;
+        Ok(Startup {
+            store: self.store,
+            http: self.http,
+            _state: PhantomData,
+        })
     }
 }
 
 impl<S> Startup<S, Ready> {
-    pub fn into_store(self) -> S { self.store }
+    pub fn into_store(self) -> S {
+        self.store
+    }
 }

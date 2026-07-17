@@ -30,15 +30,15 @@ mod status;
 #[cfg(not(target_arch = "wasm32"))]
 mod config;
 #[cfg(not(target_arch = "wasm32"))]
+mod engine;
+#[cfg(not(target_arch = "wasm32"))]
+mod frf_transport;
+#[cfg(not(target_arch = "wasm32"))]
 mod seam;
 #[cfg(not(target_arch = "wasm32"))]
 mod shapes;
 #[cfg(not(target_arch = "wasm32"))]
 mod write_queue;
-#[cfg(not(target_arch = "wasm32"))]
-mod engine;
-#[cfg(not(target_arch = "wasm32"))]
-mod frf_transport;
 // Needs sqlx::PgPool → `pg`. Desktop/web only; mobile's local store is SurrealDB
 // (gen_ui_db_graph), matching how `relational` is gated.
 #[cfg(all(not(target_arch = "wasm32"), feature = "pg"))]

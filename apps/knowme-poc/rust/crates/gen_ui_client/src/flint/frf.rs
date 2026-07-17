@@ -55,9 +55,12 @@ impl FrfSpine {
     #[cfg(feature = "frf")]
     pub async fn connect(&self) -> gen_ui_types::CoreResult<()> {
         use gen_ui_types::CoreError;
-        let client = frf_sdk_rust::FrfClient::connect(self.config.endpoint.clone(), self.config.token.clone())
-            .await
-            .map_err(|e| CoreError::Transient(format!("frf connect: {e}")))?;
+        let client = frf_sdk_rust::FrfClient::connect(
+            self.config.endpoint.clone(),
+            self.config.token.clone(),
+        )
+        .await
+        .map_err(|e| CoreError::Transient(format!("frf connect: {e}")))?;
         *self.client.lock() = Some(client);
         *self.status.write() = SyncStatus::Live;
         Ok(())

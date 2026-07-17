@@ -141,7 +141,12 @@ impl FrfSyncTransport {
             max_write_attempts: cfg.max_write_attempts,
         };
         let queue = Arc::new(WriteQueue::new(&queue_cfg, sink, status.clone()));
-        Self { cfg, store, queue, status }
+        Self {
+            cfg,
+            store,
+            queue,
+            status,
+        }
     }
 
     /// Subscribe to [`SyncStatus`] transitions for the UI sync chip.
@@ -162,10 +167,7 @@ impl FrfSyncTransport {
     /// dep CI cannot fetch, so anything welded to it is untestable by construction.
     ///
     /// A foreign-tenant row is applied as a no-op (see `row_change_from_payload`).
-    pub async fn apply_envelope_payload(
-        &self,
-        payload: &serde_json::Value,
-    ) -> CoreResult<()> {
+    pub async fn apply_envelope_payload(&self, payload: &serde_json::Value) -> CoreResult<()> {
         let Some(change) = row_change_from_payload(payload, &self.cfg.tenant_id)? else {
             return Ok(());
         };
@@ -179,7 +181,9 @@ impl FrfSyncTransport {
 #[async_trait]
 impl SyncTransport for FrfSyncTransport {
     async fn start(&self) -> CoreResult<()> {
-        self.status.set(SyncStatus::Syncing { pending_writes: self.status.pending() });
+        self.status.set(SyncStatus::Syncing {
+            pending_writes: self.status.pending(),
+        });
 
         // Write-queue drain loop — identical to the Electric engine's, because the write
         // path did not change with the substrate.
@@ -296,7 +300,10 @@ mod tests {
 
     #[async_trait]
     impl super::super::seam::WriteSink for NoopSink {
-        async fn send(&self, _w: &super::super::seam::PendingWrite) -> super::super::seam::WriteOutcome {
+        async fn send(
+            &self,
+            _w: &super::super::seam::PendingWrite,
+        ) -> super::super::seam::WriteOutcome {
             super::super::seam::WriteOutcome::Applied
         }
     }
@@ -312,7 +319,11 @@ mod tests {
             write_batch: 8,
             max_write_attempts: 3,
         };
-        let t = FrfSyncTransport::new(cfg, Arc::clone(&store) as Arc<dyn LocalStore>, Arc::new(NoopSink));
+        let t = FrfSyncTransport::new(
+            cfg,
+            Arc::clone(&store) as Arc<dyn LocalStore>,
+            Arc::new(NoopSink),
+        );
         (t, store)
     }
 
@@ -375,7 +386,9 @@ mod tests {
     #[tokio::test]
     async fn applies_an_own_tenant_row_to_the_store() {
         let (t, store) = transport("t1");
-        t.apply_envelope_payload(&payload("insert", "t1")).await.unwrap();
+        t.apply_envelope_payload(&payload("insert", "t1"))
+            .await
+            .unwrap();
 
         let applied = store.applied.lock().unwrap();
         assert_eq!(applied.len(), 1);
@@ -388,14 +401,19 @@ mod tests {
         // The check that matters: a foreign row must not be written locally, even
         // though decoding it succeeds.
         let (t, store) = transport("t1");
-        t.apply_envelope_payload(&payload("insert", "attacker")).await.unwrap();
+        t.apply_envelope_payload(&payload("insert", "attacker"))
+            .await
+            .unwrap();
         assert!(store.applied.lock().unwrap().is_empty());
     }
 
     #[tokio::test]
     async fn malformed_payload_does_not_touch_the_store() {
         let (t, store) = transport("t1");
-        assert!(t.apply_envelope_payload(&json!({ "nope": true })).await.is_err());
+        assert!(t
+            .apply_envelope_payload(&json!({ "nope": true }))
+            .await
+            .is_err());
         assert!(store.applied.lock().unwrap().is_empty());
     }
 }

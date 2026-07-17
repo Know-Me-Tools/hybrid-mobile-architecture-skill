@@ -43,13 +43,13 @@ cat > "$REACT_DIR/package.json" << 'EOF'
   "description": "ContentBlock React 19 components for the TJ-ARCH-MOB-001 hybrid architecture. Used in Tauri desktop, plain web, and Flutter webview embeds.",
   "license": "MIT OR Apache-2.0",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
     }
   },
   "files": ["dist", "src"],
@@ -66,7 +66,16 @@ cat > "$REACT_DIR/package.json" << 'EOF'
     "typescript": "^7.0.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
   }
 }
 EOF
@@ -327,15 +336,15 @@ cat > "$GUEST_DIR/package.json" << 'EOF'
   "description": "Guest-JS bindings for tauri-plugin-gen-ui: typed invoke() wrappers + event listeners for the gen_ui_core intent surface.",
   "license": "MIT OR Apache-2.0",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "src"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit"
@@ -347,7 +356,15 @@ cat > "$GUEST_DIR/package.json" << 'EOF'
     "typescript": "^7.0.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
   }
 }
 EOF
@@ -414,6 +431,21 @@ export interface ViewDescriptor {
 }
 
 // --- Command wrappers --------------------------------------------------------
+export function runMigrations(): Promise<void> {
+  return invoke<void>(cmd("run_migrations"));
+}
+export function loadSeeds(): Promise<void> {
+  return invoke<void>(cmd("load_seeds"));
+}
+export function attachSyncShapes(): Promise<void> {
+  return invoke<void>(cmd("attach_sync_shapes"));
+}
+export function entityRuntimeStart(tenantId: string): Promise<void> {
+  return invoke<void>(cmd("entity_runtime_start"), { tenantId });
+}
+export function entityRuntimeStop(): Promise<void> {
+  return invoke<void>(cmd("entity_runtime_stop"));
+}
 export function chatSend(threadId: string, message: string): Promise<string> {
   return invoke<string>(cmd("chat_send"), { threadId, message });
 }
@@ -432,8 +464,17 @@ export function entityUpdate(record: EntityRecord): Promise<EntityRecord> {
 export function entityDelete(entityType: string, id: string): Promise<void> {
   return invoke<void>(cmd("entity_delete"), { entityType, id });
 }
-export function memorySearch(query: string, k: number): Promise<string[]> {
-  return invoke<string[]>(cmd("memory_search"), { query, k });
+export interface MemoryHit {
+  id: string;
+  text: string;
+  kind: string;
+  score: number;
+}
+export function memoryIngest(text: string): Promise<string> {
+  return invoke<string>(cmd("memory_ingest"), { text });
+}
+export function memorySearch(query: string, k: number): Promise<MemoryHit[]> {
+  return invoke<MemoryHit[]>(cmd("memory_search"), { query, k, mode: undefined });
 }
 export function graphExpand(entityId: string, depth: number): Promise<string[]> {
   return invoke<string[]>(cmd("graph_expand"), { entityId, depth });

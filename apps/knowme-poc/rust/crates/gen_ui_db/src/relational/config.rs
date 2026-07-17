@@ -46,7 +46,11 @@ pub trait ConfigStore: Send + Sync {
     async fn upsert_provider(&self, provider: &Provider) -> RelationalResult<()>;
     async fn delete_provider(&self, id: &str) -> RelationalResult<()>;
 
-    async fn get_model_pref(&self, surface: &str, lane: &str) -> RelationalResult<Option<ModelPref>>;
+    async fn get_model_pref(
+        &self,
+        surface: &str,
+        lane: &str,
+    ) -> RelationalResult<Option<ModelPref>>;
     async fn upsert_model_pref(&self, pref: &ModelPref) -> RelationalResult<()>;
 
     async fn get_setting(&self, key: &str) -> RelationalResult<Option<serde_json::Value>>;
@@ -63,9 +67,11 @@ mod postgres_impl {
     #[async_trait::async_trait]
     impl ConfigStore for PostgresStore {
         async fn list_providers(&self) -> RelationalResult<Vec<Provider>> {
-            let rows = sqlx::query("SELECT id, kind, base_url, api_key_ref, enabled FROM providers ORDER BY id")
-                .fetch_all(self.pool())
-                .await?;
+            let rows = sqlx::query(
+                "SELECT id, kind, base_url, api_key_ref, enabled FROM providers ORDER BY id",
+            )
+            .fetch_all(self.pool())
+            .await?;
             Ok(rows
                 .into_iter()
                 .map(|r| Provider {
@@ -96,11 +102,18 @@ mod postgres_impl {
         }
 
         async fn delete_provider(&self, id: &str) -> RelationalResult<()> {
-            sqlx::query("DELETE FROM providers WHERE id = $1").bind(id).execute(self.pool()).await?;
+            sqlx::query("DELETE FROM providers WHERE id = $1")
+                .bind(id)
+                .execute(self.pool())
+                .await?;
             Ok(())
         }
 
-        async fn get_model_pref(&self, surface: &str, lane: &str) -> RelationalResult<Option<ModelPref>> {
+        async fn get_model_pref(
+            &self,
+            surface: &str,
+            lane: &str,
+        ) -> RelationalResult<Option<ModelPref>> {
             let row = sqlx::query(
                 "SELECT surface, lane, provider_id, model_id, params FROM model_prefs \
                  WHERE surface = $1 AND lane = $2",
@@ -159,12 +172,20 @@ mod postgres_impl {
     #[cfg(feature = "pglite")]
     #[async_trait::async_trait]
     impl ConfigStore for crate::relational::PgliteStore {
-        async fn list_providers(&self) -> RelationalResult<Vec<Provider>> { self.store().list_providers().await }
+        async fn list_providers(&self) -> RelationalResult<Vec<Provider>> {
+            self.store().list_providers().await
+        }
         async fn upsert_provider(&self, provider: &Provider) -> RelationalResult<()> {
             self.store().upsert_provider(provider).await
         }
-        async fn delete_provider(&self, id: &str) -> RelationalResult<()> { self.store().delete_provider(id).await }
-        async fn get_model_pref(&self, surface: &str, lane: &str) -> RelationalResult<Option<ModelPref>> {
+        async fn delete_provider(&self, id: &str) -> RelationalResult<()> {
+            self.store().delete_provider(id).await
+        }
+        async fn get_model_pref(
+            &self,
+            surface: &str,
+            lane: &str,
+        ) -> RelationalResult<Option<ModelPref>> {
             self.store().get_model_pref(surface, lane).await
         }
         async fn upsert_model_pref(&self, pref: &ModelPref) -> RelationalResult<()> {
@@ -177,5 +198,4 @@ mod postgres_impl {
             self.store().set_setting(key, value).await
         }
     }
-
 }

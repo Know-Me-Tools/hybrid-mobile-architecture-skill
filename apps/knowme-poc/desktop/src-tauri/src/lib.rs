@@ -6,8 +6,47 @@
 use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::Manager;
 
+fn init_logging() {
+    let _ = tracing_log::LogTracer::init();
+    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+
+    let diagnostic_root = std::env::var_os("GEN_UI_APP_DATA_DIR")
+        .map(std::path::PathBuf::from)
+        .or_else(|| {
+            directories::ProjectDirs::from("ai", "prometheusags", "knowme-poc")
+                .map(|project| project.data_local_dir().to_path_buf())
+        });
+    let file = diagnostic_root.and_then(|root| {
+        let directory = root.join("diagnostics");
+        std::fs::create_dir_all(&directory).ok()?;
+        std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(directory.join("desktop.log"))
+            .ok()
+    });
+
+    match file {
+        Some(file) => {
+            let _ = tracing_subscriber::fmt()
+                .with_env_filter(filter)
+                .with_writer(std::sync::Mutex::new(file))
+                .with_ansi(false)
+                .try_init();
+            tracing::info!("persistent desktop diagnostics initialized");
+        }
+        None => {
+            let _ = tracing_subscriber::fmt().with_env_filter(filter).try_init();
+            tracing::warn!("persistent diagnostic file unavailable; using process output");
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    init_logging();
+    tracing::info!("desktop boot starting");
     tauri::Builder::default()
         // Must be registered first: a second launch attempt is redirected here
         // instead of racing the first instance for the config-db PGlite lock.
@@ -22,6 +61,7 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_gen_ui::init())
         .setup(|app| {
+            tracing::info!("tauri setup starting");
             let exit = MenuItem::with_id(app, "exit", "Exit", true, Some("CmdOrCtrl+Q"))?;
             let file_menu = Submenu::with_items(app, "File", true, &[&exit])?;
 
@@ -68,6 +108,7 @@ pub fn run() {
                 _ => {}
             });
 
+            tracing::info!("tauri setup ready");
             Ok(())
         })
         .run(tauri::generate_context!())

@@ -60,10 +60,10 @@ edition = "2021"
 # current dependency graph — transitive crates (e.g. chacha20 ≥0.10) now require the
 # edition2024 Cargo feature, unparseable before Cargo 1.85. 1.93 is the realistic
 # mid-2026 floor. 1.93 can no longer build the SurrealDB 3.2 graph crate (C-004):
-# its transitive fastnum ≥0.7.5 requires rustc 1.94+, so the floor moves to 1.95
-# (the mid-2026 stable that satisfies it). Keep in sync with rust-toolchain.toml
+# its transitive fastnum ≥0.7.5 requires rustc 1.94+, and wasm32 builds require
+# 1.96 in this workspace. Keep in sync with rust-toolchain.toml
 # and CLAUDE.md tool versions.
-rust-version = "1.95"
+rust-version = "1.96"
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
@@ -182,6 +182,10 @@ cat > "$OUT/.cargo/config.toml" << 'EOF'
 # [target.aarch64-apple-darwin]
 # rustflags = ["-C", "link-arg=-fuse-ld=/opt/homebrew/opt/llvm/bin/ld64.lld"]
 
+[env]
+# Native inference/audio dependencies use std::filesystem (macOS 10.15+).
+MACOSX_DEPLOYMENT_TARGET = { value = "10.15", force = true }
+
 [target.x86_64-unknown-linux-gnu]
 # mold is the fastest production linker on Linux (install: apt/brew install mold)
 # linker = "clang"
@@ -196,13 +200,12 @@ ok ".cargo/config.toml"
 # ── rust-toolchain.toml ──────────────────────────────────────────────────────
 cat > "$OUT/rust-toolchain.toml" << 'EOF'
 [toolchain]
-# 1.95 floor: SurrealDB 3.2 (gen_ui_db_graph, C-004) pulls fastnum ≥0.7.5 which
-# requires rustc 1.94+. 1.95 is the mid-2026 stable that satisfies it. Keep in
-# sync with the workspace rust-version in Cargo.toml.
-channel = "1.95"
+# Rust 1.96 is the native/wasm floor for this workspace.
+channel = "1.96"
 components = ["rustfmt", "clippy", "rust-src"]
 targets = [
     "aarch64-apple-ios",
+    "aarch64-apple-ios-sim",
     "aarch64-linux-android",
     "wasm32-unknown-unknown",
 ]
@@ -1897,6 +1900,18 @@ impl From<surrealdb::Error> for GraphError {
     }
 }
 
+pub(crate) fn check_statements(
+    response: &mut surrealdb::IndexedResults,
+    context: &str,
+) -> Result<(), GraphError> {
+    if let Some((index, error)) = response.take_errors().into_iter().next() {
+        return Err(GraphError::Surreal(format!(
+            "{context} statement {index}: {error}"
+        )));
+    }
+    Ok(())
+}
+
 impl From<serde_json::Error> for GraphError {
     fn from(e: serde_json::Error) -> Self {
         GraphError::Serialize(e.to_string())
@@ -1957,7 +1972,7 @@ mod native {
     use std::sync::Mutex;
 
     /// fastembed-backed embedder (all-MiniLM-L6-v2, 384-dim). Downloads the ONNX
-    /// model to `FASTEMBED_CACHE_DIR` on first use, then runs fully offline.
+    /// model to an explicit application-data cache on first use, then runs fully offline.
     /// `TextEmbedding` is not `Sync`, so it sits behind a `Mutex`; embedding is
     /// short and always called off the async runtime via `spawn_blocking`.
     pub struct FastEmbedder {
@@ -1967,9 +1982,10 @@ mod native {
     impl FastEmbedder {
         /// Load the default 384-dim model. Blocking (may download) — construct at
         /// startup off the async runtime.
-        pub fn new() -> Result<Self, GraphError> {
+        pub fn new(cache_dir: impl AsRef<std::path::Path>) -> Result<Self, GraphError> {
             let model = TextEmbedding::try_new(
-                TextInitOptions::new(EmbeddingModel::AllMiniLML6V2),
+                TextInitOptions::new(EmbeddingModel::AllMiniLML6V2)
+                    .with_cache_dir(cache_dir.as_ref().to_path_buf()),
             )
             .map_err(|e| GraphError::Embedding(e.to_string()))?;
             Ok(Self { inner: Mutex::new(model) })
@@ -2126,7 +2142,7 @@ RUST
 //! `memory_ingest` / `memory_search` / `graph_expand`; SurrealQL never leaves this
 //! module.
 use crate::embed::{Embedder, EMBED_DIM};
-use crate::error::GraphError;
+use crate::error::{check_statements, GraphError};
 use crate::rrf::{rrf_fuse, RrfConfig};
 use crate::schema::{HYBRID_SEARCH_QUERY, SCHEMA_DDL};
 use serde::{Deserialize, Serialize};
@@ -2202,12 +2218,7 @@ impl GraphStore {
 
     async fn init(&self) -> Result<(), GraphError> {
         let mut res = self.db.query(SCHEMA_DDL).await?;
-        // DDL errors surface per-statement, not as a query-level Err — surface the
-        // first so a bad schema fails loudly at boot instead of at first search.
-        if let Some((idx, err)) = res.take_errors().into_iter().next() {
-            return Err(GraphError::Surreal(format!("schema stmt {idx}: {err}")));
-        }
-        Ok(())
+        check_statements(&mut res, "schema")
     }
 
     /// Run the (synchronous, CPU-bound) embedder off the async runtime.
@@ -2284,16 +2295,17 @@ impl GraphStore {
         if from.trim().is_empty() || to.trim().is_empty() {
             return Err(GraphError::Invalid("relate endpoints must be non-empty".into()));
         }
-        self.db
+        let mut response = self
+            .db
             .query(
-                "RELATE type::thing('entity', $from)->relates_to->type::thing('entity', $to) \
+                "RELATE (type::record('entity', $from))->relates_to->(type::record('entity', $to)) \
                  SET rel = $rel;",
             )
             .bind(("from", from.to_string()))
             .bind(("to", to.to_string()))
             .bind(("rel", rel.to_string()))
             .await?;
-        Ok(())
+        check_statements(&mut response, "relate")
     }
 
     /// INTENT: hybrid semantic + lexical search. Embeds `query`, runs the vector
@@ -2316,6 +2328,7 @@ impl GraphStore {
             .bind(("q", query.to_string()))
             .bind(("k", k as i64))
             .await?;
+        check_statements(&mut res, "memory_search")?;
         // The SELECT is the last statement in the multi-statement query. Bind the
         // index first — `take(&mut self)` and `num_statements(&self)` can't borrow
         // `res` in the same expression.
@@ -2848,8 +2861,13 @@ $MARK
 // import keeps a plain \`pg\` build (no \`pglite\`) warning-free under the clippy gate.
 #[cfg(feature = "pglite")]
 use std::path::Path;
+#[cfg(feature = "pglite")]
+use std::sync::Arc;
 
 use sqlx::{PgPool, postgres::PgPoolOptions};
+
+#[cfg(feature = "pglite")]
+use tokio::sync::OnceCell;
 
 use super::{RelationalResult, startup::StartupStore};
 
@@ -2877,21 +2895,38 @@ impl StartupStore for PostgresStore {
 }
 
 #[cfg(feature = "pglite")]
+#[derive(Clone)]
 pub struct PgliteStore {
     store: PostgresStore,
-    _server: pglite_oxide::PgliteServer,
+    _server: Arc<pglite_oxide::PgliteServer>,
 }
+
+#[cfg(feature = "pglite")]
+static PGLITE_STORE: OnceCell<PgliteStore> = OnceCell::const_new();
 
 #[cfg(feature = "pglite")]
 impl PgliteStore {
     pub async fn open(path: impl AsRef<Path>) -> RelationalResult<Self> {
-        let server = pglite_oxide::PgliteServer::builder().path(path.as_ref()).start()?;
-        let url = server.database_url();
-        let store = PostgresStore::connect(&url).await?;
-        Ok(Self { store, _server: server })
+        let path = path.as_ref().to_path_buf();
+        PGLITE_STORE
+            .get_or_try_init(|| async move {
+                let server = pglite_oxide::PgliteServer::builder().path(&path).start()?;
+                let url = server.database_url();
+                let pool = PgPoolOptions::new().max_connections(1).connect(&url).await?;
+                Ok::<_, super::RelationalError>(Self {
+                    store: PostgresStore { pool },
+                    _server: Arc::new(server),
+                })
+            })
+            .await
+            .cloned()
     }
 
     pub fn store(&self) -> &PostgresStore { &self.store }
+
+    pub async fn migrate(&self) -> RelationalResult<()> {
+        self.store.migrate().await
+    }
 }
 EOF
   cat > "$dir/migrations/postgres/0001_relational.sql" << 'EOF'
@@ -3800,6 +3835,7 @@ gen_ui_agent    = { path = "../gen_ui_agent" }
 flutter_rust_bridge.workspace = true
 anyhow.workspace = true
 log = "0.4"
+tracing.workspace = true
 
 [lints.rust]
 # `#[frb(...)]` expands to code guarded by `cfg(frb_expand)`, a cfg name that only
@@ -3996,6 +4032,7 @@ gen_ui_agent    = { path = "../gen_ui_agent" }
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+tracing.workspace = true
 tauri = { version = "2", default-features = false }
 
 [build-dependencies]

@@ -19,7 +19,9 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use gen_ui_agent::ConfigBackend;
 use gen_ui_db::relational::{ConfigStore, ModelPref, Provider, RelationalError, RelationalResult};
-use gen_ui_db_graph::{Embedder, EmbeddingModelInfo, GraphError, GraphStore, GraphStoreConfig, EMBED_DIM};
+use gen_ui_db_graph::{
+    Embedder, EmbeddingModelInfo, GraphError, GraphStore, GraphStoreConfig, EMBED_DIM,
+};
 
 const DEV_PROVIDER_ID: &str = "dev-ollama";
 const DEV_API_KEY_REF: &str = "dev-ollama-noop";
@@ -42,12 +44,20 @@ impl ConfigStore for DevOllamaConfigStore {
         }])
     }
     async fn upsert_provider(&self, _provider: &Provider) -> RelationalResult<()> {
-        Err(RelationalError::Sync("dev Ollama config store is read-only".into()))
+        Err(RelationalError::Sync(
+            "dev Ollama config store is read-only".into(),
+        ))
     }
     async fn delete_provider(&self, _id: &str) -> RelationalResult<()> {
-        Err(RelationalError::Sync("dev Ollama config store is read-only".into()))
+        Err(RelationalError::Sync(
+            "dev Ollama config store is read-only".into(),
+        ))
     }
-    async fn get_model_pref(&self, surface: &str, lane: &str) -> RelationalResult<Option<ModelPref>> {
+    async fn get_model_pref(
+        &self,
+        surface: &str,
+        lane: &str,
+    ) -> RelationalResult<Option<ModelPref>> {
         if surface != "chat" || lane != "cloud" {
             return Ok(None);
         }
@@ -60,13 +70,17 @@ impl ConfigStore for DevOllamaConfigStore {
         }))
     }
     async fn upsert_model_pref(&self, _pref: &ModelPref) -> RelationalResult<()> {
-        Err(RelationalError::Sync("dev Ollama config store is read-only".into()))
+        Err(RelationalError::Sync(
+            "dev Ollama config store is read-only".into(),
+        ))
     }
     async fn get_setting(&self, _key: &str) -> RelationalResult<Option<serde_json::Value>> {
         Ok(None)
     }
     async fn set_setting(&self, _key: &str, _value: serde_json::Value) -> RelationalResult<()> {
-        Err(RelationalError::Sync("dev Ollama config store is read-only".into()))
+        Err(RelationalError::Sync(
+            "dev Ollama config store is read-only".into(),
+        ))
     }
 }
 
@@ -77,7 +91,10 @@ impl ConfigStore for DevOllamaConfigStore {
 struct ZeroEmbedder;
 impl Embedder for ZeroEmbedder {
     fn model_info(&self) -> EmbeddingModelInfo {
-        EmbeddingModelInfo { name: "dev-ollama-zero-fake".into(), dim: EMBED_DIM }
+        EmbeddingModelInfo {
+            name: "dev-ollama-zero-fake".into(),
+            dim: EMBED_DIM,
+        }
     }
     fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, GraphError> {
         Ok(texts.iter().map(|_| vec![0.0; EMBED_DIM]).collect())

@@ -16,6 +16,6 @@ pub mod flint;
 
 // The FlintClient façade is native-only (reqwest/tonic IO); the browser reaches the
 // same planes from JS per the layer contract. Token types are cross-target.
+pub use flint::token;
 #[cfg(not(target_arch = "wasm32"))]
 pub use flint::{FlintClient, FlintConfig};
-pub use flint::token;

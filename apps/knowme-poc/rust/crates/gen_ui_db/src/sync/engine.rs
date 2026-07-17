@@ -26,7 +26,13 @@ impl SyncEngine {
     pub fn new(cfg: SyncConfig, store: Arc<dyn LocalStore>, sink: Arc<dyn WriteSink>) -> Self {
         let status = SyncStatusHandle::new();
         let queue = Arc::new(WriteQueue::new(&cfg, sink, status.clone()));
-        Self { cfg, client: reqwest::Client::new(), store, queue, status }
+        Self {
+            cfg,
+            client: reqwest::Client::new(),
+            store,
+            queue,
+            status,
+        }
     }
 
     /// Subscribe to [`SyncStatus`] transitions for the UI sync chip.
@@ -49,7 +55,9 @@ impl SyncTransport for SyncEngine {
         if self.cfg.shapes.is_empty() {
             return Err(CoreError::Terminal("sync: no shapes configured".into()));
         }
-        self.status.set(SyncStatus::Syncing { pending_writes: self.status.pending() });
+        self.status.set(SyncStatus::Syncing {
+            pending_writes: self.status.pending(),
+        });
 
         for shape in &self.cfg.shapes {
             let consumer = ShapeConsumer::new(
@@ -100,7 +108,12 @@ impl SyncTransport for SyncEngine {
             .unwrap_or_else(|| derive_key(change_json));
 
         self.queue
-            .enqueue(PendingWrite { idempotency_key, table, change_json: change_json.to_string(), attempts: 0 })
+            .enqueue(PendingWrite {
+                idempotency_key,
+                table,
+                change_json: change_json.to_string(),
+                attempts: 0,
+            })
             .await;
         Ok(())
     }

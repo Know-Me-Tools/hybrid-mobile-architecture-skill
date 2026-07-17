@@ -1,12 +1,11 @@
 // TJ-ARCH-MOB-001 compliant
 import { createRouter, createRoute, createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
-import type { AuthState } from '@/features/auth/stores/authStore'
 import { ChatScreen } from '@/features/chat/screens/ChatScreen'
 import { MemoryScreen } from '@/features/memory/screens/MemoryScreen'
 import { AppShell } from './AppShell'
 
-interface RouterContext { auth: AuthState; queryClient: QueryClient }
+interface RouterContext { queryClient: QueryClient }
 
 // AppShell wraps every route, so the nav chrome is mounted once rather than by
 // each screen. See AppShell for why placement responds to width, not platform.
@@ -18,10 +17,7 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
   ),
 })
 
-// PoC has no real auth backend wired yet (authStore.signIn is a stub) — the
-// index route renders the chat surface directly. A '/login' route + real
-// beforeLoad gate lands with the auth feature; do not gate the demo behind a
-// route that doesn't exist yet.
+// Authentication is intentionally absent until a real backend and route gate exist.
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
@@ -38,7 +34,7 @@ const memoryRoute = createRoute({
 
 export const router = createRouter({
   routeTree: rootRoute.addChildren([indexRoute, memoryRoute]),
-  context: { auth: undefined!, queryClient: undefined! },
+  context: { queryClient: undefined! },
 })
 
 declare module '@tanstack/react-router' {

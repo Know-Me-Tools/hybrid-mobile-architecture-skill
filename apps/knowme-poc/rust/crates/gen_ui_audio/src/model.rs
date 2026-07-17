@@ -21,8 +21,7 @@ use std::path::PathBuf;
 
 /// ggml whisper-tiny (multilingual, fp16) — smallest stock whisper.cpp model.
 /// Hosted on the official whisper.cpp Hugging Face mirror.
-const MODEL_URL: &str =
-    "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin";
+const MODEL_URL: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin";
 const MODEL_FILE_NAME: &str = "ggml-tiny.bin";
 /// Sanity floor: the real file is ~75MB; anything drastically smaller means a
 /// truncated/failed download, not a valid model.

@@ -69,12 +69,16 @@ fn classify(err: &CoreError) -> WriteOutcome {
         // gets the same rejection, forever.
         CoreError::Terminal(e) => WriteOutcome::Poison { reason: e.clone() },
         // A malformed body cannot fix itself either.
-        CoreError::Serde(e) => WriteOutcome::Poison { reason: format!("serde: {e}") },
+        CoreError::Serde(e) => WriteOutcome::Poison {
+            reason: format!("serde: {e}"),
+        },
         // NotFound on update/delete: the row is already gone server-side. Treat as
         // poison, not retry — but see `send`, which converts delete-NotFound to Applied
         // before we ever get here, because a delete whose target is absent has already
         // achieved what it wanted.
-        CoreError::NotFound(e) => WriteOutcome::Poison { reason: format!("not found: {e}") },
+        CoreError::NotFound(e) => WriteOutcome::Poison {
+            reason: format!("not found: {e}"),
+        },
         CoreError::Io(e) => {
             tracing::debug!(error = %e, "write replay: io, will retry");
             WriteOutcome::Retry
@@ -89,7 +93,9 @@ impl<T: EntityTransport + Send + Sync> WriteSink for ForgeWriteSink<T> {
             Ok(b) => b,
             // Unparseable payload: quarantine rather than retry a body we cannot read.
             Err(e) => {
-                return WriteOutcome::Poison { reason: format!("bad write body: {e}") };
+                return WriteOutcome::Poison {
+                    reason: format!("bad write body: {e}"),
+                };
             }
         };
 
@@ -114,7 +120,9 @@ impl<T: EntityTransport + Send + Sync> WriteSink for ForgeWriteSink<T> {
                 other => other,
             },
             other => {
-                return WriteOutcome::Poison { reason: format!("unknown write op: {other}") };
+                return WriteOutcome::Poison {
+                    reason: format!("unknown write op: {other}"),
+                };
             }
         };
 
@@ -144,7 +152,9 @@ pub fn forge_write_sink(
     use gen_ui_client::flint::{FlintAuthState, Token};
 
     let auth = match bearer {
-        Some(raw) => FlintAuthState::Authenticated { token: Token::parse(raw)? },
+        Some(raw) => FlintAuthState::Authenticated {
+            token: Token::parse(raw)?,
+        },
         None => {
             tracing::warn!("forge sink: no bearer — writes go to Quarry unauthenticated");
             FlintAuthState::Unauthenticated
@@ -152,7 +162,10 @@ pub fn forge_write_sink(
     };
     let client = ForgeClient::new(
         reqwest::Client::new(),
-        ForgeConfig { base: base.into(), schema: schema.into() },
+        ForgeConfig {
+            base: base.into(),
+            schema: schema.into(),
+        },
         Arc::new(parking_lot::RwLock::new(auth)),
     );
     Ok(Arc::new(ForgeWriteSink::new(Arc::new(client))))
@@ -175,7 +188,10 @@ mod tests {
 
     impl FakeForge {
         fn failing(e: CoreError) -> Self {
-            Self { calls: Mutex::new(Vec::new()), fail_with: Some(e) }
+            Self {
+                calls: Mutex::new(Vec::new()),
+                fail_with: Some(e),
+            }
         }
         fn err(&self) -> CoreResult<()> {
             match &self.fail_with {
@@ -198,7 +214,10 @@ mod tests {
     #[async_trait::async_trait]
     impl EntityTransport for FakeForge {
         async fn list(&self, _v: &ViewDescriptor) -> CoreResult<ListResult> {
-            Ok(ListResult { items: vec![], next_cursor: None })
+            Ok(ListResult {
+                items: vec![],
+                next_cursor: None,
+            })
         }
         async fn get(&self, _t: &str, _id: &str) -> CoreResult<Option<EntityRecord>> {
             Ok(None)
@@ -248,7 +267,9 @@ mod tests {
     async fn terminal_failure_poisons_rather_than_retrying_forever() {
         // Replaying the same invalid bytes gets the same 4xx until the heat death of
         // the universe — quarantine instead of wedging the queue.
-        let forge = Arc::new(FakeForge::failing(CoreError::Terminal("400 invalid".into())));
+        let forge = Arc::new(FakeForge::failing(CoreError::Terminal(
+            "400 invalid".into(),
+        )));
         let sink = ForgeWriteSink::new(forge);
         assert!(matches!(
             sink.send(&write("insert")).await,

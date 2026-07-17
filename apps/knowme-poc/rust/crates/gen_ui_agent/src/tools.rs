@@ -40,7 +40,9 @@ fn unqualify(qualified: &str) -> Option<(&str, &str)> {
 pub fn tool_definitions(registry: &McpRegistry) -> Vec<ChatCompletionTool> {
     let mut defs = Vec::new();
     for server_name in registry.server_names() {
-        let Some(server) = registry.get(&server_name) else { continue };
+        let Some(server) = registry.get(&server_name) else {
+            continue;
+        };
         for tool in server.cached_tools() {
             defs.push(to_definition(&server_name, &tool));
         }
@@ -92,7 +94,10 @@ pub async fn call_tool(
             .map_err(|e| AgentError::Config(format!("tool arguments are not valid JSON: {e}")))?
     };
 
-    server.call_tool(tool_name, args).await.map_err(|e| AgentError::Config(e.to_string()))
+    server
+        .call_tool(tool_name, args)
+        .await
+        .map_err(|e| AgentError::Config(e.to_string()))
 }
 
 #[cfg(test)]
@@ -110,7 +115,10 @@ mod tests {
     fn unqualify_splits_on_the_first_separator_only() {
         // Tool names come from the server and may contain the separator themselves;
         // splitting on the last one would silently address the wrong server.
-        assert_eq!(unqualify("forge__list__views"), Some(("forge", "list__views")));
+        assert_eq!(
+            unqualify("forge__list__views"),
+            Some(("forge", "list__views"))
+        );
     }
 
     #[test]

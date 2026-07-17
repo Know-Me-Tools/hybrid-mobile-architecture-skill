@@ -13,8 +13,9 @@ vi.mock('@tauri-apps/api/core', () => ({
   isTauri: () => true,
 }))
 vi.mock('@prometheus-ags/tauri-plugin-gen-ui', () => ({
-  memorySearch: (query: string, k: number) => invoke('memory_search', { query, k }),
-  memoryIngest: (text: string) => invoke('memory_ingest', { text }),
+  memorySearch: (query: string, k: number, mode: string) =>
+    invoke('plugin:gen-ui|memory_search', { query, k, mode }),
+  memoryIngest: (text: string) => invoke('plugin:gen-ui|memory_ingest', { text }),
 }))
 
 import { useMemoryStore, type MemoryHit } from '../stores/memoryStore'
@@ -40,7 +41,11 @@ describe('memoryStore', () => {
     await useMemoryStore.getState().search('alpha')
 
     const s = useMemoryStore.getState()
-    expect(invoke).toHaveBeenCalledWith('memory_search', { query: 'alpha', k: 8 })
+    expect(invoke).toHaveBeenCalledWith('plugin:gen-ui|memory_search', {
+      query: 'alpha',
+      k: 8,
+      mode: 'hybrid',
+    })
     expect(s.query).toBe('alpha')
     expect(s.hits).toHaveLength(2)
     expect(s.hits[0].score).toBeGreaterThan(s.hits[1].score)

@@ -17,11 +17,17 @@ pub use gen_ui_types::CoreError;
 pub async fn entity_list(view: ViewDescriptor) -> Result<ListResult, CoreError> {
     // C-003 backs this with the relational store; C-007 lands the signature.
     let _ = view;
-    Ok(ListResult { items: Vec::new(), next_cursor: None })
+    Ok(ListResult {
+        items: Vec::new(),
+        next_cursor: None,
+    })
 }
 
 /// Fetch one entity by type + id.
-pub async fn entity_get(entity_type: String, id: String) -> Result<Option<EntityRecord>, CoreError> {
+pub async fn entity_get(
+    entity_type: String,
+    id: String,
+) -> Result<Option<EntityRecord>, CoreError> {
     let _ = (entity_type, id);
     Ok(None)
 }

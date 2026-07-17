@@ -15,15 +15,17 @@
 // frb-exposed fn below spells out `Result<T, CoreError>` literally; using
 // `CoreResult<T>` here would silently make Dart receive an opaque blob with
 // no field/error access instead of a normal Future<T> that throws on Err.
-pub use gen_ui_types::CoreError;
 pub use gen_ui_db_graph::{MemoryHit, RelatedEntity};
+pub use gen_ui_types::CoreError;
 
 /// Start a chat turn; returns the run_id whose events arrive on chat_events(run_id).
 /// `thread_id` is reserved for multi-thread history (not yet used — the agent
 /// layer takes the full turn history via `message` for now).
 pub async fn chat_send(thread_id: String, message: String) -> Result<String, CoreError> {
     let _ = thread_id;
-    gen_ui_agent::chat::send(message, Vec::new()).await.map_err(Into::into)
+    gen_ui_agent::chat::send(message, Vec::new())
+        .await
+        .map_err(Into::into)
 }
 
 /// Ingest a note into memory (embeds on-device via fastembed, upserts into
@@ -34,10 +36,14 @@ pub async fn memory_ingest(text: String) -> Result<String, CoreError> {
 
 /// Hybrid memory search (vector recall + graph expansion + BM25, RRF-fused in Rust).
 pub async fn memory_search(query: String, k: u32) -> Result<Vec<MemoryHit>, CoreError> {
-    gen_ui_agent::memory::search(query, k).await.map_err(Into::into)
+    gen_ui_agent::memory::search(query, k)
+        .await
+        .map_err(Into::into)
 }
 
 /// Expand the entity graph around a node to a given depth.
 pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<RelatedEntity>, CoreError> {
-    gen_ui_agent::memory::graph_expand(entity_id, depth).await.map_err(Into::into)
+    gen_ui_agent::memory::graph_expand(entity_id, depth)
+        .await
+        .map_err(Into::into)
 }

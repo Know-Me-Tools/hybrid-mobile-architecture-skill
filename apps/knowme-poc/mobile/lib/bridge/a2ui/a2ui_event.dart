@@ -11,8 +11,8 @@ sealed class A2uiEvent {
       switch (json['type'] as String) {
         'run_started' => RunStarted(json['run_id'] as String),
         'block' => BlockEvent(
-          ContentBlock.fromJson(json['block'] as Map<String, dynamic>),
-        ),
+            ContentBlock.fromJson(json['block'] as Map<String, dynamic>),
+          ),
         'run_finished' => RunFinished(json['run_id'] as String),
         'run_error' => RunError(json['message'] as String),
         final type => throw FormatException('Unknown A2uiEvent type: $type'),

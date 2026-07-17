@@ -39,10 +39,14 @@ use crate::frb_generated::StreamSink;
 /// a real gap for concurrent turns, deferred until that's an actual requirement.
 pub fn chat_events(run_id: String, sink: StreamSink<String>) {
     let _ = run_id;
-    let Ok(mut rx) = gen_ui_agent::state::subscribe() else { return };
+    let Ok(mut rx) = gen_ui_agent::state::subscribe() else {
+        return;
+    };
     gen_ui_runtime::spawn(async move {
         while let Ok(event) = rx.recv().await {
-            let Ok(json) = serde_json::to_string(&event) else { continue };
+            let Ok(json) = serde_json::to_string(&event) else {
+                continue;
+            };
             if sink.add(json).is_err() {
                 break; // Dart side dropped the stream — stop forwarding.
             }

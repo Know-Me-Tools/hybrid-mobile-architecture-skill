@@ -51,4 +51,4 @@ final class StartupProvider extends $FunctionalProvider<
   }
 }
 
-String _$startupHash() => r'28afd0cfb34be4322944a53a08cea260145b889f';
+String _$startupHash() => r'd5df62aed7fa44f9f95a690fdb21c6da55758d4a';

@@ -13,7 +13,12 @@ pub struct JsonRpcRequest {
 
 impl JsonRpcRequest {
     pub fn new(id: u64, method: impl Into<String>, params: Option<serde_json::Value>) -> Self {
-        Self { jsonrpc: "2.0", id, method: method.into(), params }
+        Self {
+            jsonrpc: "2.0",
+            id,
+            method: method.into(),
+            params,
+        }
     }
 }
 

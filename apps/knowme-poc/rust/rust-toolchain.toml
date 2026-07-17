@@ -1,11 +1,11 @@
 [toolchain]
-# 1.95 floor: SurrealDB 3.2 (gen_ui_db_graph, C-004) pulls fastnum ≥0.7.5 which
-# requires rustc 1.94+. 1.95 is the mid-2026 stable that satisfies it. Keep in
-# sync with the workspace rust-version in Cargo.toml.
-channel = "1.95"
+# Rust 1.96 is the shared native/wasm floor. SurrealDB 3.2's fastnum needs
+# rustc >=1.94, and wasm32-unknown-unknown only compiled cleanly on 1.96.
+channel = "1.96"
 components = ["rustfmt", "clippy", "rust-src"]
 targets = [
     "aarch64-apple-ios",
+    "aarch64-apple-ios-sim",
     "aarch64-linux-android",
     "wasm32-unknown-unknown",
 ]

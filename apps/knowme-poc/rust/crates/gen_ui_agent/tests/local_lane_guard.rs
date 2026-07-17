@@ -31,7 +31,10 @@ use gen_ui_db_graph::{
 struct ZeroEmbedder;
 impl Embedder for ZeroEmbedder {
     fn model_info(&self) -> EmbeddingModelInfo {
-        EmbeddingModelInfo { name: "zero-fake".into(), dim: EMBED_DIM }
+        EmbeddingModelInfo {
+            name: "zero-fake".into(),
+            dim: EMBED_DIM,
+        }
     }
     fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, GraphError> {
         Ok(texts.iter().map(|_| vec![0.0; EMBED_DIM]).collect())
@@ -101,7 +104,9 @@ async fn set_active_lane_rejects_local_without_an_engine() {
 
     // The lane must be unchanged — a rejected switch must not half-apply.
     assert_eq!(
-        gen_ui_agent::chat::active_lane().await.expect("active_lane"),
+        gen_ui_agent::chat::active_lane()
+            .await
+            .expect("active_lane"),
         "cloud",
         "a rejected switch must leave the lane where it was"
     );
@@ -114,5 +119,8 @@ async fn set_active_lane_rejects_local_without_an_engine() {
     let err = gen_ui_agent::chat::set_active_lane("banana")
         .await
         .expect_err("an unknown lane must be rejected");
-    assert!(err.to_string().contains("unknown lane"), "unexpected error: {err}");
+    assert!(
+        err.to_string().contains("unknown lane"),
+        "unexpected error: {err}"
+    );
 }

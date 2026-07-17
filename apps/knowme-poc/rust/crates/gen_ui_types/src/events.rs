@@ -21,10 +21,18 @@ pub enum StreamEvent {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum A2uiEvent {
-    RunStarted { run_id: String },
-    Block { block: crate::content_block::ContentBlock },
-    RunFinished { run_id: String },
-    RunError { message: String },
+    RunStarted {
+        run_id: String,
+    },
+    Block {
+        block: crate::content_block::ContentBlock,
+    },
+    RunFinished {
+        run_id: String,
+    },
+    RunError {
+        message: String,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

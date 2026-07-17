@@ -6,5 +6,5 @@
 //!
 //! Generated glue (`frb_generated.rs`) is produced by
 //! `flutter_rust_bridge_codegen generate` and is gitignored — do not hand-edit.
-mod frb_generated; /* AUTO INJECTED BY flutter_rust_bridge. This line may not be accurate, and you can change it according to your needs. */
 pub mod api;
+mod frb_generated; /* AUTO INJECTED BY flutter_rust_bridge. This line may not be accurate, and you can change it according to your needs. */

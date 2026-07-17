@@ -39,5 +39,12 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    # ort (ONNX Runtime, via fastembed) has no x86_64-apple-ios prebuilts, so an
+    # Intel-simulator slice can never link. Same exclusion the Runner xcconfigs
+    # make, applied to every pod so no target drags x86_64 back into a sim build.
+    # (Mirror of cargokit plugin.gradle's Android x86 ABI exclusion.)
+    target.build_configurations.each do |config|
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386 x86_64'
+    end
   end
 end

@@ -8,9 +8,15 @@ pub enum RelationalError {
     #[error("migration failed: {0}")]
     Migration(#[from] sqlx::migrate::MigrateError),
     #[error("seed bundle {name} could not be fetched: {source}")]
-    SeedFetch { name: String, source: reqwest::Error },
+    SeedFetch {
+        name: String,
+        source: reqwest::Error,
+    },
     #[error("seed bundle {name} has invalid UTF-8: {source}")]
-    SeedEncoding { name: String, source: std::str::Utf8Error },
+    SeedEncoding {
+        name: String,
+        source: std::str::Utf8Error,
+    },
     #[error("seed bundle {name} has an empty IPFS CID")]
     EmptyCid { name: String },
     #[error("sync attach failed: {0}")]

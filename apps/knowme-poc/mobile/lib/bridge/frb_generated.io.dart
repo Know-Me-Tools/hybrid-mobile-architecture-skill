@@ -28,109 +28,92 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   });
 
   CrossPlatformFinalizerArg
-  get rust_arc_decrement_strong_count_ChangeEventPtr => wire
-      ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEventPtr;
+      get rust_arc_decrement_strong_count_ChangeEventPtr => wire
+          ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEventPtr;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_CoreErrorPtr =>
+      wire._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreErrorPtr;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_GraphErrorPtr =>
+      wire._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphErrorPtr;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_GraphStorePtr =>
+      wire._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStorePtr;
 
   CrossPlatformFinalizerArg
-  get rust_arc_decrement_strong_count_CoreErrorPtr => wire
-      ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreErrorPtr;
+      get rust_arc_decrement_strong_count_GraphStoreConfigPtr => wire
+          ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfigPtr;
 
-  CrossPlatformFinalizerArg
-  get rust_arc_decrement_strong_count_GraphErrorPtr => wire
-      ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphErrorPtr;
-
-  CrossPlatformFinalizerArg
-  get rust_arc_decrement_strong_count_GraphStorePtr => wire
-      ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStorePtr;
-
-  CrossPlatformFinalizerArg
-  get rust_arc_decrement_strong_count_GraphStoreConfigPtr => wire
-      ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfigPtr;
-
-  CrossPlatformFinalizerArg
-  get rust_arc_decrement_strong_count_SyncStatusPtr => wire
-      ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatusPtr;
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_SyncStatusPtr =>
+      wire._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatusPtr;
 
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
   @protected
   ChangeEvent
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    dynamic raw,
-  );
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          dynamic raw);
 
   @protected
   CoreError
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    dynamic raw,
-  );
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          dynamic raw);
 
   @protected
   GraphError
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    dynamic raw,
-  );
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          dynamic raw);
 
   @protected
   GraphStore
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    dynamic raw,
-  );
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          dynamic raw);
 
   @protected
   GraphStoreConfig
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    dynamic raw,
-  );
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          dynamic raw);
 
   @protected
   SyncStatus
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    dynamic raw,
-  );
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          dynamic raw);
 
   @protected
   GraphStore
-  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    dynamic raw,
-  );
+      dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          dynamic raw);
 
   @protected
   ChangeEvent
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    dynamic raw,
-  );
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          dynamic raw);
 
   @protected
   CoreError
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    dynamic raw,
-  );
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          dynamic raw);
 
   @protected
   GraphError
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    dynamic raw,
-  );
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          dynamic raw);
 
   @protected
   GraphStore
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    dynamic raw,
-  );
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          dynamic raw);
 
   @protected
   GraphStoreConfig
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    dynamic raw,
-  );
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          dynamic raw);
 
   @protected
   SyncStatus
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    dynamic raw,
-  );
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          dynamic raw);
 
   @protected
   RustStreamSink<String> dco_decode_StreamSink_String_Sse(dynamic raw);
@@ -187,6 +170,9 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  List<(String, String)> dco_decode_list_record_string_string(dynamic raw);
+
+  @protected
   List<RelatedEntity> dco_decode_list_related_entity(dynamic raw);
 
   @protected
@@ -214,7 +200,13 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   BigInt? dco_decode_opt_box_autoadd_usize(dynamic raw);
 
   @protected
+  (String, String) dco_decode_record_string_string(dynamic raw);
+
+  @protected
   RelatedEntity dco_decode_related_entity(dynamic raw);
+
+  @protected
+  SearchMode dco_decode_search_mode(dynamic raw);
 
   @protected
   SortSpec dco_decode_sort_spec(dynamic raw);
@@ -239,86 +231,72 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   ChangeEvent
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    SseDeserializer deserializer,
-  );
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          SseDeserializer deserializer);
 
   @protected
   CoreError
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    SseDeserializer deserializer,
-  );
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          SseDeserializer deserializer);
 
   @protected
   GraphError
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    SseDeserializer deserializer,
-  );
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          SseDeserializer deserializer);
 
   @protected
   GraphStore
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    SseDeserializer deserializer,
-  );
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          SseDeserializer deserializer);
 
   @protected
   GraphStoreConfig
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    SseDeserializer deserializer,
-  );
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          SseDeserializer deserializer);
 
   @protected
   SyncStatus
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SseDeserializer deserializer,
-  );
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SseDeserializer deserializer);
 
   @protected
   GraphStore
-  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    SseDeserializer deserializer,
-  );
+      sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          SseDeserializer deserializer);
 
   @protected
   ChangeEvent
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    SseDeserializer deserializer,
-  );
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          SseDeserializer deserializer);
 
   @protected
   CoreError
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    SseDeserializer deserializer,
-  );
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          SseDeserializer deserializer);
 
   @protected
   GraphError
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    SseDeserializer deserializer,
-  );
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          SseDeserializer deserializer);
 
   @protected
   GraphStore
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    SseDeserializer deserializer,
-  );
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          SseDeserializer deserializer);
 
   @protected
   GraphStoreConfig
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    SseDeserializer deserializer,
-  );
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          SseDeserializer deserializer);
 
   @protected
   SyncStatus
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SseDeserializer deserializer,
-  );
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SseDeserializer deserializer);
 
   @protected
   RustStreamSink<String> sse_decode_StreamSink_String_Sse(
-    SseDeserializer deserializer,
-  );
+      SseDeserializer deserializer);
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
@@ -328,13 +306,11 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   EntityRecord sse_decode_box_autoadd_entity_record(
-    SseDeserializer deserializer,
-  );
+      SseDeserializer deserializer);
 
   @protected
   MemoryRecord sse_decode_box_autoadd_memory_record(
-    SseDeserializer deserializer,
-  );
+      SseDeserializer deserializer);
 
   @protected
   int sse_decode_box_autoadd_u_32(SseDeserializer deserializer);
@@ -344,8 +320,7 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   ViewDescriptor sse_decode_box_autoadd_view_descriptor(
-    SseDeserializer deserializer,
-  );
+      SseDeserializer deserializer);
 
   @protected
   EntityRecord sse_decode_entity_record(SseDeserializer deserializer);
@@ -364,8 +339,7 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   List<EntityRecord> sse_decode_list_entity_record(
-    SseDeserializer deserializer,
-  );
+      SseDeserializer deserializer);
 
   @protected
   List<FilterSpec> sse_decode_list_filter_spec(SseDeserializer deserializer);
@@ -377,9 +351,12 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  List<(String, String)> sse_decode_list_record_string_string(
+      SseDeserializer deserializer);
+
+  @protected
   List<RelatedEntity> sse_decode_list_related_entity(
-    SseDeserializer deserializer,
-  );
+      SseDeserializer deserializer);
 
   @protected
   ListResult sse_decode_list_result(SseDeserializer deserializer);
@@ -398,8 +375,7 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   EntityRecord? sse_decode_opt_box_autoadd_entity_record(
-    SseDeserializer deserializer,
-  );
+      SseDeserializer deserializer);
 
   @protected
   int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer);
@@ -408,7 +384,14 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   BigInt? sse_decode_opt_box_autoadd_usize(SseDeserializer deserializer);
 
   @protected
+  (String, String) sse_decode_record_string_string(
+      SseDeserializer deserializer);
+
+  @protected
   RelatedEntity sse_decode_related_entity(SseDeserializer deserializer);
+
+  @protected
+  SearchMode sse_decode_search_mode(SseDeserializer deserializer);
 
   @protected
   SortSpec sse_decode_sort_spec(SseDeserializer deserializer);
@@ -430,106 +413,76 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
-  );
+      AnyhowException self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    ChangeEvent self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          ChangeEvent self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    CoreError self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          CoreError self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    GraphError self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          GraphError self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    GraphStore self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          GraphStore self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    GraphStoreConfig self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          GraphStoreConfig self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SyncStatus self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SyncStatus self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    GraphStore self,
-    SseSerializer serializer,
-  );
+      sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          GraphStore self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    ChangeEvent self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          ChangeEvent self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    CoreError self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          CoreError self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    GraphError self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          GraphError self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    GraphStore self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          GraphStore self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    GraphStoreConfig self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          GraphStoreConfig self, SseSerializer serializer);
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SyncStatus self,
-    SseSerializer serializer,
-  );
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SyncStatus self, SseSerializer serializer);
 
   @protected
   void sse_encode_StreamSink_String_Sse(
-    RustStreamSink<String> self,
-    SseSerializer serializer,
-  );
+      RustStreamSink<String> self, SseSerializer serializer);
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
@@ -539,15 +492,11 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   void sse_encode_box_autoadd_entity_record(
-    EntityRecord self,
-    SseSerializer serializer,
-  );
+      EntityRecord self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_memory_record(
-    MemoryRecord self,
-    SseSerializer serializer,
-  );
+      MemoryRecord self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer);
@@ -557,9 +506,7 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   void sse_encode_box_autoadd_view_descriptor(
-    ViewDescriptor self,
-    SseSerializer serializer,
-  );
+      ViewDescriptor self, SseSerializer serializer);
 
   @protected
   void sse_encode_entity_record(EntityRecord self, SseSerializer serializer);
@@ -578,33 +525,27 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   void sse_encode_list_entity_record(
-    List<EntityRecord> self,
-    SseSerializer serializer,
-  );
+      List<EntityRecord> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_filter_spec(
-    List<FilterSpec> self,
-    SseSerializer serializer,
-  );
+      List<FilterSpec> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_memory_hit(
-    List<MemoryHit> self,
-    SseSerializer serializer,
-  );
+      List<MemoryHit> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  );
+      Uint8List self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_record_string_string(
+      List<(String, String)> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_related_entity(
-    List<RelatedEntity> self,
-    SseSerializer serializer,
-  );
+      List<RelatedEntity> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_result(ListResult self, SseSerializer serializer);
@@ -623,9 +564,7 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   void sse_encode_opt_box_autoadd_entity_record(
-    EntityRecord? self,
-    SseSerializer serializer,
-  );
+      EntityRecord? self, SseSerializer serializer);
 
   @protected
   void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer);
@@ -634,7 +573,14 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
   void sse_encode_opt_box_autoadd_usize(BigInt? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_record_string_string(
+      (String, String) self, SseSerializer serializer);
+
+  @protected
   void sse_encode_related_entity(RelatedEntity self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_search_mode(SearchMode self, SseSerializer serializer);
 
   @protected
   void sse_encode_sort_spec(SortSpec self, SseSerializer serializer);
@@ -653,9 +599,7 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   void sse_encode_view_descriptor(
-    ViewDescriptor self,
-    SseSerializer serializer,
-  );
+      ViewDescriptor self, SseSerializer serializer);
 }
 
 // Section: wire_class
@@ -666,14 +610,14 @@ class GenUiCoreWire implements BaseWire {
 
   /// Holds the symbol lookup function.
   final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
-  _lookup;
+      _lookup;
 
   /// The symbols are looked up in [dynamicLibrary].
   GenUiCoreWire(ffi.DynamicLibrary dynamicLibrary)
-    : _lookup = dynamicLibrary.lookup;
+      : _lookup = dynamicLibrary.lookup;
 
   void
-  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
@@ -683,14 +627,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEventPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent',
-      );
+          'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent');
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent =
       _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEventPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
@@ -700,14 +643,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEventPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent',
-      );
+          'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent');
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEventPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
@@ -717,14 +659,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreErrorPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError',
-      );
+          'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError');
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError =
       _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreErrorPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
@@ -734,14 +675,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreErrorPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError',
-      );
+          'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError');
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreErrorPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
@@ -751,14 +691,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphErrorPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError',
-      );
+          'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError');
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError =
       _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphErrorPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
@@ -768,14 +707,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphErrorPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError',
-      );
+          'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError');
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphErrorPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
@@ -785,14 +723,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStorePtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore',
-      );
+          'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore');
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore =
       _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStorePtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
@@ -802,14 +739,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStorePtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore',
-      );
+          'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore');
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStorePtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
@@ -819,14 +755,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfigPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig',
-      );
+          'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig');
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig =
       _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfigPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
@@ -836,14 +771,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfigPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig',
-      );
+          'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig');
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfigPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
@@ -853,14 +787,13 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatusPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus',
-      );
+          'frbgen_knowme_poc_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus');
   late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus =
       _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatusPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void
-  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
     ffi.Pointer<ffi.Void> ptr,
   ) {
     return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
@@ -870,8 +803,7 @@ class GenUiCoreWire implements BaseWire {
 
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatusPtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
-        'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus',
-      );
+          'frbgen_knowme_poc_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus');
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatusPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();

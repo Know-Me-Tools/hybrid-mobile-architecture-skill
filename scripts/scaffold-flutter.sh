@@ -19,6 +19,8 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 OUT="${1:-mobile}"
 APP_NAME="${2:-my_app}"
 SNAKE_NAME="$(echo "$APP_NAME" | tr '-' '_' | tr '[:upper:]' '[:lower:]')"
@@ -39,6 +41,31 @@ flutter create \
   "$OUT"
 
 cd "$OUT"
+
+# ONNX Runtime has no x86_64 iOS simulator slice. Keep Runner and every pod on
+# the supported Apple-silicon simulator architecture.
+cat >> ios/Flutter/Debug.xcconfig << 'EOF'
+
+// TJ-ARCH-MOB-001 compliant — ONNX Runtime supports arm64 simulators only.
+EXCLUDED_ARCHS[sdk=iphonesimulator*] = i386 x86_64
+EOF
+cat >> ios/Flutter/Release.xcconfig << 'EOF'
+
+// TJ-ARCH-MOB-001 compliant — ONNX Runtime supports arm64 simulators only.
+EXCLUDED_ARCHS[sdk=iphonesimulator*] = i386 x86_64
+EOF
+if [[ -f ios/Podfile ]]; then
+  ruby -e '
+    path = ARGV.fetch(0)
+    text = File.read(path)
+    marker = "    flutter_additional_ios_build_settings(target)\n"
+    addition = marker + "    target.build_configurations.each do |config|\n" +
+      "      config.build_settings[\x27EXCLUDED_ARCHS[sdk=iphonesimulator*]\x27] = \x27i386 x86_64\x27\n" +
+      "    end\n"
+    abort "Podfile post_install marker missing" unless text.include?(marker)
+    File.write(path, text.sub(marker, addition)) unless text.include?("EXCLUDED_ARCHS[sdk=iphonesimulator*]")
+  ' ios/Podfile
+fi
 
 # flutter create's default counter-app smoke test references MyApp/main.dart from the
 # stock template — this scaffold writes its own real boundary tests, so remove the
@@ -391,26 +418,42 @@ class A2uiContentDriver {
   final void Function(String messageId, String message)? onError;
 
   StreamSubscription<A2uiEvent>? _sub;
+  final Completer<void> _done = Completer<void>();
 
-  void connect(Stream<A2uiEvent> stream) {
-    _sub = stream.listen((event) {
-      switch (event) {
-        case RunStarted():
-          break;
-        case BlockEvent(:final block):
-          onBlock(messageId: messageId, block: block);
-        case RunFinished():
-          onFinalize(messageId);
-        case RunError(:final message):
-          onError?.call(messageId, message);
-          onFinalize(messageId);
-      }
-    });
+  Future<void> connect(Stream<A2uiEvent> stream) {
+    if (_sub != null) throw StateError('A2uiContentDriver is already connected');
+    _sub = stream.listen(
+      (event) {
+        switch (event) {
+          case RunStarted():
+            break;
+          case BlockEvent(:final block):
+            onBlock(messageId: messageId, block: block);
+          case RunFinished():
+            onFinalize(messageId);
+            if (!_done.isCompleted) _done.complete();
+          case RunError(:final message):
+            onError?.call(messageId, message);
+            onFinalize(messageId);
+            if (!_done.isCompleted) _done.complete();
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        onError?.call(messageId, error.toString());
+        onFinalize(messageId);
+        if (!_done.isCompleted) _done.complete();
+      },
+      onDone: () {
+        if (!_done.isCompleted) _done.complete();
+      },
+    );
+    return _done.future;
   }
 
   Future<void> dispose() async {
     await _sub?.cancel();
     _sub = null;
+    if (!_done.isCompleted) _done.complete();
   }
 }
 EOF
@@ -660,8 +703,9 @@ class ChatNotifier extends _$ChatNotifier {
       messageId: messageId,
       onBlock: streamBlock,
       onFinalize: finalizeMessage,
-    )..connect(stream);
+    );
     _drivers[messageId] = driver;
+    await driver.connect(stream);
   }
 }
 EOF
@@ -763,42 +807,141 @@ EOF
 ok "features/chat (ChatNotifier + A2uiContentDriver + local pending-state send)"
 
 # ═══════════════════════════════════════════════════════════════════════════
-# features/notes — entity-CRUD demo backed by prometheus_entity_management.
-# Shows the families-as-normalization pattern + optimistic edit buffer.
+# features/notes — domain contract → PEM data adapter → Riverpod providers → UI.
 # ═══════════════════════════════════════════════════════════════════════════
-cat > lib/features/notes/presentation/screens/notes_screen.dart << 'EOF'
+cat > lib/features/notes/domain/note.dart << 'EOF'
 // TJ-ARCH-MOB-001 compliant
-// Notes list — a thin CRUD demo over prometheus_entity_management. The list
-// comes from entityListProvider(view) (one family instance per query); creating
-// a note calls the transport (FFI → Rust); the ChangeEvent bridge invalidates
-// the affected providers. No hand-built Dart store — Riverpod families ARE it.
-import 'dart:convert';
+class Note {
+  const Note({required this.id, required this.title, required this.body});
+  final String id;
+  final String title;
+  final String body;
+}
+EOF
 
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+cat > lib/features/notes/domain/notes_repository.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import 'note.dart';
+
+abstract interface class NotesRepository {
+  Future<List<Note>> listNotes();
+  Future<void> createNote({required String title, required String body});
+  Future<void> deleteNote(String id);
+}
+EOF
+
+cat > lib/features/notes/data/pem_notes_repository.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import 'dart:convert';
 import 'package:prometheus_entity_management/prometheus_entity_management.dart';
 import 'package:uuid/uuid.dart';
+import '../domain/note.dart';
+import '../domain/notes_repository.dart';
 
-const _notesView = ViewDescriptor(
+class PemNotesRepository implements NotesRepository {
+  PemNotesRepository({required this.transport, required this.loadRecords});
+  final EntityTransport transport;
+  final Future<ListResult> Function() loadRecords;
+  static const _uuid = Uuid();
+
+  @override
+  Future<List<Note>> listNotes() async {
+    final result = await loadRecords();
+    return result.items.map((record) {
+      final data = jsonDecode(record.dataJson) as Map<String, Object?>;
+      return Note(
+        id: record.id,
+        title: data['title']?.toString() ?? record.id,
+        body: data['body']?.toString() ?? '',
+      );
+    }).toList(growable: false);
+  }
+
+  @override
+  Future<void> createNote({required String title, required String body}) =>
+      transport.create(EntityRecord(
+        id: _uuid.v4(),
+        entityType: 'note',
+        dataJson: jsonEncode({'title': title, 'body': body}),
+      )).then((_) {});
+
+  @override
+  Future<void> deleteNote(String id) => transport.delete('note', id);
+}
+EOF
+
+cat > lib/features/notes/presentation/providers/notes_provider.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import 'dart:async';
+import 'package:prometheus_entity_management/prometheus_entity_management.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../data/pem_notes_repository.dart';
+import '../../domain/note.dart';
+import '../../domain/notes_repository.dart';
+
+part 'notes_provider.g.dart';
+
+const notesView = ViewDescriptor(
   entityType: 'note',
   sorts: [SortSpec(field: 'updated_at', descending: true)],
   limit: 100,
 );
-const _uuid = Uuid();
+Duration? _noRetry(int retryCount, Object error) => null;
+
+@riverpod
+NotesRepository notesRepository(Ref ref) => PemNotesRepository(
+  transport: ref.watch(entityTransportProvider),
+  loadRecords: () => ref.read(entityListProvider(notesView).future),
+);
+
+@Riverpod(retry: _noRetry)
+Future<List<Note>> notes(Ref ref) {
+  ref.watch(entityChangeBridgeProvider);
+  ref.watch(entityListProvider(notesView));
+  return ref.watch(notesRepositoryProvider).listNotes();
+}
+
+@riverpod
+class NotesActions extends _$NotesActions {
+  @override
+  FutureOr<void> build() {}
+  Future<void> create() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(notesRepositoryProvider).createNote(title: 'New note', body: '');
+      ref.invalidate(notesProvider);
+    });
+  }
+  Future<void> delete(String id) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(notesRepositoryProvider).deleteNote(id);
+      ref.invalidate(notesProvider);
+    });
+  }
+}
+EOF
+
+cat > lib/features/notes/presentation/screens/notes_screen.dart << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/notes_provider.dart';
 
 class NotesScreen extends ConsumerWidget {
   const NotesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Mount the change bridge so Rust-emitted invalidations reach these providers.
-    ref.watch(entityChangeBridgeProvider);
-    final notes = ref.watch(entityListProvider(_notesView));
+    final notes = ref.watch(notesProvider);
+    final action = ref.watch(notesActionsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Notes')),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _create(ref),
+        onPressed: action.isLoading
+            ? null
+            : () => ref.read(notesActionsProvider.notifier).create(),
         child: const Icon(Icons.add),
       ),
       body: notes.when(
@@ -806,15 +949,15 @@ class NotesScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (result) => ListView(
           children: [
-            for (final rec in result.items)
+            for (final note in result)
               ListTile(
-                title: Text((jsonDecode(rec.dataJson) as Map)['title']?.toString() ?? rec.id),
-                subtitle: Text(rec.id, style: const TextStyle(fontSize: 11)),
+                title: Text(note.title),
+                subtitle: Text(note.id, style: const TextStyle(fontSize: 11)),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  onPressed: () => ref
-                      .read(entityCrudProvider(rec.entityType, rec.id, const {}).notifier)
-                      .deleteRecord(),
+                  onPressed: action.isLoading
+                      ? null
+                      : () => ref.read(notesActionsProvider.notifier).delete(note.id),
                 ),
               ),
           ],
@@ -823,18 +966,9 @@ class NotesScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _create(WidgetRef ref) async {
-    final id = _uuid.v4();
-    final transport = ref.read(entityTransportProvider);
-    await transport.create(EntityRecord(
-      id: id,
-      entityType: 'note',
-      dataJson: jsonEncode({'title': 'New note', 'body': ''}),
-    ));
-  }
 }
 EOF
-ok "features/notes (PEM entity CRUD demo)"
+ok "features/notes (domain/data/Riverpod layered CRUD)"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # features/memory — memory / graph-RAG panel. Ingest text → hybrid search over
@@ -1299,6 +1433,9 @@ ok "lib/main.dart"
 # ═══════════════════════════════════════════════════════════════════════════
 step "Writing native build scripts"
 mkdir -p ../scripts/{android,ios}
+cp "$SCRIPT_DIR/patch-cargokit-ios.sh" ../scripts/ios/patch-cargokit-ios.sh
+cp "$SCRIPT_DIR/../assets/templates/cargokit/dedup_archive.dart" ../scripts/ios/dedup_archive.dart
+chmod +x ../scripts/ios/patch-cargokit-ios.sh
 cat > ../scripts/android/build.sh << 'BEOF'
 #!/usr/bin/env bash
 # Build gen_ui_core for all Android ABIs, then regenerate the Dart bridge.
@@ -1317,6 +1454,9 @@ for ABI in "${!ABIS[@]}"; do
 done
 if command -v flutter_rust_bridge_codegen &>/dev/null; then
   flutter_rust_bridge_codegen generate --config-file "$RUST_DIR/flutter_rust_bridge.yaml"
+  if [[ -f rust_builder/cargokit/build_tool/lib/src/build_pod.dart ]]; then
+    bash ../scripts/ios/patch-cargokit-ios.sh "$(pwd)"
+  fi
   echo "✓ Dart bindings generated"
 fi
 BEOF
@@ -1334,17 +1474,11 @@ FLAGS=(); [[ "$PROFILE" == "release" ]] && FLAGS+=(--release)
 mkdir -p "$BUILD"
 cargo build --manifest-path "$RUST_DIR/Cargo.toml" --target aarch64-apple-ios "${FLAGS[@]}"
 cargo build --manifest-path "$RUST_DIR/Cargo.toml" --target aarch64-apple-ios-sim "${FLAGS[@]}"
-cargo build --manifest-path "$RUST_DIR/Cargo.toml" --target x86_64-apple-ios "${FLAGS[@]}"
-SIM_FAT="$BUILD/libgen_ui_core_sim.a"
-lipo -create \
-  "$RUST_DIR/target/aarch64-apple-ios-sim/$PROFILE/libgen_ui_core.a" \
-  "$RUST_DIR/target/x86_64-apple-ios/$PROFILE/libgen_ui_core.a" \
-  -output "$SIM_FAT"
 XCFW="$BUILD/GenUICore.xcframework"
 rm -rf "$XCFW"
 xcodebuild -create-xcframework \
   -library "$RUST_DIR/target/aarch64-apple-ios/$PROFILE/libgen_ui_core.a" \
-  -library "$SIM_FAT" \
+  -library "$RUST_DIR/target/aarch64-apple-ios-sim/$PROFILE/libgen_ui_core.a" \
   -output "$XCFW"
 mkdir -p "$ROOT/mobile/ios/Frameworks"
 cp -R "$XCFW" "$ROOT/mobile/ios/Frameworks/"
@@ -1386,8 +1520,6 @@ void main() {
 
     final notifier = container.read(chatProvider.notifier);
     await notifier.foldStream('msg-1', _cannedRun());
-    // let the stream drain
-    await Future<void>.delayed(const Duration(milliseconds: 20));
 
     final ChatState state = container.read(chatProvider);
     final msg = state.messages.firstWhere((m) => m.id == 'msg-1');
@@ -1553,6 +1685,7 @@ if [[ -d ../flutter_packages/gen_ui_flutter && -d ../flutter_packages/prometheus
   echo -e "${CYAN}Next: run codegen, then the app:${NC}"
   echo "  dart run build_runner build --delete-conflicting-outputs   # riverpod/freezed"
   echo "  # (build gen_ui_core, then) flutter_rust_bridge_codegen generate --config-file ../rust/flutter_rust_bridge.yaml"
+  echo "  bash ../scripts/ios/patch-cargokit-ios.sh \"$(pwd)\""
   echo "  flutter run"
 else
   warn "flutter_packages/* not present yet — skipping pub get."

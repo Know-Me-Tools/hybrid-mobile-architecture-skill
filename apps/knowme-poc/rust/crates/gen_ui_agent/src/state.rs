@@ -71,7 +71,13 @@ pub fn init_with_inference(
     inference: Option<Arc<dyn InferenceProvider>>,
 ) {
     let (tx, _rx) = broadcast::channel(EVENT_CHANNEL_CAPACITY);
-    let state = AgentState { config, memory, inference, mcp: McpRegistry::new(), events: tx };
+    let state = AgentState {
+        config,
+        memory,
+        inference,
+        mcp: McpRegistry::new(),
+        events: tx,
+    };
     if STATE.set(state).is_err() {
         tracing::warn!(
             "gen_ui_agent::state::init called more than once in this process; \

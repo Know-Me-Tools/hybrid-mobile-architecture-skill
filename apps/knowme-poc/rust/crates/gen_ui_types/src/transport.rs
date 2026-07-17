@@ -8,10 +8,17 @@ use flutter_rust_bridge_macros::frb;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct EntityRecord { pub id: String, pub entity_type: String, pub data_json: String }
+pub struct EntityRecord {
+    pub id: String,
+    pub entity_type: String,
+    pub data_json: String,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct ListResult { pub items: Vec<EntityRecord>, pub next_cursor: Option<String> }
+pub struct ListResult {
+    pub items: Vec<EntityRecord>,
+    pub next_cursor: Option<String>,
+}
 
 // frb only keeps foreign types reachable through a `pub fn` in the codegen
 // root's own crate; `entity_changes`'s `Stream<ChangeEvent>` return in
@@ -34,9 +41,17 @@ pub struct ListResult { pub items: Vec<EntityRecord>, pub next_cursor: Option<St
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum ChangeEvent {
-    Upsert { record: EntityRecord },
-    Delete { entity_type: String, id: String },
-    Invalidate { entity_type: String, list_key: Option<String> },
+    Upsert {
+        record: EntityRecord,
+    },
+    Delete {
+        entity_type: String,
+        id: String,
+    },
+    Invalidate {
+        entity_type: String,
+        list_key: Option<String>,
+    },
 }
 
 #[async_trait]

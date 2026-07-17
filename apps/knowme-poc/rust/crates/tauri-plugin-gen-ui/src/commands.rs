@@ -9,11 +9,20 @@ use std::sync::{Arc, Mutex};
 
 use crate::error::Result;
 use gen_ui_agent::ConfigBackend;
-use gen_ui_db_graph::{FastEmbedder, GraphStore, GraphStoreConfig, MemoryHit, RelatedEntity, SearchMode};
+use gen_ui_db_graph::{
+    FastEmbedder, GraphStore, GraphStoreConfig, MemoryHit, RelatedEntity, SearchMode,
+};
 use gen_ui_types::transport::{EntityRecord, ListResult};
 use gen_ui_types::view::ViewDescriptor;
 use once_cell::sync::OnceCell;
 use tauri::{Manager, Runtime};
+
+fn app_data_dir<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<std::path::PathBuf> {
+    if let Some(path) = std::env::var_os("GEN_UI_APP_DATA_DIR") {
+        return Ok(path.into());
+    }
+    Ok(app.path().app_data_dir()?)
+}
 
 // Named to match the frontend's existing invoke('stream_agent_a2ui', ...) call
 // site (src/features/chat/stores/chatStore.ts) rather than renaming the
@@ -22,10 +31,13 @@ use tauri::{Manager, Runtime};
 // have different but internally consistent naming.
 #[tauri::command]
 pub async fn stream_agent_a2ui(user_message: String, messages: Vec<String>) -> Result<String> {
-    gen_ui_agent::chat::send(user_message, messages)
+    tracing::info!(history_items = messages.len(), "desktop chat turn starting");
+    let run_id = gen_ui_agent::chat::send(user_message, messages)
         .await
         .map_err(gen_ui_types::CoreError::from)
-        .map_err(Into::into)
+        .map_err(crate::Error::from)?;
+    tracing::info!(run_id = %run_id, "desktop chat run started");
+    Ok(run_id)
 }
 
 /// Current chat lane: "cloud" or "local".
@@ -72,15 +84,30 @@ pub async fn has_local_engine() -> Result<bool> {
 /// text verbatim — no re-labelling, so the real cause is never masked.
 #[tauri::command]
 pub async fn run_migrations<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> {
-    let data_dir = app.path().app_data_dir()?;
+    let data_dir = app_data_dir(&app)?;
+    tracing::info!(path = %data_dir.display(), "desktop migrations starting");
     std::fs::create_dir_all(&data_dir).map_err(|e| {
         tauri::Error::from(std::io::Error::new(e.kind(), format!("app data dir: {e}")))
     })?;
     let config_store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
         .await
-        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+        .map_err(|e| {
+            tracing::error!(error = %e, "config store open failed");
+            gen_ui_types::CoreError::Transient(e.to_string())
+        })?;
+    config_store.migrate().await.map_err(|e| {
+        tracing::error!(error = %e, "config migrations failed");
+        gen_ui_types::CoreError::Transient(e.to_string())
+    })?;
 
-    let embedder = gen_ui_runtime::spawn_blocking(FastEmbedder::new)
+    let embed_cache = data_dir.join("model-cache/fastembed");
+    std::fs::create_dir_all(&embed_cache).map_err(|e| {
+        tauri::Error::from(std::io::Error::new(
+            e.kind(),
+            format!("model cache dir: {e}"),
+        ))
+    })?;
+    let embedder = gen_ui_runtime::spawn_blocking(move || FastEmbedder::new(embed_cache))
         .await
         .map_err(|e| gen_ui_types::CoreError::Transient(format!("embedder task join: {e}")))?
         .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
@@ -104,6 +131,7 @@ pub async fn run_migrations<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> 
         Arc::new(memory_store),
         Some(inference),
     );
+    tracing::info!(path = %data_dir.display(), "desktop migrations ready");
     Ok(())
 }
 
@@ -118,10 +146,12 @@ pub async fn run_migrations<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> 
 /// rather than a lazy path precisely so the cost lands once, before the user searches.
 #[tauri::command]
 pub async fn load_seeds() -> Result<()> {
+    tracing::info!("seed load starting");
     let n = gen_ui_agent::memory::seed_demo_corpus()
         .await
         .map_err(gen_ui_types::CoreError::from)?;
     log::info!("seeded {n} demo memories");
+    tracing::info!(count = n, "seed load ready");
     Ok(())
 }
 
@@ -142,9 +172,10 @@ pub async fn load_seeds() -> Result<()> {
 pub async fn attach_sync_shapes<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> {
     use gen_ui_db::sync::{FrfSyncTransport, PgLocalStore, SyncTransport};
 
-    let data_dir = app.path().app_data_dir()?;
+    let data_dir = app_data_dir(&app)?;
     let Some(cfg) = read_sync_config(&data_dir).await? else {
         log::info!("sync: not configured (no `sync.frf` setting) — running local-only");
+        tracing::info!("sync ready in local-only mode");
         return Ok(());
     };
 
@@ -167,8 +198,7 @@ pub async fn attach_sync_shapes<R: Runtime>(app: tauri::AppHandle<R>) -> Result<
 
     // Hold the transport for the process lifetime: dropping it stops the drain loop and
     // the read lane (they only live as long as the Arcs they captured).
-    SYNC
-        .set(Arc::new(transport))
+    SYNC.set(Arc::new(transport))
         .map_err(|_| gen_ui_types::CoreError::Terminal("sync already attached".into()))?;
     Ok(())
 }
@@ -227,11 +257,13 @@ async fn read_sync_config(data_dir: &std::path::Path) -> Result<Option<SyncSetti
     Ok(Some(parsed))
 }
 
-/// C-104 wires the real memory graph-RAG ingest; stub keeps the app booting.
+/// Ingest through the shared agent boundary, matching mobile's FFI command.
 #[tauri::command]
 pub async fn memory_ingest(text: String) -> Result<String> {
-    let _ = text;
-    Ok(String::new())
+    gen_ui_agent::memory::ingest(text)
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
 }
 
 /// C-104/C-003 wire the real entity runtime; stub keeps the app booting.
@@ -249,7 +281,10 @@ pub async fn entity_runtime_stop() -> Result<()> {
 #[tauri::command]
 pub async fn entity_list(view: ViewDescriptor) -> Result<ListResult> {
     let _ = view;
-    Ok(ListResult { items: Vec::new(), next_cursor: None })
+    Ok(ListResult {
+        items: Vec::new(),
+        next_cursor: None,
+    })
 }
 
 #[tauri::command]
@@ -285,11 +320,17 @@ pub async fn entity_delete(entity_type: String, id: String) -> Result<()> {
 /// diagnostic lane (no BM25, no RRF) so the UI can show what fusion buys on the same
 /// query. Scores compare only WITHIN a mode — never merge results from both.
 #[tauri::command]
-pub async fn memory_search(query: String, k: u32, mode: Option<SearchMode>) -> Result<Vec<MemoryHit>> {
-    gen_ui_agent::memory::search_with(query, k, mode.unwrap_or_default())
+pub async fn memory_search(
+    query: String,
+    k: u32,
+    mode: Option<SearchMode>,
+) -> Result<Vec<MemoryHit>> {
+    let hits = gen_ui_agent::memory::search_with(query, k, mode.unwrap_or_default())
         .await
         .map_err(gen_ui_types::CoreError::from)
-        .map_err(Into::into)
+        .map_err(crate::Error::from)?;
+    tracing::info!(count = hits.len(), "desktop memory search ready");
+    Ok(hits)
 }
 
 /// Graph expansion from an entity. Same delegation, same C-104 gap as above.
@@ -313,7 +354,9 @@ fn recording_slot() -> &'static Mutex<Option<gen_ui_audio::Recorder>> {
 
 #[tauri::command]
 pub async fn scribe_start() -> Result<()> {
-    let mut guard = recording_slot().lock().expect("scribe recording mutex poisoned");
+    let mut guard = recording_slot()
+        .lock()
+        .expect("scribe recording mutex poisoned");
     if guard.is_some() {
         return Err(gen_ui_types::CoreError::Terminal(
             "a recording is already in progress".to_string(),
@@ -333,9 +376,7 @@ pub async fn scribe_stop() -> Result<String> {
         .lock()
         .expect("scribe recording mutex poisoned")
         .take()
-        .ok_or_else(|| {
-            gen_ui_types::CoreError::Terminal("no recording in progress".to_string())
-        })?;
+        .ok_or_else(|| gen_ui_types::CoreError::Terminal("no recording in progress".to_string()))?;
     gen_ui_audio::Scribe::new()
         .stop_and_transcribe(recorder)
         .await

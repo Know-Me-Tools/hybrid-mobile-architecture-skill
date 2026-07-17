@@ -210,3 +210,50 @@ fn graph_expand_traverses_relate_edges() {
         );
     });
 }
+
+#[test]
+fn relate_rejected_by_db_surfaces_error() {
+    run_test(async {
+        let store = open_store().await;
+        store
+            .create_entity("real", "node", "Real")
+            .await
+            .expect("create entity");
+        store
+            .upsert_provider(&gen_ui_db_graph::Provider {
+                id: "not-an-entity".into(),
+                kind: "openai".into(),
+                base_url: None,
+                api_key_ref: None,
+                enabled: true,
+            })
+            .await
+            .expect("provider upsert");
+
+        let error = store
+            .relate_raw_for_test("provider", "not-an-entity", "real")
+            .await
+            .expect_err("relation type violation must surface");
+        assert!(error.to_string().contains("relate"));
+    });
+}
+
+#[test]
+fn relate_binds_endpoint_ids_not_literal_param_names() {
+    run_test(async {
+        let store = open_store().await;
+        for (id, label) in [("src", "Source"), ("dst", "Destination")] {
+            store
+                .create_entity(id, "node", label)
+                .await
+                .expect("create entity");
+        }
+        store.relate("src", "dst", "related").await.expect("relate");
+
+        let edges = store.edge_endpoints_for_test().await.expect("read edges");
+        assert!(edges.contains(&("src".to_string(), "dst".to_string())));
+        assert!(!edges
+            .iter()
+            .any(|(from, to)| from.starts_with('$') || to.starts_with('$')));
+    });
+}

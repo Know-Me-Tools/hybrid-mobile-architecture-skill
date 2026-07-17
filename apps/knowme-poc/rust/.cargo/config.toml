@@ -10,6 +10,10 @@
 # [target.aarch64-apple-darwin]
 # rustflags = ["-C", "link-arg=-fuse-ld=/opt/homebrew/opt/llvm/bin/ld64.lld"]
 
+[env]
+# Native inference/audio dependencies use std::filesystem (macOS 10.15+).
+MACOSX_DEPLOYMENT_TARGET = { value = "10.15", force = true }
+
 [target.x86_64-unknown-linux-gnu]
 # mold is the fastest production linker on Linux (install: apt/brew install mold)
 # linker = "clang"

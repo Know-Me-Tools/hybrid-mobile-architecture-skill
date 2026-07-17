@@ -17,5 +17,7 @@ const SERVICE: &str = "ai.prometheusags.knowme-poc";
 pub fn resolve_api_key(api_key_ref: &str) -> Result<String, AgentError> {
     let entry = keyring::Entry::new(SERVICE, api_key_ref)
         .map_err(|e| AgentError::Config(format!("keychain entry for '{api_key_ref}': {e}")))?;
-    entry.get_password().map_err(|e| AgentError::Config(format!("keychain read for '{api_key_ref}': {e}")))
+    entry
+        .get_password()
+        .map_err(|e| AgentError::Config(format!("keychain read for '{api_key_ref}': {e}")))
 }

@@ -40,7 +40,10 @@ class ListResult {
   final List<EntityRecord> items;
   final String? nextCursor;
 
-  const ListResult({required this.items, this.nextCursor});
+  const ListResult({
+    required this.items,
+    this.nextCursor,
+  });
 
   @override
   int get hashCode => items.hashCode ^ nextCursor.hashCode;

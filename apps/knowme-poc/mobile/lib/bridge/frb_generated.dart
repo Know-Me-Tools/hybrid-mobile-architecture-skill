@@ -45,8 +45,12 @@ class GenUiCore
 
   /// Initialize flutter_rust_bridge in mock mode.
   /// No libraries for FFI are loaded.
-  static void initMock({required GenUiCoreApi api}) {
-    instance.initMockImpl(api: api);
+  static void initMock({
+    required GenUiCoreApi api,
+  }) {
+    instance.initMockImpl(
+      api: api,
+    );
   }
 
   /// Dispose flutter_rust_bridge
@@ -76,99 +80,91 @@ class GenUiCore
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => -861603044;
+  int get rustContentHash => 226348985;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
-        stem: 'gen_ui_ffi',
-        ioDirectory: '../rust/crates/gen_ui_ffi/target/release/',
-        webPrefix: 'pkg/',
-        wasmBindgenName: 'wasm_bindgen',
-      );
+    stem: 'gen_ui_ffi',
+    ioDirectory: '../rust/crates/gen_ui_ffi/target/release/',
+    webPrefix: 'pkg/',
+    wasmBindgenName: 'wasm_bindgen',
+  );
 }
 
 abstract class GenUiCoreApi extends BaseApi {
-  Future<String> genUiDbGraphGraphStoreCreateEntity({
-    required GraphStore that,
-    required String id,
-    required String entityType,
-    required String label,
-  });
+  Future<String> genUiDbGraphGraphStoreCreateEntity(
+      {required GraphStore that,
+      required String id,
+      required String entityType,
+      required String label});
 
-  Future<List<RelatedEntity>> genUiDbGraphGraphStoreGraphExpand({
-    required GraphStore that,
-    required String entityId,
-    required int depth,
-  });
+  Future<List<(String, String)>> genUiDbGraphGraphStoreEdgeEndpointsForTest(
+      {required GraphStore that});
 
-  Future<String> genUiDbGraphGraphStoreMemoryIngest({
-    required GraphStore that,
-    required MemoryRecord record,
-  });
+  Future<List<RelatedEntity>> genUiDbGraphGraphStoreGraphExpand(
+      {required GraphStore that, required String entityId, required int depth});
 
-  Future<List<MemoryHit>> genUiDbGraphGraphStoreMemorySearch({
-    required GraphStore that,
-    required String query,
-    required BigInt k,
-  });
+  Future<String> genUiDbGraphGraphStoreMemoryIngest(
+      {required GraphStore that, required MemoryRecord record});
 
-  Future<GraphStore> genUiDbGraphGraphStoreOpen({
-    required GraphStoreConfig cfg,
-  });
+  Future<List<MemoryHit>> genUiDbGraphGraphStoreMemorySearch(
+      {required GraphStore that, required String query, required BigInt k});
 
-  Future<void> genUiDbGraphGraphStoreRelate({
-    required GraphStore that,
-    required String from,
-    required String to,
-    required String rel,
-  });
+  Future<List<MemoryHit>> genUiDbGraphGraphStoreMemorySearchWith(
+      {required GraphStore that,
+      required String query,
+      required BigInt k,
+      required SearchMode mode});
+
+  Future<GraphStore> genUiDbGraphGraphStoreOpen(
+      {required GraphStoreConfig cfg});
+
+  Future<void> genUiDbGraphGraphStoreRelate(
+      {required GraphStore that,
+      required String from,
+      required String to,
+      required String rel});
+
+  Future<void> genUiDbGraphGraphStoreRelateRawForTest(
+      {required GraphStore that,
+      required String fromTable,
+      required String from,
+      required String to});
 
   Future<void> crateApiBootAttachSyncShapes();
 
   Stream<String> crateApiStreamsChatEvents({required String runId});
 
-  Future<String> crateApiChatChatSend({
-    required String threadId,
-    required String message,
-  });
+  Future<String> crateApiChatChatSend(
+      {required String threadId, required String message});
 
   Stream<String> crateApiStreamsEntityChanges();
 
-  Future<EntityRecord> crateApiEntityEntityCreate({
-    required EntityRecord record,
-  });
+  Future<EntityRecord> crateApiEntityEntityCreate(
+      {required EntityRecord record});
 
-  Future<void> crateApiEntityEntityDelete({
-    required String entityType,
-    required String id,
-  });
+  Future<void> crateApiEntityEntityDelete(
+      {required String entityType, required String id});
 
-  Future<EntityRecord?> crateApiEntityEntityGet({
-    required String entityType,
-    required String id,
-  });
+  Future<EntityRecord?> crateApiEntityEntityGet(
+      {required String entityType, required String id});
 
   Future<ListResult> crateApiEntityEntityList({required ViewDescriptor view});
 
-  Future<EntityRecord> crateApiEntityEntityUpdate({
-    required EntityRecord record,
-  });
+  Future<EntityRecord> crateApiEntityEntityUpdate(
+      {required EntityRecord record});
 
-  Future<List<RelatedEntity>> crateApiChatGraphExpand({
-    required String entityId,
-    required int depth,
-  });
+  Future<List<RelatedEntity>> crateApiChatGraphExpand(
+      {required String entityId, required int depth});
 
   Future<void> crateApiInitCore({BigInt? workerThreads});
 
-  Future<void> crateApiBootLoadSeeds();
+  Future<int> crateApiBootLoadSeeds();
 
   Future<String> crateApiChatMemoryIngest({required String text});
 
-  Future<List<MemoryHit>> crateApiChatMemorySearch({
-    required String query,
-    required int k,
-  });
+  Future<List<MemoryHit>> crateApiChatMemorySearch(
+      {required String query, required int k});
 
   Future<void> crateApiBootRunMigrations({required String dataDir});
 
@@ -176,54 +172,56 @@ abstract class GenUiCoreApi extends BaseApi {
 
   Future<String> crateApiScribeScribeStop();
 
+  Future<SearchMode> genUiDbGraphSearchModeDefault();
+
   Stream<String> crateApiStreamsSyncStatus();
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_ChangeEvent;
+      get rust_arc_increment_strong_count_ChangeEvent;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_ChangeEvent;
+      get rust_arc_decrement_strong_count_ChangeEvent;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_ChangeEventPtr;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_CoreError;
+      get rust_arc_increment_strong_count_CoreError;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_CoreError;
+      get rust_arc_decrement_strong_count_CoreError;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_CoreErrorPtr;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_GraphError;
+      get rust_arc_increment_strong_count_GraphError;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_GraphError;
+      get rust_arc_decrement_strong_count_GraphError;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_GraphErrorPtr;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_GraphStore;
+      get rust_arc_increment_strong_count_GraphStore;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_GraphStore;
+      get rust_arc_decrement_strong_count_GraphStore;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_GraphStorePtr;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_GraphStoreConfig;
+      get rust_arc_increment_strong_count_GraphStoreConfig;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_GraphStoreConfig;
+      get rust_arc_decrement_strong_count_GraphStoreConfig;
 
   CrossPlatformFinalizerArg
-  get rust_arc_decrement_strong_count_GraphStoreConfigPtr;
+      get rust_arc_decrement_strong_count_GraphStoreConfigPtr;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_SyncStatus;
+      get rust_arc_increment_strong_count_SyncStatus;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_SyncStatus;
+      get rust_arc_decrement_strong_count_SyncStatus;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_SyncStatusPtr;
 }
@@ -238,29 +236,22 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   });
 
   @override
-  Future<String> genUiDbGraphGraphStoreCreateEntity({
-    required GraphStore that,
-    required String id,
-    required String entityType,
-    required String label,
-  }) {
+  Future<String> genUiDbGraphGraphStoreCreateEntity(
+      {required GraphStore that,
+      required String id,
+      required String entityType,
+      required String label}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-            that,
-            serializer,
-          );
+              that, serializer);
           sse_encode_String(id, serializer);
           sse_encode_String(entityType, serializer);
           sse_encode_String(label, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 1,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 1, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -281,27 +272,50 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       );
 
   @override
-  Future<List<RelatedEntity>> genUiDbGraphGraphStoreGraphExpand({
-    required GraphStore that,
-    required String entityId,
-    required int depth,
-  }) {
+  Future<List<(String, String)>> genUiDbGraphGraphStoreEdgeEndpointsForTest(
+      {required GraphStore that}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-            that,
-            serializer,
-          );
+              that, serializer);
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 2, port: port_);
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_record_string_string,
+          decodeErrorData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
+        ),
+        constMeta: kGenUiDbGraphGraphStoreEdgeEndpointsForTestConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kGenUiDbGraphGraphStoreEdgeEndpointsForTestConstMeta =>
+      const TaskConstMeta(
+        debugName: 'GraphStore_edge_endpoints_for_test',
+        argNames: ['that'],
+      );
+
+  @override
+  Future<List<RelatedEntity>> genUiDbGraphGraphStoreGraphExpand(
+      {required GraphStore that,
+      required String entityId,
+      required int depth}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+              that, serializer);
           sse_encode_String(entityId, serializer);
           sse_encode_u_8(depth, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 2,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 3, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_related_entity,
@@ -322,25 +336,17 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       );
 
   @override
-  Future<String> genUiDbGraphGraphStoreMemoryIngest({
-    required GraphStore that,
-    required MemoryRecord record,
-  }) {
+  Future<String> genUiDbGraphGraphStoreMemoryIngest(
+      {required GraphStore that, required MemoryRecord record}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-            that,
-            serializer,
-          );
+              that, serializer);
           sse_encode_box_autoadd_memory_record(record, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 3,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 4, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -361,27 +367,18 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       );
 
   @override
-  Future<List<MemoryHit>> genUiDbGraphGraphStoreMemorySearch({
-    required GraphStore that,
-    required String query,
-    required BigInt k,
-  }) {
+  Future<List<MemoryHit>> genUiDbGraphGraphStoreMemorySearch(
+      {required GraphStore that, required String query, required BigInt k}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-            that,
-            serializer,
-          );
+              that, serializer);
           sse_encode_String(query, serializer);
           sse_encode_usize(k, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 4,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 5, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_memory_hit,
@@ -402,23 +399,52 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       );
 
   @override
-  Future<GraphStore> genUiDbGraphGraphStoreOpen({
-    required GraphStoreConfig cfg,
-  }) {
+  Future<List<MemoryHit>> genUiDbGraphGraphStoreMemorySearchWith(
+      {required GraphStore that,
+      required String query,
+      required BigInt k,
+      required SearchMode mode}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+              that, serializer);
+          sse_encode_String(query, serializer);
+          sse_encode_usize(k, serializer);
+          sse_encode_search_mode(mode, serializer);
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 6, port: port_);
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_memory_hit,
+          decodeErrorData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
+        ),
+        constMeta: kGenUiDbGraphGraphStoreMemorySearchWithConstMeta,
+        argValues: [that, query, k, mode],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kGenUiDbGraphGraphStoreMemorySearchWithConstMeta =>
+      const TaskConstMeta(
+        debugName: 'GraphStore_memory_search_with',
+        argNames: ['that', 'query', 'k', 'mode'],
+      );
+
+  @override
+  Future<GraphStore> genUiDbGraphGraphStoreOpen(
+      {required GraphStoreConfig cfg}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-            cfg,
-            serializer,
-          );
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 5,
-            port: port_,
-          );
+              cfg, serializer);
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 7, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -433,33 +459,28 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kGenUiDbGraphGraphStoreOpenConstMeta =>
-      const TaskConstMeta(debugName: 'GraphStore_open', argNames: ['cfg']);
+  TaskConstMeta get kGenUiDbGraphGraphStoreOpenConstMeta => const TaskConstMeta(
+        debugName: 'GraphStore_open',
+        argNames: ['cfg'],
+      );
 
   @override
-  Future<void> genUiDbGraphGraphStoreRelate({
-    required GraphStore that,
-    required String from,
-    required String to,
-    required String rel,
-  }) {
+  Future<void> genUiDbGraphGraphStoreRelate(
+      {required GraphStore that,
+      required String from,
+      required String to,
+      required String rel}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-            that,
-            serializer,
-          );
+              that, serializer);
           sse_encode_String(from, serializer);
           sse_encode_String(to, serializer);
           sse_encode_String(rel, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 6,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 8, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -480,17 +501,49 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       );
 
   @override
+  Future<void> genUiDbGraphGraphStoreRelateRawForTest(
+      {required GraphStore that,
+      required String fromTable,
+      required String from,
+      required String to}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+              that, serializer);
+          sse_encode_String(fromTable, serializer);
+          sse_encode_String(from, serializer);
+          sse_encode_String(to, serializer);
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 9, port: port_);
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
+        ),
+        constMeta: kGenUiDbGraphGraphStoreRelateRawForTestConstMeta,
+        argValues: [that, fromTable, from, to],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kGenUiDbGraphGraphStoreRelateRawForTestConstMeta =>
+      const TaskConstMeta(
+        debugName: 'GraphStore_relate_raw_for_test',
+        argNames: ['that', 'fromTable', 'from', 'to'],
+      );
+
+  @override
   Future<void> crateApiBootAttachSyncShapes() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 8,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 11, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -505,7 +558,10 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   TaskConstMeta get kCrateApiBootAttachSyncShapesConstMeta =>
-      const TaskConstMeta(debugName: 'attach_sync_shapes', argNames: []);
+      const TaskConstMeta(
+        debugName: 'attach_sync_shapes',
+        argNames: [],
+      );
 
   @override
   Stream<String> crateApiStreamsChatEvents({required String runId}) {
@@ -517,12 +573,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
             final serializer = SseSerializer(generalizedFrbRustBinding);
             sse_encode_String(runId, serializer);
             sse_encode_StreamSink_String_Sse(sink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 9,
-              port: port_,
-            );
+            pdeCallFfi(generalizedFrbRustBinding, serializer,
+                funcId: 12, port: port_);
           },
           codec: SseCodec(
             decodeSuccessData: sse_decode_unit,
@@ -538,27 +590,21 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   TaskConstMeta get kCrateApiStreamsChatEventsConstMeta => const TaskConstMeta(
-    debugName: 'chat_events',
-    argNames: ['runId', 'sink'],
-  );
+        debugName: 'chat_events',
+        argNames: ['runId', 'sink'],
+      );
 
   @override
-  Future<String> crateApiChatChatSend({
-    required String threadId,
-    required String message,
-  }) {
+  Future<String> crateApiChatChatSend(
+      {required String threadId, required String message}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(threadId, serializer);
           sse_encode_String(message, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 10,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 13, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -573,9 +619,9 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   TaskConstMeta get kCrateApiChatChatSendConstMeta => const TaskConstMeta(
-    debugName: 'chat_send',
-    argNames: ['threadId', 'message'],
-  );
+        debugName: 'chat_send',
+        argNames: ['threadId', 'message'],
+      );
 
   @override
   Stream<String> crateApiStreamsEntityChanges() {
@@ -586,12 +632,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           callFfi: (port_) {
             final serializer = SseSerializer(generalizedFrbRustBinding);
             sse_encode_StreamSink_String_Sse(sink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 11,
-              port: port_,
-            );
+            pdeCallFfi(generalizedFrbRustBinding, serializer,
+                funcId: 14, port: port_);
           },
           codec: SseCodec(
             decodeSuccessData: sse_decode_unit,
@@ -607,23 +649,21 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   TaskConstMeta get kCrateApiStreamsEntityChangesConstMeta =>
-      const TaskConstMeta(debugName: 'entity_changes', argNames: ['sink']);
+      const TaskConstMeta(
+        debugName: 'entity_changes',
+        argNames: ['sink'],
+      );
 
   @override
-  Future<EntityRecord> crateApiEntityEntityCreate({
-    required EntityRecord record,
-  }) {
+  Future<EntityRecord> crateApiEntityEntityCreate(
+      {required EntityRecord record}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_box_autoadd_entity_record(record, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 12,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 15, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_entity_record,
@@ -637,26 +677,22 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiEntityEntityCreateConstMeta =>
-      const TaskConstMeta(debugName: 'entity_create', argNames: ['record']);
+  TaskConstMeta get kCrateApiEntityEntityCreateConstMeta => const TaskConstMeta(
+        debugName: 'entity_create',
+        argNames: ['record'],
+      );
 
   @override
-  Future<void> crateApiEntityEntityDelete({
-    required String entityType,
-    required String id,
-  }) {
+  Future<void> crateApiEntityEntityDelete(
+      {required String entityType, required String id}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(entityType, serializer);
           sse_encode_String(id, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 13,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 16, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -671,27 +707,21 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   TaskConstMeta get kCrateApiEntityEntityDeleteConstMeta => const TaskConstMeta(
-    debugName: 'entity_delete',
-    argNames: ['entityType', 'id'],
-  );
+        debugName: 'entity_delete',
+        argNames: ['entityType', 'id'],
+      );
 
   @override
-  Future<EntityRecord?> crateApiEntityEntityGet({
-    required String entityType,
-    required String id,
-  }) {
+  Future<EntityRecord?> crateApiEntityEntityGet(
+      {required String entityType, required String id}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(entityType, serializer);
           sse_encode_String(id, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 14,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 17, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_opt_box_autoadd_entity_record,
@@ -706,9 +736,9 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   TaskConstMeta get kCrateApiEntityEntityGetConstMeta => const TaskConstMeta(
-    debugName: 'entity_get',
-    argNames: ['entityType', 'id'],
-  );
+        debugName: 'entity_get',
+        argNames: ['entityType', 'id'],
+      );
 
   @override
   Future<ListResult> crateApiEntityEntityList({required ViewDescriptor view}) {
@@ -717,12 +747,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_box_autoadd_view_descriptor(view, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 15,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 18, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_result,
@@ -736,24 +762,21 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiEntityEntityListConstMeta =>
-      const TaskConstMeta(debugName: 'entity_list', argNames: ['view']);
+  TaskConstMeta get kCrateApiEntityEntityListConstMeta => const TaskConstMeta(
+        debugName: 'entity_list',
+        argNames: ['view'],
+      );
 
   @override
-  Future<EntityRecord> crateApiEntityEntityUpdate({
-    required EntityRecord record,
-  }) {
+  Future<EntityRecord> crateApiEntityEntityUpdate(
+      {required EntityRecord record}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_box_autoadd_entity_record(record, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 16,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 19, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_entity_record,
@@ -767,26 +790,22 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiEntityEntityUpdateConstMeta =>
-      const TaskConstMeta(debugName: 'entity_update', argNames: ['record']);
+  TaskConstMeta get kCrateApiEntityEntityUpdateConstMeta => const TaskConstMeta(
+        debugName: 'entity_update',
+        argNames: ['record'],
+      );
 
   @override
-  Future<List<RelatedEntity>> crateApiChatGraphExpand({
-    required String entityId,
-    required int depth,
-  }) {
+  Future<List<RelatedEntity>> crateApiChatGraphExpand(
+      {required String entityId, required int depth}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(entityId, serializer);
           sse_encode_u_32(depth, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 17,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 20, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_related_entity,
@@ -801,9 +820,9 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   TaskConstMeta get kCrateApiChatGraphExpandConstMeta => const TaskConstMeta(
-    debugName: 'graph_expand',
-    argNames: ['entityId', 'depth'],
-  );
+        debugName: 'graph_expand',
+        argNames: ['entityId', 'depth'],
+      );
 
   @override
   Future<void> crateApiInitCore({BigInt? workerThreads}) {
@@ -812,12 +831,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_opt_box_autoadd_usize(workerThreads, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 18,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 21, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -830,24 +845,22 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiInitCoreConstMeta =>
-      const TaskConstMeta(debugName: 'init_core', argNames: ['workerThreads']);
+  TaskConstMeta get kCrateApiInitCoreConstMeta => const TaskConstMeta(
+        debugName: 'init_core',
+        argNames: ['workerThreads'],
+      );
 
   @override
-  Future<void> crateApiBootLoadSeeds() {
+  Future<int> crateApiBootLoadSeeds() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 19,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 22, port: port_);
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
+          decodeSuccessData: sse_decode_u_32,
           decodeErrorData:
               sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
         ),
@@ -858,8 +871,10 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiBootLoadSeedsConstMeta =>
-      const TaskConstMeta(debugName: 'load_seeds', argNames: []);
+  TaskConstMeta get kCrateApiBootLoadSeedsConstMeta => const TaskConstMeta(
+        debugName: 'load_seeds',
+        argNames: [],
+      );
 
   @override
   Future<String> crateApiChatMemoryIngest({required String text}) {
@@ -868,12 +883,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(text, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 20,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 23, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -887,26 +898,22 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiChatMemoryIngestConstMeta =>
-      const TaskConstMeta(debugName: 'memory_ingest', argNames: ['text']);
+  TaskConstMeta get kCrateApiChatMemoryIngestConstMeta => const TaskConstMeta(
+        debugName: 'memory_ingest',
+        argNames: ['text'],
+      );
 
   @override
-  Future<List<MemoryHit>> crateApiChatMemorySearch({
-    required String query,
-    required int k,
-  }) {
+  Future<List<MemoryHit>> crateApiChatMemorySearch(
+      {required String query, required int k}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(query, serializer);
           sse_encode_u_32(k, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 21,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 24, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_memory_hit,
@@ -920,8 +927,10 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiChatMemorySearchConstMeta =>
-      const TaskConstMeta(debugName: 'memory_search', argNames: ['query', 'k']);
+  TaskConstMeta get kCrateApiChatMemorySearchConstMeta => const TaskConstMeta(
+        debugName: 'memory_search',
+        argNames: ['query', 'k'],
+      );
 
   @override
   Future<void> crateApiBootRunMigrations({required String dataDir}) {
@@ -930,12 +939,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(dataDir, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 22,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 25, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -949,8 +954,10 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiBootRunMigrationsConstMeta =>
-      const TaskConstMeta(debugName: 'run_migrations', argNames: ['dataDir']);
+  TaskConstMeta get kCrateApiBootRunMigrationsConstMeta => const TaskConstMeta(
+        debugName: 'run_migrations',
+        argNames: ['dataDir'],
+      );
 
   @override
   Future<void> crateApiScribeScribeStart() {
@@ -958,12 +965,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 23,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 26, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -977,8 +980,10 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiScribeScribeStartConstMeta =>
-      const TaskConstMeta(debugName: 'scribe_start', argNames: []);
+  TaskConstMeta get kCrateApiScribeScribeStartConstMeta => const TaskConstMeta(
+        debugName: 'scribe_start',
+        argNames: [],
+      );
 
   @override
   Future<String> crateApiScribeScribeStop() {
@@ -986,12 +991,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 24,
-            port: port_,
-          );
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 27, port: port_);
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -1005,8 +1006,36 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     );
   }
 
-  TaskConstMeta get kCrateApiScribeScribeStopConstMeta =>
-      const TaskConstMeta(debugName: 'scribe_stop', argNames: []);
+  TaskConstMeta get kCrateApiScribeScribeStopConstMeta => const TaskConstMeta(
+        debugName: 'scribe_stop',
+        argNames: [],
+      );
+
+  @override
+  Future<SearchMode> genUiDbGraphSearchModeDefault() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(generalizedFrbRustBinding, serializer,
+              funcId: 28, port: port_);
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_search_mode,
+          decodeErrorData: null,
+        ),
+        constMeta: kGenUiDbGraphSearchModeDefaultConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kGenUiDbGraphSearchModeDefaultConstMeta =>
+      const TaskConstMeta(
+        debugName: 'search_mode_default',
+        argNames: [],
+      );
 
   @override
   Stream<String> crateApiStreamsSyncStatus() {
@@ -1017,12 +1046,8 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
           callFfi: (port_) {
             final serializer = SseSerializer(generalizedFrbRustBinding);
             sse_encode_StreamSink_String_Sse(sink, serializer);
-            pdeCallFfi(
-              generalizedFrbRustBinding,
-              serializer,
-              funcId: 25,
-              port: port_,
-            );
+            pdeCallFfi(generalizedFrbRustBinding, serializer,
+                funcId: 29, port: port_);
           },
           codec: SseCodec(
             decodeSuccessData: sse_decode_unit,
@@ -1037,56 +1062,58 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     return sink.stream;
   }
 
-  TaskConstMeta get kCrateApiStreamsSyncStatusConstMeta =>
-      const TaskConstMeta(debugName: 'sync_status', argNames: ['sink']);
+  TaskConstMeta get kCrateApiStreamsSyncStatusConstMeta => const TaskConstMeta(
+        debugName: 'sync_status',
+        argNames: ['sink'],
+      );
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_ChangeEvent => wire
-      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent;
+      get rust_arc_increment_strong_count_ChangeEvent => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_ChangeEvent => wire
-      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent;
+      get rust_arc_decrement_strong_count_ChangeEvent => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_CoreError => wire
-      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError;
+      get rust_arc_increment_strong_count_CoreError => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_CoreError => wire
-      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError;
+      get rust_arc_decrement_strong_count_CoreError => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_GraphError => wire
-      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError;
+      get rust_arc_increment_strong_count_GraphError => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_GraphError => wire
-      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError;
+      get rust_arc_decrement_strong_count_GraphError => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_GraphStore => wire
-      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore;
+      get rust_arc_increment_strong_count_GraphStore => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_GraphStore => wire
-      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore;
+      get rust_arc_decrement_strong_count_GraphStore => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_GraphStoreConfig => wire
-      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig;
+      get rust_arc_increment_strong_count_GraphStoreConfig => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_GraphStoreConfig => wire
-      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig;
+      get rust_arc_decrement_strong_count_GraphStoreConfig => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig;
 
   RustArcIncrementStrongCountFnType
-  get rust_arc_increment_strong_count_SyncStatus => wire
-      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus;
+      get rust_arc_increment_strong_count_SyncStatus => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus;
 
   RustArcDecrementStrongCountFnType
-  get rust_arc_decrement_strong_count_SyncStatus => wire
-      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus;
+      get rust_arc_decrement_strong_count_SyncStatus => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus;
 
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {
@@ -1096,117 +1123,104 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   ChangeEvent
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    dynamic raw,
-  ) {
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ChangeEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   CoreError
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    dynamic raw,
-  ) {
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreErrorImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   GraphError
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    dynamic raw,
-  ) {
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return GraphErrorImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   GraphStore
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    dynamic raw,
-  ) {
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return GraphStoreImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   GraphStoreConfig
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    dynamic raw,
-  ) {
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return GraphStoreConfigImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   SyncStatus
-  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    dynamic raw,
-  ) {
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return SyncStatusImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   GraphStore
-  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    dynamic raw,
-  ) {
+      dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return GraphStoreImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   ChangeEvent
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    dynamic raw,
-  ) {
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ChangeEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   CoreError
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    dynamic raw,
-  ) {
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return CoreErrorImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   GraphError
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    dynamic raw,
-  ) {
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return GraphErrorImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   GraphStore
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    dynamic raw,
-  ) {
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return GraphStoreImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   GraphStoreConfig
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    dynamic raw,
-  ) {
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return GraphStoreConfigImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
   SyncStatus
-  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    dynamic raw,
-  ) {
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return SyncStatusImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
@@ -1334,6 +1348,12 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  List<(String, String)> dco_decode_list_record_string_string(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_record_string_string).toList();
+  }
+
+  @protected
   List<RelatedEntity> dco_decode_list_related_entity(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_related_entity).toList();
@@ -1410,6 +1430,19 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  (String, String) dco_decode_record_string_string(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2) {
+      throw Exception('Expected 2 elements, got ${arr.length}');
+    }
+    return (
+      dco_decode_String(arr[0]),
+      dco_decode_String(arr[1]),
+    );
+  }
+
+  @protected
   RelatedEntity dco_decode_related_entity(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -1421,6 +1454,12 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       entityType: dco_decode_String(arr[2]),
       score: dco_decode_f_32(arr[3]),
     );
+  }
+
+  @protected
+  SearchMode dco_decode_search_mode(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return SearchMode.values[raw as int];
   }
 
   @protected
@@ -1483,164 +1522,124 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   ChangeEvent
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ChangeEventImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   CoreError
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreErrorImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   GraphError
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return GraphErrorImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   GraphStore
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return GraphStoreImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   GraphStoreConfig
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return GraphStoreConfigImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   SyncStatus
-  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return SyncStatusImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   GraphStore
-  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return GraphStoreImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   ChangeEvent
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ChangeEventImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   CoreError
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return CoreErrorImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   GraphError
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return GraphErrorImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   GraphStore
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return GraphStoreImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   GraphStoreConfig
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return GraphStoreConfigImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   SyncStatus
-  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SseDeserializer deserializer,
-  ) {
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return SyncStatusImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
   @protected
   RustStreamSink<String> sse_decode_StreamSink_String_Sse(
-    SseDeserializer deserializer,
-  ) {
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     throw UnimplementedError('Unreachable ()');
   }
@@ -1660,16 +1659,14 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   EntityRecord sse_decode_box_autoadd_entity_record(
-    SseDeserializer deserializer,
-  ) {
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_entity_record(deserializer));
   }
 
   @protected
   MemoryRecord sse_decode_box_autoadd_memory_record(
-    SseDeserializer deserializer,
-  ) {
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_memory_record(deserializer));
   }
@@ -1688,8 +1685,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   ViewDescriptor sse_decode_box_autoadd_view_descriptor(
-    SseDeserializer deserializer,
-  ) {
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_view_descriptor(deserializer));
   }
@@ -1701,10 +1697,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     var var_entityType = sse_decode_String(deserializer);
     var var_dataJson = sse_decode_String(deserializer);
     return EntityRecord(
-      id: var_id,
-      entityType: var_entityType,
-      dataJson: var_dataJson,
-    );
+        id: var_id, entityType: var_entityType, dataJson: var_dataJson);
   }
 
   @protected
@@ -1737,8 +1730,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   List<EntityRecord> sse_decode_list_entity_record(
-    SseDeserializer deserializer,
-  ) {
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     var len_ = sse_decode_i_32(deserializer);
@@ -1781,9 +1773,21 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  List<(String, String)> sse_decode_list_record_string_string(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <(String, String)>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_record_string_string(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   List<RelatedEntity> sse_decode_list_related_entity(
-    SseDeserializer deserializer,
-  ) {
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     var len_ = sse_decode_i_32(deserializer);
@@ -1822,11 +1826,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     var var_kind = sse_decode_String(deserializer);
     var var_score = sse_decode_f_32(deserializer);
     return MemoryHit(
-      id: var_id,
-      text: var_text,
-      kind: var_kind,
-      score: var_score,
-    );
+        id: var_id, text: var_text, kind: var_kind, score: var_score);
   }
 
   @protected
@@ -1837,11 +1837,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     var var_kind = sse_decode_String(deserializer);
     var var_entity = sse_decode_opt_String(deserializer);
     return MemoryRecord(
-      id: var_id,
-      text: var_text,
-      kind: var_kind,
-      entity: var_entity,
-    );
+        id: var_id, text: var_text, kind: var_kind, entity: var_entity);
   }
 
   @protected
@@ -1857,8 +1853,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   EntityRecord? sse_decode_opt_box_autoadd_entity_record(
-    SseDeserializer deserializer,
-  ) {
+      SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     if (sse_decode_bool(deserializer)) {
@@ -1891,6 +1886,15 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  (String, String) sse_decode_record_string_string(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_field0 = sse_decode_String(deserializer);
+    var var_field1 = sse_decode_String(deserializer);
+    return (var_field0, var_field1);
+  }
+
+  @protected
   RelatedEntity sse_decode_related_entity(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_id = sse_decode_String(deserializer);
@@ -1898,11 +1902,17 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     var var_entityType = sse_decode_String(deserializer);
     var var_score = sse_decode_f_32(deserializer);
     return RelatedEntity(
-      id: var_id,
-      label: var_label,
-      entityType: var_entityType,
-      score: var_score,
-    );
+        id: var_id,
+        label: var_label,
+        entityType: var_entityType,
+        score: var_score);
+  }
+
+  @protected
+  SearchMode sse_decode_search_mode(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return SearchMode.values[inner];
   }
 
   @protected
@@ -1945,197 +1955,142 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
     var var_limit = sse_decode_opt_box_autoadd_u_32(deserializer);
     var var_cursor = sse_decode_opt_String(deserializer);
     return ViewDescriptor(
-      entityType: var_entityType,
-      filters: var_filters,
-      sorts: var_sorts,
-      limit: var_limit,
-      cursor: var_cursor,
-    );
+        entityType: var_entityType,
+        filters: var_filters,
+        sorts: var_sorts,
+        limit: var_limit,
+        cursor: var_cursor);
   }
 
   @protected
   void sse_encode_AnyhowException(
-    AnyhowException self,
-    SseSerializer serializer,
-  ) {
+      AnyhowException self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.message, serializer);
   }
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    ChangeEvent self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          ChangeEvent self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as ChangeEventImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as ChangeEventImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    CoreError self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          CoreError self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreErrorImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as CoreErrorImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    GraphError self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          GraphError self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as GraphErrorImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as GraphErrorImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    GraphStore self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          GraphStore self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as GraphStoreImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as GraphStoreImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    GraphStoreConfig self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          GraphStoreConfig self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as GraphStoreConfigImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as GraphStoreConfigImpl).frbInternalSseEncode(move: true),
+        serializer);
   }
 
   @protected
   void
-  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SyncStatus self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SyncStatus self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as SyncStatusImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
+        (self as SyncStatusImpl).frbInternalSseEncode(move: true), serializer);
   }
 
   @protected
   void
-  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    GraphStore self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          GraphStore self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as GraphStoreImpl).frbInternalSseEncode(move: false),
-      serializer,
-    );
+        (self as GraphStoreImpl).frbInternalSseEncode(move: false), serializer);
   }
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
-    ChangeEvent self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChangeEvent(
+          ChangeEvent self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as ChangeEventImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+        (self as ChangeEventImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
-    CoreError self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError(
+          CoreError self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as CoreErrorImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+        (self as CoreErrorImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
-    GraphError self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError(
+          GraphError self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as GraphErrorImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+        (self as GraphErrorImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-    GraphStore self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+          GraphStore self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as GraphStoreImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+        (self as GraphStoreImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-    GraphStoreConfig self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+          GraphStoreConfig self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as GraphStoreConfigImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+        (self as GraphStoreConfigImpl).frbInternalSseEncode(move: null),
+        serializer);
   }
 
   @protected
   void
-  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
-    SyncStatus self,
-    SseSerializer serializer,
-  ) {
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSyncStatus(
+          SyncStatus self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
-      (self as SyncStatusImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
+        (self as SyncStatusImpl).frbInternalSseEncode(move: null), serializer);
   }
 
   @protected
   void sse_encode_StreamSink_String_Sse(
-    RustStreamSink<String> self,
-    SseSerializer serializer,
-  ) {
+      RustStreamSink<String> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(
       self.setupAndSerialize(
@@ -2162,18 +2117,14 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_box_autoadd_entity_record(
-    EntityRecord self,
-    SseSerializer serializer,
-  ) {
+      EntityRecord self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_entity_record(self, serializer);
   }
 
   @protected
   void sse_encode_box_autoadd_memory_record(
-    MemoryRecord self,
-    SseSerializer serializer,
-  ) {
+      MemoryRecord self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_memory_record(self, serializer);
   }
@@ -2192,9 +2143,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_box_autoadd_view_descriptor(
-    ViewDescriptor self,
-    SseSerializer serializer,
-  ) {
+      ViewDescriptor self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_view_descriptor(self, serializer);
   }
@@ -2235,9 +2184,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_list_entity_record(
-    List<EntityRecord> self,
-    SseSerializer serializer,
-  ) {
+      List<EntityRecord> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
@@ -2247,9 +2194,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_list_filter_spec(
-    List<FilterSpec> self,
-    SseSerializer serializer,
-  ) {
+      List<FilterSpec> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
@@ -2259,9 +2204,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_list_memory_hit(
-    List<MemoryHit> self,
-    SseSerializer serializer,
-  ) {
+      List<MemoryHit> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
@@ -2271,19 +2214,25 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_list_prim_u_8_strict(
-    Uint8List self,
-    SseSerializer serializer,
-  ) {
+      Uint8List self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
   }
 
   @protected
+  void sse_encode_list_record_string_string(
+      List<(String, String)> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_record_string_string(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_list_related_entity(
-    List<RelatedEntity> self,
-    SseSerializer serializer,
-  ) {
+      List<RelatedEntity> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
@@ -2300,9 +2249,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_list_sort_spec(
-    List<SortSpec> self,
-    SseSerializer serializer,
-  ) {
+      List<SortSpec> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
@@ -2340,9 +2287,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_opt_box_autoadd_entity_record(
-    EntityRecord? self,
-    SseSerializer serializer,
-  ) {
+      EntityRecord? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
@@ -2363,9 +2308,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_opt_box_autoadd_usize(
-    BigInt? self,
-    SseSerializer serializer,
-  ) {
+      BigInt? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
@@ -2375,12 +2318,26 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  void sse_encode_record_string_string(
+      (String, String) self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.$1, serializer);
+    sse_encode_String(self.$2, serializer);
+  }
+
+  @protected
   void sse_encode_related_entity(RelatedEntity self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.id, serializer);
     sse_encode_String(self.label, serializer);
     sse_encode_String(self.entityType, serializer);
     sse_encode_f_32(self.score, serializer);
+  }
+
+  @protected
+  void sse_encode_search_mode(SearchMode self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
   }
 
   @protected
@@ -2415,9 +2372,7 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 
   @protected
   void sse_encode_view_descriptor(
-    ViewDescriptor self,
-    SseSerializer serializer,
-  ) {
+      ViewDescriptor self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.entityType, serializer);
     sse_encode_list_filter_spec(self.filters, serializer);
@@ -2431,11 +2386,11 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
 class ChangeEventImpl extends RustOpaque implements ChangeEvent {
   // Not to be used by end users
   ChangeEventImpl.frbInternalDcoDecode(List<dynamic> wire)
-    : super.frbInternalDcoDecode(wire, _kStaticData);
+      : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   ChangeEventImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:
@@ -2451,11 +2406,11 @@ class ChangeEventImpl extends RustOpaque implements ChangeEvent {
 class CoreErrorImpl extends RustOpaque implements CoreError {
   // Not to be used by end users
   CoreErrorImpl.frbInternalDcoDecode(List<dynamic> wire)
-    : super.frbInternalDcoDecode(wire, _kStaticData);
+      : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   CoreErrorImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:
@@ -2471,11 +2426,11 @@ class CoreErrorImpl extends RustOpaque implements CoreError {
 class GraphErrorImpl extends RustOpaque implements GraphError {
   // Not to be used by end users
   GraphErrorImpl.frbInternalDcoDecode(List<dynamic> wire)
-    : super.frbInternalDcoDecode(wire, _kStaticData);
+      : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   GraphErrorImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:
@@ -2491,13 +2446,12 @@ class GraphErrorImpl extends RustOpaque implements GraphError {
 class GraphStoreConfigImpl extends RustOpaque implements GraphStoreConfig {
   // Not to be used by end users
   GraphStoreConfigImpl.frbInternalDcoDecode(List<dynamic> wire)
-    : super.frbInternalDcoDecode(wire, _kStaticData);
+      : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   GraphStoreConfigImpl.frbInternalSseDecode(
-    BigInt ptr,
-    int externalSizeOnNative,
-  ) : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+      BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:
@@ -2505,9 +2459,7 @@ class GraphStoreConfigImpl extends RustOpaque implements GraphStoreConfig {
     rustArcDecrementStrongCount:
         GenUiCore.instance.api.rust_arc_decrement_strong_count_GraphStoreConfig,
     rustArcDecrementStrongCountPtr: GenUiCore
-        .instance
-        .api
-        .rust_arc_decrement_strong_count_GraphStoreConfigPtr,
+        .instance.api.rust_arc_decrement_strong_count_GraphStoreConfigPtr,
   );
 }
 
@@ -2515,11 +2467,11 @@ class GraphStoreConfigImpl extends RustOpaque implements GraphStoreConfig {
 class GraphStoreImpl extends RustOpaque implements GraphStore {
   // Not to be used by end users
   GraphStoreImpl.frbInternalDcoDecode(List<dynamic> wire)
-    : super.frbInternalDcoDecode(wire, _kStaticData);
+      : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   GraphStoreImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:
@@ -2532,68 +2484,75 @@ class GraphStoreImpl extends RustOpaque implements GraphStore {
 
   /// INTENT: create (or upsert) a graph entity node. `id` is the record key
   /// (e.g. `project_x`); `label`/`entity_type` are indexed graph metadata.
-  Future<String> createEntity({
-    required String id,
-    required String entityType,
-    required String label,
-  }) => GenUiCore.instance.api.genUiDbGraphGraphStoreCreateEntity(
-    that: this,
-    id: id,
-    entityType: entityType,
-    label: label,
-  );
+  Future<String> createEntity(
+          {required String id,
+          required String entityType,
+          required String label}) =>
+      GenUiCore.instance.api.genUiDbGraphGraphStoreCreateEntity(
+          that: this, id: id, entityType: entityType, label: label);
+
+  /// Test-only inspection of stored relation endpoint IDs.
+  Future<List<(String, String)>> edgeEndpointsForTest() =>
+      GenUiCore.instance.api.genUiDbGraphGraphStoreEdgeEndpointsForTest(
+        that: this,
+      );
 
   /// INTENT: expand the graph outward from `entity_id` up to `depth` RELATE hops,
   /// fusing per-depth neighbour lists with Rust RRF (nearer hops rank higher).
-  Future<List<RelatedEntity>> graphExpand({
-    required String entityId,
-    required int depth,
-  }) => GenUiCore.instance.api.genUiDbGraphGraphStoreGraphExpand(
-    that: this,
-    entityId: entityId,
-    depth: depth,
-  );
+  Future<List<RelatedEntity>> graphExpand(
+          {required String entityId, required int depth}) =>
+      GenUiCore.instance.api.genUiDbGraphGraphStoreGraphExpand(
+          that: this, entityId: entityId, depth: depth);
 
   /// INTENT: ingest a memory. Embeds `text`, stores row + vector, returns the id.
-  Future<String> memoryIngest({required MemoryRecord record}) => GenUiCore
-      .instance
-      .api
-      .genUiDbGraphGraphStoreMemoryIngest(that: this, record: record);
+  Future<String> memoryIngest({required MemoryRecord record}) =>
+      GenUiCore.instance.api
+          .genUiDbGraphGraphStoreMemoryIngest(that: this, record: record);
 
   /// INTENT: hybrid semantic + lexical search. Embeds `query`, runs the vector
   /// and BM25 lanes, fuses them with native `search::rrf`, returns top-`k`.
-  Future<List<MemoryHit>> memorySearch({
-    required String query,
-    required BigInt k,
-  }) => GenUiCore.instance.api.genUiDbGraphGraphStoreMemorySearch(
-    that: this,
-    query: query,
-    k: k,
-  );
+  Future<List<MemoryHit>> memorySearch(
+          {required String query, required BigInt k}) =>
+      GenUiCore.instance.api
+          .genUiDbGraphGraphStoreMemorySearch(that: this, query: query, k: k);
+
+  /// `memory_search`, choosing the retrieval lane (C-111 T3).
+  ///
+  /// `SearchMode::Vector` skips the BM25 lane and RRF entirely — a diagnostic for
+  /// showing what fusion actually buys, not a product path. Scores are comparable
+  /// only within a mode; see `MemoryHit::score`.
+  Future<List<MemoryHit>> memorySearchWith(
+          {required String query,
+          required BigInt k,
+          required SearchMode mode}) =>
+      GenUiCore.instance.api.genUiDbGraphGraphStoreMemorySearchWith(
+          that: this, query: query, k: k, mode: mode);
 
   /// INTENT: create a directed RELATE edge `from -> to` with a relation label.
   /// Edges are what `graph_expand` traverses.
-  Future<void> relate({
-    required String from,
-    required String to,
-    required String rel,
-  }) => GenUiCore.instance.api.genUiDbGraphGraphStoreRelate(
-    that: this,
-    from: from,
-    to: to,
-    rel: rel,
-  );
+  Future<void> relate(
+          {required String from, required String to, required String rel}) =>
+      GenUiCore.instance.api.genUiDbGraphGraphStoreRelate(
+          that: this, from: from, to: to, rel: rel);
+
+  /// Test-only boundary for a relation whose source table violates schema.
+  Future<void> relateRawForTest(
+          {required String fromTable,
+          required String from,
+          required String to}) =>
+      GenUiCore.instance.api.genUiDbGraphGraphStoreRelateRawForTest(
+          that: this, fromTable: fromTable, from: from, to: to);
 }
 
 @sealed
 class SyncStatusImpl extends RustOpaque implements SyncStatus {
   // Not to be used by end users
   SyncStatusImpl.frbInternalDcoDecode(List<dynamic> wire)
-    : super.frbInternalDcoDecode(wire, _kStaticData);
+      : super.frbInternalDcoDecode(wire, _kStaticData);
 
   // Not to be used by end users
   SyncStatusImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
 
   static final _kStaticData = RustArcStaticData(
     rustArcIncrementStrongCount:

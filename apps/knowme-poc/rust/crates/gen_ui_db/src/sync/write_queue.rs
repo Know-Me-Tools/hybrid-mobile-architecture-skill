@@ -21,7 +21,9 @@ const BACKOFF_MAX: Duration = Duration::from_secs(30);
 fn backoff_for(attempt: u32) -> Duration {
     // 200ms, 400ms, 800ms, … capped at 30s. saturating shift avoids overflow panics.
     let factor = 1u64.checked_shl(attempt.min(20)).unwrap_or(u64::MAX);
-    BACKOFF_BASE.saturating_mul(factor.min(u32::MAX as u64) as u32).min(BACKOFF_MAX)
+    BACKOFF_BASE
+        .saturating_mul(factor.min(u32::MAX as u64) as u32)
+        .min(BACKOFF_MAX)
 }
 
 pub(crate) struct WriteQueue {
@@ -36,7 +38,11 @@ pub(crate) struct WriteQueue {
 }
 
 impl WriteQueue {
-    pub(crate) fn new(cfg: &SyncConfig, sink: Arc<dyn WriteSink>, status: SyncStatusHandle) -> Self {
+    pub(crate) fn new(
+        cfg: &SyncConfig,
+        sink: Arc<dyn WriteSink>,
+        status: SyncStatusHandle,
+    ) -> Self {
         Self {
             sink,
             status,
@@ -128,7 +134,10 @@ mod tests {
 
     impl ScriptedSink {
         fn new(script: Vec<WriteOutcome>) -> Arc<Self> {
-            Arc::new(Self { script, calls: AtomicU32::new(0) })
+            Arc::new(Self {
+                script,
+                calls: AtomicU32::new(0),
+            })
         }
         fn calls(&self) -> u32 {
             self.calls.load(Ordering::SeqCst)
@@ -139,7 +148,11 @@ mod tests {
     impl WriteSink for ScriptedSink {
         async fn send(&self, _w: &PendingWrite) -> WriteOutcome {
             let n = self.calls.fetch_add(1, Ordering::SeqCst) as usize;
-            self.script.get(n).or_else(|| self.script.last()).cloned().unwrap()
+            self.script
+                .get(n)
+                .or_else(|| self.script.last())
+                .cloned()
+                .unwrap()
         }
     }
 
@@ -205,7 +218,9 @@ mod tests {
     /// bytes gets the same answer, so retrying only delays the bad news.
     #[tokio::test(start_paused = true)]
     async fn a_terminal_rejection_poisons_immediately_without_burning_retries() {
-        let sink = ScriptedSink::new(vec![WriteOutcome::Poison { reason: "400".into() }]);
+        let sink = ScriptedSink::new(vec![WriteOutcome::Poison {
+            reason: "400".into(),
+        }]);
         let q = queue(sink.clone(), 5);
         q.enqueue(write("k1")).await;
 
@@ -227,10 +242,16 @@ mod tests {
             async fn send(&self, w: &PendingWrite) -> WriteOutcome {
                 let mut seen = self.seen.lock().await;
                 seen.push(w.idempotency_key.clone());
-                if seen.len() < 3 { WriteOutcome::Retry } else { WriteOutcome::Applied }
+                if seen.len() < 3 {
+                    WriteOutcome::Retry
+                } else {
+                    WriteOutcome::Applied
+                }
             }
         }
-        let spy = Arc::new(KeySpy { seen: Mutex::new(Vec::new()) });
+        let spy = Arc::new(KeySpy {
+            seen: Mutex::new(Vec::new()),
+        });
         let q = queue(spy.clone(), 5);
         q.enqueue(write("stable-key")).await;
 
@@ -239,7 +260,10 @@ mod tests {
         }
         let seen = spy.seen.lock().await;
         assert_eq!(seen.len(), 3);
-        assert!(seen.iter().all(|k| k == "stable-key"), "key drifted across replays: {seen:?}");
+        assert!(
+            seen.iter().all(|k| k == "stable-key"),
+            "key drifted across replays: {seen:?}"
+        );
     }
 
     /// Ordering: a retried write goes back to the FRONT, so a later write cannot
@@ -255,10 +279,16 @@ mod tests {
                 let mut seen = self.seen.lock().await;
                 seen.push(w.idempotency_key.clone());
                 // Fail the first write once, then accept everything.
-                if seen.len() == 1 { WriteOutcome::Retry } else { WriteOutcome::Applied }
+                if seen.len() == 1 {
+                    WriteOutcome::Retry
+                } else {
+                    WriteOutcome::Applied
+                }
             }
         }
-        let spy = Arc::new(OrderSpy { seen: Mutex::new(Vec::new()) });
+        let spy = Arc::new(OrderSpy {
+            seen: Mutex::new(Vec::new()),
+        });
         let q = queue(spy.clone(), 5);
         q.enqueue(write("first")).await;
         q.enqueue(write("second")).await;
@@ -268,7 +298,10 @@ mod tests {
 
         let seen = spy.seen.lock().await;
         assert_eq!(seen[0], "first");
-        assert_eq!(seen[1], "first", "the retried write must be re-tried before later ones");
+        assert_eq!(
+            seen[1], "first",
+            "the retried write must be re-tried before later ones"
+        );
         assert_eq!(seen[2], "second");
     }
 

@@ -19,27 +19,47 @@ pub struct SseTransport {
 impl SseTransport {
     /// `endpoint` is the JSON-RPC POST URL (e.g. `https://forge/mcp/v1/a2ui`).
     pub fn new(http: reqwest::Client, endpoint: impl Into<String>, bearer: Option<String>) -> Self {
-        Self { http, endpoint: endpoint.into(), bearer, next_id: AtomicU64::new(1) }
+        Self {
+            http,
+            endpoint: endpoint.into(),
+            bearer,
+            next_id: AtomicU64::new(1),
+        }
     }
 }
 
 #[async_trait]
 impl McpTransport for SseTransport {
-    async fn request(&self, method: &str, params: Option<serde_json::Value>) -> CoreResult<serde_json::Value> {
+    async fn request(
+        &self,
+        method: &str,
+        params: Option<serde_json::Value>,
+    ) -> CoreResult<serde_json::Value> {
         let id = self.next_id.fetch_add(1, Ordering::Relaxed);
         let body = JsonRpcRequest::new(id, method, params);
         let mut req = self.http.post(&self.endpoint).json(&body);
         if let Some(token) = &self.bearer {
             req = req.bearer_auth(token);
         }
-        let resp = req.send().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
         if !resp.status().is_success() {
             return Err(CoreError::Terminal(format!("mcp http {}", resp.status())));
         }
-        let parsed: JsonRpcResponse = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
+        let parsed: JsonRpcResponse = resp
+            .json()
+            .await
+            .map_err(|e| CoreError::Serde(e.to_string()))?;
         if let Some(err) = parsed.error {
-            return Err(CoreError::Terminal(format!("jsonrpc {}: {}", err.code, err.message)));
+            return Err(CoreError::Terminal(format!(
+                "jsonrpc {}: {}",
+                err.code, err.message
+            )));
         }
-        parsed.result.ok_or_else(|| CoreError::Terminal("jsonrpc: empty result".into()))
+        parsed
+            .result
+            .ok_or_else(|| CoreError::Terminal("jsonrpc: empty result".into()))
     }
 }

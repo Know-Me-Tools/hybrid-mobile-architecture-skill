@@ -15,7 +15,11 @@ use std::sync::Arc;
 /// concrete transport (the browser drives MCP from JS).
 #[async_trait]
 pub trait McpTransport: Send + Sync {
-    async fn request(&self, method: &str, params: Option<serde_json::Value>) -> CoreResult<serde_json::Value>;
+    async fn request(
+        &self,
+        method: &str,
+        params: Option<serde_json::Value>,
+    ) -> CoreResult<serde_json::Value>;
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -37,7 +41,11 @@ pub struct McpServerHandle {
 
 impl McpServerHandle {
     pub fn new(name: impl Into<String>, transport: Box<dyn McpTransport>) -> Self {
-        Self { name: name.into(), transport, tools: RwLock::new(Vec::new()) }
+        Self {
+            name: name.into(),
+            transport,
+            tools: RwLock::new(Vec::new()),
+        }
     }
 
     /// Refresh the cached tool inventory via `tools/list`.
@@ -52,13 +60,22 @@ impl McpServerHandle {
     }
 
     /// Invoke a tool via `tools/call`.
-    pub async fn call_tool(&self, name: &str, arguments: serde_json::Value) -> CoreResult<serde_json::Value> {
+    pub async fn call_tool(
+        &self,
+        name: &str,
+        arguments: serde_json::Value,
+    ) -> CoreResult<serde_json::Value> {
         self.transport
-            .request("tools/call", Some(serde_json::json!({ "name": name, "arguments": arguments })))
+            .request(
+                "tools/call",
+                Some(serde_json::json!({ "name": name, "arguments": arguments })),
+            )
             .await
     }
 
-    pub fn cached_tools(&self) -> Vec<McpTool> { self.tools.read().clone() }
+    pub fn cached_tools(&self) -> Vec<McpTool> {
+        self.tools.read().clone()
+    }
 }
 
 #[derive(Default, Clone)]
@@ -67,12 +84,16 @@ pub struct McpRegistry {
 }
 
 impl McpRegistry {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     /// Register a server (e.g. flint-forge's `/mcp/v1/a2ui`) under its name.
     pub fn register(&self, handle: McpServerHandle) -> Arc<McpServerHandle> {
         let handle = Arc::new(handle);
-        self.servers.write().insert(handle.name.clone(), handle.clone());
+        self.servers
+            .write()
+            .insert(handle.name.clone(), handle.clone());
         handle
     }
 

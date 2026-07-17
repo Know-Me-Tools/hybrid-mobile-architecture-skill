@@ -59,7 +59,12 @@ impl Recorder {
             .play()
             .map_err(|e| ScribeError::Microphone(format!("failed to start stream: {e}")))?;
 
-        Ok(Self { stream, rx, input_rate, input_channels })
+        Ok(Self {
+            stream,
+            rx,
+            input_rate,
+            input_channels,
+        })
     }
 
     /// Stop capturing and return mono 16kHz f32 PCM ready for `transcribe`.

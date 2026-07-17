@@ -10,14 +10,14 @@
 //! 2026-07: the module is no longer feature-gated) so it actually sees these
 //! functions and generates their SseEncode impls + Dart stream bindings —
 //! there is no build of this crate, gated or not, that doesn't need them.
-pub mod streams;
-pub mod entity;
 pub mod chat;
+pub mod entity;
+pub mod streams;
 // gen_ui_audio (whisper-rs) is off on Android — see gen_ui_ffi/Cargo.toml's
 // target-gated dependency comment for why.
+pub mod boot;
 #[cfg(not(target_os = "android"))]
 pub mod scribe;
-pub mod boot;
 
 use flutter_rust_bridge::frb;
 

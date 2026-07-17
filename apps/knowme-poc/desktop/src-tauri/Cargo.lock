@@ -5393,6 +5393,7 @@ dependencies = [
 name = "knowme-poc"
 version = "0.1.0"
 dependencies = [
+ "directories",
  "serde",
  "serde_json",
  "tauri",
@@ -5402,6 +5403,9 @@ dependencies = [
  "tauri-plugin-shell",
  "tauri-plugin-single-instance",
  "tauri-plugin-store",
+ "tracing",
+ "tracing-log",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -11084,6 +11088,7 @@ dependencies = [
  "tauri-plugin",
  "thiserror 1.0.69",
  "tokio",
+ "tracing",
 ]
 
 [[package]]

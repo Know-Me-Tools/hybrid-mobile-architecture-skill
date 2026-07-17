@@ -16,7 +16,9 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use gen_ui_agent::{state, ConfigBackend};
 use gen_ui_db::relational::{ConfigStore, ModelPref, Provider, RelationalError, RelationalResult};
-use gen_ui_db_graph::{Embedder, EmbeddingModelInfo, GraphError, GraphStore, GraphStoreConfig, EMBED_DIM};
+use gen_ui_db_graph::{
+    Embedder, EmbeddingModelInfo, GraphError, GraphStore, GraphStoreConfig, EMBED_DIM,
+};
 use gen_ui_types::events::A2uiEvent;
 
 const PROVIDER_ID: &str = "test-ollama";
@@ -29,7 +31,10 @@ const SERVICE: &str = "ai.prometheusags.knowme-poc";
 struct ZeroEmbedder;
 impl Embedder for ZeroEmbedder {
     fn model_info(&self) -> EmbeddingModelInfo {
-        EmbeddingModelInfo { name: "zero-fake".into(), dim: EMBED_DIM }
+        EmbeddingModelInfo {
+            name: "zero-fake".into(),
+            dim: EMBED_DIM,
+        }
     }
     fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, GraphError> {
         Ok(texts.iter().map(|_| vec![0.0; EMBED_DIM]).collect())
@@ -57,7 +62,11 @@ impl ConfigStore for OllamaConfigStore {
     async fn delete_provider(&self, _: &str) -> RelationalResult<()> {
         Err(RelationalError::Sync("read-only test store".into()))
     }
-    async fn get_model_pref(&self, surface: &str, lane: &str) -> RelationalResult<Option<ModelPref>> {
+    async fn get_model_pref(
+        &self,
+        surface: &str,
+        lane: &str,
+    ) -> RelationalResult<Option<ModelPref>> {
         if surface != "chat" || lane != "cloud" {
             return Ok(None);
         }
@@ -85,7 +94,9 @@ impl ConfigStore for OllamaConfigStore {
 /// provider references so `chat::send`'s real resolve_api_key call succeeds.
 fn seed_test_keychain_entry() {
     let entry = keyring::Entry::new(SERVICE, API_KEY_REF).expect("keychain entry");
-    entry.set_password("").expect("seed empty api key for ollama test provider");
+    entry
+        .set_password("")
+        .expect("seed empty api key for ollama test provider");
 }
 
 #[tokio::test]
@@ -105,7 +116,10 @@ async fn chat_send_streams_a_real_ollama_response() {
         .await
         .expect("ephemeral in-memory GraphStore should open"),
     );
-    state::init(ConfigBackend::Postgres(Arc::new(OllamaConfigStore { model_hint })), memory);
+    state::init(
+        ConfigBackend::Postgres(Arc::new(OllamaConfigStore { model_hint })),
+        memory,
+    );
 
     let run_id = gen_ui_agent::chat::send("Say hello in exactly one word.".into(), Vec::new())
         .await
@@ -122,9 +136,8 @@ async fn chat_send_streams_a_real_ollama_response() {
         tokio::time::timeout(std::time::Duration::from_secs(30), rx.recv()).await
     {
         let is_this_run = match &event {
-            A2uiEvent::RunStarted { run_id: id, .. } | A2uiEvent::RunFinished { run_id: id, .. } => {
-                *id == run_id
-            }
+            A2uiEvent::RunStarted { run_id: id, .. }
+            | A2uiEvent::RunFinished { run_id: id, .. } => *id == run_id,
             // Block/RunError carry no run_id in this PoC's single-turn-at-a-time
             // design (see gen_ui_ffi::api::streams's doc comment) — accept them
             // since no other run can be concurrently in flight in this test.
@@ -154,6 +167,9 @@ async fn chat_send_streams_a_real_ollama_response() {
     assert!(saw_run_started, "expected a RunStarted event");
     assert!(saw_text, "expected at least one text Block event");
     assert!(saw_terminal, "expected a terminal RunFinished event");
-    assert!(!collected_text.trim().is_empty(), "collected response text should be non-empty");
+    assert!(
+        !collected_text.trim().is_empty(),
+        "collected response text should be non-empty"
+    );
     println!("Ollama response: {collected_text:?}");
 }

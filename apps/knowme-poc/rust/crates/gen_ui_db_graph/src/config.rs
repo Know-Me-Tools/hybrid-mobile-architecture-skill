@@ -12,7 +12,7 @@
 use serde::{Deserialize, Serialize};
 use surrealdb::types::SurrealValue;
 
-use crate::error::GraphError;
+use crate::error::{check_statements, GraphError};
 use crate::store::GraphStore;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,7 +44,13 @@ struct ProviderRow {
 
 impl From<ProviderRow> for Provider {
     fn from(r: ProviderRow) -> Self {
-        Provider { id: r.id, kind: r.kind, base_url: r.base_url, api_key_ref: r.api_key_ref, enabled: r.enabled }
+        Provider {
+            id: r.id,
+            kind: r.kind,
+            base_url: r.base_url,
+            api_key_ref: r.api_key_ref,
+            enabled: r.enabled,
+        }
     }
 }
 
@@ -72,7 +78,8 @@ impl GraphStore {
         if provider.id.trim().is_empty() {
             return Err(GraphError::Invalid("provider id is empty".into()));
         }
-        self.db()
+        let mut response = self
+            .db()
             .query(
                 "UPSERT type::record('provider', $id) \
                  SET kind = $kind, base_url = $base_url, api_key_ref = $api_key_ref, \
@@ -84,17 +91,25 @@ impl GraphStore {
             .bind(("api_key_ref", provider.api_key_ref.clone()))
             .bind(("enabled", provider.enabled))
             .await?;
-        Ok(())
+        check_statements(&mut response, "upsert_provider")
     }
 
     /// INTENT: remove a provider by id.
     pub async fn delete_provider(&self, id: &str) -> Result<(), GraphError> {
-        self.db().query("DELETE type::record('provider', $id);").bind(("id", id.to_string())).await?;
-        Ok(())
+        let mut response = self
+            .db()
+            .query("DELETE type::record('provider', $id);")
+            .bind(("id", id.to_string()))
+            .await?;
+        check_statements(&mut response, "delete_provider")
     }
 
     /// INTENT: read the model preference for one (surface, lane) pair.
-    pub async fn get_model_pref(&self, surface: &str, lane: &str) -> Result<Option<ModelPref>, GraphError> {
+    pub async fn get_model_pref(
+        &self,
+        surface: &str,
+        lane: &str,
+    ) -> Result<Option<ModelPref>, GraphError> {
         let mut res = self
             .db()
             .query(
@@ -118,18 +133,23 @@ impl GraphStore {
                 .await?;
             p.take(0)?
         };
-        Ok(rows.into_iter().zip(params).next().map(|(r, params)| ModelPref {
-            surface: r.surface,
-            lane: r.lane,
-            provider_id: r.provider_id,
-            model_id: r.model_id,
-            params: params.unwrap_or(serde_json::Value::Null),
-        }))
+        Ok(rows
+            .into_iter()
+            .zip(params)
+            .next()
+            .map(|(r, params)| ModelPref {
+                surface: r.surface,
+                lane: r.lane,
+                provider_id: r.provider_id,
+                model_id: r.model_id,
+                params: params.unwrap_or(serde_json::Value::Null),
+            }))
     }
 
     /// INTENT: create or update the model preference for one (surface, lane) pair.
     pub async fn upsert_model_pref(&self, pref: &ModelPref) -> Result<(), GraphError> {
-        self.db()
+        let mut response = self
+            .db()
             .query(
                 "UPSERT type::record('model_pref', $key) \
                  SET surface = $surface, lane = $lane, provider_id = $provider_id, \
@@ -142,7 +162,7 @@ impl GraphStore {
             .bind(("model_id", pref.model_id.clone()))
             .bind(("params", pref.params.clone()))
             .await?;
-        Ok(())
+        check_statements(&mut response, "upsert_model_pref")
     }
 
     /// INTENT: read one app setting by key.
@@ -158,11 +178,12 @@ impl GraphStore {
 
     /// INTENT: create or update one app setting.
     pub async fn set_setting(&self, key: &str, value: serde_json::Value) -> Result<(), GraphError> {
-        self.db()
+        let mut response = self
+            .db()
             .query("UPSERT type::record('app_setting', $key) SET value = $value;")
             .bind(("key", key.to_string()))
             .bind(("value", value))
             .await?;
-        Ok(())
+        check_statements(&mut response, "set_setting")
     }
 }

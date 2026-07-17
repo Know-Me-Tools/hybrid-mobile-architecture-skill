@@ -42,17 +42,28 @@ async fn demo_corpus_seeds_and_is_searchable() {
     .await
     .expect("store opens and applies schema");
 
-    let n = gen_ui_db_graph::seed_corpus(&store).await.expect("corpus seeds");
-    assert_eq!(n, gen_ui_db_graph::corpus_len(), "seed_corpus should report every note");
+    let n = gen_ui_db_graph::seed_corpus(&store)
+        .await
+        .expect("corpus seeds");
+    assert_eq!(
+        n,
+        gen_ui_db_graph::corpus_len(),
+        "seed_corpus should report every note"
+    );
     assert!(n > 0, "corpus must not be empty");
 
     // Idempotent: stable ids are what let `load_seeds` run on every app start.
-    let again = gen_ui_db_graph::seed_corpus(&store).await.expect("re-seed is safe");
+    let again = gen_ui_db_graph::seed_corpus(&store)
+        .await
+        .expect("re-seed is safe");
     assert_eq!(again, n, "re-seeding reports the same count");
 
     // "BossFang" is a coined product term appearing in exactly one seed — the kind of
     // rare token the BM25 lane exists to catch, and one no embedding would place well.
-    let hits = store.memory_search("BossFang", 10).await.expect("search the seeded corpus");
+    let hits = store
+        .memory_search("BossFang", 10)
+        .await
+        .expect("search the seeded corpus");
     assert!(
         hits.iter().any(|h| h.text.contains("BossFang")),
         "the BossFang seed should be retrievable for its own rare term; got {} hits: {:?}",

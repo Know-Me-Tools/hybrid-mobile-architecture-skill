@@ -3,7 +3,7 @@
 //! `memory_ingest` / `memory_search` / `graph_expand`; SurrealQL never leaves this
 //! module.
 use crate::embed::{Embedder, EMBED_DIM};
-use crate::error::GraphError;
+use crate::error::{check_statements, GraphError};
 use crate::rrf::RrfConfig;
 use crate::schema::{HYBRID_SEARCH_QUERY, SCHEMA_DDL, VECTOR_SEARCH_QUERY};
 use serde::{Deserialize, Serialize};
@@ -121,12 +121,7 @@ impl GraphStore {
 
     async fn init(&self) -> Result<(), GraphError> {
         let mut res = self.db.query(SCHEMA_DDL).await?;
-        // DDL errors surface per-statement, not as a query-level Err — surface the
-        // first so a bad schema fails loudly at boot instead of at first search.
-        if let Some((idx, err)) = res.take_errors().into_iter().next() {
-            return Err(GraphError::Surreal(format!("schema stmt {idx}: {err}")));
-        }
-        Ok(())
+        check_statements(&mut res, "schema")
     }
 
     /// Run the (synchronous, CPU-bound) embedder off the async runtime.
@@ -219,7 +214,8 @@ impl GraphStore {
         // Do NOT "simplify" to the escaped-ident form `entity:⟨$from⟩` — chevrons are
         // escaped-IDENTIFIER syntax, not interpolation, so that silently relates the
         // literal records `entity:$from`/`entity:$to` and traversal finds nothing.
-        self.db
+        let mut response = self
+            .db
             .query(
                 "RELATE (type::record('entity', $from))->relates_to->(type::record('entity', $to)) \
                  SET rel = $rel;",
@@ -228,7 +224,7 @@ impl GraphStore {
             .bind(("to", to.to_string()))
             .bind(("rel", rel.to_string()))
             .await?;
-        Ok(())
+        check_statements(&mut response, "relate")
     }
 
     /// INTENT: hybrid semantic + lexical search. Embeds `query`, runs the vector
@@ -267,6 +263,7 @@ impl GraphStore {
                     .bind(("q", query.to_string()))
                     .bind(("k", k as i64))
                     .await?;
+                check_statements(&mut res, "memory_search")?;
                 // The SELECT is the last statement in the multi-statement query. Bind
                 // the index first — `take(&mut self)` and `num_statements(&self)` can't
                 // borrow `res` in the same expression.
@@ -402,6 +399,41 @@ impl GraphStore {
     // public field on every other consumer of this struct.
     pub(crate) fn db(&self) -> &Surreal<Any> {
         &self.db
+    }
+
+    /// Test-only boundary for a relation whose source table violates schema.
+    #[doc(hidden)]
+    pub async fn relate_raw_for_test(
+        &self,
+        from_table: &str,
+        from: &str,
+        to: &str,
+    ) -> Result<(), GraphError> {
+        let mut response = self
+            .db
+            .query(
+                "RELATE (type::record($from_table, $from))->relates_to->\
+                 (type::record('entity', $to)) SET rel = 'related';",
+            )
+            .bind(("from_table", from_table.to_string()))
+            .bind(("from", from.to_string()))
+            .bind(("to", to.to_string()))
+            .await?;
+        check_statements(&mut response, "relate")
+    }
+
+    /// Test-only inspection of stored relation endpoint IDs.
+    #[doc(hidden)]
+    pub async fn edge_endpoints_for_test(&self) -> Result<Vec<(String, String)>, GraphError> {
+        let mut response = self
+            .db
+            .query("SELECT VALUE [meta::id(in), meta::id(out)] FROM relates_to;")
+            .await?;
+        let rows: Vec<Vec<String>> = response.take(0)?;
+        Ok(rows
+            .into_iter()
+            .filter_map(|pair| Some((pair.first()?.clone(), pair.get(1)?.clone())))
+            .collect())
     }
 }
 

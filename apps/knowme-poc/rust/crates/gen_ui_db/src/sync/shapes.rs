@@ -49,7 +49,10 @@ struct ShapeCursor {
 impl ShapeCursor {
     /// Fresh cursor — Electric's initial-sync sentinel offset is `-1`.
     fn initial() -> Self {
-        Self { handle: None, offset: "-1".to_string() }
+        Self {
+            handle: None,
+            offset: "-1".to_string(),
+        }
     }
 }
 
@@ -69,7 +72,13 @@ impl ShapeConsumer {
         store: Arc<dyn LocalStore>,
         status: SyncStatusHandle,
     ) -> Self {
-        Self { client, electric_url, shape, store, status }
+        Self {
+            client,
+            electric_url,
+            shape,
+            store,
+            status,
+        }
     }
 
     /// Consume the shape until the task is cancelled (drop of the join handle) or a
@@ -125,7 +134,10 @@ impl ShapeConsumer {
         let mut req = self
             .client
             .get(format!("{}/v1/shape", self.electric_url))
-            .query(&[("table", self.shape.table.as_str()), ("offset", cursor.offset.as_str())]);
+            .query(&[
+                ("table", self.shape.table.as_str()),
+                ("offset", cursor.offset.as_str()),
+            ]);
         if let Some(handle) = &cursor.handle {
             req = req.query(&[("handle", handle.as_str())]);
         }
@@ -136,20 +148,29 @@ impl ShapeConsumer {
             req = req.query(&[("live", "true")]);
         }
 
-        let resp = req.send().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
 
         // 409 = shape handle rotated: reset to initial and let run() refetch.
         if resp.status().as_u16() == 409 {
             return Ok((Vec::new(), ShapeCursor::initial()));
         }
         if !resp.status().is_success() {
-            return Err(CoreError::Transient(format!("shape http {}", resp.status())));
+            return Err(CoreError::Transient(format!(
+                "shape http {}",
+                resp.status()
+            )));
         }
 
         let handle = header(&resp, "electric-handle").or_else(|| cursor.handle.clone());
         let offset = header(&resp, "electric-offset").unwrap_or_else(|| cursor.offset.clone());
 
-        let body = resp.text().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+        let body = resp
+            .text()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
         // Empty body on a live long-poll timeout = no new data; keep the cursor.
         let messages: Vec<ShapeMessage> = if body.trim().is_empty() {
             Vec::new()
@@ -162,7 +183,10 @@ impl ShapeConsumer {
 }
 
 fn header(resp: &reqwest::Response, name: &str) -> Option<String> {
-    resp.headers().get(name).and_then(|v| v.to_str().ok()).map(str::to_string)
+    resp.headers()
+        .get(name)
+        .and_then(|v| v.to_str().ok())
+        .map(str::to_string)
 }
 
 /// Decode one shape row message into a [`RowChange`]. Returns `None` for messages
@@ -180,7 +204,12 @@ fn decode_row(table: &str, msg: &ShapeMessage) -> Option<RowChange> {
         .as_ref()
         .map(|v| v.to_string())
         .unwrap_or_else(|| "{}".to_string());
-    Some(RowChange { table: table.to_string(), op, key, value_json })
+    Some(RowChange {
+        table: table.to_string(),
+        op,
+        key,
+        value_json,
+    })
 }
 
 #[cfg(test)]

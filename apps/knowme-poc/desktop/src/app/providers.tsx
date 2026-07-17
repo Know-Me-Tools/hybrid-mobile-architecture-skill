@@ -2,7 +2,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from '@tanstack/react-router'
 import { router } from './router'
-import { useAuthStore } from '@/features/auth/stores/authStore'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,10 +11,9 @@ const queryClient = new QueryClient({
 })
 
 export function AppProviders() {
-  const auth = useAuthStore()
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} context={{ auth, queryClient }} />
+      <RouterProvider router={router} context={{ queryClient }} />
     </QueryClientProvider>
   )
 }

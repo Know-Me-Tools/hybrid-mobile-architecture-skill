@@ -12,10 +12,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 /// `thread_id` is reserved for multi-thread history (not yet used — the agent
 /// layer takes the full turn history via `message` for now).
 Future<String> chatSend({required String threadId, required String message}) =>
-    GenUiCore.instance.api.crateApiChatChatSend(
-      threadId: threadId,
-      message: message,
-    );
+    GenUiCore.instance.api
+        .crateApiChatChatSend(threadId: threadId, message: message);
 
 /// Ingest a note into memory (embeds on-device via fastembed, upserts into
 /// SurrealDB). Returns the assigned record id.
@@ -27,10 +25,7 @@ Future<List<MemoryHit>> memorySearch({required String query, required int k}) =>
     GenUiCore.instance.api.crateApiChatMemorySearch(query: query, k: k);
 
 /// Expand the entity graph around a node to a given depth.
-Future<List<RelatedEntity>> graphExpand({
-  required String entityId,
-  required int depth,
-}) => GenUiCore.instance.api.crateApiChatGraphExpand(
-  entityId: entityId,
-  depth: depth,
-);
+Future<List<RelatedEntity>> graphExpand(
+        {required String entityId, required int depth}) =>
+    GenUiCore.instance.api
+        .crateApiChatGraphExpand(entityId: entityId, depth: depth);

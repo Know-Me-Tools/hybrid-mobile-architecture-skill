@@ -57,10 +57,10 @@ pillar 1 "Rust toolchain + WASM + Prometheus Skill System"
 
 if command -v rustc &>/dev/null; then
   RUST_VER=$(rustc --version | awk '{print $2}' | cut -d- -f1)
-  if version_ge "$RUST_VER" "1.95"; then
+  if version_ge "$RUST_VER" "1.96"; then
     ok "rustc $RUST_VER"
   else
-    warn "rustc $RUST_VER — requires 1.95+ (SurrealDB 3.2 / gen_ui_db_graph needs it). Run: rustup update stable"
+    warn "rustc $RUST_VER — requires 1.96+ (SurrealDB 3.2 plus wasm target). Run: rustup toolchain install 1.96"
     MISSING+=("rust-update")
   fi
 else
@@ -369,7 +369,7 @@ if $INSTALL_MODE; then
   STILL_MISSING=()
   for item in "${MISSING[@]}"; do
     case "$item" in
-      rust-update)       version_ge "$(rustc --version | awk '{print $2}' | cut -d- -f1)" "1.95" || STILL_MISSING+=("$item") ;;
+      rust-update)       version_ge "$(rustc --version | awk '{print $2}' | cut -d- -f1)" "1.96" || STILL_MISSING+=("$item") ;;
       flutter_rust_bridge_codegen-update) version_ge "$(flutter_rust_bridge_codegen --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)" "2.12" || STILL_MISSING+=("$item") ;;
       openspec-update)   version_ge "$(openspec --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)" "1.6.0" || STILL_MISSING+=("$item") ;;
       node-update)       [[ $(node --version | sed 's/v//' | cut -d. -f1) -ge 24 ]] || STILL_MISSING+=("$item") ;;

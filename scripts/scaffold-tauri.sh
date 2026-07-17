@@ -57,8 +57,9 @@ cat > package.json << PKGEOF
     "@tanstack/react-virtual": "^3.0.0",
     "@electric-sql/pglite":   "0.5.4",
     "@electric-sql/pglite-sync": "^0.4.0",
-    "@prometheus-ags/prometheus-entity-management": "git+https://github.com/Prometheus-AGS/prometheus-entity-management.git#74d72c7a3394a09c246d08aba833b903666a37d1&path:packages/entity-graph-react",
+    "@prometheus-ags/prometheus-entity-management": "3.0.0-alpha.0",
     "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
+    "@prometheus-ags/tauri-plugin-gen-ui": "file:../rust/crates/tauri-plugin-gen-ui/guest-js",
     "@flint/react": "git+https://github.com/Know-Me-Tools/flint-forge.git#1cae090d2cc02675eb99ba7a599735d339e53e38&path:packages/flint-react",
     "tailwindcss":            "^4.0.0",
     "@tailwindcss/vite":      "^4.0.0",
@@ -97,7 +98,7 @@ ok "package.json"
 cat > index.html << EOF
 <!doctype html>
 <html lang="en">
-  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>${APP_NAME}</title></head>
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='28'%3EK%3C/text%3E%3C/svg%3E" /><title>${APP_NAME}</title></head>
   <body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body>
 </html>
 EOF
@@ -163,14 +164,14 @@ export default defineConfig({
   },
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
   envPrefix: ['VITE_', 'TAURI_'],
-  build: { target: process.env.TAURI_ENV_PLATFORM === 'windows' ? 'chrome105' : 'safari13', minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false, sourcemap: !!process.env.TAURI_ENV_DEBUG },
+  build: { target: process.env.TAURI_ENV_PLATFORM === 'windows' ? 'chrome105' : 'safari15', minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false, sourcemap: !!process.env.TAURI_ENV_DEBUG },
 })
 EOF
 ok "vite.config.ts"
 
 # ── Feature-based src structure ────────────────────────────────────────────
 step "Creating feature-based clean architecture"
-mkdir -p src/{app,core/{types,errors,utils,theme},shared/{components/ui,hooks,stores},bridge/{a2ui,agui},features/{chat/{api,stores,queries,hooks,components},auth/{api,stores,queries,hooks,components},entities/{api,stores,queries,hooks,components},memory/{api,stores,queries,hooks,components},settings/{stores,components}}}
+mkdir -p src/{app,core/{types,errors,utils,theme},shared/{components/ui,hooks,stores},bridge/{a2ui,agui},features/{chat/{api,stores,queries,hooks,components},entities/{api,stores,queries,hooks,components},memory/{api,stores,queries,hooks,components},settings/{stores,components}}}
 ok "src/ directory structure"
 
 # ── App providers ──────────────────────────────────────────────────────────
@@ -179,7 +180,6 @@ cat > src/app/providers.tsx << 'EOF'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from '@tanstack/react-router'
 import { router } from './router'
-import { useAuthStore } from '@/features/auth/stores/authStore'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -189,10 +189,9 @@ const queryClient = new QueryClient({
 })
 
 export function AppProviders() {
-  const auth = useAuthStore()
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} context={{ auth, queryClient }} />
+      <RouterProvider router={router} context={{ queryClient }} />
     </QueryClientProvider>
   )
 }
@@ -202,27 +201,18 @@ ok "src/app/providers.tsx"
 # ── Router stub ────────────────────────────────────────────────────────────
 cat > src/app/router.tsx << 'EOF'
 // TJ-ARCH-MOB-001 compliant
-import { createRouter, createRoute, createRootRouteWithContext, redirect } from '@tanstack/react-router'
+import { createRouter, createRootRouteWithContext } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
-import type { AuthState } from '@/features/auth/stores/authStore'
 
-interface RouterContext { auth: AuthState; queryClient: QueryClient }
+interface RouterContext { queryClient: QueryClient }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: () => <div className="h-screen bg-background">outlet placeholder</div>,
 })
 
-const protectedRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  id: 'protected',
-  beforeLoad: ({ context }) => {
-    if (!context.auth.isAuthenticated) throw redirect({ to: '/login' })
-  },
-})
-
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([protectedRoute]),
-  context: { auth: undefined!, queryClient: undefined! },
+  routeTree: rootRoute,
+  context: { queryClient: undefined! },
 })
 
 declare module '@tanstack/react-router' {
@@ -230,46 +220,6 @@ declare module '@tanstack/react-router' {
 }
 EOF
 ok "src/app/router.tsx"
-
-# ── Auth store stub ────────────────────────────────────────────────────────
-cat > src/features/auth/stores/authStore.ts << 'EOF'
-// TJ-ARCH-MOB-001 compliant — store layer (called only by hooks, never by components)
-import { create } from 'zustand'
-import { subscribeWithSelector, persist } from 'zustand/middleware'
-
-export interface AuthState {
-  user: { id: string; email: string } | null
-  session: unknown | null
-  isAuthenticated: boolean
-}
-
-interface AuthActions {
-  signIn: (email: string, password: string) => Promise<void>
-  signOut: () => Promise<void>
-}
-
-export const useAuthStore = create<AuthState & AuthActions>()(
-  subscribeWithSelector(
-    persist(
-      (set) => ({
-        user: null,
-        session: null,
-        isAuthenticated: false,
-        signIn: async (email, _password) => {
-          // TODO: implement via Supabase or Kratos
-          // Store calls invoke() or supabase SDK here — never a component
-          set({ user: { id: '1', email }, isAuthenticated: true })
-        },
-        signOut: async () => {
-          set({ user: null, session: null, isAuthenticated: false })
-        },
-      }),
-      { name: 'auth-state' }
-    )
-  )
-)
-EOF
-ok "src/features/auth/stores/authStore.ts"
 
 # ── Chat store stub ────────────────────────────────────────────────────────
 cat > src/features/chat/stores/chatStore.ts << 'EOF'
@@ -406,12 +356,19 @@ import {
   registerEntityTransport,
   startLocalFirstGraph,
   type EntityTransport,
-  type LocalFirstGraphRuntime,
 } from '@prometheus-ags/prometheus-entity-management'
 import schemaSql from '../schema.sql?raw'
 
 export interface EntityRow { id: string; tenant_id: string; [key: string]: unknown }
-let runtime: LocalFirstGraphRuntime | null = null
+
+interface EntityRuntimeSession {
+  tenantId: string
+  dispose: () => void
+}
+
+let session: EntityRuntimeSession | null = null
+let sessionInflight: Promise<EntityRuntimeSession> | null = null
+let consumers = 0
 
 function tauriTransport(entityType: string): EntityTransport<EntityRow> {
   return {
@@ -442,7 +399,7 @@ function pgliteTransport(db: PGlite, table: string, tenantId: string): EntityTra
   }
 }
 
-export async function startEntityRuntime(tenantId: string): Promise<() => void> {
+async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSession> {
   const [projectsDdl, notesDdl] = schemaSql.split(';').filter((sql) => sql.includes('CREATE TABLE'))
   if (!projectsDdl || !notesDdl) throw new Error('shared entity DDL is incomplete')
   registerEntityFromSql({ entityType: 'Project', createTableSql: projectsDdl })
@@ -452,34 +409,97 @@ export async function startEntityRuntime(tenantId: string): Promise<() => void> 
     registerEntityTransport('Project', tauriTransport('projects'))
     registerEntityTransport('Note', tauriTransport('notes'))
     await invoke<void>('entity_runtime_start', { tenantId })
-    return () => { void invoke<void>('entity_runtime_stop') }
+    return { tenantId, dispose: () => { void invoke<void>('entity_runtime_stop') } }
   }
 
   const db = await PGlite.create('idb://gen-ui', { relaxedDurability: true })
   await db.exec(schemaSql)
   registerEntityTransport('Project', pgliteTransport(db, 'projects', tenantId))
   registerEntityTransport('Note', pgliteTransport(db, 'notes', tenantId))
-  runtime = startLocalFirstGraph({
+  const graph = startLocalFirstGraph({
     storage: await createPGlitePersistenceAdapter(db),
     key: `tenant:${tenantId}`,
     replayPendingActions: true,
   })
-  return () => { runtime?.dispose(); runtime = null; void db.close() }
+  return {
+    tenantId,
+    dispose: () => {
+      graph.dispose()
+      void db.close()
+    },
+  }
+}
+
+export async function startEntityRuntime(tenantId: string): Promise<() => void> {
+  if (session && session.tenantId !== tenantId) {
+    throw new Error(`entity runtime already active for tenant ${session.tenantId}`)
+  }
+  consumers += 1
+
+  try {
+    if (!session) {
+      sessionInflight ??= createEntityRuntime(tenantId)
+      const pending = sessionInflight
+      session = await pending
+      if (sessionInflight === pending) sessionInflight = null
+    }
+  } catch (cause) {
+    consumers -= 1
+    sessionInflight = null
+    throw cause
+  }
+
+  const acquired = session
+  let released = false
+  return () => {
+    if (released) return
+    released = true
+    consumers -= 1
+    if (consumers === 0 && session === acquired) {
+      acquired.dispose()
+      session = null
+    }
+  }
 }
 EOF
 
 cat > src/features/entities/hooks/useEntityRuntime.ts << 'EOF'
 // TJ-ARCH-MOB-001 compliant
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { startEntityRuntime } from '../stores/entityRuntime'
 
-export function useEntityRuntime(tenantId: string | null): void {
+export function useEntityRuntime(tenantId: string | null) {
+  const [isReady, setIsReady] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   useEffect(() => {
-    if (!tenantId) return
+    setIsReady(false)
+    setError(null)
+    if (!tenantId) return undefined
+    let active = true
     let dispose: (() => void) | undefined
-    void startEntityRuntime(tenantId).then((cleanup) => { dispose = cleanup })
-    return () => dispose?.()
+    void startEntityRuntime(tenantId)
+      .then((cleanup) => {
+        if (!active) { cleanup(); return }
+        dispose = cleanup
+        setIsReady(true)
+      })
+      .catch((cause: unknown) => { if (active) setError(String(cause)) })
+    return () => { active = false; dispose?.() }
   }, [tenantId])
+  return { isReady, error }
+}
+EOF
+
+cat > src/features/entities/components/EntityRuntimeBoundary.tsx << 'EOF'
+// TJ-ARCH-MOB-001 compliant — component imports the hook only.
+import type { ReactNode } from 'react'
+import { useEntityRuntime } from '../hooks/useEntityRuntime'
+
+export function EntityRuntimeBoundary({ children }: { children: ReactNode }) {
+  const { isReady, error } = useEntityRuntime('local-default')
+  if (error) return <div role="alert">Entity runtime failed: {error}</div>
+  if (!isReady) return <div aria-live="polite">Starting entity runtime…</div>
+  return <>{children}</>
 }
 EOF
 
@@ -493,15 +513,10 @@ cat > src/features/memory/stores/memoryStore.ts << 'EOF'
 // TJ-ARCH-MOB-001 compliant — store layer (the ONLY place invoke() is called).
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import { invoke, isTauri } from '@tauri-apps/api/core'
+import { isTauri } from '@tauri-apps/api/core'
+import { memoryIngest, memorySearch, type MemoryHit } from '@prometheus-ags/tauri-plugin-gen-ui'
 
-/** Mirror of gen_ui_db::graph::EntityHit — the fused RRF result. snake_case wire. */
-export interface MemoryHit {
-  id: string
-  name: string
-  score: number
-  snippet?: string | null
-}
+export type { MemoryHit }
 
 interface MemoryState {
   query: string
@@ -530,7 +545,7 @@ export const useMemoryStore = create<MemoryState & MemoryActions>()(
     ingest: async (text: string) => {
       set((s) => { s.isIngesting = true; s.error = null })
       try {
-        if (isTauri()) await invoke<string>('memory_ingest', { text })
+        if (isTauri()) await memoryIngest(text)
       } catch (e) {
         set((s) => { s.error = String(e) })
       } finally {
@@ -542,7 +557,7 @@ export const useMemoryStore = create<MemoryState & MemoryActions>()(
       set((s) => { s.isSearching = true; s.error = null; s.query = query })
       try {
         const hits = isTauri()
-          ? await invoke<MemoryHit[]>('memory_search', { query, k: 8 })
+          ? await memorySearch(query, 8)
           : []
         set((s) => { s.hits = hits })
       } catch (e) {
@@ -607,9 +622,9 @@ export function MemoryPanel() {
       <ol aria-label={`Results for ${query}`}>
         {hits.map((hit) => (
           <li key={hit.id}>
-            <strong>{hit.name}</strong>
+            <strong>{hit.text}</strong>
             <span> · {hit.score.toFixed(3)}</span>
-            {hit.snippet ? <p>{hit.snippet}</p> : null}
+            <p>{hit.kind}</p>
           </li>
         ))}
       </ol>
@@ -628,7 +643,8 @@ mkdir -p src/features/startup/{stores,hooks,components}
 cat > src/features/startup/stores/startupStore.ts << 'EOF'
 // TJ-ARCH-MOB-001 compliant — store layer (the ONLY place invoke() is called).
 import { create } from 'zustand'
-import { invoke, isTauri } from '@tauri-apps/api/core'
+import { isTauri } from '@tauri-apps/api/core'
+import { attachSyncShapes, loadSeeds, runMigrations } from '@prometheus-ags/tauri-plugin-gen-ui'
 
 export type StartupPhase = 'migrations' | 'seeds' | 'shapes' | 'ready'
 
@@ -651,21 +667,28 @@ interface StartupState {
 // Boot-order invariant: migrations → seeds → shapes. Sync shapes fail on unknown
 // columns, so migrations+seeds MUST run first. On web the wasm core runs the same
 // sequence; until wired, the steps resolve immediately so the gate opens.
+let inflight: Promise<void> | null = null
+
 export const useStartupStore = create<StartupState>((set) => ({
   phase: 'migrations',
   error: null,
-  run: async () => {
-    try {
-      set({ phase: 'migrations', error: null })
-      if (isTauri()) await invoke<void>('run_migrations')
-      set({ phase: 'seeds' })
-      if (isTauri()) await invoke<void>('load_seeds')
-      set({ phase: 'shapes' })
-      if (isTauri()) await invoke<void>('attach_sync_shapes')
-      set({ phase: 'ready' })
-    } catch (e) {
-      set({ error: String(e) })
-    }
+  run: () => {
+    inflight ??= (async () => {
+      try {
+        set({ phase: 'migrations', error: null })
+        if (isTauri()) await runMigrations()
+        set({ phase: 'seeds' })
+        if (isTauri()) await loadSeeds()
+        set({ phase: 'shapes' })
+        if (isTauri()) await attachSyncShapes()
+        set({ phase: 'ready' })
+      } catch (e) {
+        set({ error: String(e) })
+      } finally {
+        inflight = null
+      }
+    })()
+    return inflight
   },
 }))
 EOF
@@ -812,6 +835,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AppProviders } from './app/providers'
 import { StartupGate } from './features/startup/components/StartupGate'
+import { EntityRuntimeBoundary } from './features/entities/components/EntityRuntimeBoundary'
 import { useChatStore } from './features/chat/stores/chatStore'
 import './index.css'
 
@@ -824,7 +848,9 @@ window.addEventListener('beforeunload', cleanup)
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <StartupGate>
-      <AppProviders />
+      <EntityRuntimeBoundary>
+        <AppProviders />
+      </EntityRuntimeBoundary>
     </StartupGate>
   </StrictMode>
 )
@@ -865,7 +891,12 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { '@': new URL('./src', import.meta.url).pathname } },
-  test: { environment: 'jsdom', globals: true, restoreMocks: true },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    restoreMocks: true,
+    server: { deps: { inline: [/@prometheus-ags\//] } },
+  },
 })
 EOF
 
@@ -892,15 +923,19 @@ beforeEach(() => {
 describe('memoryStore', () => {
   it('folds ranked hits from memory_search into state', async () => {
     const hits: MemoryHit[] = [
-      { id: 'entity:1', name: 'Alpha', score: 0.91, snippet: 'first' },
-      { id: 'entity:2', name: 'Beta', score: 0.42 },
+      { id: 'entity:1', text: 'Alpha', kind: 'note', score: 0.91 },
+      { id: 'entity:2', text: 'Beta', kind: 'note', score: 0.42 },
     ]
     invoke.mockResolvedValueOnce(hits)
 
     await useMemoryStore.getState().search('alpha')
 
     const s = useMemoryStore.getState()
-    expect(invoke).toHaveBeenCalledWith('memory_search', { query: 'alpha', k: 8 })
+    expect(invoke).toHaveBeenCalledWith('plugin:gen-ui|memory_search', {
+      query: 'alpha',
+      k: 8,
+      mode: undefined,
+    })
     expect(s.query).toBe('alpha')
     expect(s.hits).toHaveLength(2)
     expect(s.hits[0].score).toBeGreaterThan(s.hits[1].score)
@@ -948,9 +983,9 @@ describe('startupStore', () => {
     expect(useStartupStore.getState().phase).toBe('ready')
     // The boot-order invariant: shapes come AFTER migrations and seeds.
     expect(invoke.mock.calls.map((c) => c[0])).toEqual([
-      'run_migrations',
-      'load_seeds',
-      'attach_sync_shapes',
+      'plugin:gen-ui|run_migrations',
+      'plugin:gen-ui|load_seeds',
+      'plugin:gen-ui|attach_sync_shapes',
     ])
   })
 
@@ -963,7 +998,7 @@ describe('startupStore', () => {
     expect(s.error).toContain('migration 003 failed')
     expect(s.phase).not.toBe('ready')
     // Shapes must never attach when migrations fail (they'd hit unknown columns).
-    expect(invoke.mock.calls.map((c) => c[0])).not.toContain('attach_sync_shapes')
+    expect(invoke.mock.calls.map((c) => c[0])).not.toContain('plugin:gen-ui|attach_sync_shapes')
   })
 
   it('exposes monotonic progress across the phase order', () => {
@@ -979,12 +1014,28 @@ ok "Vitest + 5 boundary tests (memory fold · memory error · boot order · boot
 
 # ── src-tauri placeholder ──────────────────────────────────────────────────
 step "Creating Tauri source skeleton"
-mkdir -p src-tauri/src
+mkdir -p src-tauri/src src-tauri/.cargo
+cat > src-tauri/.cargo/config.toml << 'EOF'
+# TJ-ARCH-MOB-001 compliant
+
+[env]
+# Native inference/audio dependencies use std::filesystem (macOS 10.15+).
+# Cargo owns native dependency compilation; bundle metadata alone is too late.
+MACOSX_DEPLOYMENT_TARGET = { value = "10.15", force = true }
+EOF
+
+cat > src-tauri/rust-toolchain.toml << 'EOF'
+[toolchain]
+channel = "1.96"
+components = ["rustfmt", "clippy"]
+EOF
+
 cat > src-tauri/Cargo.toml << EOF
 [package]
 name = "${APP_NAME}"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.96"
 
 [lib]
 name = "${APP_NAME//-/_}"
@@ -1033,6 +1084,7 @@ cat > src-tauri/tauri.conf.json << EOF
   "bundle": {
     "active": true,
     "targets": "all",
+    "macOS": { "minimumSystemVersion": "10.15" },
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
   }
 }
@@ -1207,80 +1259,6 @@ cat > src-tauri/capabilities/default.json << 'EOF'
 }
 EOF
 ok "src-tauri/capabilities/default.json"
-
-# ── PEM local-tarball pre-resolve ───────────────────────────────────────────
-# @prometheus-ags/prometheus-entity-management (PEM) is an unpublished pnpm-workspace
-# subpackage: its own package.json depends on "@prometheus-ags/entity-graph-core@workspace:*",
-# which cannot resolve outside the PEM monorepo (ERR_PNPM_WORKSPACE_PKG_NOT_FOUND). Two
-# remediations, in order:
-#   1. If PEM_HOME (a local PEM monorepo checkout) is set/found and its packages are
-#      prebuilt, `pnpm pack` the needed workspace packages into local tarballs and
-#      rewrite this app's dependency to a `file:` tarball reference.
-#   2. Otherwise, strip the PEM dependency entirely — the app still builds using the
-#      local @prometheus-ags/gen-ui-react package + this app's own entity providers.
-step "Resolving PEM (prometheus-entity-management) dependency"
-PEM_HOME="${PEM_HOME:-$HOME/Projects/prometheus/prometheus-entity-management}"
-PEM_RESOLVED=false
-if [[ -d "$PEM_HOME/packages/entity-graph-core" ]] && [[ -d "$PEM_HOME/packages/entity-graph-react" ]]; then
-  mkdir -p packages/vendor
-  PEM_OK=true
-  for pkg in entity-graph-core entity-graph-react; do
-    if [[ ! -d "$PEM_HOME/packages/$pkg/dist" ]]; then
-      echo "  ⚠ $pkg has no dist/ (not built) — falling back to stripping PEM"
-      PEM_OK=false
-      break
-    fi
-  done
-  if $PEM_OK; then
-    VENDOR_DIR="$(pwd)/packages/vendor"
-    # PEM's package.json pins an exact corepack "packageManager" version (pnpm@10.33.0
-    # with a hash). On boxes where that exact build isn't cached, corepack's own
-    # integrity check can hash-mismatch against the registry (an environment issue in
-    # the PEM checkout, not something this scaffold controls) — `pnpm pack` then fails
-    # and we fall through to the strip-PEM fallback below, same as when PEM_HOME is
-    # missing entirely.
-    PACK_OK=true
-    for pkg in entity-graph-core entity-graph-react; do
-      if ! (cd "$PEM_HOME/packages/$pkg" && pnpm pack --pack-destination "$VENDOR_DIR" >/dev/null 2>&1); then
-        echo "  ⚠ pnpm pack failed for $pkg (likely a corepack packageManager-pin mismatch in PEM_HOME) — falling back to stripping PEM"
-        PACK_OK=false
-        break
-      fi
-    done
-    # `ls nomatch* 2>/dev/null | head -1` still fails the pipeline under `set -o pipefail`
-    # (ls's own non-zero exit propagates regardless of head) — guard explicitly.
-    CORE_TGZ=$(ls packages/vendor/prometheus-ags-entity-graph-core-*.tgz 2>/dev/null | head -1) || CORE_TGZ=""
-    REACT_TGZ=$(ls packages/vendor/prometheus-ags-entity-graph-react-*.tgz 2>/dev/null | head -1) || REACT_TGZ=""
-    if $PACK_OK && [[ -n "$CORE_TGZ" ]] && [[ -n "$REACT_TGZ" ]]; then
-      python3 - "$CORE_TGZ" "$REACT_TGZ" << 'PYEOF'
-import json, sys
-core_tgz, react_tgz = sys.argv[1], sys.argv[2]
-with open("package.json") as f:
-    pkg = json.load(f)
-pkg["dependencies"]["@prometheus-ags/entity-graph-core"] = f"file:{core_tgz}"
-pkg["dependencies"]["@prometheus-ags/prometheus-entity-management"] = f"file:{react_tgz}"
-with open("package.json", "w") as f:
-    json.dump(pkg, f, indent=2)
-    f.write("\n")
-PYEOF
-      ok "PEM resolved via local tarballs ($CORE_TGZ, $REACT_TGZ)"
-      PEM_RESOLVED=true
-    fi
-  fi
-fi
-if ! $PEM_RESOLVED; then
-  echo "  ⚠ PEM_HOME not found/buildable ($PEM_HOME) — stripping PEM dependency (fallback)"
-  python3 - << 'PYEOF'
-import json
-with open("package.json") as f:
-    pkg = json.load(f)
-pkg["dependencies"].pop("@prometheus-ags/prometheus-entity-management", None)
-with open("package.json", "w") as f:
-    json.dump(pkg, f, indent=2)
-    f.write("\n")
-PYEOF
-  ok "PEM dependency stripped — app uses gen-ui-react + local entity providers only"
-fi
 
 step "Installing dependencies"
 if [[ "${SKIP_INSTALL:-0}" == "1" ]]; then

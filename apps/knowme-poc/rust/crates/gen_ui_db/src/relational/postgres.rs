@@ -8,17 +8,19 @@ use std::path::Path;
 #[cfg(feature = "pglite")]
 use std::sync::Arc;
 
-use sqlx::{PgPool, postgres::PgPoolOptions};
+use sqlx::{postgres::PgPoolOptions, PgPool};
 
 #[cfg(feature = "pglite")]
 use tokio::sync::OnceCell;
 
-use super::{RelationalResult, startup::StartupStore};
+use super::{startup::StartupStore, RelationalResult};
 
 static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!("./migrations/postgres");
 
 #[derive(Clone)]
-pub struct PostgresStore { pool: PgPool }
+pub struct PostgresStore {
+    pool: PgPool,
+}
 
 impl PostgresStore {
     pub async fn connect(url: &str) -> RelationalResult<Self> {
@@ -26,12 +28,16 @@ impl PostgresStore {
         Ok(Self { pool })
     }
 
-    pub fn pool(&self) -> &PgPool { &self.pool }
+    pub fn pool(&self) -> &PgPool {
+        &self.pool
+    }
 }
 
 #[async_trait::async_trait]
 impl StartupStore for PostgresStore {
-    async fn migrate(&self) -> RelationalResult<()> { MIGRATOR.run(&self.pool).await.map_err(Into::into) }
+    async fn migrate(&self) -> RelationalResult<()> {
+        MIGRATOR.run(&self.pool).await.map_err(Into::into)
+    }
     async fn execute_seed(&self, sql: &str) -> RelationalResult<()> {
         sqlx::raw_sql(sql).execute(&self.pool).await?;
         Ok(())
@@ -74,7 +80,10 @@ impl PgliteStore {
                 // wire connections multiplexed onto it. A pool of 1 matches the
                 // engine's real concurrency; more connections only queue inside
                 // the server and can deadlock interleaved transactions.
-                let pool = PgPoolOptions::new().max_connections(1).connect(&url).await?;
+                let pool = PgPoolOptions::new()
+                    .max_connections(1)
+                    .connect(&url)
+                    .await?;
                 Ok::<_, super::RelationalError>(Self {
                     store: PostgresStore { pool },
                     _server: Arc::new(server),
@@ -84,5 +93,13 @@ impl PgliteStore {
             .cloned()
     }
 
-    pub fn store(&self) -> &PostgresStore { &self.store }
+    pub fn store(&self) -> &PostgresStore {
+        &self.store
+    }
+
+    /// Apply the embedded Postgres migrations through the same pool returned
+    /// by [`Self::store`]. Opening the server alone does not create tables.
+    pub async fn migrate(&self) -> RelationalResult<()> {
+        self.store.migrate().await
+    }
 }

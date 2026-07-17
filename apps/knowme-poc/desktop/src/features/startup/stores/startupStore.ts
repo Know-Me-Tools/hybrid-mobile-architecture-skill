@@ -27,7 +27,8 @@ interface StartupState {
 //
 // React StrictMode double-invokes the mounting effect in dev, so `run()` must be
 // idempotent: a second call while a run is in flight joins the same promise
-// instead of firing the whole boot sequence (and its Tauri commands) twice.
+// instead of firing the whole boot sequence (and its Tauri commands) twice. The
+// marker is cleared after either outcome so later retries are real new runs.
 let inflight: Promise<void> | null = null
 
 export const useStartupStore = create<StartupState>((set) => ({
@@ -45,8 +46,7 @@ export const useStartupStore = create<StartupState>((set) => ({
         set({ phase: 'ready' })
       } catch (e) {
         set({ error: String(e) })
-        // A failed boot may be retried (the error screen can offer it); clear
-        // the in-flight marker so the next run() attempt starts fresh.
+      } finally {
         inflight = null
       }
     })()

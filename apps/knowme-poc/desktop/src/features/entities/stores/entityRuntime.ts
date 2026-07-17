@@ -14,12 +14,19 @@ import {
   registerEntityTransport,
   startLocalFirstGraph,
   type EntityTransport,
-  type LocalFirstGraphRuntime,
 } from '@prometheus-ags/prometheus-entity-management'
 import schemaSql from '../schema.sql?raw'
 
 export interface EntityRow { id: string; tenant_id: string; [key: string]: unknown }
-let runtime: LocalFirstGraphRuntime | null = null
+
+interface EntityRuntimeSession {
+  tenantId: string
+  dispose: () => void
+}
+
+let session: EntityRuntimeSession | null = null
+let sessionInflight: Promise<EntityRuntimeSession> | null = null
+let consumers = 0
 
 // The plugin's wire shape ({id, entityType, dataJson}) is schema-agnostic —
 // dataJson is the entity payload as a JSON string (see gen_ui_types::transport
@@ -69,7 +76,7 @@ function pgliteTransport(db: PGlite, table: string, tenantId: string): EntityTra
   }
 }
 
-export async function startEntityRuntime(tenantId: string): Promise<() => void> {
+async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSession> {
   const [projectsDdl, notesDdl] = schemaSql.split(';').filter((sql) => sql.includes('CREATE TABLE'))
   if (!projectsDdl || !notesDdl) throw new Error('shared entity DDL is incomplete')
   registerEntityFromSql({ entityType: 'Project', createTableSql: projectsDdl })
@@ -79,17 +86,58 @@ export async function startEntityRuntime(tenantId: string): Promise<() => void> 
     registerEntityTransport('Project', tauriTransport('projects', tenantId))
     registerEntityTransport('Note', tauriTransport('notes', tenantId))
     await entityRuntimeStart(tenantId)
-    return () => { void entityRuntimeStop() }
+    return { tenantId, dispose: () => { void entityRuntimeStop() } }
   }
 
   const db = await PGlite.create('idb://gen-ui', { relaxedDurability: true })
   await db.exec(schemaSql)
   registerEntityTransport('Project', pgliteTransport(db, 'projects', tenantId))
   registerEntityTransport('Note', pgliteTransport(db, 'notes', tenantId))
-  runtime = startLocalFirstGraph({
+  const graph = startLocalFirstGraph({
     storage: await createPGlitePersistenceAdapter(db),
     key: `tenant:${tenantId}`,
     replayPendingActions: true,
   })
-  return () => { runtime?.dispose(); runtime = null; void db.close() }
+  return {
+    tenantId,
+    dispose: () => {
+      graph.dispose()
+      void db.close()
+    },
+  }
+}
+
+// React StrictMode mounts, releases, then remounts effects in development. Share
+// one in-flight runtime across those consumers so two PGlite instances never
+// race the same IndexedDB database, and close it only after the final release.
+export async function startEntityRuntime(tenantId: string): Promise<() => void> {
+  if (session && session.tenantId !== tenantId) {
+    throw new Error(`entity runtime already active for tenant ${session.tenantId}`)
+  }
+  consumers += 1
+
+  try {
+    if (!session) {
+      sessionInflight ??= createEntityRuntime(tenantId)
+      const pending = sessionInflight
+      session = await pending
+      if (sessionInflight === pending) sessionInflight = null
+    }
+  } catch (cause) {
+    consumers -= 1
+    sessionInflight = null
+    throw cause
+  }
+
+  const acquired = session
+  let released = false
+  return () => {
+    if (released) return
+    released = true
+    consumers -= 1
+    if (consumers === 0 && session === acquired) {
+      acquired.dispose()
+      session = null
+    }
+  }
 }

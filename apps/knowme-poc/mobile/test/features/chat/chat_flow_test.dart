@@ -22,8 +22,6 @@ void main() {
 
     final notifier = container.read(chatProvider.notifier);
     await notifier.foldStream('msg-1', _cannedRun());
-    // let the stream drain
-    await Future<void>.delayed(const Duration(milliseconds: 20));
 
     final ChatState state = container.read(chatProvider);
     final msg = state.messages.firstWhere((m) => m.id == 'msg-1');

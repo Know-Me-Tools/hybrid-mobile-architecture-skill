@@ -70,11 +70,15 @@ pub async fn send(user_message: String, history: Vec<String>) -> Result<String, 
         None => return Err(AgentError::NoProvider),
     };
 
-    let mut builder = ClientBuilder::new().api_key(api_key).provider(provider.kind.clone());
+    let mut builder = ClientBuilder::new()
+        .api_key(api_key)
+        .provider(provider.kind.clone());
     if let Some(base_url) = &provider.base_url {
         builder = builder.base_url(base_url.clone());
     }
-    let client = builder.build().map_err(|e| AgentError::Client(e.to_string()))?;
+    let client = builder
+        .build()
+        .map_err(|e| AgentError::Client(e.to_string()))?;
 
     let messages = build_messages(&history, &user_message);
     // Offer the model whatever MCP tools are registered (C-108). Empty registry → None,
@@ -126,7 +130,12 @@ pub async fn set_active_lane(lane: &str) -> Result<(), AgentError> {
             )))
         }
     }
-    state::config()?.set_setting(SETTING_ACTIVE_LANE, serde_json::Value::String(lane.to_string())).await
+    state::config()?
+        .set_setting(
+            SETTING_ACTIVE_LANE,
+            serde_json::Value::String(lane.to_string()),
+        )
+        .await
 }
 
 /// Whether this build/platform has a local-inference engine at all. The UI uses
@@ -159,13 +168,20 @@ async fn send_local(
     };
     let spec = LocalModelSpec {
         model: pref.model_id.clone(),
-        context_len: pref.params.get("context_len").and_then(|v| v.as_u64()).map(|v| v as u32),
+        context_len: pref
+            .params
+            .get("context_len")
+            .and_then(|v| v.as_u64())
+            .map(|v| v as u32),
     };
 
     // Load before returning the run_id: a first-run model download is minutes
     // long, and reporting "started" before the model exists would leave the UI
     // streaming nothing. Idempotent, so subsequent turns fall straight through.
-    engine.load(&spec).await.map_err(AgentError::LocalInference)?;
+    engine
+        .load(&spec)
+        .await
+        .map_err(AgentError::LocalInference)?;
 
     let prompt = build_local_prompt(&history, &user_message);
     let engine = engine.clone();
@@ -179,7 +195,9 @@ async fn send_local(
         let stream = match engine.generate(&prompt, &params).await {
             Ok(s) => s,
             Err(e) => {
-                for event in adapter.ingest(&StreamEvent::Error { message: e.to_string() }) {
+                for event in adapter.ingest(&StreamEvent::Error {
+                    message: e.to_string(),
+                }) {
                     state::publish(event);
                 }
                 return;
@@ -210,11 +228,19 @@ async fn send_local(
 }
 
 fn param_f32(params: &serde_json::Value, key: &str, default: f32) -> f32 {
-    params.get(key).and_then(|v| v.as_f64()).map(|v| v as f32).unwrap_or(default)
+    params
+        .get(key)
+        .and_then(|v| v.as_f64())
+        .map(|v| v as f32)
+        .unwrap_or(default)
 }
 
 fn param_u32(params: &serde_json::Value, key: &str, default: u32) -> u32 {
-    params.get(key).and_then(|v| v.as_u64()).map(|v| v as u32).unwrap_or(default)
+    params
+        .get(key)
+        .and_then(|v| v.as_u64())
+        .map(|v| v as u32)
+        .unwrap_or(default)
 }
 
 /// Flatten history + the new turn into a single prompt string.
@@ -246,7 +272,10 @@ fn build_messages(history: &[String], user_message: &str) -> Vec<Message> {
         .filter_map(|pair| {
             let [role, text] = pair else { return None };
             match role.as_str() {
-                "user" => Some(Message::User(UserMessage { content: UserContent::Text(text.clone()), name: None })),
+                "user" => Some(Message::User(UserMessage {
+                    content: UserContent::Text(text.clone()),
+                    name: None,
+                })),
                 "assistant" => Some(Message::Assistant(AssistantMessage {
                     content: Some(AssistantContent::Text(text.clone())),
                     ..Default::default()
@@ -255,7 +284,10 @@ fn build_messages(history: &[String], user_message: &str) -> Vec<Message> {
             }
         })
         .collect();
-    messages.push(Message::User(UserMessage { content: UserContent::Text(user_message.to_string()), name: None }));
+    messages.push(Message::User(UserMessage {
+        content: UserContent::Text(user_message.to_string()),
+        name: None,
+    }));
     messages
 }
 
@@ -268,7 +300,9 @@ async fn run_stream(client: impl LlmClient, request: ChatCompletionRequest, run_
     let stream = match client.chat_stream(request).await {
         Ok(s) => s,
         Err(e) => {
-            for event in adapter.ingest(&StreamEvent::Error { message: e.to_string() }) {
+            for event in adapter.ingest(&StreamEvent::Error {
+                message: e.to_string(),
+            }) {
                 state::publish(event);
             }
             return;
@@ -286,9 +320,10 @@ async fn run_stream(client: impl LlmClient, request: ChatCompletionRequest, run_
             Ok(chunk) => {
                 for choice in &chunk.choices {
                     if let Some(delta) = &choice.delta.content {
-                        for event in
-                            adapter.ingest(&StreamEvent::TextDelta { index, delta: delta.clone() })
-                        {
+                        for event in adapter.ingest(&StreamEvent::TextDelta {
+                            index,
+                            delta: delta.clone(),
+                        }) {
                             state::publish(event);
                         }
                         index += 1;
@@ -344,7 +379,9 @@ async fn run_stream(client: impl LlmClient, request: ChatCompletionRequest, run_
                 }
             }
             Err(e) => {
-                for event in adapter.ingest(&StreamEvent::Error { message: e.to_string() }) {
+                for event in adapter.ingest(&StreamEvent::Error {
+                    message: e.to_string(),
+                }) {
                     state::publish(event);
                 }
                 return;

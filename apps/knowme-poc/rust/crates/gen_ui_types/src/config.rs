@@ -7,7 +7,11 @@ use serde::{Deserialize, Serialize};
 pub enum UarMode {
     #[default]
     Embedded,
-    External { url: String, api_key: Option<String>, timeout_secs: u64 },
+    External {
+        url: String,
+        api_key: Option<String>,
+        timeout_secs: u64,
+    },
 }
 
 // (Default derived on the enum via #[default] on the Embedded variant.)

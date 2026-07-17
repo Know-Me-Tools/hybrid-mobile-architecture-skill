@@ -40,8 +40,10 @@ pub fn rrf_fuse(lanes: &[Vec<String>], cfg: RrfConfig) -> Vec<(String, f32)> {
             *scores.entry(id.as_str()).or_insert(0.0) += 1.0 / (cfg.k + rank as f32);
         }
     }
-    let mut fused: Vec<(String, f32)> =
-        scores.into_iter().map(|(id, s)| (id.to_string(), s)).collect();
+    let mut fused: Vec<(String, f32)> = scores
+        .into_iter()
+        .map(|(id, s)| (id.to_string(), s))
+        .collect();
     fused.sort_by(|a, b| {
         b.1.partial_cmp(&a.1)
             .unwrap_or(std::cmp::Ordering::Equal)

@@ -39,7 +39,10 @@ const LOCAL_MODEL: &str = "qwen2.5-1.5b-instruct-q4";
 struct ZeroEmbedder;
 impl Embedder for ZeroEmbedder {
     fn model_info(&self) -> EmbeddingModelInfo {
-        EmbeddingModelInfo { name: "zero-fake".into(), dim: EMBED_DIM }
+        EmbeddingModelInfo {
+            name: "zero-fake".into(),
+            dim: EMBED_DIM,
+        }
     }
     fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, GraphError> {
         Ok(texts.iter().map(|_| vec![0.0; EMBED_DIM]).collect())
@@ -64,7 +67,11 @@ impl ConfigStore for LocalLaneConfigStore {
     async fn delete_provider(&self, _: &str) -> RelationalResult<()> {
         Err(RelationalError::Sync("read-only test store".into()))
     }
-    async fn get_model_pref(&self, surface: &str, lane: &str) -> RelationalResult<Option<ModelPref>> {
+    async fn get_model_pref(
+        &self,
+        surface: &str,
+        lane: &str,
+    ) -> RelationalResult<Option<ModelPref>> {
         if surface != "chat" || lane != "local" {
             return Ok(None);
         }
@@ -155,8 +162,14 @@ async fn chat_send_streams_a_real_local_response() {
         }
     }
 
-    assert!(saw_started, "the run must announce RunStarted before its blocks");
-    assert!(!text.trim().is_empty(), "the model must produce actual text");
+    assert!(
+        saw_started,
+        "the run must announce RunStarted before its blocks"
+    );
+    assert!(
+        !text.trim().is_empty(),
+        "the model must produce actual text"
+    );
     eprintln!(
         "local response in {:?}: {:?}",
         generation_started.elapsed(),

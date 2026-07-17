@@ -56,6 +56,13 @@ SKILLS = {
         "focus", "aria", "semantics", "contrast", "alt text", "reduced motion",
         "tab order", "accessible name", "focus trap",
     ],
+    "hybrid-runtime-verification": [
+        "working app", "application works", "app works", "actually runs",
+        "runnable", "runtime verification", "verify runtime", "real launch",
+        "production build", "clean checkout", "fresh clone", "smoke test",
+        "end-to-end", "e2e", "ready to ship", "shippable", "release gate",
+        "working example", "launch the app", "launch ios", "launch tauri",
+    ],
 }
 
 
@@ -77,7 +84,7 @@ def main() -> int:
 
     lines = [
         "TJ-ARCH-MOB-001 project skills relevant to this prompt "
-        "— invoke each via the Skill tool BEFORE writing UI code:",
+        "— invoke each via the Skill tool before doing the matching work:",
     ]
     lines += [f"  - {name}" for name in hits]
 

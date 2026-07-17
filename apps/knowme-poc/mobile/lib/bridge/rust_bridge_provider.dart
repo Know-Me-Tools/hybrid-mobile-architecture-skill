@@ -61,12 +61,12 @@ Future<EntityRecord?> entityGet(String entityType, String id) async {
 }
 
 Future<EntityRecord> entityCreate(EntityRecord record) async => _toEntityRecord(
-  await ffi.entityCreate(record: _toWireEntityRecord(record)),
-);
+      await ffi.entityCreate(record: _toWireEntityRecord(record)),
+    );
 
 Future<EntityRecord> entityUpdate(EntityRecord record) async => _toEntityRecord(
-  await ffi.entityUpdate(record: _toWireEntityRecord(record)),
-);
+      await ffi.entityUpdate(record: _toWireEntityRecord(record)),
+    );
 
 Future<void> entityDelete(String entityType, String id) =>
     ffi.entityDelete(entityType: entityType, id: id);
@@ -107,10 +107,10 @@ Future<void> attachSyncShapes() => ffi.attachSyncShapes();
 // richer domain shape) ───────────────────────────────────────────────────────
 
 EntityRecord _toEntityRecord(transport_wire.EntityRecord wire) => EntityRecord(
-  id: wire.id,
-  entityType: wire.entityType,
-  dataJson: wire.dataJson,
-);
+      id: wire.id,
+      entityType: wire.entityType,
+      dataJson: wire.dataJson,
+    );
 
 transport_wire.EntityRecord _toWireEntityRecord(EntityRecord record) =>
     transport_wire.EntityRecord(
@@ -144,12 +144,12 @@ view_wire.ViewDescriptor _toWireViewDescriptor(ViewDescriptor view) =>
 // name from the wire enum's FilterOp.in_ — same serde wire value, different
 // Dart identifier on either side of the bridge.
 view_wire.FilterOp _toWireFilterOp(FilterOp op) => switch (op) {
-  FilterOp.eq => view_wire.FilterOp.eq,
-  FilterOp.ne => view_wire.FilterOp.ne,
-  FilterOp.lt => view_wire.FilterOp.lt,
-  FilterOp.lte => view_wire.FilterOp.lte,
-  FilterOp.gt => view_wire.FilterOp.gt,
-  FilterOp.gte => view_wire.FilterOp.gte,
-  FilterOp.inList => view_wire.FilterOp.in_,
-  FilterOp.like => view_wire.FilterOp.like,
-};
+      FilterOp.eq => view_wire.FilterOp.eq,
+      FilterOp.ne => view_wire.FilterOp.ne,
+      FilterOp.lt => view_wire.FilterOp.lt,
+      FilterOp.lte => view_wire.FilterOp.lte,
+      FilterOp.gt => view_wire.FilterOp.gt,
+      FilterOp.gte => view_wire.FilterOp.gte,
+      FilterOp.inList => view_wire.FilterOp.in_,
+      FilterOp.like => view_wire.FilterOp.like,
+    };

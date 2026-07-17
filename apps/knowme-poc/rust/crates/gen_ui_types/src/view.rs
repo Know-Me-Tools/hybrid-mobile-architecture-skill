@@ -21,7 +21,19 @@ pub struct FilterSpec {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
-pub enum FilterOp { Eq, Ne, Lt, Lte, Gt, Gte, In, Like }
+pub enum FilterOp {
+    Eq,
+    Ne,
+    Lt,
+    Lte,
+    Gt,
+    Gte,
+    In,
+    Like,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct SortSpec { pub field: String, pub descending: bool }
+pub struct SortSpec {
+    pub field: String,
+    pub descending: bool,
+}

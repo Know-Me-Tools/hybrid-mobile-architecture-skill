@@ -24,9 +24,9 @@ describe('startupStore', () => {
     expect(useStartupStore.getState().phase).toBe('ready')
     // The boot-order invariant: shapes come AFTER migrations and seeds.
     expect(invoke.mock.calls.map((c) => c[0])).toEqual([
-      'run_migrations',
-      'load_seeds',
-      'attach_sync_shapes',
+      'plugin:gen-ui|run_migrations',
+      'plugin:gen-ui|load_seeds',
+      'plugin:gen-ui|attach_sync_shapes',
     ])
   })
 
@@ -39,7 +39,7 @@ describe('startupStore', () => {
     expect(s.error).toContain('migration 003 failed')
     expect(s.phase).not.toBe('ready')
     // Shapes must never attach when migrations fail (they'd hit unknown columns).
-    expect(invoke.mock.calls.map((c) => c[0])).not.toContain('attach_sync_shapes')
+    expect(invoke.mock.calls.map((c) => c[0])).not.toContain('plugin:gen-ui|attach_sync_shapes')
   })
 
   it('exposes monotonic progress across the phase order', () => {

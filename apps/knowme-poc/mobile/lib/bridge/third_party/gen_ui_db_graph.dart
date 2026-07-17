@@ -13,28 +13,32 @@ abstract class GraphError implements RustOpaqueInterface {}
 abstract class GraphStore implements RustOpaqueInterface {
   /// INTENT: create (or upsert) a graph entity node. `id` is the record key
   /// (e.g. `project_x`); `label`/`entity_type` are indexed graph metadata.
-  Future<String> createEntity({
-    required String id,
-    required String entityType,
-    required String label,
-  });
+  Future<String> createEntity(
+      {required String id, required String entityType, required String label});
+
+  /// Test-only inspection of stored relation endpoint IDs.
+  Future<List<(String, String)>> edgeEndpointsForTest();
 
   /// INTENT: expand the graph outward from `entity_id` up to `depth` RELATE hops,
   /// fusing per-depth neighbour lists with Rust RRF (nearer hops rank higher).
-  Future<List<RelatedEntity>> graphExpand({
-    required String entityId,
-    required int depth,
-  });
+  Future<List<RelatedEntity>> graphExpand(
+      {required String entityId, required int depth});
 
   /// INTENT: ingest a memory. Embeds `text`, stores row + vector, returns the id.
   Future<String> memoryIngest({required MemoryRecord record});
 
   /// INTENT: hybrid semantic + lexical search. Embeds `query`, runs the vector
   /// and BM25 lanes, fuses them with native `search::rrf`, returns top-`k`.
-  Future<List<MemoryHit>> memorySearch({
-    required String query,
-    required BigInt k,
-  });
+  Future<List<MemoryHit>> memorySearch(
+      {required String query, required BigInt k});
+
+  /// `memory_search`, choosing the retrieval lane (C-111 T3).
+  ///
+  /// `SearchMode::Vector` skips the BM25 lane and RRF entirely — a diagnostic for
+  /// showing what fusion actually buys, not a product path. Scores are comparable
+  /// only within a mode; see `MemoryHit::score`.
+  Future<List<MemoryHit>> memorySearchWith(
+      {required String query, required BigInt k, required SearchMode mode});
 
   /// Open (or return/await the already-opening) singleton embedded store for
   /// this process, selecting ns/db and applying the schema on first open.
@@ -46,17 +50,20 @@ abstract class GraphStore implements RustOpaqueInterface {
 
   /// INTENT: create a directed RELATE edge `from -> to` with a relation label.
   /// Edges are what `graph_expand` traverses.
-  Future<void> relate({
-    required String from,
-    required String to,
-    required String rel,
-  });
+  Future<void> relate(
+      {required String from, required String to, required String rel});
+
+  /// Test-only boundary for a relation whose source table violates schema.
+  Future<void> relateRawForTest(
+      {required String fromTable, required String from, required String to});
 }
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GraphStoreConfig>>
 abstract class GraphStoreConfig implements RustOpaqueInterface {}
 
-/// One hybrid-search hit. `score` is the fused RRF score (higher = better).
+/// One search hit. `score` is always "higher = better", but its SCALE depends on the
+/// `SearchMode` that produced it — an RRF score and a vector-similarity score are not
+/// comparable magnitudes. Never rank hits from different modes against each other.
 class MemoryHit {
   final String id;
   final String text;
@@ -144,4 +151,23 @@ class RelatedEntity {
           label == other.label &&
           entityType == other.entityType &&
           score == other.score;
+}
+
+/// Which retrieval lane `memory_search` runs (C-111 T3).
+///
+/// Exists so the hybrid lane's advantage is demonstrable rather than asserted: run the
+/// same query both ways and watch a rare exact term — a product name, an error code —
+/// that vector recall smooths away come back ranked first under fusion.
+///
+/// Defaults to `Hybrid`: that is the product behaviour, and `Vector` is a diagnostic.
+enum SearchMode {
+  /// Vector + BM25, fused with native RRF. The real retrieval path.
+  hybrid,
+
+  /// HNSW vector recall alone — no lexical lane, no fusion. Diagnostic only.
+  vector,
+  ;
+
+  static Future<SearchMode> default_() =>
+      GenUiCore.instance.api.genUiDbGraphSearchModeDefault();
 }

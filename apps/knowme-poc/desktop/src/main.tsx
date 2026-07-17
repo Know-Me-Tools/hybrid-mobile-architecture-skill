@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import { AppProviders } from './app/providers'
 import { StartupGate } from './features/startup/components/StartupGate'
 import { useChatStore } from './features/chat/stores/chatStore'
+import { EntityRuntimeBoundary } from './features/entities/components/EntityRuntimeBoundary'
 import './index.css'
 
 // Initialize Rust event listeners (store-level, not component-level)
@@ -15,7 +16,9 @@ window.addEventListener('beforeunload', cleanup)
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <StartupGate>
-      <AppProviders />
+      <EntityRuntimeBoundary>
+        <AppProviders />
+      </EntityRuntimeBoundary>
     </StartupGate>
   </StrictMode>
 )

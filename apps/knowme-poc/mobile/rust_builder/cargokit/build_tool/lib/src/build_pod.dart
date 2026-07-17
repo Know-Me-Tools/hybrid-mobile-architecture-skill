@@ -7,6 +7,7 @@ import 'package:path/path.dart' as path;
 
 import 'artifacts_provider.dart';
 import 'builder.dart';
+import 'dedup_archive.dart';
 import 'environment.dart';
 import 'options.dart';
 import 'target.dart';
@@ -59,6 +60,17 @@ class BuildPod {
 
     // If there is static lib, use it and link it with pod
     if (staticLibs.isNotEmpty) {
+      // LOCAL DIVERGENCE (see dedup_archive.dart): ort's prebuilt
+      // libonnxruntime.a carries byte-identical duplicate members that cargo
+      // bundles into our staticlib; under the pod's -force_load link they
+      // become hard "duplicate symbol" errors. Dedup each thin archive before
+      // lipo and rebuild its symbol index.
+      for (final lib in staticLibs) {
+        final removed = dedupArchiveMembers(lib.path);
+        if (removed > 0) {
+          runCommand("ranlib", [lib.path]);
+        }
+      }
       final finalTargetFile = path.join(outputDir, "lib$libName.a");
       performLipo(finalTargetFile, staticLibs.map((e) => e.path));
     } else {

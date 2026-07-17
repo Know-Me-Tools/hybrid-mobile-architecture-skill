@@ -92,7 +92,9 @@ struct LoadedModel {
 
 impl MistralEngine {
     pub fn new() -> Self {
-        Self { state: RwLock::new(None) }
+        Self {
+            state: RwLock::new(None),
+        }
     }
 }
 
@@ -108,14 +110,12 @@ impl Default for MistralEngine {
 fn resolve(spec: &LocalModelSpec) -> CoreResult<(String, String)> {
     if spec.model.starts_with('/') {
         let path = std::path::Path::new(&spec.model);
-        let dir = path
-            .parent()
-            .and_then(|p| p.to_str())
-            .ok_or_else(|| CoreError::Terminal(format!("model path has no parent dir: {}", spec.model)))?;
-        let file = path
-            .file_name()
-            .and_then(|f| f.to_str())
-            .ok_or_else(|| CoreError::Terminal(format!("model path has no filename: {}", spec.model)))?;
+        let dir = path.parent().and_then(|p| p.to_str()).ok_or_else(|| {
+            CoreError::Terminal(format!("model path has no parent dir: {}", spec.model))
+        })?;
+        let file = path.file_name().and_then(|f| f.to_str()).ok_or_else(|| {
+            CoreError::Terminal(format!("model path has no filename: {}", spec.model))
+        })?;
         return Ok((dir.to_string(), file.to_string()));
     }
     match spec.model.as_str() {
@@ -131,38 +131,49 @@ impl InferenceProvider for MistralEngine {
     async fn load(&self, spec: &LocalModelSpec) -> CoreResult<()> {
         // Idempotent per the trait contract — re-loading what's resident must not
         // re-download several GB.
-        if self.state.read().await.as_ref().is_some_and(|l| &l.spec == spec) {
+        if self
+            .state
+            .read()
+            .await
+            .as_ref()
+            .is_some_and(|l| &l.spec == spec)
+        {
             return Ok(());
         }
 
         let (repo, file) = resolve(spec)?;
 
-        // NOTE: mistral.rs's builder is already `async fn` and drives its own
-        // internal threading, so this is deliberately NOT wrapped in
-        // spawn_blocking — doing so would park a blocking-pool thread on a future
-        // that yields anyway. It IS long-running (multi-GB download on first call),
-        // which is why `load` is a separate trait method callers invoke off the
-        // latency-sensitive path rather than lazily inside `generate`.
+        // `GgufModelBuilder::build()` is `async fn`, but its implementation calls
+        // the synchronous `Loader::load_model_from_hf` with no await. Download,
+        // dequantization, and device mapping therefore run on the polling thread.
+        // Drive the non-Send future on a current-thread runtime inside the global
+        // runtime's blocking pool so model loading cannot starve Tokio workers.
         //
         // `spec.context_len` is intentionally unused here: GgufModelBuilder exposes
         // no sequence-length override (verified against the API at our pinned rev) —
         // a GGUF's context length is baked into the file's own metadata. The field
         // stays in the trait for the llama-cpp-2 mobile lane, which does accept one.
-        let mut builder = GgufModelBuilder::new(repo, vec![file]).with_tok_model_id(QWEN_TOK_REPO);
-        // Opt-in engine logging (chat-template resolution, device mapping, load
-        // progress). Gated on an env var so a normal run stays quiet.
-        if std::env::var_os("GEN_UI_INFERENCE_LOG").is_some() {
-            builder = builder.with_logging();
-        }
-        let model = builder
-            .build()
-            .await
-            // The builder returns anyhow::Error (NOT mistralrs::error::Error — the
-            // two halves of this API disagree); `{e:#}` renders the full cause chain,
-            // which is where the real reason (404, corrupt GGUF, OOM) actually lives.
-            .map_err(|e| classify("model load", format!("{e:#}")))?;
+        let with_logging = std::env::var_os("GEN_UI_INFERENCE_LOG").is_some();
+        let model = gen_ui_runtime::spawn_blocking(move || {
+            let mut builder =
+                GgufModelBuilder::new(repo, vec![file]).with_tok_model_id(QWEN_TOK_REPO);
+            if with_logging {
+                builder = builder.with_logging();
+            }
+            tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .map_err(|e| classify("model load", format!("runtime build failed: {e}")))?
+                .block_on(builder.build())
+                .map_err(|e| classify("model load", format!("{e:#}")))
+        })
+        .await
+        .map_err(|e| classify("model load", format!("load task failed: {e}")))??;
 
-        *self.state.write().await = Some(LoadedModel { model: Arc::new(model), spec: spec.clone() });
+        *self.state.write().await = Some(LoadedModel {
+            model: Arc::new(model),
+            spec: spec.clone(),
+        });
         tracing::info!(model = %spec.model, "local model loaded");
         Ok(())
     }
@@ -207,7 +218,9 @@ impl InferenceProvider for MistralEngine {
                 Err(e) => {
                     // Terminal for this run — report and end the stream rather than
                     // leaving the UI spinning.
-                    let _ = tx.send(StreamEvent::Error { message: e.to_string() });
+                    let _ = tx.send(StreamEvent::Error {
+                        message: e.to_string(),
+                    });
                     return;
                 }
             };
@@ -220,10 +233,17 @@ impl InferenceProvider for MistralEngine {
                     Response::Chunk(ChatCompletionChunkResponse { choices, .. }) => {
                         match choices.first() {
                             Some(ChunkChoice {
-                                delta: Delta { content: Some(content), .. },
+                                delta:
+                                    Delta {
+                                        content: Some(content),
+                                        ..
+                                    },
                                 ..
                             }) if !content.is_empty() => {
-                                let e = StreamEvent::TextDelta { index, delta: content.clone() };
+                                let e = StreamEvent::TextDelta {
+                                    index,
+                                    delta: content.clone(),
+                                };
                                 index += 1;
                                 Some(e)
                             }
@@ -235,7 +255,9 @@ impl InferenceProvider for MistralEngine {
                     // two carry a boxed error. All three end the run.
                     Response::ModelError(message, _) => Some(StreamEvent::Error { message }),
                     Response::ValidationError(e) | Response::InternalError(e) => {
-                        Some(StreamEvent::Error { message: e.to_string() })
+                        Some(StreamEvent::Error {
+                            message: e.to_string(),
+                        })
                     }
                     // Completion/image/speech/embedding/agentic variants cannot occur
                     // on a chat stream_chat_request.

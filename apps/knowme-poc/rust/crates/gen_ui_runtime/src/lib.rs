@@ -5,7 +5,7 @@
 #[cfg(not(target_arch = "wasm32"))]
 mod native;
 #[cfg(not(target_arch = "wasm32"))]
-pub use native::{init, handle, spawn, spawn_blocking};
+pub use native::{handle, init, spawn, spawn_blocking};
 
 #[cfg(target_arch = "wasm32")]
 mod web;

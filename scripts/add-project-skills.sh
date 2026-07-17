@@ -4,8 +4,8 @@
 # Usage: bash scripts/add-project-skills.sh [project-root]
 # Example: bash scripts/add-project-skills.sh ./my-hybrid-app
 #
-# Additive and backward-compatible: copies 5 skill templates into <root>/.claude/skills/,
-# two hook scripts into <root>/.claude/hooks/, and merges the hook settings into
+# Additive and backward-compatible: copies project skill templates into every
+# supported harness, installs two Claude hooks, and merges the hook settings into
 # <root>/.claude/settings.json (deep-merge via jq when available; safe fallback otherwise).
 
 set -euo pipefail
@@ -25,16 +25,20 @@ if [[ ! -d "$SRC" ]]; then
 fi
 
 CLAUDE_DIR="$ROOT/.claude"
-step "Installing project-local UI/UX skills into $CLAUDE_DIR"
+HARNESS_DIRS=(.claude .codex .opencode .kimi .agents .kimi-code)
+step "Installing project-local skills into all supported harnesses"
 mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/hooks"
 
 # ── Skills ──────────────────────────────────────────────────────────────────
-for skill in content-block-ui hybrid-design-tokens tauri-ui-review tauri-custom-titlebar mobile-navigation flutter-golden-ui a11y-gate; do
-  if [[ -d "$SRC/$skill" ]]; then
-    mkdir -p "$CLAUDE_DIR/skills/$skill"
-    cp "$SRC/$skill/SKILL.md" "$CLAUDE_DIR/skills/$skill/SKILL.md"
-    ok "skill: $skill"
-  fi
+for harness in "${HARNESS_DIRS[@]}"; do
+  mkdir -p "$ROOT/$harness/skills"
+  for skill in content-block-ui hybrid-design-tokens tauri-ui-review tauri-custom-titlebar mobile-navigation flutter-golden-ui a11y-gate hybrid-runtime-verification; do
+    if [[ -d "$SRC/$skill" ]]; then
+      mkdir -p "$ROOT/$harness/skills/$skill"
+      cp -R "$SRC/$skill/." "$ROOT/$harness/skills/$skill/"
+    fi
+  done
+  ok "skills: $harness"
 done
 
 # ── Hooks ───────────────────────────────────────────────────────────────────
@@ -68,6 +72,6 @@ else
 fi
 
 echo ""
-echo -e "${GREEN}  ✅ Project-local UI/UX skills installed${NC}"
-echo "     5 skills · 2 activation hooks · WCAG 2.2 AA gate"
+echo -e "${GREEN}  ✅ Project-local skills installed${NC}"
+echo "     8 skills × 6 harnesses · 2 activation hooks · runtime and WCAG 2.2 AA gates"
 echo "     See references/ui-skills.md for the external skill stack."

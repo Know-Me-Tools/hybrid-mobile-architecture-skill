@@ -17,11 +17,21 @@ use gen_ui_types::CoreError;
 /// doc comment on why memory is SurrealDB-only regardless of platform) and
 /// initialise gen_ui_agent's process-lifetime state. Idempotent per process.
 pub async fn run_migrations(data_dir: String) -> Result<(), CoreError> {
+    fn boot_fail(stage: &str, message: impl std::fmt::Display) -> CoreError {
+        let rendered = format!("{stage}: {message}");
+        eprintln!("[knowme boot] {rendered}");
+        tracing::error!(stage, error = %message, "mobile boot phase failed");
+        CoreError::Transient(rendered)
+    }
+
+    tracing::info!(%data_dir, "mobile migrations starting");
     let db_path = format!("{data_dir}/knowme-poc.db");
-    let embedder = gen_ui_runtime::spawn_blocking(FastEmbedder::new)
+    let embed_cache = std::path::PathBuf::from(&data_dir).join("model-cache/fastembed");
+    std::fs::create_dir_all(&embed_cache).map_err(|e| boot_fail("model cache create", e))?;
+    let embedder = gen_ui_runtime::spawn_blocking(move || FastEmbedder::new(embed_cache))
         .await
-        .map_err(|e| gen_ui_types::CoreError::Transient(format!("embedder task join: {e}")))?
-        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+        .map_err(|e| boot_fail("embedder task join", e))?
+        .map_err(|e| boot_fail("embedder load", e))?;
 
     let store = GraphStore::open(GraphStoreConfig {
         endpoint: format!("rocksdb://{db_path}"),
@@ -30,10 +40,11 @@ pub async fn run_migrations(data_dir: String) -> Result<(), CoreError> {
         embedder: Arc::new(embedder),
     })
     .await
-    .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    .map_err(|e| boot_fail("graph store open", e))?;
     let store = Arc::new(store);
 
     gen_ui_agent::state::init(ConfigBackend::Surreal(store.clone()), store);
+    tracing::info!("mobile migrations ready");
     Ok(())
 }
 

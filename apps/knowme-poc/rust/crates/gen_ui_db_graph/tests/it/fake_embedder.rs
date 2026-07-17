@@ -9,7 +9,10 @@ pub struct HashEmbedder;
 
 impl Embedder for HashEmbedder {
     fn model_info(&self) -> EmbeddingModelInfo {
-        EmbeddingModelInfo { name: "test-hash".into(), dim: EMBED_DIM }
+        EmbeddingModelInfo {
+            name: "test-hash".into(),
+            dim: EMBED_DIM,
+        }
     }
 
     fn embed(&self, texts: &[String]) -> Result<Vec<Vec<f32>>, gen_ui_db_graph::GraphError> {

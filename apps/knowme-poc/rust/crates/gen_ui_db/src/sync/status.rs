@@ -26,7 +26,10 @@ mod imp {
     impl SyncStatusHandle {
         pub fn new() -> Self {
             let (tx, _rx) = watch::channel(SyncStatus::Offline);
-            Self { tx: Arc::new(tx), pending: Arc::new(AtomicU32::new(0)) }
+            Self {
+                tx: Arc::new(tx),
+                pending: Arc::new(AtomicU32::new(0)),
+            }
         }
 
         /// Subscribe to status transitions (drives one UI chip).

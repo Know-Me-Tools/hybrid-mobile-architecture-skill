@@ -6,14 +6,14 @@
 //! because every downstream crate depends on these signatures.
 #![forbid(unsafe_code)]
 
-pub mod content_block;
-pub mod events;
-pub mod view;
-pub mod transport;
-pub mod sync;
 pub mod config;
+pub mod content_block;
 pub mod error;
+pub mod events;
 pub mod inference;
+pub mod sync;
+pub mod transport;
+pub mod view;
 
 pub use content_block::ContentBlock;
 pub use error::{CoreError, CoreResult};

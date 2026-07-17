@@ -110,7 +110,8 @@ class ChatNotifier extends _$ChatNotifier {
       messageId: messageId,
       onBlock: streamBlock,
       onFinalize: finalizeMessage,
-    )..connect(stream);
+    );
     _drivers[messageId] = driver;
+    await driver.connect(stream);
   }
 }

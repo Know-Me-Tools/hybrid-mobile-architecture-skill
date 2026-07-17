@@ -77,9 +77,10 @@ class Rustup {
 
     final res = runCommand("rustup", ['toolchain', 'list']);
 
-    // To list all non-custom toolchains, we need to filter out lines that
-    // don't start with "stable", "beta", or "nightly".
-    Pattern nonCustom = RegExp(r"^(stable|beta|nightly)");
+    // Version-pinned toolchains (for example `1.96-aarch64-apple-darwin`) are
+    // first-class rustup toolchains too. Retain them so Cargokit does not try
+    // to reinstall an already-present pinned compiler on every build.
+    Pattern nonCustom = RegExp(r"^(stable|beta|nightly|[0-9])");
     final lines = res.stdout
         .toString()
         .split('\n')

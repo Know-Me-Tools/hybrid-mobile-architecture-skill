@@ -40,10 +40,21 @@ async fn concurrent_and_repeat_opens_share_one_pglite_singleton() {
         .await
         .expect("later open must reuse the singleton");
 
+    // Opening PGlite is not migration. The public boot boundary must apply the
+    // embedded schema before commands such as `attach_sync_shapes` query it.
+    first.migrate().await.expect("embedded migrations apply");
+    sqlx::query("SELECT value FROM app_settings WHERE key = 'missing'")
+        .execute(first.store().pool())
+        .await
+        .expect("config tables exist after migrate");
+
     // All handles share the same underlying pool/server — queries through each
     // prove they are live connections, not stubs.
     for store in [&first, &second, &third] {
-        sqlx::query("SELECT 1").execute(store.store().pool()).await.expect("query");
+        sqlx::query("SELECT 1")
+            .execute(store.store().pool())
+            .await
+            .expect("query");
     }
 }
 
@@ -63,7 +74,10 @@ async fn empty_ipfs_cid_is_rejected_before_network_io() {
     let bundle = SeedBundle {
         name: "lookups".to_owned(),
         version: 1,
-        source: SeedSource::Ipfs { cid: " ".to_owned(), gateway: "https://ipfs.io/ipfs".to_owned() },
+        source: SeedSource::Ipfs {
+            cid: " ".to_owned(),
+            gateway: "https://ipfs.io/ipfs".to_owned(),
+        },
     };
     let error = bundle.sql(&reqwest::Client::new()).await.unwrap_err();
     assert!(matches!(error, RelationalError::EmptyCid { .. }));

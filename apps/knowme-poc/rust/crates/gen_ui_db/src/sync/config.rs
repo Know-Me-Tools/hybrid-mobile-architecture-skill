@@ -18,7 +18,10 @@ pub struct ShapeSpec {
 
 impl ShapeSpec {
     pub fn new(table: impl Into<String>) -> Self {
-        Self { table: table.into(), where_clause: None }
+        Self {
+            table: table.into(),
+            where_clause: None,
+        }
     }
 
     #[must_use]

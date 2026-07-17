@@ -4,8 +4,8 @@
 //! AuthState machine; (2) forge AG-UI SSE frames fold into the ContentBlock contract.
 #![cfg(not(target_arch = "wasm32"))]
 
+use gen_ui_client::flint::forge::{agui_to_a2ui, parse_agui_frame, AgUiEvent};
 use gen_ui_client::flint::token::{AuthState, Role, Token};
-use gen_ui_client::flint::forge::{parse_agui_frame, AgUiEvent, agui_to_a2ui};
 use gen_ui_types::content_block::ContentBlock;
 use gen_ui_types::events::A2uiEvent;
 
@@ -13,7 +13,12 @@ use gen_ui_types::events::A2uiEvent;
 /// decodes WITHOUT verification, mirroring the real "gate/forge own verification").
 fn mint(claims: serde_json::Value) -> String {
     use jsonwebtoken::{encode, EncodingKey, Header};
-    encode(&Header::default(), &claims, &EncodingKey::from_secret(b"test")).expect("encode")
+    encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(b"test"),
+    )
+    .expect("encode")
 }
 
 #[test]
@@ -40,8 +45,11 @@ fn absent_role_coerces_to_anon() {
 
 #[test]
 fn auth_state_machine_tracks_bearer_and_refresh() {
-    let fresh = mint(serde_json::json!({ "sub": "a", "role": "authenticated", "exp": 9_999_999_999i64 }));
-    let state = AuthState::Authenticated { token: Token::parse(&fresh).unwrap() };
+    let fresh =
+        mint(serde_json::json!({ "sub": "a", "role": "authenticated", "exp": 9_999_999_999i64 }));
+    let state = AuthState::Authenticated {
+        token: Token::parse(&fresh).unwrap(),
+    };
     assert_eq!(state.role(), Role::Authenticated);
     assert!(state.bearer().is_some());
     assert!(!state.needs_refresh(1_000)); // far from exp
@@ -59,7 +67,9 @@ fn agui_text_delta_folds_to_content_block_text() {
     let events = parse_agui_frame(frame);
     assert_eq!(events.len(), 1);
     match &events[0] {
-        A2uiEvent::Block { block: ContentBlock::Text { text } } => assert_eq!(text, "hello"),
+        A2uiEvent::Block {
+            block: ContentBlock::Text { text },
+        } => assert_eq!(text, "hello"),
         other => panic!("expected Text block, got {other:?}"),
     }
 }
@@ -67,13 +77,18 @@ fn agui_text_delta_folds_to_content_block_text() {
 #[test]
 fn agui_run_lifecycle_and_toolcall_map_to_a2ui() {
     // RunStarted → A2uiEvent::RunStarted.
-    let started = agui_to_a2ui(&AgUiEvent::RunStarted { run_id: "r1".into() });
+    let started = agui_to_a2ui(&AgUiEvent::RunStarted {
+        run_id: "r1".into(),
+    });
     assert!(matches!(started.as_slice(), [A2uiEvent::RunStarted { run_id }] if run_id == "r1"));
 
     // ToolCallStart → a ToolUse ContentBlock (name + id preserved).
-    let tool = parse_agui_frame(r#"{"type":"ToolCallStart","tool_call_id":"t9","tool_name":"search"}"#);
+    let tool =
+        parse_agui_frame(r#"{"type":"ToolCallStart","tool_call_id":"t9","tool_name":"search"}"#);
     match tool.as_slice() {
-        [A2uiEvent::Block { block: ContentBlock::ToolUse { id, name, .. } }] => {
+        [A2uiEvent::Block {
+            block: ContentBlock::ToolUse { id, name, .. },
+        }] => {
             assert_eq!(id, "t9");
             assert_eq!(name, "search");
         }

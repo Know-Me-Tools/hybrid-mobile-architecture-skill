@@ -14,9 +14,16 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 Future<void> runMigrations({required String dataDir}) =>
     GenUiCore.instance.api.crateApiBootRunMigrations(dataDir: dataDir);
 
-/// Boot-order invariant, step 2: seed data. No seed bundles for the PoC yet
-/// (C-104's curated corpus lands separately) — a real no-op until then.
-Future<void> loadSeeds() => GenUiCore.instance.api.crateApiBootLoadSeeds();
+/// Boot-order invariant, step 2: seed data.
+///
+/// Ingests the C-111 demo corpus through the SAME `gen_ui_agent::memory` the desktop
+/// plugin's `load_seeds` calls — no duplicated seeding logic, and both surfaces get an
+/// identical corpus. Idempotent (stable seed ids), so running on every start upserts
+/// rather than duplicates. MUST follow `run_migrations`.
+///
+/// Returns the number of notes seeded, so Dart can report progress rather than stare at
+/// a silent pause: every note is embedded here, which is not instant on a cold start.
+Future<int> loadSeeds() => GenUiCore.instance.api.crateApiBootLoadSeeds();
 
 /// Boot-order invariant, step 3: attach sync (C-106).
 ///

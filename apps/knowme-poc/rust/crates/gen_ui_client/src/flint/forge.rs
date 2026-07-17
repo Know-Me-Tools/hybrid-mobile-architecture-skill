@@ -28,7 +28,10 @@ pub struct ForgeConfig {
 
 impl Default for ForgeConfig {
     fn default() -> Self {
-        Self { base: "http://localhost:8080".into(), schema: "public".into() }
+        Self {
+            base: "http://localhost:8080".into(),
+            schema: "public".into(),
+        }
     }
 }
 
@@ -57,11 +60,19 @@ impl ForgeClient {
     pub fn register_a2ui_mcp(&self, registry: &McpRegistry) -> Arc<McpServerHandle> {
         let endpoint = format!("{}/mcp/v1/a2ui", self.config.base.trim_end_matches('/'));
         let transport = SseTransport::new(self.http.clone(), endpoint, self.bearer());
-        registry.register(McpServerHandle::new("flint-a2ui-registry", Box::new(transport)))
+        registry.register(McpServerHandle::new(
+            "flint-a2ui-registry",
+            Box::new(transport),
+        ))
     }
 
     fn table_url(&self, entity_type: &str) -> String {
-        format!("{}/{}/{}", self.config.base.trim_end_matches('/'), self.config.schema, entity_type)
+        format!(
+            "{}/{}/{}",
+            self.config.base.trim_end_matches('/'),
+            self.config.schema,
+            entity_type
+        )
     }
 
     fn apply_bearer(&self, req: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
@@ -92,9 +103,12 @@ impl EntityTransport for ForgeClient {
         let mut req = self.apply_bearer(self.http.get(self.table_url(&view.entity_type)));
         // PostgREST filter grammar: one query pair per filter.
         for f in &view.filters {
-            let raw: serde_json::Value =
-                serde_json::from_str(&f.value_json).unwrap_or(serde_json::Value::String(f.value_json.clone()));
-            let val = raw.as_str().map(str::to_owned).unwrap_or_else(|| raw.to_string());
+            let raw: serde_json::Value = serde_json::from_str(&f.value_json)
+                .unwrap_or(serde_json::Value::String(f.value_json.clone()));
+            let val = raw
+                .as_str()
+                .map(str::to_owned)
+                .unwrap_or_else(|| raw.to_string());
             req = req.query(&[(f.field.as_str(), format!("{}.{}", postgrest_op(f.op), val))]);
         }
         if !view.sorts.is_empty() {
@@ -109,24 +123,42 @@ impl EntityTransport for ForgeClient {
         if let Some(limit) = view.limit {
             req = req.query(&[("limit", limit.to_string())]);
         }
-        let resp = req.send().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
         if !resp.status().is_success() {
             return Err(map_status(resp.status()));
         }
-        let rows: Vec<serde_json::Value> = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
-        let items = rows.into_iter().map(|row| row_to_record(&view.entity_type, row)).collect();
-        Ok(ListResult { items, next_cursor: None })
+        let rows: Vec<serde_json::Value> = resp
+            .json()
+            .await
+            .map_err(|e| CoreError::Serde(e.to_string()))?;
+        let items = rows
+            .into_iter()
+            .map(|row| row_to_record(&view.entity_type, row))
+            .collect();
+        Ok(ListResult {
+            items,
+            next_cursor: None,
+        })
     }
 
     async fn get(&self, entity_type: &str, id: &str) -> CoreResult<Option<EntityRecord>> {
         let req = self
             .apply_bearer(self.http.get(self.table_url(entity_type)))
             .query(&[("id", format!("eq.{id}")), ("limit", "1".into())]);
-        let resp = req.send().await.map_err(|e| CoreError::Transient(e.to_string()))?;
+        let resp = req
+            .send()
+            .await
+            .map_err(|e| CoreError::Transient(e.to_string()))?;
         if !resp.status().is_success() {
             return Err(map_status(resp.status()));
         }
-        let mut rows: Vec<serde_json::Value> = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
+        let mut rows: Vec<serde_json::Value> = resp
+            .json()
+            .await
+            .map_err(|e| CoreError::Serde(e.to_string()))?;
         Ok(rows.pop().map(|row| row_to_record(entity_type, row)))
     }
 
@@ -143,8 +175,13 @@ impl EntityTransport for ForgeClient {
         if !resp.status().is_success() {
             return Err(map_status(resp.status()));
         }
-        let mut rows: Vec<serde_json::Value> = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
-        let row = rows.pop().ok_or_else(|| CoreError::Terminal("forge create: empty representation".into()))?;
+        let mut rows: Vec<serde_json::Value> = resp
+            .json()
+            .await
+            .map_err(|e| CoreError::Serde(e.to_string()))?;
+        let row = rows
+            .pop()
+            .ok_or_else(|| CoreError::Terminal("forge create: empty representation".into()))?;
         Ok(row_to_record(&record.entity_type, row))
     }
 
@@ -162,8 +199,13 @@ impl EntityTransport for ForgeClient {
         if !resp.status().is_success() {
             return Err(map_status(resp.status()));
         }
-        let mut rows: Vec<serde_json::Value> = resp.json().await.map_err(|e| CoreError::Serde(e.to_string()))?;
-        let row = rows.pop().ok_or_else(|| CoreError::Terminal("forge update: empty representation".into()))?;
+        let mut rows: Vec<serde_json::Value> = resp
+            .json()
+            .await
+            .map_err(|e| CoreError::Serde(e.to_string()))?;
+        let row = rows
+            .pop()
+            .ok_or_else(|| CoreError::Terminal("forge update: empty representation".into()))?;
         Ok(row_to_record(&record.entity_type, row))
     }
 
@@ -184,17 +226,29 @@ impl EntityTransport for ForgeClient {
 fn row_to_record(entity_type: &str, row: serde_json::Value) -> EntityRecord {
     let id = row
         .get("id")
-        .map(|v| v.as_str().map(str::to_owned).unwrap_or_else(|| v.to_string()))
+        .map(|v| {
+            v.as_str()
+                .map(str::to_owned)
+                .unwrap_or_else(|| v.to_string())
+        })
         .unwrap_or_default();
-    EntityRecord { id, entity_type: entity_type.to_owned(), data_json: row.to_string() }
+    EntityRecord {
+        id,
+        entity_type: entity_type.to_owned(),
+        data_json: row.to_string(),
+    }
 }
 
 fn map_status(status: reqwest::StatusCode) -> CoreError {
     use reqwest::StatusCode;
     match status {
         StatusCode::NOT_FOUND => CoreError::NotFound(status.to_string()),
-        StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => CoreError::Terminal(format!("forge auth: {status}")),
-        s if s.is_server_error() || s == StatusCode::TOO_MANY_REQUESTS => CoreError::Transient(s.to_string()),
+        StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => {
+            CoreError::Terminal(format!("forge auth: {status}"))
+        }
+        s if s.is_server_error() || s == StatusCode::TOO_MANY_REQUESTS => {
+            CoreError::Transient(s.to_string())
+        }
         s => CoreError::Terminal(format!("forge http {s}")),
     }
 }
@@ -206,11 +260,28 @@ fn map_status(status: reqwest::StatusCode) -> CoreError {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "type")]
 pub enum AgUiEvent {
-    RunStarted { #[serde(default)] run_id: String },
-    TextMessageContent { #[serde(default)] delta: String },
-    ToolCallStart { #[serde(default)] tool_call_id: String, #[serde(default)] tool_name: String },
-    RunFinished { #[serde(default)] run_id: String },
-    RunError { #[serde(default)] message: String },
+    RunStarted {
+        #[serde(default)]
+        run_id: String,
+    },
+    TextMessageContent {
+        #[serde(default)]
+        delta: String,
+    },
+    ToolCallStart {
+        #[serde(default)]
+        tool_call_id: String,
+        #[serde(default)]
+        tool_name: String,
+    },
+    RunFinished {
+        #[serde(default)]
+        run_id: String,
+    },
+    RunError {
+        #[serde(default)]
+        message: String,
+    },
     #[serde(other)]
     Other,
 }
@@ -220,15 +291,32 @@ pub enum AgUiEvent {
 /// surface layer directly — this path only feeds the streaming ContentBlock fold.
 pub fn agui_to_a2ui(ev: &AgUiEvent) -> Vec<A2uiEvent> {
     match ev {
-        AgUiEvent::RunStarted { run_id } => vec![A2uiEvent::RunStarted { run_id: run_id.clone() }],
-        AgUiEvent::TextMessageContent { delta } => {
-            vec![A2uiEvent::Block { block: ContentBlock::Text { text: delta.clone() } }]
-        }
-        AgUiEvent::ToolCallStart { tool_call_id, tool_name } => vec![A2uiEvent::Block {
-            block: ContentBlock::ToolUse { id: tool_call_id.clone(), name: tool_name.clone(), input_json: "{}".into() },
+        AgUiEvent::RunStarted { run_id } => vec![A2uiEvent::RunStarted {
+            run_id: run_id.clone(),
         }],
-        AgUiEvent::RunFinished { run_id } => vec![A2uiEvent::RunFinished { run_id: run_id.clone() }],
-        AgUiEvent::RunError { message } => vec![A2uiEvent::RunError { message: message.clone() }],
+        AgUiEvent::TextMessageContent { delta } => {
+            vec![A2uiEvent::Block {
+                block: ContentBlock::Text {
+                    text: delta.clone(),
+                },
+            }]
+        }
+        AgUiEvent::ToolCallStart {
+            tool_call_id,
+            tool_name,
+        } => vec![A2uiEvent::Block {
+            block: ContentBlock::ToolUse {
+                id: tool_call_id.clone(),
+                name: tool_name.clone(),
+                input_json: "{}".into(),
+            },
+        }],
+        AgUiEvent::RunFinished { run_id } => vec![A2uiEvent::RunFinished {
+            run_id: run_id.clone(),
+        }],
+        AgUiEvent::RunError { message } => vec![A2uiEvent::RunError {
+            message: message.clone(),
+        }],
         AgUiEvent::Other => vec![],
     }
 }
