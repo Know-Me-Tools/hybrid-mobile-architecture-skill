@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-07-16 (worktree consolidation)
+* **Update**: [SurrealDB RELATE endpoints need parenthesized type::record — chevrons silently corrupt edges](/surrealdb-relate-endpoints-need-parenthesized-type-record.md) — added the check_statements() follow-up and proof that the guard cannot catch this bug class
+* **Creation**: [FRF phase-36 SFU ICE fix paused with no local changes authored](/frf-phase-36-sfu-ice-fix-paused-with-no-local-changes-authored.md) (from worktree gallant-blackburn-b9ccea)
+* **Creation**: [KnowMe PoC phase complete after T12 with mobile startup gap deferred](/knowme-poc-phase-complete-after-t12-with-mobile-startup-gap-deferred.md) (from worktree gallant-blackburn-b9ccea)
+* **Creation**: [KnowMe PoC build probe during codegen and CI verification](/knowme-poc-build-probe-during-codegen-and-ci-verification.md) (from worktree optimistic-volhard-233482)
+
 ## 2026-07-16
 * **Creation**: [SurrealDB RELATE endpoints need parenthesized type::record — chevrons silently corrupt edges](/surrealdb-relate-endpoints-need-parenthesized-type-record.md)
 * **Creation**: [Codegen and CI verification executor session complete unknown change](/codegen-and-ci-verification-executor-session-complete-unknown-change.md)

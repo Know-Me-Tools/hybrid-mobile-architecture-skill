@@ -68,6 +68,40 @@ guards this correctly. Flagged as follow-up work.
 The chevron form was worse than a parse error: a parse error fails loudly, this wrote
 plausible-looking garbage and returned success.
 
+## Follow-up (2026-07-17): the error guard was added — and proven unable to catch this bug
+
+A later session added the flagged follow-up: `error::check_statements(&mut IndexedResults,
+ctx)`, applied to every previously-silent `.query()` site (`relate`, `upsert_provider`,
+`delete_provider`, `upsert_model_pref`, `set_setting`, `init`).
+
+**But it does not catch this bug, and cannot.** Verified empirically, not assumed: a
+side-by-side live probe against surrealdb-core 3.2.1 ran both RELATE forms and called
+`take_errors()` on each —
+
+```
+CHEVRON take_errors: {}   <- EMPTY. The chevron form is not a statement failure.
+PAREN   take_errors: {}
+```
+
+The chevron form is not a "failure that goes unreported" — it is a **complete, correct
+success** from SurrealDB's point of view. It parsed, executed, and did exactly what its
+syntax says: wrote an escaped-identifier record key. `check_statements()` has nothing to
+catch. Confirmed by falsification: reverting `relate()` to the chevron form and re-running
+the test suite left `relate_rejected_by_db_surfaces_error` (the guard's own test) **green**,
+while only a test asserting on the actual stored edge keys (`relate_binds_endpoint_ids_not_
+literal_param_names`) went red.
+
+**The corrected framing:** this was never a missing-error-check bug. It was a **silent
+wrong-success** bug — SurrealDB did something legal and complete that was not what the
+caller meant. No error-reporting layer, however thorough, can surface that class of bug.
+Only an assertion on what was actually written can. See [[surrealdb-three-failure-levels]]
+for the general pattern (query Err / per-statement error / silent wrong success).
+
+The guard is still worth having — `memory_search()` had a real level-2 bug of its own
+(only the last of its multi-statement query was checked, so a failed vector or BM25 lane
+silently degraded hybrid search to one lane while returning plausible rows) — just not
+this one.
+
 ## Lesson
 
 Don't iterate on SurrealQL syntax guesses. Two moves beat guessing:
@@ -75,5 +109,10 @@ Don't iterate on SurrealQL syntax guesses. Two moves beat guessing:
    key of `"$from"` instead of `"a"` names the bug in one shot.
 2. **Read surrealdb-core's parser source.** The parser's own error text names the
    sanctioned route (`type::record("{}",{})`).
+
+A second lesson from the follow-up: **don't assume an error-reporting gap explains a
+silent-wrong-success bug** without checking whether the error path could ever have fired.
+Falsify the fix — revert it and confirm the test goes red for the right reason — before
+trusting a green suite.
 
 Related: `type::thing` does not exist in 3.2 — it is `type::record(table, key)`.
