@@ -54,7 +54,7 @@
     },
     {
       "id": "2026-07-16-c111-memory-ui-and-corpus",
-      "status": "pending",
+      "status": "merged",
       "wave": 2
     },
     {
@@ -68,7 +68,7 @@
       "wave": 2
     }
   ],
-  "completedChanges": 8,
+  "completedChanges": 9,
   "totalChanges": 13,
   "previousPhase": "scaffold-full-hybrid-project",
   "startedAt": "2026-07-15T22:04:11Z",
