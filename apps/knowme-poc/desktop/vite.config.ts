@@ -17,5 +17,15 @@ export default defineConfig({
   },
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
   envPrefix: ['VITE_', 'TAURI_'],
-  build: { target: process.env.TAURI_ENV_PLATFORM === 'windows' ? 'chrome105' : 'safari13', minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false, sourcemap: !!process.env.TAURI_ENV_DEBUG },
+  // safari15, NOT Tauri's scaffold default of safari13: the app's dependencies emit
+  // destructuring that esbuild cannot downlevel that far — `vite build` failed with 103
+  // "Transforming destructuring to the configured target environment is not supported yet"
+  // errors. Nothing caught it because `tsc` and `vite dev` both pass; only the PRODUCTION
+  // bundle (the one Tauri actually ships) goes through esbuild's transform.
+  //
+  // safari14 still fails; 15 is the lowest that builds, verified by bisecting. Safari 15
+  // ships with macOS 12, which is above Tauri 2's own macOS floor — so this narrows the
+  // supported range slightly, deliberately, rather than shipping a bundle that cannot be
+  // built at all.
+  build: { target: process.env.TAURI_ENV_PLATFORM === 'windows' ? 'chrome105' : 'safari15', minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false, sourcemap: !!process.env.TAURI_ENV_DEBUG },
 })
