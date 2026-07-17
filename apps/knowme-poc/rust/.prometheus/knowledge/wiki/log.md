@@ -24,3 +24,14 @@
 * **Creation**: [Hybrid Mobile PoC Executor Session Completion](/hybrid-mobile-poc-executor-session-completion.md)
 * **Creation**: [Hybrid Mobile PoC Codegen and CI Verification Session](/hybrid-mobile-poc-codegen-and-ci-verification-session.md)
 * **Creation**: [Hybrid Mobile Architecture PoC Phase Goals and Current Status](/hybrid-mobile-architecture-poc-phase-goals-and-current-status.md)
+
+## 2026-07-17
+* **Creation**: [Hybrid Mobile Codegen and CI Verification Session Complete](/hybrid-mobile-codegen-and-ci-verification-session-complete.md)
+* **Creation**: [Hybrid Mobile PoC worktree cleanup and remaining walkthrough status](/hybrid-mobile-poc-worktree-cleanup-and-remaining-walkthrough-status.md)
+* **Creation**: [Hybrid Mobile Codegen and CI Phase Executor Completion](/hybrid-mobile-codegen-and-ci-phase-executor-completion.md)
+* **Creation**: [Prometheus Entity Management universal platform evolution status](/prometheus-entity-management-universal-platform-evolution-status.md)
+* **Creation**: [Hybrid Mobile PoC iOS Reboot Verification Next Steps](/hybrid-mobile-poc-ios-reboot-verification-next-steps.md)
+* **Creation**: [SurrealDB RELATE parameter fix for graph_expand C-111](/surrealdb-relate-parameter-fix-for-graph-expand-c-111.md)
+* **Creation**: [Executor Session Completion for Codegen and CI Verification](/executor-session-completion-for-codegen-and-ci-verification.md)
+* **Creation**: [KnowMe PoC SurrealDB RELATE error handling and endpoint fix](/knowme-poc-surrealdb-relate-error-handling-and-endpoint-fix.md)
+* **Creation**: [Hybrid Mobile PoC iOS Skia Verification Status](/hybrid-mobile-poc-ios-skia-verification-status.md)

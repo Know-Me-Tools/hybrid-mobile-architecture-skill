@@ -24,7 +24,7 @@ revision: 0
 
 - **Project:** `flint-realtime-fabric`
 - **Phase:** `phase-36-sovereign-sfu-ice-linux-fix`
-- **KBD root:** `/Users/gqadonis/Projects/prometheus/flint-realtime-fabric`
+- **KBD root:** `$HOME/Projects/prometheus/flint-realtime-fabric`
 - **Captured:** `2026-07-16T18:44:58Z`
 - **Position:** `phase-codegen-and-ci-verification`
 - **Status:** `executing`

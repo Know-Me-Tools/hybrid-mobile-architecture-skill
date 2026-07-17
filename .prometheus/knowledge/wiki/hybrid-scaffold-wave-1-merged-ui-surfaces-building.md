@@ -74,3 +74,63 @@ This continues the scaffolding execution flow initialized in [Hybrid Mobile Arch
 
 1. [1] stdin
 2. [2] manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project
+
+## Consolidated source variants
+
+### Variant from `agent-a6bf13877ab890979`
+
+Original path: `.prometheus/knowledge/wiki/hybrid-scaffold-wave-1-merged-ui-surfaces-building.md`  
+Original SHA-256: `c19d8a028af11724d20274225ece51470a0f942b000747bdadbbc9d231e019ec`
+
+## Context
+
+- **Project:** Hybrid Mobile Architecture
+- **Phase:** `scaffold-full-hybrid-project`
+- **KBD root:** `$REPO_ROOT`
+- **Captured:** `2026-07-15T20:23:52Z`
+- **Position:** `scaffold-full-hybrid-project`
+- **Status:** `executing`
+- **Progress:** `9/12` changes merged to `main`
+
+This continues the scaffolding execution flow initialized in [Hybrid Mobile Architecture Scaffold Phase Initialization](/hybrid-mobile-architecture-scaffold-phase-initialization.md) and follows the earlier assessment/gating records such as [Hybrid scaffold c004 awaits graph RAG boundary tests](/hybrid-scaffold-c004-awaits-graph-rag-boundary-tests.md).
+
+## Phase goals
+
+- Create a complete working instance of the hybrid mobile architecture:
+  - Flutter mobile application layer
+  - Rust FFI integration layer
+  - Tauri runtime/shell integration
+  - React 19 frontend surface
+- Run scaffolding scripts from the reference library to generate the project.
+- Verify generated artifacts conform to `TJ-ARCH-MOB-001`.
+- Confirm the environment meets minimum required tool versions.
+
+## Current execution state
+
+- **Wave 1:** complete and merged.
+- **Shared Rust foundation:** complete, merged, and cold-compile verified.
+  - This is the load-bearing shared layer for the generated architecture.
+  - It is now considered permanent baseline work for subsequent UI surface integration.
+- **Wave 2:** dispatched and building.
+  - `C-010`: Flutter surface, assigned to `claude`.
+  - `C-011`: React 19 surface, assigned to `codex`.
+- **Remaining integration:** vertical slice change `C-012` will tie the shared Rust foundation and UI surfaces together.
+
+## Next actions
+
+1. Gate and integrate `C-010` Flutter surface when complete.
+2. Gate and integrate `C-011` React 19 surface when complete.
+3. Dispatch `C-012` vertical slice.
+4. Run `/kbd-reflect` to close the phase.
+5. Record the recommended next phase.
+
+## Operational notes
+
+- Autonomous loop remains active.
+- Monitor is armed.
+- Fallback heartbeat is armed.
+
+# Citations
+
+1. [1] stdin
+2. [2] manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project

@@ -56,3 +56,41 @@ This pause follows the earlier scaffold readiness and assessment flow documented
 
 1. [1] stdin
 2. [2] manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project
+
+## Consolidated source variants
+
+### Variant from `agent-a6bf13877ab890979`
+
+Original path: `.prometheus/knowledge/wiki/hybrid-scaffold-pauses-pending-mcp-skills-research.md`  
+Original SHA-256: `7849f0334d2eaad1e46e8ced204b78e965456215fc3e358521b72b36fb9a689b`
+
+## Context
+
+- **Project:** Hybrid Mobile Architecture
+- **Phase:** `scaffold-full-hybrid-project`
+- **KBD root:** `$REPO_ROOT`
+- **Captured:** `2026-07-15T20:42:22Z`
+- **Source:** `manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project`
+- **Status:** waiting on research
+
+## Phase goals
+
+- Create a new full instance of the hybrid mobile architecture:
+  - Flutter mobile application layer
+  - Rust FFI integration layer
+  - Tauri shell/runtime integration
+  - React 19 frontend surface
+- Run scaffolding scripts to generate a complete working project from the reference library.
+- Verify all generated artifacts conform to `TJ-ARCH-MOB-001`.
+- Confirm the environment meets minimum tool version requirements.
+
+## Session state
+
+The scaffold phase remains blocked on completion of MCP/skills research. No additional implementation, scaffolding, or verification action was recorded for this tick.
+
+This pause follows the earlier scaffold readiness and assessment flow documented in [Hybrid Mobile Architecture Scaffold Phase Initialization](/hybrid-mobile-architecture-scaffold-phase-initialization.md), [Hybrid Mobile scaffold phase assessment readiness](/hybrid-mobile-scaffold-phase-assessment-readiness.md), [Hybrid scaffold assessment waits on remaining research agents](/hybrid-scaffold-assessment-waits-on-remaining-research-agents.md), and [Hybrid scaffold assessment receives testing policy research](/hybrid-scaffold-assessment-receives-testing-policy-research.md). It also occurs immediately after the C-010 Flutter-surface lane was marked complete in [Hybrid scaffold C-010 Flutter surface completion](/hybrid-scaffold-c-010-flutter-surface-completion.md).
+
+# Citations
+
+1. [1] stdin
+2. [2] manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project

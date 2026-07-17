@@ -59,3 +59,48 @@ Keep waiting on the monitor until the Gradle build, Rust cross-compile, APK inst
 
 1. stdin
 2. manual:Hybrid Mobile Architecture/phase-codegen-and-ci-verification
+
+## Consolidated source variants
+
+### Variant from `compassionate-babbage-7cd4bc`
+
+Original path: `.prometheus/knowledge/wiki/knowme-poc-android-launch-reaches-gradle-assembledebug-wait-loop.md`  
+Original SHA-256: `28ad851d04914ceae47cc4a710b7219087964579108d6bf44e61734d6f44caa8`
+
+## Context
+
+- **Project:** Hybrid Mobile Architecture
+- **Phase:** `phase-codegen-and-ci-verification`
+- **KBD root:** `$REPO_ROOT`
+- **Captured:** `2026-07-16T14:47:44Z`
+- **Position:** `phase-codegen-and-ci-verification`
+- **Status:** `executing`
+
+This execution tick continues the PoC-first phase scope captured in [KnowMe PoC codegen and CI verification phase goals](/knowme-poc-codegen-and-ci-verification-phase-goals.md) and follows the Android device launch progress in [KnowMe PoC Flutter Android device launch in progress](/knowme-poc-flutter-android-device-launch-in-progress.md).
+
+## Current execution state
+
+- The Flutter Android build has reached the launch/build phase.
+- The same benign warning is still present; no action is required for it at this point.
+- Monitoring should continue through:
+  - Gradle `assembleDebug`
+  - Rust cross-compilation for `arm64` and `x86_64`
+  - APK installation
+  - App launch on device `SM S936U`
+
+## Build configuration observations
+
+- Previously problematic targets/components are now avoided:
+  - `i686`
+  - `whisper.cpp`
+  - `wasmer`
+- Current expected path is limited to the active Android build and launch pipeline.
+
+## Next action
+
+Keep waiting on the monitor until the Gradle build, Rust cross-compile, APK install, and launch sequence complete on `SM S936U`.
+
+# Citations
+
+1. stdin
+2. manual:Hybrid Mobile Architecture/phase-codegen-and-ci-verification

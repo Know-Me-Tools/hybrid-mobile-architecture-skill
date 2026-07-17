@@ -92,3 +92,77 @@ Two analysis agents remain open:
 
 1. stdin
 2. manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project
+
+## Consolidated source variants
+
+### Variant from `agent-a6bf13877ab890979`
+
+Original path: `.prometheus/knowledge/wiki/hybrid-scaffold-analysis-integrates-pem-and-pes-sync-findings.md`  
+Original SHA-256: `b06c4ac17a188dfc0898737ae1c877ff38c53251edb549e99f0e8f86ba33947a`
+
+## Context
+
+- **Project:** Hybrid Mobile Architecture
+- **Phase:** `scaffold-full-hybrid-project`
+- **KBD root:** `$REPO_ROOT`
+- **Captured:** `2026-07-15T17:45:08Z`
+- **Position:** `scaffold-full-hybrid-project`
+- **Status:** `analyzing`
+- **Research progress:** 3 of 4 analysis agents complete
+
+This record continues the scaffold assessment and research flow after [Hybrid scaffold analysis integrates Flint platform report](/hybrid-scaffold-analysis-integrates-flint-platform-report.md), within the phase initialized by [Hybrid Mobile Architecture Scaffold Phase Initialization](/hybrid-mobile-architecture-scaffold-phase-initialization.md). It updates the status from the earlier assessment records, including [Hybrid Mobile scaffold phase assessment readiness](/hybrid-mobile-scaffold-phase-assessment-readiness.md), [Hybrid scaffold assessment waits on remaining research agents](/hybrid-scaffold-assessment-waits-on-remaining-research-agents.md), and [Hybrid scaffold assessment receives testing policy research](/hybrid-scaffold-assessment-receives-testing-policy-research.md).
+
+## Phase goals
+
+- Create a new full instance of the hybrid mobile architecture:
+  - Flutter mobile application layer
+  - Rust FFI integration layer
+  - Tauri shell/runtime integration
+  - React 19 frontend surface
+- Run scaffolding scripts to generate a complete working project from the reference library.
+- Verify all generated artifacts conform to `TJ-ARCH-MOB-001`.
+- Confirm the environment meets minimum tool version requirements.
+
+## Entity-management research finding
+
+The entity-management report identified **PEM** as a significant alignment candidate for the scaffolded architecture:
+
+- PEM is a full normalized entity-graph monorepo.
+- Current version noted: `3.0.0-alpha.0`.
+- Existing adapters already include:
+  - PGlite
+  - ElectricSQL
+  - Tauri
+- PEM includes a Flutter/Riverpod mapping sketch:
+  - Rust is treated as the canonical store.
+  - Provider families act as the normalization map.
+
+## Sync architecture implication
+
+The report found that **v4 `prometheus-entity-sync` (PES)** already specifies a Rust-native bidirectional sync engine:
+
+- Reuses FRF's CDC crate.
+- Treats Dart/SQLite as a first-class client target.
+- Treats `pglite-oxide` clients as first-class targets.
+
+This aligns the example application's sync story with already-planned ecosystem work rather than requiring a bespoke sync design during scaffolding.
+
+## Remaining research
+
+Two analysis agents remain open:
+
+- PGlite/local-first platform matrix.
+- SurrealDB 3.2 + Riverpod 3.
+
+## Next actions
+
+- Collect the final agent report.
+- Write `analysis.md`.
+- Write `library-candidates.json`.
+- Write `decision-log.md`.
+- Prepare handoff.
+
+# Citations
+
+1. stdin
+2. manual:Hybrid Mobile Architecture/scaffold-full-hybrid-project
