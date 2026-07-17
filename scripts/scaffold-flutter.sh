@@ -149,7 +149,7 @@ dev_dependencies:
   # analyzer_plugin ^0.14/analyzer ^12, custom_lint requires ^0.13/^8 respectively) —
   # a live ecosystem incompatibility, not a version we can pin around. Neither is
   # needed to build/run/build_runner; they're IDE-only lint plugins. Re-add once the
-  # ecosystem resolves (check `flutter pub add custom_lint riverpod_lint --dry-run`).
+  # ecosystem resolves; verify with: flutter pub add custom_lint riverpod_lint --dry-run.
   alchemist: ^0.12.0           # deterministic golden tests (VGV workflow) — no mocks
 
 flutter:

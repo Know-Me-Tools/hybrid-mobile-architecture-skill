@@ -94,6 +94,17 @@ cat > package.json << PKGEOF
 PKGEOF
 ok "package.json"
 
+# pnpm 11 blocks dependency lifecycle scripts unless the project explicitly
+# approves them. Vite requires esbuild's platform binary; es5-ext is also a
+# current transitive installer. Keep the allowlist narrow and tracked so a
+# fresh scaffold installs non-interactively without suppressing failures.
+cat > pnpm-workspace.yaml << 'EOF'
+allowBuilds:
+  es5-ext: true
+  esbuild: true
+EOF
+ok "pnpm-workspace.yaml (approved build scripts)"
+
 cat > index.html << EOF
 <!doctype html>
 <html lang="en">
@@ -1211,12 +1222,11 @@ step "Installing dependencies"
 if [[ "${SKIP_INSTALL:-0}" == "1" ]]; then
   ok "dependency installation skipped (SKIP_INSTALL=1)"
 elif command -v pnpm &>/dev/null; then
-  # pnpm's newer default exits non-zero when it withholds a dependency's postinstall
-  # script for supply-chain safety (ERR_PNPM_IGNORED_BUILDS) — install itself still
-  # succeeds (node_modules is populated), so this is advisory, not fatal, for a
-  # non-interactive scaffold. Don't let it kill the script under set -e.
-  pnpm install --frozen-lockfile 2>/dev/null || pnpm install || true
-  ok "pnpm install (review 'pnpm approve-builds' if native postinstall steps are needed)"
+  # A newly generated project has no lockfile yet. Generate it once while
+  # honoring the tracked lifecycle-script allowlist; all later verification
+  # and CI installs use --frozen-lockfile.
+  pnpm install --no-frozen-lockfile
+  ok "pnpm lockfile + dependencies"
 else
   npm install
   ok "npm install"
