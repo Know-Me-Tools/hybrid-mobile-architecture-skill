@@ -129,8 +129,21 @@ export interface RelatedEntity {
   score: number;
 }
 
-export function memorySearch(query: string, k: number): Promise<MemoryHit[]> {
-  return invoke<MemoryHit[]>(cmd("memory_search"), { query, k });
+/**
+ * Which retrieval lane memory search runs.
+ *
+ * - `hybrid` — vector + BM25, RRF-fused. The product path; the default.
+ * - `vector` — HNSW vector recall alone. A DIAGNOSTIC, for showing what fusion buys
+ *   on the same query.
+ *
+ * Scores compare only WITHIN a mode — an RRF score and a vector-similarity score are
+ * different scales. Never merge or rank results from both together.
+ */
+export type SearchMode = "hybrid" | "vector";
+
+/** Omit `mode` for the product path (hybrid). */
+export function memorySearch(query: string, k: number, mode?: SearchMode): Promise<MemoryHit[]> {
+  return invoke<MemoryHit[]>(cmd("memory_search"), { query, k, mode });
 }
 export function graphExpand(entityId: string, depth: number): Promise<RelatedEntity[]> {
   return invoke<RelatedEntity[]>(cmd("graph_expand"), { entityId, depth });

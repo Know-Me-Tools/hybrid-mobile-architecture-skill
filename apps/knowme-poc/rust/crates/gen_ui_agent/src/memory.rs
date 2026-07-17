@@ -3,7 +3,7 @@
 //! (mobile, via frb) and tauri-plugin-gen-ui (desktop, via Tauri IPC) — both
 //! platforms share the SAME embedded SurrealDB GraphStore instance shape (see
 //! `state::init`'s doc comment on why this is not tied to `ConfigBackend`).
-use gen_ui_db_graph::{MemoryRecord, MemoryHit, RelatedEntity};
+use gen_ui_db_graph::{MemoryRecord, MemoryHit, RelatedEntity, SearchMode};
 
 use crate::error::AgentError;
 use crate::state;
@@ -18,10 +18,26 @@ pub async fn ingest(text: String) -> Result<String, AgentError> {
         .map_err(|e| AgentError::Config(e.to_string()))
 }
 
-/// Hybrid semantic + lexical search over ingested memory, RRF-fused in Rust.
+/// Hybrid semantic + lexical search over ingested memory, RRF-fused in the DB.
 pub async fn search(query: String, k: u32) -> Result<Vec<MemoryHit>, AgentError> {
+    search_with(query, k, SearchMode::Hybrid).await
+}
+
+/// `search`, choosing the retrieval lane (C-111 T3).
+///
+/// `SearchMode::Vector` is a diagnostic — it drops the BM25 lane and RRF so the UI can
+/// show what fusion actually buys on the same query. Scores are comparable only within a
+/// mode, so callers must never merge results from both.
+pub async fn search_with(
+    query: String,
+    k: u32,
+    mode: SearchMode,
+) -> Result<Vec<MemoryHit>, AgentError> {
     let store = state::memory()?;
-    store.memory_search(&query, k as usize).await.map_err(|e| AgentError::Config(e.to_string()))
+    store
+        .memory_search_with(&query, k as usize, mode)
+        .await
+        .map_err(|e| AgentError::Config(e.to_string()))
 }
 
 /// Ingest the demo corpus (C-111). Idempotent — the notes carry stable ids, so the

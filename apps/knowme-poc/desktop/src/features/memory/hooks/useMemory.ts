@@ -8,7 +8,9 @@ export function useMemory() {
     isIngesting: useMemoryStore((s) => s.isIngesting),
     isSearching: useMemoryStore((s) => s.isSearching),
     error: useMemoryStore((s) => s.error),
+    mode: useMemoryStore((s) => s.mode),
     ingest: useMemoryStore((s) => s.ingest),
     search: useMemoryStore((s) => s.search),
+    setMode: useMemoryStore((s) => s.setMode),
   }
 }

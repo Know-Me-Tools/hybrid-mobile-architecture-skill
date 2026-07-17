@@ -8,7 +8,7 @@ const ACTION =
   'shrink-0 rounded-md bg-[color:var(--color-ember)] px-4 py-2 text-sm font-medium text-white disabled:opacity-50'
 
 export function MemoryPanel() {
-  const { hits, query, isIngesting, isSearching, error, ingest, search } = useMemory()
+  const { hits, query, isIngesting, isSearching, error, mode, ingest, search, setMode } = useMemory()
   const [ingestText, setIngestText] = useState('')
   const [searchText, setSearchText] = useState('')
 
@@ -48,9 +48,38 @@ export function MemoryPanel() {
           if (searchText.trim()) void search(searchText.trim())
         }}
       >
-        <label htmlFor="mem-search" className="text-xs font-medium uppercase tracking-wide text-[color:var(--color-fg-sub)]">
-          Search
-        </label>
+        <div className="flex items-center justify-between gap-2">
+          <label htmlFor="mem-search" className="text-xs font-medium uppercase tracking-wide text-[color:var(--color-fg-sub)]">
+            Search
+          </label>
+          {/* Dev toggle: proves what RRF fusion buys instead of asserting it. Run the
+              same query both ways — a rare exact term that vector recall smooths away
+              comes back ranked first under hybrid. */}
+          <div role="radiogroup" aria-label="Retrieval mode" className="flex gap-1">
+            {(['hybrid', 'vector'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="radio"
+                aria-checked={mode === m}
+                disabled={isSearching}
+                onClick={() => void setMode(m)}
+                title={
+                  m === 'hybrid'
+                    ? 'Vector + BM25, RRF-fused — the real retrieval path'
+                    : 'Vector recall only, no lexical lane — diagnostic'
+                }
+                className={
+                  mode === m
+                    ? 'rounded-md bg-[color:var(--color-ember)] px-2 py-1 text-xs font-medium text-white disabled:opacity-50'
+                    : 'rounded-md border border-[color:var(--color-border)] px-2 py-1 text-xs text-[color:var(--color-fg)] disabled:opacity-50'
+                }
+              >
+                {m === 'hybrid' ? 'Hybrid' : 'Vector only'}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex gap-2">
           <input
             id="mem-search"
@@ -84,7 +113,15 @@ export function MemoryPanel() {
                   These are the real MemoryHit fields — the panel previously read
                   `name`/`snippet`, which no longer exist. */}
               <span className="text-xs uppercase tracking-wide text-[color:var(--color-fg-faint)]">{hit.kind}</span>
-              <span className="font-mono text-xs text-[color:var(--color-fg-sub)]">{hit.score.toFixed(3)}</span>
+              {/* The score's SCALE depends on the mode — an RRF score and a vector
+                  similarity are not the same units. Label it, so nobody compares a
+                  number across modes and concludes something false. */}
+              <span
+                className="font-mono text-xs text-[color:var(--color-fg-sub)]"
+                title={mode === 'hybrid' ? 'Fused RRF score' : 'Vector similarity, 1/(1+distance)'}
+              >
+                {mode === 'hybrid' ? 'rrf' : 'sim'} {hit.score.toFixed(3)}
+              </span>
             </div>
             <p className="mt-1 text-sm text-[color:var(--color-fg)]">{hit.text}</p>
           </li>

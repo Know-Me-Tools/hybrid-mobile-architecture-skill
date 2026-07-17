@@ -35,7 +35,7 @@ pub use corpus::{corpus_len, seed_corpus};
 pub use embed::{Embedder, EmbeddingModelInfo, EMBED_DIM};
 pub use error::GraphError;
 pub use rrf::{rrf_fuse, RrfConfig};
-pub use store::{GraphStore, GraphStoreConfig, MemoryHit, MemoryRecord, RelatedEntity};
+pub use store::{GraphStore, GraphStoreConfig, MemoryHit, MemoryRecord, RelatedEntity, SearchMode};
 
 #[cfg(feature = "embed-native")]
 pub use embed::FastEmbedder;

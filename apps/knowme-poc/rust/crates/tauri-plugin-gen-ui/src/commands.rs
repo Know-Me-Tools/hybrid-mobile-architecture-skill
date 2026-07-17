@@ -9,7 +9,7 @@ use std::sync::{Arc, Mutex};
 
 use crate::error::Result;
 use gen_ui_agent::ConfigBackend;
-use gen_ui_db_graph::{FastEmbedder, GraphStore, GraphStoreConfig, MemoryHit, RelatedEntity};
+use gen_ui_db_graph::{FastEmbedder, GraphStore, GraphStoreConfig, MemoryHit, RelatedEntity, SearchMode};
 use gen_ui_types::transport::{EntityRecord, ListResult};
 use gen_ui_types::view::ViewDescriptor;
 use once_cell::sync::OnceCell;
@@ -281,9 +281,12 @@ pub async fn entity_delete(entity_type: String, id: String) -> Result<()> {
 /// used to stub out: C-104 wired the mobile FFI to the agent but left this command
 /// returning an empty vec, so desktop memory search silently produced nothing.
 /// Found while surfacing the Memory screen in C-113.
+/// `mode` is optional: absent → hybrid, the product path. `"vector"` runs the
+/// diagnostic lane (no BM25, no RRF) so the UI can show what fusion buys on the same
+/// query. Scores compare only WITHIN a mode — never merge results from both.
 #[tauri::command]
-pub async fn memory_search(query: String, k: u32) -> Result<Vec<MemoryHit>> {
-    gen_ui_agent::memory::search(query, k)
+pub async fn memory_search(query: String, k: u32, mode: Option<SearchMode>) -> Result<Vec<MemoryHit>> {
+    gen_ui_agent::memory::search_with(query, k, mode.unwrap_or_default())
         .await
         .map_err(gen_ui_types::CoreError::from)
         .map_err(Into::into)

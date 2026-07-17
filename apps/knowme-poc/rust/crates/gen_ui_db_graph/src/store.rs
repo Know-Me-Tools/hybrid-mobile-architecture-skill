@@ -5,7 +5,7 @@
 use crate::embed::{Embedder, EMBED_DIM};
 use crate::error::GraphError;
 use crate::rrf::{rrf_fuse, RrfConfig};
-use crate::schema::{HYBRID_SEARCH_QUERY, SCHEMA_DDL};
+use crate::schema::{HYBRID_SEARCH_QUERY, SCHEMA_DDL, VECTOR_SEARCH_QUERY};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::OnceCell;
@@ -41,13 +41,32 @@ fn default_kind() -> String {
     "note".to_string()
 }
 
-/// One hybrid-search hit. `score` is the fused RRF score (higher = better).
+/// One search hit. `score` is always "higher = better", but its SCALE depends on the
+/// `SearchMode` that produced it — an RRF score and a vector-similarity score are not
+/// comparable magnitudes. Never rank hits from different modes against each other.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct MemoryHit {
     pub id: String,
     pub text: String,
     pub kind: String,
     pub score: f32,
+}
+
+/// Which retrieval lane `memory_search` runs (C-111 T3).
+///
+/// Exists so the hybrid lane's advantage is demonstrable rather than asserted: run the
+/// same query both ways and watch a rare exact term — a product name, an error code —
+/// that vector recall smooths away come back ranked first under fusion.
+///
+/// Defaults to `Hybrid`: that is the product behaviour, and `Vector` is a diagnostic.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SearchMode {
+    /// Vector + BM25, fused with native RRF. The real retrieval path.
+    #[default]
+    Hybrid,
+    /// HNSW vector recall alone — no lexical lane, no fusion. Diagnostic only.
+    Vector,
 }
 
 /// A neighbour reached by graph expansion, with the RRF score from re-fusing the
@@ -189,15 +208,15 @@ impl GraphStore {
         if from.trim().is_empty() || to.trim().is_empty() {
             return Err(GraphError::Invalid("relate endpoints must be non-empty".into()));
         }
-        // RELATE needs record LITERALS at its endpoints — unlike UPSERT/SELECT, it
-        // rejects a function call there ("Parse error: Unexpected token `::`"), so
-        // `type::record('entity', $from)` does not work here even though it works
-        // everywhere else in this file. `entity:⟨$from⟩` is the parameterized-id
-        // literal form: the table stays a compile-time constant and the id is still
-        // bound, so this is not string interpolation of user input.
+        // Endpoints must be PARENTHESIZED. A bare `type::record('entity', $from)`
+        // hits RELATE's record-id fallback and dies on `::`; the parens route it to
+        // the expression arm instead (syn/parser/stmt/relate.rs `parse_relate_expr`).
+        // Do NOT "simplify" to the escaped-ident form `entity:⟨$from⟩` — chevrons are
+        // escaped-IDENTIFIER syntax, not interpolation, so that silently relates the
+        // literal records `entity:$from`/`entity:$to` and traversal finds nothing.
         self.db
             .query(
-                "RELATE entity:⟨$from⟩->relates_to->entity:⟨$to⟩ \
+                "RELATE (type::record('entity', $from))->relates_to->(type::record('entity', $to)) \
                  SET rel = $rel;",
             )
             .bind(("from", from.to_string()))
@@ -210,6 +229,20 @@ impl GraphStore {
     /// INTENT: hybrid semantic + lexical search. Embeds `query`, runs the vector
     /// and BM25 lanes, fuses them with native `search::rrf`, returns top-`k`.
     pub async fn memory_search(&self, query: &str, k: usize) -> Result<Vec<MemoryHit>, GraphError> {
+        self.memory_search_with(query, k, SearchMode::Hybrid).await
+    }
+
+    /// `memory_search`, choosing the retrieval lane (C-111 T3).
+    ///
+    /// `SearchMode::Vector` skips the BM25 lane and RRF entirely — a diagnostic for
+    /// showing what fusion actually buys, not a product path. Scores are comparable
+    /// only within a mode; see `MemoryHit::score`.
+    pub async fn memory_search_with(
+        &self,
+        query: &str,
+        k: usize,
+        mode: SearchMode,
+    ) -> Result<Vec<MemoryHit>, GraphError> {
         if query.trim().is_empty() {
             return Err(GraphError::Invalid("search query is empty".into()));
         }
@@ -220,19 +253,35 @@ impl GraphStore {
             .next()
             .ok_or_else(|| GraphError::Embedding("embedder returned no vector".into()))?;
 
-        let mut res = self
-            .db
-            .query(HYBRID_SEARCH_QUERY)
-            .bind(("qvec", qvec))
-            .bind(("q", query.to_string()))
-            .bind(("k", k as i64))
-            .await?;
-        // The SELECT is the last statement in the multi-statement query. Bind the
-        // index first — `take(&mut self)` and `num_statements(&self)` can't borrow
-        // `res` in the same expression.
-        let last = res.num_statements().saturating_sub(1);
-        let rows: Vec<HitRow> = res.take(last)?;
-        Ok(rows.into_iter().map(HitRow::into_hit).collect())
+        match mode {
+            SearchMode::Hybrid => {
+                let mut res = self
+                    .db
+                    .query(HYBRID_SEARCH_QUERY)
+                    .bind(("qvec", qvec))
+                    .bind(("q", query.to_string()))
+                    .bind(("k", k as i64))
+                    .await?;
+                // The SELECT is the last statement in the multi-statement query. Bind
+                // the index first — `take(&mut self)` and `num_statements(&self)` can't
+                // borrow `res` in the same expression.
+                let last = res.num_statements().saturating_sub(1);
+                let rows: Vec<HitRow> = res.take(last)?;
+                Ok(rows.into_iter().map(HitRow::into_hit).collect())
+            }
+            SearchMode::Vector => {
+                // Single statement, so the rows are at index 0 — no `$q` binding,
+                // because with no lexical lane there is nothing to match text against.
+                let mut res = self
+                    .db
+                    .query(VECTOR_SEARCH_QUERY)
+                    .bind(("qvec", qvec))
+                    .bind(("k", k as i64))
+                    .await?;
+                let rows: Vec<HitRow> = res.take(0)?;
+                Ok(rows.into_iter().map(HitRow::into_hit).collect())
+            }
+        }
     }
 
     /// INTENT: expand the graph outward from `entity_id` up to `depth` RELATE hops,

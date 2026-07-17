@@ -97,3 +97,24 @@ SELECT meta::id(id) AS id, text, kind, rrf_score AS score
     FROM search::rrf([$vs, $ft], 60, 128)
     LIMIT $k;
 "#;
+
+/// Vector-only recall: the HNSW lane alone, no BM25, no fusion (C-111 T3).
+///
+/// Exists to make the hybrid lane's value *demonstrable* rather than asserted — run the
+/// same query both ways and watch a rare exact term (a product name, an error code) that
+/// vector recall smooths away come back ranked first under fusion.
+///
+/// `score` is derived as `1/(1+distance)` so it stays "higher = better" like the fused
+/// RRF score, keeping `MemoryHit`'s contract identical across modes. It is NOT comparable
+/// to an RRF score in magnitude — only within a mode. The UI must never rank the two
+/// together, which is why the mode is an explicit parameter rather than a hidden default.
+///
+/// Binds `$qvec` and `$k`. No `$q`: without a lexical lane there is nothing to match text
+/// against, and binding an unused parameter would imply otherwise.
+pub const VECTOR_SEARCH_QUERY: &str = r#"
+SELECT meta::id(id) AS id, text, kind,
+       math::fixed(1.0 / (1.0 + vector::distance::knn()), 6) AS score
+    FROM memory WHERE embedding <|64,64|> $qvec
+    ORDER BY score DESC
+    LIMIT $k;
+"#;
