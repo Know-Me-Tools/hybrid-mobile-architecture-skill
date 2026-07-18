@@ -11,15 +11,20 @@ import {
   type EntityRecord as PluginEntityRecord,
 } from '@prometheus-ags/tauri-plugin-gen-ui'
 import { PGlite } from '@electric-sql/pglite'
+import { live } from '@electric-sql/pglite/live'
+import { vector } from '@electric-sql/pglite-pgvector'
 import {
+  createGraphAction,
   createPGlitePersistenceAdapter,
   registerEntityFromSql,
   registerEntityTransport,
   startLocalFirstGraph,
   useGraphStore,
   type EntityTransport,
+  type ListQuery,
 } from '@prometheus-ags/prometheus-entity-management'
 import schemaSql from '../schema.sql?raw'
+import { bridgeTableToGraph, compileListQuery, type LivePGlite } from './syncBridge'
 
 export interface EntityRow { id: string; tenant_id: string; [key: string]: unknown }
 
@@ -61,16 +66,19 @@ function tauriTransport(entityType: string, tenantId: string): EntityTransport<E
   }
 }
 
+// C-126: honors the real PEM ListQuery (filter/sort/limit/cursor) via
+// compileListQuery, retiring the pre-C-104 fetch-everything behavior.
 function pgliteTransport(db: PGlite, table: string, tenantId: string): EntityTransport<EntityRow> {
   return {
     identify: (row) => row.id,
     authoritative: true,
-    list: async ({ limit = 100 }) => {
-      const result = await db.query<EntityRow>(
-        `SELECT * FROM ${table} WHERE tenant_id = $1 ORDER BY updated_at DESC LIMIT $2`,
-        [tenantId, limit],
-      )
-      return { rows: result.rows, total: result.rows.length, nextCursor: null }
+    list: async (query: ListQuery) => {
+      const { sql, params } = compileListQuery(table, tenantId, query)
+      const result = await db.query<EntityRow>(sql, params)
+      const nextCursor = typeof query.limit === 'number' && result.rows.length === query.limit
+        ? (Number(query.cursor ?? 0) + query.limit)
+        : null
+      return { rows: result.rows, total: result.rows.length, nextCursor }
     },
     get: async (id) => {
       const result = await db.query<EntityRow>(
@@ -101,12 +109,25 @@ async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSessi
   // keeps the app usable there without letting Emscripten fall through a noisy
   // filesystem error. The full browser deployment remains durable by default.
   const dataDir = typeof indexedDB === 'undefined' ? 'memory://' : 'idb://gen-ui'
-  const db = await PGlite.create(dataDir, { relaxedDurability: true })
+  const db = await PGlite.create(dataDir, {
+    relaxedDurability: true,
+    // C-123: pgvector powers the client-RAG vector surface (384-dim standard).
+    // C-126: `live` drives the sync bridge — a local table change (whether
+    // from a UI mutation or a future scope-stream write) invalidates PEM's
+    // graph without feature code ever being sync-aware.
+    extensions: { vector, live },
+  }) as LivePGlite
   browserDb = db
+  await db.exec('CREATE EXTENSION IF NOT EXISTS vector')
   await db.exec(schemaSql)
   registerEntityTransport('Project', pgliteTransport(db, 'projects', tenantId))
   registerEntityTransport('Note', pgliteTransport(db, 'notes', tenantId))
   registerEntityTransport('Conversation', pgliteTransport(db, 'chat_conversations', tenantId))
+  const bridges = [
+    bridgeTableToGraph(db, 'projects', 'Project', tenantId),
+    bridgeTableToGraph(db, 'notes', 'Note', tenantId),
+    bridgeTableToGraph(db, 'chat_conversations', 'Conversation', tenantId),
+  ]
   const graph = startLocalFirstGraph({
     storage: await createPGlitePersistenceAdapter(db),
     key: `tenant:${tenantId}`,
@@ -115,6 +136,7 @@ async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSessi
   return {
     tenantId,
     dispose: () => {
+      bridges.forEach((bridge) => bridge.unsubscribe())
       graph.dispose()
       browserDb = null
       void db.close()
@@ -153,26 +175,54 @@ export async function listConversationRecords(tenantId: string): Promise<Convers
   return rows
 }
 
+// C-126: one queue, not two. Mutations route through PEM's own durable
+// action queue (createGraphAction) instead of a manual optimistic
+// useGraphStore call plus a separate persistence write — `optimistic` IS
+// the optimism, `run` IS the durable write, and PEM replays `run` on
+// failure/restart. There is no second write-queue to keep in sync with.
+const saveConversationAction = createGraphAction<ConversationRecord, void>({
+  key: 'conversation.save',
+  optimistic: (tx, row) => {
+    tx.upsertEntity(CONVERSATION_TYPE, row.id, row).markEntityPending(CONVERSATION_TYPE, row.id)
+  },
+  run: async (tx, row) => {
+    if (isTauri()) {
+      const record = { id: row.id, entityType: 'conversations', dataJson: JSON.stringify(row) }
+      const existing = await entityGet('conversations', row.id)
+      await (existing ? entityUpdate(record) : entityCreate(record))
+    } else {
+      if (!browserDb) throw new Error('PGlite conversation store is not ready')
+      await browserDb.query(
+        `INSERT INTO chat_conversations (id, tenant_id, title, messages, created_at, updated_at)
+         VALUES ($1, $2, $3, $4::jsonb, $5, $6)
+         ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, messages = EXCLUDED.messages,
+           updated_at = EXCLUDED.updated_at`,
+        [row.id, row.tenant_id, row.title, JSON.stringify(row.messages), row.created_at, row.updated_at],
+      )
+    }
+    tx.markEntitySynced(CONVERSATION_TYPE, row.id)
+  },
+})
+
 export async function saveConversationRecord(row: ConversationRecord): Promise<void> {
-  graphConversation(row)
-  if (isTauri()) {
-    const record = { id: row.id, entityType: 'conversations', dataJson: JSON.stringify(row) }
-    const existing = await entityGet('conversations', row.id)
-    await (existing ? entityUpdate(record) : entityCreate(record))
-    return
-  }
-  if (!browserDb) throw new Error('PGlite conversation store is not ready')
-  await browserDb.query(
-    `INSERT INTO chat_conversations (id, tenant_id, title, messages, created_at, updated_at)
-     VALUES ($1, $2, $3, $4::jsonb, $5, $6)
-     ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, messages = EXCLUDED.messages,
-       updated_at = EXCLUDED.updated_at`,
-    [row.id, row.tenant_id, row.title, JSON.stringify(row.messages), row.created_at, row.updated_at],
-  )
+  await saveConversationAction(row)
 }
 
+const deleteConversationAction = createGraphAction<string, void>({
+  key: 'conversation.delete',
+  optimistic: (tx, id) => {
+    tx.removeEntity(CONVERSATION_TYPE, id)
+  },
+  run: async (_tx, id) => {
+    await deleteConversationRow(id)
+  },
+})
+
 export async function deleteConversationRecord(id: string): Promise<void> {
-  useGraphStore.getState().removeEntity(CONVERSATION_TYPE, id)
+  await deleteConversationAction(id)
+}
+
+async function deleteConversationRow(id: string): Promise<void> {
   if (isTauri()) {
     await entityDelete('conversations', id)
     return

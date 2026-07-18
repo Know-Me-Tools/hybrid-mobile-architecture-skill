@@ -109,7 +109,11 @@ pub(crate) fn config() -> Result<&'static ConfigBackend, AgentError> {
     Ok(&get()?.config)
 }
 
-pub(crate) fn memory() -> Result<&'static Arc<GraphStore>, AgentError> {
+/// The (always SurrealDB) memory/graph-RAG store. Public because C-127's
+/// mobile sync boot phase (`gen_ui_ffi::api::boot::attach_sync_scopes`) needs
+/// the same already-open connection `GraphStore::local_store()` wraps as the
+/// sync `LocalStore` — one embedded store per process, never a second one.
+pub fn memory() -> Result<&'static Arc<GraphStore>, AgentError> {
     Ok(&get()?.memory)
 }
 

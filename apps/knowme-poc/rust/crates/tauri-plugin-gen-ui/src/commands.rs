@@ -191,6 +191,19 @@ pub async fn load_seeds() -> Result<()> {
 /// unrunnable for everyone who is not doing sync work today.
 #[tauri::command]
 pub async fn attach_sync_shapes<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> {
+    attach_sync_scopes(app, Vec::new()).await
+}
+
+/// C-127 parity command: attach sync with explicit partial-replication scopes
+/// (`gen_ui_types::sync::SyncScope` JSON) instead of the all-or-nothing legacy
+/// `attach_sync_shapes`. Empty `scope_json` preserves the exact prior
+/// behavior (FRF consumes its own configured shapes regardless — scopes are
+/// additive metadata for future PES buckets, ADR-LFS-1).
+#[tauri::command]
+pub async fn attach_sync_scopes<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    scope_json: Vec<String>,
+) -> Result<()> {
     use gen_ui_db::sync::{FrfSyncTransport, PgLocalStore, SyncTransport};
 
     let data_dir = app_data_dir(&app)?;
@@ -199,6 +212,12 @@ pub async fn attach_sync_shapes<R: Runtime>(app: tauri::AppHandle<R>) -> Result<
         tracing::info!("sync ready in local-only mode");
         return Ok(());
     };
+
+    let scopes = scope_json
+        .iter()
+        .map(|json| serde_json::from_str(json))
+        .collect::<std::result::Result<Vec<gen_ui_types::sync::SyncScope>, serde_json::Error>>()
+        .map_err(|e| gen_ui_types::CoreError::Serde(e.to_string()))?;
 
     // The pool the read lane writes into is the SAME pglite store `run_migrations`
     // opened — `PgliteStore::open` is a per-process singleton, so this hands back the
@@ -215,13 +234,54 @@ pub async fn attach_sync_shapes<R: Runtime>(app: tauri::AppHandle<R>) -> Result<
     )?;
 
     let transport = FrfSyncTransport::new(cfg.into_transport_config(), local, sink);
-    transport.start().await?;
+    transport.start_scopes(&scopes).await?;
 
     // Hold the transport for the process lifetime: dropping it stops the drain loop and
     // the read lane (they only live as long as the Arcs they captured).
     SYNC.set(Arc::new(transport))
         .map_err(|_| gen_ui_types::CoreError::Terminal("sync already attached".into()))?;
     Ok(())
+}
+
+/// C-127 parity command: ledgered one-time loads (`stage`: "pre" | "post").
+/// Runs against the SAME pglite store `run_migrations` opened — `PgliteStore`
+/// wraps `PostgresStore`, which already implements `StartupStore`, so no
+/// second store type is needed here (unlike mobile's SurrealDB tier).
+#[tauri::command]
+pub async fn run_one_time_loads<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    stage: String,
+) -> Result<Vec<String>> {
+    let parsed_stage = match stage.as_str() {
+        "pre" => gen_ui_db::relational::LoadStage::PreOnboarding,
+        "post" => gen_ui_db::relational::LoadStage::PostOnboarding,
+        other => {
+            return Err(gen_ui_types::CoreError::Terminal(format!(
+                "run_one_time_loads: unknown stage {other:?} (expected \"pre\" or \"post\")"
+            ))
+            .into())
+        }
+    };
+    let data_dir = app_data_dir(&app)?;
+    let store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    // No bundles ship yet (no desktop-specific pre/post-onboarding bundle
+    // today) — this proves the boot-order contract; bundles arrive with the
+    // first real onboarding flow that needs one.
+    let loads: Vec<gen_ui_db::relational::OneTimeLoad> = Vec::new();
+    let ledger = gen_ui_db::relational::MemoryLookupLedger::default();
+    let client = reqwest::Client::new();
+    let results = gen_ui_db::relational::run_one_time_loads(
+        store.store(),
+        &ledger,
+        &client,
+        &loads,
+        parsed_stage,
+    )
+    .await
+    .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    Ok(results.into_iter().map(|r| format!("{r:?}")).collect())
 }
 
 /// The live sync transport. `OnceCell` mirrors `gen_ui_agent::state`'s process-lifetime
@@ -251,6 +311,12 @@ impl SyncSettings {
             consumer_id: self.consumer_id,
             write_batch: 32,
             max_write_attempts: 5,
+            // C-124: declare the server-syncable tables (mirrors PgLocalStore's
+            // SYNCED_TABLES allow-list); everything else is Local and the write
+            // queue refuses it at enqueue (fail closed).
+            privacy: gen_ui_types::sync::PrivacyRegistry::default()
+                .declare("notes", gen_ui_types::sync::PrivacyClass::Trusted)
+                .declare("memories", gen_ui_types::sync::PrivacyClass::Trusted),
         }
     }
 }
@@ -448,6 +514,122 @@ pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<RelatedEn
         .await
         .map_err(gen_ui_types::CoreError::from)
         .map_err(Into::into)
+}
+
+// C-129: client-RAG retrieval over the desktop chat/agent-memory vector
+// surface (pgvector via pglite-oxide, c123). One typed request/response;
+// this is the ONLY place retrieval SQL runs — chatStore.ts calls this and
+// nothing else touches gen_ui_db::rag directly.
+#[derive(serde::Deserialize)]
+pub struct RagRetrieveRequest {
+    pub query: String,
+    /// "this_conversation" | "all_conversations" | "agent_memory". Vault is
+    /// deliberately not selectable from the wire — it has no server-facing
+    /// invoke path (LFS-INV-4).
+    pub scope: String,
+    #[serde(default)]
+    pub conversation_id: Option<String>,
+    #[serde(default = "default_k")]
+    pub k: usize,
+    #[serde(default = "default_token_budget")]
+    pub token_budget: usize,
+}
+
+fn default_k() -> usize {
+    gen_ui_db::rag::DEFAULT_K
+}
+fn default_token_budget() -> usize {
+    2048
+}
+
+#[derive(serde::Serialize)]
+pub struct RagRetrieveResult {
+    pub source_id: String,
+    pub text: String,
+    pub score: f32,
+    pub table: String,
+    pub updated_at: String,
+}
+
+static RAG_ENGINE: OnceCell<Arc<gen_ui_db::rag::RagEngine>> = OnceCell::new();
+
+async fn rag_engine<R: Runtime>(
+    app: &tauri::AppHandle<R>,
+) -> Result<Arc<gen_ui_db::rag::RagEngine>> {
+    if let Some(engine) = RAG_ENGINE.get() {
+        return Ok(Arc::clone(engine));
+    }
+    let data_dir = app_data_dir(app)?;
+    let store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    let pool = store.store().pool().clone();
+    sqlx::raw_sql(gen_ui_db::rag::MESSAGES_EMBEDDING_DDL)
+        .execute(&pool)
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+
+    let embed_cache = data_dir.join("model-cache/fastembed");
+    std::fs::create_dir_all(&embed_cache)
+        .map_err(|e| gen_ui_types::CoreError::Terminal(format!("rag embed cache dir: {e}")))?;
+    let fast_embedder =
+        gen_ui_runtime::spawn_blocking(move || gen_ui_db_graph::FastEmbedder::new(embed_cache))
+            .await
+            .map_err(|e| gen_ui_types::CoreError::Terminal(format!("embedder task join: {e}")))?
+            .map_err(|e| gen_ui_types::CoreError::Terminal(format!("embedder load: {e}")))?;
+
+    let embedder: Arc<dyn gen_ui_db::rag::Embedder> = Arc::new(
+        gen_ui_db_graph::GraphRagEmbedder::new(Arc::new(fast_embedder)),
+    );
+    let vector_store: Arc<dyn gen_ui_db::rag::VectorStore> =
+        Arc::new(gen_ui_db::rag::PgVectorStore::new(pool));
+    let engine = Arc::new(gen_ui_db::rag::RagEngine::new(embedder, vector_store));
+    Ok(Arc::clone(RAG_ENGINE.get_or_init(|| engine)))
+}
+
+#[tauri::command]
+pub async fn rag_retrieve<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    request: RagRetrieveRequest,
+) -> Result<Vec<RagRetrieveResult>> {
+    let scope = match request.scope.as_str() {
+        "this_conversation" => {
+            let id = request.conversation_id.ok_or_else(|| {
+                gen_ui_types::CoreError::Terminal(
+                    "this_conversation scope requires conversation_id".into(),
+                )
+            })?;
+            gen_ui_db::rag::RetrievalScope::ThisConversation {
+                conversation_id: id,
+            }
+        }
+        "all_conversations" => gen_ui_db::rag::RetrievalScope::AllConversations,
+        "agent_memory" => gen_ui_db::rag::RetrievalScope::AgentMemory,
+        other => {
+            return Err(gen_ui_types::CoreError::Terminal(format!(
+                "rag_retrieve: unknown scope {other:?}"
+            ))
+            .into())
+        }
+    };
+    let query = gen_ui_db::rag::RetrievalQuery {
+        text: request.query,
+        scope,
+        k: request.k,
+        min_score: gen_ui_db::rag::DEFAULT_MIN_SCORE,
+    };
+    let engine = rag_engine(&app).await?;
+    let chunks = engine.retrieve(query, request.token_budget).await?;
+    Ok(chunks
+        .into_iter()
+        .map(|c| RagRetrieveResult {
+            source_id: c.source_id,
+            text: c.text,
+            score: c.score,
+            table: c.provenance.table,
+            updated_at: c.provenance.updated_at,
+        })
+        .collect())
 }
 
 // Scribe (voice-to-memory): delegates entirely to gen_ui_audio, the SAME crate

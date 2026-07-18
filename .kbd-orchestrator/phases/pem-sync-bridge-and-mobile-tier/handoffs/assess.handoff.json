@@ -1,0 +1,11 @@
+{
+  "stage": "assess",
+  "completedAt": "2026-07-18T13:36:13Z",
+  "outputs": [
+    "assessment.md"
+  ],
+  "nextStage": "analyze",
+  "summaryForNext": "Three goals NOT MET (PEM bridge, mobile tier, RAG exposure), one PARTIAL (vault auth). Key plan decisions: PEM-repo vs app-side adapter for the scope bridge (PEM dist has ListQuery + useLocalFirst but no scope adapter); implement-or-amend ADR-LFS-2; queue unification strategy. All seams from the previous phase are ready to implement against.",
+  "skipped": false,
+  "skipReason": null
+}

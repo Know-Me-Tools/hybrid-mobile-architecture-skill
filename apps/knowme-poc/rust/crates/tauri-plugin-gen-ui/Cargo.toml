@@ -31,6 +31,8 @@ tracing.workspace = true
 tauri = { version = "2", default-features = false }
 tokio = { workspace = true, features = ["time"] }
 sqlx.workspace = true
+# C-127: run_one_time_loads composes gen_ui_db::relational::run_one_time_loads directly.
+reqwest.workspace = true
 
 [build-dependencies]
 tauri-plugin = { version = "2", features = ["build"] }

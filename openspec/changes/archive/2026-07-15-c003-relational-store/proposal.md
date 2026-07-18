@@ -1,7 +1,7 @@
 # 2026-07-15-c003-relational-store
 
 > Phase: scaffold-full-hybrid-project · Wave: see plan.md · Status: proposed
-> Assigned harness/model: codex / gpt-5.6
+> Assigned harness/model: codex / gpt-5.6-sol
 > Depends on: c001
 
 ## Why

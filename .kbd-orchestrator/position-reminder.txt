@@ -1,10 +1,4 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
-Phase: build-detailed-prompting-guide
-Step: 5 of 5
-Stage: complete
-Next command: none
-
-Required signal format (emit BEFORE any tool call):
-  Starting completed-goal-audit — build-detailed-prompting-guide
-  [do work]
-  Completed completed-goal-audit — build-detailed-prompting-guide
+Phase: pem-sync-bridge-and-mobile-tier
+Stage: phase_complete
+Next command: /kbd-next-phase (seeds vault-ui-and-conversation-scoped-rag from reflection.md)

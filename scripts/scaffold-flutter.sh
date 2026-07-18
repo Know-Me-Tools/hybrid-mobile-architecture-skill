@@ -347,10 +347,32 @@ Future<void> loadSeeds() async {
   throw UnimplementedError('run flutter_rust_bridge_codegen generate');
 }
 
-/// attach_sync_shapes() — subscribe Electric shapes AFTER migrations+seeds
-/// (shapes fail on unknown columns, so this must run last).
+/// attach_sync_shapes() — LEGACY Electric-era name; superseded by
+/// [attachSyncScopes] (references/sync/partial-replication.md).
 Future<void> attachSyncShapes() async {
   // await ffi.attachSyncShapes();
+  throw UnimplementedError('run flutter_rust_bridge_codegen generate');
+}
+
+// ── C-125 local-first mobile surface (SQLite + sqlite-vec tier) ──────────────
+// Mobile's local store is SQLite with sqlite-vec for the 384-dim client-RAG
+// vectors — PGlite is structurally impossible on iOS/Android. All of these
+// bridge to gen_ui_core (networking/sync stays in Rust, TJ-ARCH-MOB-001);
+// the Dart side only renders status and hands over scope declarations.
+
+/// attach_sync_scopes() — declare partial-replication scopes AFTER
+/// migrations + seeds + onboarding loads (boot order LFS-INV-5). Mirrors
+/// gen_ui_types::sync::SyncTransport::start_scopes: user-subset scopes carry
+/// the tenant param; lookups are read-only shared scopes.
+Future<void> attachSyncScopes(List<Map<String, Object?>> scopes) async {
+  // await ffi.attachSyncScopes(scopes: scopes);
+  throw UnimplementedError('run flutter_rust_bridge_codegen generate');
+}
+
+/// run_one_time_loads() — pre-/post-onboarding ledgered loads
+/// (gen_ui_db::relational::run_one_time_loads). stage: "pre" | "post".
+Future<void> runOneTimeLoads(String stage) async {
+  // await ffi.runOneTimeLoads(stage: stage);
   throw UnimplementedError('run flutter_rust_bridge_codegen generate');
 }
 EOF

@@ -119,6 +119,13 @@ impl GraphStore {
             .cloned()
     }
 
+    /// The embedder this store was opened with. C-129's `rag_retrieve` reuses
+    /// the SAME instance for `GraphRagEmbedder` rather than constructing a
+    /// second one (a second `FastEmbedder::new` would reload the ONNX model).
+    pub fn embedder(&self) -> Arc<dyn Embedder> {
+        Arc::clone(&self.embedder)
+    }
+
     async fn init(&self) -> Result<(), GraphError> {
         let mut res = self.db.query(SCHEMA_DDL).await?;
         check_statements(&mut res, "schema")
@@ -271,19 +278,74 @@ impl GraphStore {
                 let rows: Vec<HitRow> = res.take(last)?;
                 Ok(rows.into_iter().map(HitRow::into_hit).collect())
             }
-            SearchMode::Vector => {
-                // Single statement, so the rows are at index 0 — no `$q` binding,
-                // because with no lexical lane there is nothing to match text against.
-                let mut res = self
-                    .db
-                    .query(VECTOR_SEARCH_QUERY)
-                    .bind(("qvec", qvec))
-                    .bind(("k", k as i64))
-                    .await?;
-                let rows: Vec<HitRow> = res.take(0)?;
-                Ok(rows.into_iter().map(HitRow::into_hit).collect())
-            }
+            SearchMode::Vector => self.search_by_vector(qvec, k).await,
         }
+    }
+
+    /// INTENT: vector-only recall against an ALREADY-COMPUTED query embedding
+    /// (no text re-embedding — the caller owns embedding, e.g. C-128's
+    /// `gen_ui_db::rag::VectorStore` adapter, which embeds once via its own
+    /// `Embedder` seam and must not pay for a second embed here).
+    pub async fn search_by_vector(
+        &self,
+        qvec: Vec<f32>,
+        k: usize,
+    ) -> Result<Vec<MemoryHit>, GraphError> {
+        let mut res = self
+            .db
+            .query(VECTOR_SEARCH_QUERY)
+            .bind(("qvec", qvec))
+            .bind(("k", k as i64))
+            .await?;
+        let rows: Vec<HitRow> = res.take(0)?;
+        Ok(rows.into_iter().map(HitRow::into_hit).collect())
+    }
+
+    /// Like [`Self::search_by_vector`], but also projects `created` (RFC3339)
+    /// so callers needing provenance (C-128's `VectorStore` adapter — its
+    /// `RetrievedChunk::provenance.updated_at` contract) get a real timestamp
+    /// rather than a placeholder. A separate query, not a `MemoryHit` field
+    /// addition, so the crate's existing intent-level return type is untouched.
+    pub async fn search_by_vector_with_timestamps(
+        &self,
+        qvec: Vec<f32>,
+        k: usize,
+    ) -> Result<Vec<(MemoryHit, String)>, GraphError> {
+        #[derive(SurrealValue)]
+        struct TimedHitRow {
+            id: String,
+            text: String,
+            kind: String,
+            score: f32,
+            created: String,
+        }
+        let mut res = self
+            .db
+            .query(
+                "SELECT meta::id(id) AS id, text, kind, \
+                 math::fixed(1.0 / (1.0 + vector::distance::knn()), 6) AS score, \
+                 <string> created AS created \
+                 FROM memory WHERE embedding <|64,64|> $qvec \
+                 ORDER BY score DESC LIMIT $k;",
+            )
+            .bind(("qvec", qvec))
+            .bind(("k", k as i64))
+            .await?;
+        let rows: Vec<TimedHitRow> = res.take(0)?;
+        Ok(rows
+            .into_iter()
+            .map(|r| {
+                (
+                    MemoryHit {
+                        id: r.id,
+                        text: r.text,
+                        kind: r.kind,
+                        score: r.score,
+                    },
+                    r.created,
+                )
+            })
+            .collect())
     }
 
     /// INTENT: expand the graph outward from `entity_id` up to `depth` RELATE hops,
@@ -399,6 +461,23 @@ impl GraphStore {
     // public field on every other consumer of this struct.
     pub(crate) fn db(&self) -> &Surreal<Any> {
         &self.db
+    }
+
+    /// C-127: the sync `LocalStore` seam over this SAME connection — one
+    /// embedded store per process, not a second one opened for sync. This is
+    /// the one sanctioned way outside this crate to reach the raw connection;
+    /// everything else stays intent-level (`memory_ingest` / `memory_search` /
+    /// `graph_expand`), per the crate's documented boundary in lib.rs.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub async fn local_store(
+        &self,
+    ) -> Result<std::sync::Arc<dyn gen_ui_db::sync::LocalStore>, GraphError> {
+        let store = crate::sync::SurrealLocalStore::new(self.db.clone());
+        store
+            .ensure_schema()
+            .await
+            .map_err(|e| GraphError::Surreal(e.to_string()))?;
+        Ok(std::sync::Arc::new(store))
     }
 
     /// Test-only boundary for a relation whose source table violates schema.

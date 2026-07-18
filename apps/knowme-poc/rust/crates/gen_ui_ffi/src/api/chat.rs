@@ -51,3 +51,58 @@ pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<RelatedEn
         .await
         .map_err(Into::into)
 }
+
+/// C-129: client-RAG retrieval, mirroring desktop's `rag_retrieve` Tauri
+/// command over the SAME `RagEngine` contract (mobile runs it against c128's
+/// SurrealDB adapter instead of pgvector). `scope`: "this_conversation" |
+/// "all_conversations" | "agent_memory" — Vault is deliberately not
+/// selectable from the wire (LFS-INV-4, no server-facing invoke path).
+pub async fn rag_retrieve(
+    query: String,
+    scope: String,
+    conversation_id: Option<String>,
+    k: u32,
+    token_budget: u32,
+) -> Result<Vec<RagChunk>, CoreError> {
+    use gen_ui_db::rag::RetrievalScope;
+    let scope = match scope.as_str() {
+        "this_conversation" => {
+            let id = conversation_id.ok_or_else(|| {
+                CoreError::Terminal("this_conversation scope requires conversation_id".into())
+            })?;
+            RetrievalScope::ThisConversation { conversation_id: id }
+        }
+        "all_conversations" => RetrievalScope::AllConversations,
+        "agent_memory" => RetrievalScope::AgentMemory,
+        other => {
+            return Err(CoreError::Terminal(format!(
+                "rag_retrieve: unknown scope {other:?}"
+            )))
+        }
+    };
+    let chunks = gen_ui_agent::memory::retrieve(query, scope, k as usize, token_budget as usize)
+        .await
+        .map_err(CoreError::from)?;
+    Ok(chunks
+        .into_iter()
+        .map(|c| RagChunk {
+            source_id: c.source_id,
+            text: c.text,
+            score: c.score,
+            table: c.provenance.table,
+            updated_at: c.provenance.updated_at,
+        })
+        .collect())
+}
+
+/// frb-friendly, serde-free struct (avoids re-exporting `gen_ui_db::rag`'s
+/// types across the frb boundary, matching this module's `MemoryHit`/
+/// `RelatedEntity` re-export convention instead of a raw type re-export for
+/// a crate frb does not cargo-expand per `flutter_rust_bridge.yaml`).
+pub struct RagChunk {
+    pub source_id: String,
+    pub text: String,
+    pub score: f32,
+    pub table: String,
+    pub updated_at: String,
+}

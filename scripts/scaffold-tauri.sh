@@ -56,7 +56,7 @@ cat > package.json << PKGEOF
     "@tanstack/react-table":  "^8.0.0",
     "@tanstack/react-virtual": "^3.0.0",
     "@electric-sql/pglite":   "0.5.4",
-    "@electric-sql/pglite-sync": "^0.4.0",
+    "@electric-sql/pglite-pgvector": "0.0.5",
     "@prometheus-ags/prometheus-entity-management": "3.0.0-alpha.0",
     "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
     "@prometheus-ags/tauri-plugin-gen-ui": "file:../rust/crates/tauri-plugin-gen-ui/guest-js",
@@ -377,12 +377,38 @@ CREATE TABLE IF NOT EXISTS chat_conversations (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- C-123 client-RAG vector surface (384-dim standard, references/sync/client-rag.md).
+-- Messages live as JSONB inside chat_conversations until the C-104+ entity-view
+-- normalization; message_embeddings carries the per-message vector surface until
+-- then. agent_memory mirrors the Rust-side DDL exactly.
+CREATE TABLE IF NOT EXISTS message_embeddings (
+  id text PRIMARY KEY,
+  conversation_id uuid NOT NULL,
+  tenant_id text NOT NULL,
+  content text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  embedding vector(384),
+  embedded_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS message_embeddings_hnsw
+  ON message_embeddings USING hnsw (embedding vector_cosine_ops);
+CREATE TABLE IF NOT EXISTS agent_memory (
+  id text PRIMARY KEY,
+  content text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  embedding vector(384),
+  embedded_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS agent_memory_embedding_hnsw
+  ON agent_memory USING hnsw (embedding vector_cosine_ops);
 EOF
 
 cat > src/features/entities/stores/entityRuntime.ts << 'EOF'
 // TJ-ARCH-MOB-001 compliant — all Tauri IPC lives in this store module.
 import { invoke, isTauri } from '@tauri-apps/api/core'
 import { PGlite } from '@electric-sql/pglite'
+import { vector } from '@electric-sql/pglite-pgvector'
 import {
   createPGlitePersistenceAdapter,
   registerEntityFromSql,
@@ -449,8 +475,13 @@ async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSessi
     return { tenantId, dispose: () => { void invoke<void>('entity_runtime_stop') } }
   }
 
-  const db = await PGlite.create('idb://gen-ui', { relaxedDurability: true })
+  const db = await PGlite.create('idb://gen-ui', {
+    relaxedDurability: true,
+    // C-123: pgvector powers the client-RAG vector surface (384-dim standard).
+    extensions: { vector },
+  })
   browserDb = db
+  await db.exec('CREATE EXTENSION IF NOT EXISTS vector')
   await db.exec(schemaSql)
   registerEntityTransport('Project', pgliteTransport(db, 'projects', tenantId))
   registerEntityTransport('Note', pgliteTransport(db, 'notes', tenantId))
@@ -582,6 +613,440 @@ export function EntityRuntimeBoundary({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 EOF
+
+# ═══════════════════════════════════════════════════════════════════════════
+# features/vault — local-class Loro CRDT vault + device-to-device peer sync.
+# NEVER server-synced; snapshots persist in _vault_state (PGlite). Sync runs
+# over any VaultDuplex byte pipe (WebRTC production lane, in-memory tests).
+# ═══════════════════════════════════════════════════════════════════════════
+mkdir -p src/features/vault/{stores,sync}
+cat > src/features/vault/stores/vaultStore.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — the vault is `local`-class: NEVER server-synced.
+// One Loro doc per vault (references/sync/peer-crdt.md): maps profile /
+// preferences / agent_facts. Persisted as encoded snapshots in _vault_state;
+// the doc is the truth, the row is a cache. Feature code and agents use the
+// typed facade — nobody touches Loro APIs outside this module and sync/.
+import { LoroDoc } from 'loro-crdt'
+import type { PGlite } from '@electric-sql/pglite'
+
+export const VAULT_DOC_ID = 'user-vault'
+/** Debounce for snapshot persistence after a mutation burst. */
+const SNAPSHOT_DEBOUNCE_MS = 250
+
+export interface VaultFact {
+  key: string
+  value: string
+  learnedAt: string
+}
+
+/** Typed facade over the vault doc. Plain values in/out; CRDT stays inside. */
+export class VaultRepository {
+  private saveTimer: ReturnType<typeof setTimeout> | null = null
+
+  constructor(
+    readonly doc: LoroDoc,
+    private readonly persist: (snapshot: Uint8Array, versionVector: Uint8Array) => Promise<void>,
+  ) {
+    // Any committed local change schedules a snapshot save (debounced).
+    this.doc.subscribe(() => this.scheduleSave())
+  }
+
+  getProfileField(field: string): string | undefined {
+    const value = this.doc.getMap('profile').get(field)
+    return typeof value === 'string' ? value : undefined
+  }
+
+  setProfileField(field: string, value: string): void {
+    this.doc.getMap('profile').set(field, value)
+    this.doc.commit()
+  }
+
+  getPreference(key: string): string | undefined {
+    const value = this.doc.getMap('preferences').get(key)
+    return typeof value === 'string' ? value : undefined
+  }
+
+  setPreference(key: string, value: string): void {
+    this.doc.getMap('preferences').set(key, value)
+    this.doc.commit()
+  }
+
+  /** Agent-learned facts about the user (client-side agent data). */
+  addAgentFact(fact: VaultFact): void {
+    this.doc.getMap('agent_facts').set(fact.key, JSON.stringify(fact))
+    this.doc.commit()
+  }
+
+  agentFacts(): VaultFact[] {
+    const map = this.doc.getMap('agent_facts')
+    const facts: VaultFact[] = []
+    for (const key of map.keys()) {
+      const raw = map.get(key)
+      if (typeof raw === 'string') facts.push(JSON.parse(raw) as VaultFact)
+    }
+    return facts
+  }
+
+  async flush(): Promise<void> {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer)
+      this.saveTimer = null
+    }
+    await this.persist(
+      this.doc.export({ mode: 'snapshot' }),
+      this.doc.version().encode(),
+    )
+  }
+
+  private scheduleSave(): void {
+    if (this.saveTimer) clearTimeout(this.saveTimer)
+    this.saveTimer = setTimeout(() => {
+      void this.flush()
+    }, SNAPSHOT_DEBOUNCE_MS)
+  }
+}
+
+/** Additive DDL for the local vault row. NOT a PEM entity, NOT in any SyncScope. */
+export const VAULT_STATE_DDL = `
+CREATE TABLE IF NOT EXISTS _vault_state (
+  doc_id text PRIMARY KEY,
+  crdt_state bytea NOT NULL,
+  version_vector bytea NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);`
+
+/** Open (or create) the vault against a PGlite store. */
+export async function openVault(db: PGlite): Promise<VaultRepository> {
+  await db.exec(VAULT_STATE_DDL)
+  const doc = new LoroDoc()
+  const existing = await db.query<{ crdt_state: Uint8Array }>(
+    'SELECT crdt_state FROM _vault_state WHERE doc_id = $1',
+    [VAULT_DOC_ID],
+  )
+  const row = existing.rows[0]
+  if (row) doc.import(new Uint8Array(row.crdt_state))
+  return new VaultRepository(doc, async (snapshot, versionVector) => {
+    await db.query(
+      `INSERT INTO _vault_state (doc_id, crdt_state, version_vector, updated_at)
+       VALUES ($1, $2, $3, now())
+       ON CONFLICT (doc_id) DO UPDATE
+         SET crdt_state = $2, version_vector = $3, updated_at = now()`,
+      [VAULT_DOC_ID, snapshot, versionVector],
+    )
+  })
+}
+EOF
+ok "src/features/vault/stores/vaultStore.ts"
+
+cat > src/features/vault/sync/duplex.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — transport seam + framing for vault peer sync.
+// Any byte pipe between two of the user's devices can carry the protocol:
+// WebRTC DataChannels (production/browser lane), an in-memory pair (tests).
+// Frames are 16 KiB; logical messages reassemble up to 256 KiB.
+
+/** A bidirectional byte pipe to ONE paired peer. Dumb by design. */
+export interface VaultDuplex {
+  send(frame: Uint8Array): void
+  onFrame(handler: (frame: Uint8Array) => void): void
+  close(): void
+}
+
+export const FRAME_PAYLOAD_BYTES = 16 * 1024 - 9 // 16 KiB frame incl. 9-byte header
+export const MAX_MESSAGE_BYTES = 256 * 1024
+
+export type VaultMessage =
+  | { kind: 'hello'; versionVector: Uint8Array }
+  | { kind: 'delta'; update: Uint8Array }
+
+const KIND_HELLO = 1
+const KIND_DELTA = 2
+
+/** Encode one logical message into 16 KiB frames: [msgId u32][seq u16][total u16][kind u8][chunk]. */
+export function encodeFrames(message: VaultMessage, msgId: number): Uint8Array[] {
+  const payload = message.kind === 'hello' ? message.versionVector : message.update
+  if (payload.length > MAX_MESSAGE_BYTES) {
+    throw new Error(`vault message exceeds ${MAX_MESSAGE_BYTES} bytes — blobs do not go in the doc`)
+  }
+  const kind = message.kind === 'hello' ? KIND_HELLO : KIND_DELTA
+  const total = Math.max(1, Math.ceil(payload.length / FRAME_PAYLOAD_BYTES))
+  const frames: Uint8Array[] = []
+  for (let seq = 0; seq < total; seq++) {
+    const chunk = payload.subarray(seq * FRAME_PAYLOAD_BYTES, (seq + 1) * FRAME_PAYLOAD_BYTES)
+    const frame = new Uint8Array(9 + chunk.length)
+    const view = new DataView(frame.buffer)
+    view.setUint32(0, msgId)
+    view.setUint16(4, seq)
+    view.setUint16(6, total)
+    view.setUint8(8, kind)
+    frame.set(chunk, 9)
+    frames.push(frame)
+  }
+  return frames
+}
+
+/** Reassembles frames into logical messages (per-peer instance). */
+export class FrameAssembler {
+  private readonly partial = new Map<number, { kind: number; total: number; chunks: Map<number, Uint8Array> }>()
+
+  push(frame: Uint8Array): VaultMessage | null {
+    const view = new DataView(frame.buffer, frame.byteOffset)
+    const msgId = view.getUint32(0)
+    const seq = view.getUint16(4)
+    const total = view.getUint16(6)
+    const kind = view.getUint8(8)
+    const chunk = frame.subarray(9)
+
+    let entry = this.partial.get(msgId)
+    if (!entry) {
+      entry = { kind, total, chunks: new Map() }
+      this.partial.set(msgId, entry)
+    }
+    entry.chunks.set(seq, chunk)
+    if (entry.chunks.size < entry.total) return null
+
+    this.partial.delete(msgId)
+    const size = [...entry.chunks.values()].reduce((n, c) => n + c.length, 0)
+    const payload = new Uint8Array(size)
+    let offset = 0
+    for (let i = 0; i < entry.total; i++) {
+      const part = entry.chunks.get(i)
+      if (!part) return null // missing sequence — drop (peer will resend on next delta)
+      payload.set(part, offset)
+      offset += part.length
+    }
+    return entry.kind === KIND_HELLO
+      ? { kind: 'hello', versionVector: payload }
+      : { kind: 'delta', update: payload }
+  }
+}
+EOF
+ok "src/features/vault/sync/duplex.ts"
+
+cat > src/features/vault/sync/peerSync.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — the vault peer-sync protocol
+// (references/sync/peer-crdt.md): exchange version vectors, send
+// export_updates_since deltas both ways, converge commutatively, repeat on
+// mutation (debounced, delta-only). Transport-agnostic over VaultDuplex.
+import { VersionVector } from 'loro-crdt'
+import type { VaultRepository } from '../stores/vaultStore'
+import { encodeFrames, FrameAssembler, type VaultDuplex } from './duplex'
+
+const BROADCAST_DEBOUNCE_MS = 100
+
+/** One live pairing session between this device's vault and one peer. */
+export class VaultPeerSession {
+  private readonly assembler = new FrameAssembler()
+  private peerVersion: VersionVector | null = null
+  private nextMsgId = 1
+  private broadcastTimer: ReturnType<typeof setTimeout> | null = null
+  private readonly unsubscribe: () => void
+
+  constructor(
+    private readonly vault: VaultRepository,
+    private readonly duplex: VaultDuplex,
+  ) {
+    duplex.onFrame((frame) => this.onFrame(frame))
+    // Local commits propagate as deltas (debounced to batch mutation bursts).
+    this.unsubscribe = this.vault.doc.subscribe((event) => {
+      if (event.by === 'local') this.scheduleBroadcast()
+    })
+    this.sendHello()
+  }
+
+  close(): void {
+    if (this.broadcastTimer) clearTimeout(this.broadcastTimer)
+    this.unsubscribe()
+    this.duplex.close()
+  }
+
+  private send(message: Parameters<typeof encodeFrames>[0]): void {
+    for (const frame of encodeFrames(message, this.nextMsgId++)) {
+      this.duplex.send(frame)
+    }
+  }
+
+  private sendHello(): void {
+    this.send({ kind: 'hello', versionVector: this.vault.doc.version().encode() })
+  }
+
+  private sendDeltaSince(peerVersion: VersionVector | null): void {
+    const update = peerVersion
+      ? this.vault.doc.export({ mode: 'update', from: peerVersion })
+      : this.vault.doc.export({ mode: 'update' })
+    if (update.length > 0) this.send({ kind: 'delta', update })
+    this.peerVersion = this.vault.doc.version()
+  }
+
+  private scheduleBroadcast(): void {
+    if (this.broadcastTimer) clearTimeout(this.broadcastTimer)
+    this.broadcastTimer = setTimeout(() => this.sendDeltaSince(this.peerVersion), BROADCAST_DEBOUNCE_MS)
+  }
+
+  private onFrame(frame: Uint8Array): void {
+    const message = this.assembler.push(frame)
+    if (!message) return
+    if (message.kind === 'hello') {
+      const theirs = VersionVector.decode(message.versionVector)
+      this.sendDeltaSince(theirs)
+      return
+    }
+    // Delta: commutative import; convergence needs no ordering.
+    this.vault.doc.import(message.update)
+    this.peerVersion = this.vault.doc.version()
+  }
+}
+EOF
+ok "src/features/vault/sync/peerSync.ts"
+
+cat > src/features/vault/sync/memoryDuplex.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — in-memory duplex pair implementing the same
+// chunked-frame contract as the WebRTC lane. The legitimate test double at
+// this IO boundary (no mocks of protocol internals).
+import type { VaultDuplex } from './duplex'
+
+class MemoryEnd implements VaultDuplex {
+  private handler: ((frame: Uint8Array) => void) | null = null
+  private peer: MemoryEnd | null = null
+  private closed = false
+
+  connect(peer: MemoryEnd): void {
+    this.peer = peer
+  }
+
+  send(frame: Uint8Array): void {
+    if (this.closed || !this.peer) return
+    const target = this.peer
+    // Async delivery mirrors a real channel (no re-entrant handler stacks).
+    queueMicrotask(() => {
+      if (!target.closed) target.handler?.(frame)
+    })
+  }
+
+  onFrame(handler: (frame: Uint8Array) => void): void {
+    this.handler = handler
+  }
+
+  close(): void {
+    this.closed = true
+  }
+}
+
+export function memoryDuplexPair(): [VaultDuplex, VaultDuplex] {
+  const a = new MemoryEnd()
+  const b = new MemoryEnd()
+  a.connect(b)
+  b.connect(a)
+  return [a, b]
+}
+EOF
+ok "src/features/vault/sync/memoryDuplex.ts"
+
+cat > src/features/vault/sync/webrtcDuplex.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — WebRTC DataChannel adapter for vault peer sync.
+// The browser-capable device-to-device lane (references/sync/peer-crdt.md).
+// This shim is DUMB: it moves frames and surfaces events; every protocol
+// decision lives in VaultPeerSession. Signaling here is the dev lane (manual
+// offer/answer copy — QR/paste); production signaling is FRF SignalService,
+// swapped as configuration, not redesign. The signaler is untrusted by design:
+// it sees only SDP blobs, never vault bytes (DTLS underneath).
+import type { VaultDuplex } from './duplex'
+
+const CHANNEL_LABEL = 'vault-sync-v1'
+
+class DataChannelDuplex implements VaultDuplex {
+  private handler: ((frame: Uint8Array) => void) | null = null
+
+  constructor(
+    private readonly connection: RTCPeerConnection,
+    private readonly channel: RTCDataChannel,
+  ) {
+    channel.binaryType = 'arraybuffer'
+    channel.onmessage = (event: MessageEvent<ArrayBuffer>) => {
+      this.handler?.(new Uint8Array(event.data))
+    }
+  }
+
+  send(frame: Uint8Array): void {
+    if (this.channel.readyState !== 'open') return
+    // Copy into a plain ArrayBuffer — RTCDataChannel.send's typing rejects
+    // views over ArrayBufferLike (SharedArrayBuffer).
+    const buffer = new ArrayBuffer(frame.byteLength)
+    new Uint8Array(buffer).set(frame)
+    this.channel.send(buffer)
+  }
+
+  onFrame(handler: (frame: Uint8Array) => void): void {
+    this.handler = handler
+  }
+
+  close(): void {
+    this.channel.close()
+    this.connection.close()
+  }
+}
+
+function waitForOpen(channel: RTCDataChannel): Promise<void> {
+  if (channel.readyState === 'open') return Promise.resolve()
+  return new Promise((resolve, reject) => {
+    channel.onopen = () => resolve()
+    channel.onerror = () => reject(new Error('vault DataChannel failed to open'))
+  })
+}
+
+/** Gathered-ICE local description as a pastable/QR-able dev-signaling blob. */
+async function localDescriptionBlob(connection: RTCPeerConnection): Promise<string> {
+  await new Promise<void>((resolve) => {
+    if (connection.iceGatheringState === 'complete') return resolve()
+    connection.onicegatheringstatechange = () => {
+      if (connection.iceGatheringState === 'complete') resolve()
+    }
+  })
+  return JSON.stringify(connection.localDescription)
+}
+
+export interface OfferSession {
+  /** Give this blob to the other device (paste/QR — the dev signaler). */
+  offer: string
+  /** Complete the pairing with the answering device's blob. */
+  accept(answer: string): Promise<VaultDuplex>
+}
+
+/** Initiator side of a pairing. */
+export async function createOfferSession(config?: RTCConfiguration): Promise<OfferSession> {
+  const connection = new RTCPeerConnection(config)
+  const channel = connection.createDataChannel(CHANNEL_LABEL)
+  await connection.setLocalDescription(await connection.createOffer())
+  const offer = await localDescriptionBlob(connection)
+  return {
+    offer,
+    async accept(answer: string): Promise<VaultDuplex> {
+      await connection.setRemoteDescription(JSON.parse(answer) as RTCSessionDescriptionInit)
+      await waitForOpen(channel)
+      return new DataChannelDuplex(connection, channel)
+    },
+  }
+}
+
+/** Responder side: consume the offer blob, produce the answer blob. */
+export async function acceptOfferSession(
+  offer: string,
+  config?: RTCConfiguration,
+): Promise<{ answer: string; duplex: Promise<VaultDuplex> }> {
+  const connection = new RTCPeerConnection(config)
+  const channelReady = new Promise<RTCDataChannel>((resolve) => {
+    connection.ondatachannel = (event) => resolve(event.channel)
+  })
+  await connection.setRemoteDescription(JSON.parse(offer) as RTCSessionDescriptionInit)
+  await connection.setLocalDescription(await connection.createAnswer())
+  const answer = await localDescriptionBlob(connection)
+  const duplex = channelReady.then(async (channel) => {
+    await waitForOpen(channel)
+    return new DataChannelDuplex(connection, channel)
+  })
+  return { answer, duplex }
+}
+EOF
+ok "src/features/vault/sync/webrtcDuplex.ts"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # features/memory — memory / graph-RAG panel. Store is the ONLY IPC layer

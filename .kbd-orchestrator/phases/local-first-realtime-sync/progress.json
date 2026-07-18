@@ -1,0 +1,78 @@
+{
+  "phase": "local-first-realtime-sync",
+  "parentPhase": null,
+  "childPhases": [],
+  "childPointer": null,
+  "assessment_complete": true,
+  "plan_complete": true,
+  "execute_complete": false,
+  "reflect_complete": false,
+  "implementation_total": 0,
+  "implementation_completed": 0,
+  "changes_total": 0,
+  "changes_completed": 6,
+  "completion": {
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 6,
+      "total": 6,
+      "status": "COMPLETE"
+    },
+    "evidence": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "certification": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "publication": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    }
+  },
+  "completed_changes": [],
+  "active_change": null,
+  "blocked_changes": [],
+  "sourceTool": "unknown",
+  "createdBy": "kbd-new-phase",
+  "updatedAt": "2026-07-18T09:08:47Z",
+  "last_updated_by": "claude-code",
+  "last_updated": "2026-07-18T13:00:00Z",
+  "qa": {
+    "c120-sync-doctrine-refs": {
+      "artifact_refiner": "SKIPPED",
+      "reason": "documentation-only change (per kbd-execute QA skip rules)"
+    },
+    "c121-local-first-skills": {
+      "artifact_refiner": "SKIPPED",
+      "reason": "documentation/skill-content-only change"
+    },
+    "c122-partial-replication-slice": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "cargo clippy -D warnings clean; 27 behavior tests green (scope validation, loopback attach/stream/refusal, lookup currency, one-time loads); wasm32 gate green; scaffold heredocs proven byte-identical to app sources"
+    },
+    "c123-client-rag-slice": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "clippy 0 warnings; 30 Rust tests green (engine ordering/dedup/budget, dim discipline); desktop tsc clean + 10 vitest green; pgvector empirically verified in PGlite 0.5.4 incl. HNSW"
+    },
+    "c124-peer-profile-vault": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "Rust: privacy-gate refusal test + full suite green, workspace check clean; TS: tsc clean, 13 vitest green incl. two-peer convergence, out-of-order chunk reassembly, PGlite persistence round-trip"
+    },
+    "c125-scaffold-audit-propagation": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "bash -n on all touched scripts; heredoc replay byte-identical; new audit gates run green against the PoC; tsc + 13 vitest green after pglite-sync removal"
+    }
+  },
+  "deferred": [
+    "native webrtc-rs lane in gen_ui_core (web/Tauri-webview lane shipped; native mobile lane follows OD-2c)",
+    "FRF SignalService production signaling swap",
+    "vault-scoped local-only vector index implementation"
+  ],
+  "reflection_complete": true,
+  "phase_status": "COMPLETE"
+}

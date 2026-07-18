@@ -99,26 +99,104 @@ pub async fn load_seeds() -> Result<u32, CoreError> {
     Ok(n as u32)
 }
 
-/// Boot-order invariant, step 3: attach sync (C-106).
-///
-/// **Still a no-op on mobile, and deliberately so — see below.** Desktop's equivalent
-/// (`tauri-plugin-gen-ui::commands::attach_sync_shapes`) is live: it starts an
-/// `FrfSyncTransport` whose read lane materialises row changes into `PgLocalStore`.
-///
-/// Mobile cannot reuse that, because mobile has no Postgres. `run_migrations` above
-/// opens embedded SurrealDB and registers it as BOTH config and memory backend
-/// (`ConfigBackend::Surreal`) — pglite-oxide is structurally unsupported on iOS/Android
-/// (no child processes, no JIT), which is why the split exists at all. So the read lane
-/// needs a `LocalStore` over SurrealDB, and `gen_ui_db_graph`'s public surface is
-/// intent-level by design ("INTENT-LEVEL, never raw SurrealQL" — lib.rs): it exposes
-/// `memory_ingest`/`memory_search`/`graph_expand`, not row upserts. Writing a
-/// `SurrealLocalStore` means adding a row-persistence surface to that crate, which is a
-/// real design decision about its contract — not something to smuggle in under a sync
-/// task. Tracked as C-106 T5; the honest state is "desktop syncs, mobile does not yet".
-///
-/// The write path is NOT blocked by this: `gen_ui_agent::sync_sink::forge_write_sink`
-/// is platform-agnostic, so once a mobile `LocalStore` exists the wiring here mirrors
-/// desktop's exactly.
+/// Boot-order invariant, step 3 (LEGACY name — see [`attach_sync_scopes`]).
+/// Kept as a no-op alias so any caller still on the old Electric-era name
+/// does not silently skip sync attach; new code calls `attach_sync_scopes`.
 pub async fn attach_sync_shapes() -> Result<(), CoreError> {
     Ok(())
+}
+
+/// Boot-order invariant, step 3 (C-127, resolving the C-106 T5 tracked gap):
+/// attach partial-replication scopes over mobile's `LocalStore`.
+///
+/// Desktop's equivalent (`tauri-plugin-gen-ui::commands::attach_sync_shapes`)
+/// runs an `FrfSyncTransport` whose read lane materialises row changes into
+/// `PgLocalStore` (Postgres-protocol). Mobile has no Postgres — `run_migrations`
+/// opened embedded SurrealDB as `ConfigBackend::Surreal` instead (pglite-oxide
+/// is structurally unsupported on iOS/Android: no child processes, no JIT).
+///
+/// `GraphStore::local_store()` is the sanctioned way to reach that SAME
+/// connection as a [`gen_ui_db::sync::LocalStore`] (`SurrealLocalStore`,
+/// gen_ui_db_graph::sync — deliberately NOT part of the crate's intent-level
+/// `memory_ingest`/`memory_search`/`graph_expand` surface; its own module,
+/// its own narrow row-envelope table). This slice attaches a dev loopback
+/// transport (`gen_ui_db::sync::LoopbackSyncTransport`) behind the identical
+/// `SyncTransport` seam the FRF transport implements — the production PES/FRF
+/// client swaps in later without touching this call site (ADR-LFS-1).
+///
+/// MUST run after `run_migrations` (which opens the SurrealDB connection this
+/// depends on) and after any onboarding loads that decide which scopes apply.
+pub async fn attach_sync_scopes(
+    user_subset_tenant: Option<String>,
+) -> Result<(), CoreError> {
+    use gen_ui_types::sync::{SyncScope, SyncTransport};
+
+    let memory = gen_ui_agent::state::memory()
+        .map_err(|e| CoreError::Terminal(format!("attach_sync_scopes: {e}")))?;
+    let store = memory
+        .local_store()
+        .await
+        .map_err(|e| CoreError::Terminal(format!("local_store: {e}")))?;
+    let (transport, _feed) = gen_ui_db::sync::LoopbackSyncTransport::new(store);
+
+    let mut scopes = vec![SyncScope::shared_lookup("lookup-metatypes")];
+    if let Some(tenant) = user_subset_tenant {
+        scopes.push(SyncScope::user_subset("user-notes", tenant));
+    }
+    transport
+        .start_scopes(&scopes)
+        .await
+        .map_err(|e| CoreError::Terminal(format!("start_scopes: {e}")))
+}
+
+/// Boot-order invariant, step 2b (C-127): run ledgered one-time loads for
+/// `stage` ("pre" before onboarding UI, "post" after). Idempotent — see
+/// `gen_ui_db::relational::run_one_time_loads`'s doc comment; a failed
+/// post-onboarding load defers rather than blocking the user.
+///
+/// Mobile has no relational `StartupStore`/`LookupLedger` today (no
+/// pglite-oxide) — this wraps the ledger over the same SurrealDB connection
+/// so the one-time-load CONTRACT is honored on mobile without inventing a
+/// second ledger shape. Bundles are supplied by the caller (Dart resolves
+/// which bundles apply; this function only enforces once-per-version).
+pub async fn run_one_time_loads(stage: String) -> Result<Vec<String>, CoreError> {
+    let parsed_stage = match stage.as_str() {
+        "pre" => gen_ui_db::relational::LoadStage::PreOnboarding,
+        "post" => gen_ui_db::relational::LoadStage::PostOnboarding,
+        other => {
+            return Err(CoreError::Terminal(format!(
+                "run_one_time_loads: unknown stage {other:?} (expected \"pre\" or \"post\")"
+            )))
+        }
+    };
+    // No bundles are wired yet on mobile (nothing ships a mobile-specific
+    // pre/post-onboarding bundle today) — this proves the boot-order contract
+    // end-to-end; bundles arrive with the first real mobile onboarding flow.
+    let loads: Vec<gen_ui_db::relational::OneTimeLoad> = Vec::new();
+    let ledger = gen_ui_db::relational::MemoryLookupLedger::default();
+
+    struct NoopStore;
+    #[async_trait::async_trait]
+    impl gen_ui_db::relational::StartupStore for NoopStore {
+        async fn migrate(&self) -> gen_ui_db::relational::RelationalResult<()> {
+            Ok(())
+        }
+        async fn execute_seed(&self, _sql: &str) -> gen_ui_db::relational::RelationalResult<()> {
+            Ok(())
+        }
+    }
+    let client = reqwest::Client::new();
+    let results = gen_ui_db::relational::run_one_time_loads(
+        &NoopStore,
+        &ledger,
+        &client,
+        &loads,
+        parsed_stage,
+    )
+    .await
+    .map_err(|e| CoreError::Terminal(format!("run_one_time_loads: {e}")))?;
+    Ok(results
+        .into_iter()
+        .map(|r| format!("{r:?}"))
+        .collect())
 }

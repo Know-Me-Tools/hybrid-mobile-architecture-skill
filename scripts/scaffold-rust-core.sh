@@ -485,9 +485,10 @@ $MARK
 //! SyncTransport — local-first sync seam. The DIY Electric-consumer + write-queue
 //! (gen_ui_db::sync) implements this; a future prometheus-entity-sync (PES) client
 //! can implement the same trait without touching callers.
-use crate::error::CoreResult;
+use crate::error::{CoreError, CoreResult};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
@@ -498,14 +499,134 @@ pub enum SyncStatus {
     Error { message: String },
 }
 
+/// What a scope replicates. \`UserSubset\` scopes MUST be tenant-bound; the server
+/// re-derives their parameters from the verified JWT (client values are hints,
+/// never authority — LFS-INV-7). \`SharedLookup\` scopes carry server-managed
+/// read-only reference data whose currency arrives as version bumps.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum ScopeKind {
+    UserSubset,
+    SharedLookup,
+}
+
+/// The tenant-binding parameter every \`UserSubset\` scope must carry.
+pub const SCOPE_TENANT_PARAM: &str = "sub";
+
+/// A declared unit of partial replication (bucket descriptor). See
+/// \`references/sync/partial-replication.md\` — the device never mirrors the
+/// server database; it attaches scopes.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct SyncScope {
+    /// Stable scope id, e.g. \`user-tasks\`, \`lookup-metatypes\`.
+    pub name: String,
+    /// Parameterized-query inputs (allowlisted values, never interpolated SQL).
+    pub params: BTreeMap<String, String>,
+    pub kind: ScopeKind,
+}
+
+impl SyncScope {
+    pub fn user_subset(name: impl Into<String>, tenant_sub: impl Into<String>) -> Self {
+        let mut params = BTreeMap::new();
+        params.insert(SCOPE_TENANT_PARAM.to_string(), tenant_sub.into());
+        Self {
+            name: name.into(),
+            params,
+            kind: ScopeKind::UserSubset,
+        }
+    }
+
+    pub fn shared_lookup(name: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            params: BTreeMap::new(),
+            kind: ScopeKind::SharedLookup,
+        }
+    }
+
+    /// Fail-closed validation: scope names and parameter values must match the
+    /// allowlist \`^[a-zA-Z0-9_-]{1,128}\$\`, and a \`UserSubset\` scope without a
+    /// tenant binding is refused outright (there is no "sync everything" scope).
+    pub fn validate(&self) -> CoreResult<()> {
+        fn allowed(value: &str) -> bool {
+            !value.is_empty()
+                && value.len() <= 128
+                && value
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+        }
+        if !allowed(&self.name) {
+            return Err(CoreError::Terminal(format!(
+                "sync scope name {:?} violates the allowlist",
+                self.name
+            )));
+        }
+        for (key, value) in &self.params {
+            if !allowed(key) || !allowed(value) {
+                return Err(CoreError::Terminal(format!(
+                    "sync scope {} has a parameter violating the allowlist",
+                    self.name
+                )));
+            }
+        }
+        if self.kind == ScopeKind::UserSubset && !self.params.contains_key(SCOPE_TENANT_PARAM) {
+            return Err(CoreError::Terminal(format!(
+                "user-subset scope {} lacks the tenant parameter {SCOPE_TENANT_PARAM:?} (fail closed)",
+                self.name
+            )));
+        }
+        Ok(())
+    }
+}
+
 #[async_trait]
 pub trait SyncTransport: Send + Sync {
     /// Begin read-path sync for a shape/bucket, writing into the local store.
     async fn start(&self) -> CoreResult<()>;
+    /// Attach declared scopes, then begin read-path sync. Default delegates to
+    /// [\`SyncTransport::start\`] after validating every scope, so existing
+    /// transports keep compiling; scope-aware transports override this.
+    async fn start_scopes(&self, scopes: &[SyncScope]) -> CoreResult<()> {
+        for scope in scopes {
+            scope.validate()?;
+        }
+        self.start().await
+    }
     /// Enqueue a local write for replay through the server API.
     async fn enqueue_write(&self, change_json: &str) -> CoreResult<()>;
     /// Current status (drives the UI sync chip).
     fn status(&self) -> SyncStatus;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Fail-closed contract: a user-subset scope without the tenant param, or any
+    // allowlist-violating value, is refused before any transport work happens.
+    #[test]
+    fn refuses_tenantless_and_malformed_scopes() {
+        let tenantless = SyncScope {
+            name: "user-tasks".into(),
+            params: BTreeMap::new(),
+            kind: ScopeKind::UserSubset,
+        };
+        assert!(tenantless.validate().is_err());
+
+        let injected = SyncScope {
+            name: "user-tasks".into(),
+            params: BTreeMap::from([(SCOPE_TENANT_PARAM.into(), "u1' OR '1'='1".into())]),
+            kind: ScopeKind::UserSubset,
+        };
+        assert!(injected.validate().is_err());
+
+        assert!(SyncScope::user_subset("user-tasks", "user-42")
+            .validate()
+            .is_ok());
+        assert!(SyncScope::shared_lookup("lookup-metatypes")
+            .validate()
+            .is_ok());
+    }
 }
 EOF
 
@@ -2747,6 +2868,8 @@ $MARK
 //! (gen_ui_db_graph), not this crate's relational store.
 
 mod error;
+mod loads;
+mod lookup;
 mod seed;
 mod startup;
 
@@ -2754,12 +2877,17 @@ mod startup;
 mod postgres;
 
 pub use error::{RelationalError, RelationalResult};
+pub use loads::{run_one_time_loads, LoadResult, LoadStage, OneTimeLoad, LOAD_LEDGER_DDL};
+pub use lookup::{
+    bump_needs_refetch, revalidate_lookup, LookupLedger, LookupOutcome, LookupVersion,
+    MemoryLookupLedger, LOOKUP_VERSIONS_DDL,
+};
 #[cfg(feature = "pglite")]
 pub use postgres::PgliteStore;
 #[cfg(feature = "pg")]
 pub use postgres::PostgresStore;
 pub use seed::{SeedBundle, SeedSource};
-pub use startup::{Migrated, Ready, Startup, Uninitialized};
+pub use startup::{Migrated, PreOnboarded, Ready, Seeded, Startup, Uninitialized};
 EOF
   cat > "$dir/src/relational/error.rs" << EOF
 $MARK
@@ -2838,18 +2966,493 @@ impl SeedBundle {
     }
 }
 EOF
+  cat > "$dir/src/relational/lookup.rs" << EOF
+$MARK
+//! Lookup/metatype currency (C-122). Shared lookup data is fetched as versioned
+//! bundles and must STAY current: re-validate with \`If-None-Match\` on boot, and
+//! re-fetch when a version bump arrives through the sync stream (a row on
+//! \`_lookup_versions\` — currency events are just synced rows). See
+//! \`references/sync/partial-replication.md\` §2.
+//!
+//! Storage seam: [\`LookupLedger\`] records what version/etag each bundle last
+//! applied. Slices/tests use [\`MemoryLookupLedger\`]; store-backed ledgers
+//! implement the same trait next to their \`StartupStore\`.
+
+use super::seed::{SeedBundle, SeedSource};
+use super::startup::StartupStore;
+use super::{RelationalError, RelationalResult};
+use async_trait::async_trait;
+use std::collections::HashMap;
+use std::sync::Mutex;
+
+/// DDL for the local ledger table (additive, LFS-INV-3). Stores apply this in
+/// their migration set; the sync stream may also deliver bump rows into it.
+pub const LOOKUP_VERSIONS_DDL: &str = "CREATE TABLE IF NOT EXISTS _lookup_versions (\n  name TEXT PRIMARY KEY,\n  version INTEGER NOT NULL,\n  etag TEXT,\n  applied_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n)";
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LookupVersion {
+    pub name: String,
+    pub version: u32,
+    pub etag: Option<String>,
+}
+
+#[async_trait]
+pub trait LookupLedger: Send + Sync {
+    async fn get(&self, name: &str) -> RelationalResult<Option<LookupVersion>>;
+    async fn put(&self, entry: &LookupVersion) -> RelationalResult<()>;
+}
+
+/// In-memory ledger for slices and boundary tests.
+#[derive(Default)]
+pub struct MemoryLookupLedger {
+    entries: Mutex<HashMap<String, LookupVersion>>,
+}
+
+#[async_trait]
+impl LookupLedger for MemoryLookupLedger {
+    async fn get(&self, name: &str) -> RelationalResult<Option<LookupVersion>> {
+        Ok(self.entries.lock().expect("ledger lock").get(name).cloned())
+    }
+    async fn put(&self, entry: &LookupVersion) -> RelationalResult<()> {
+        self.entries
+            .lock()
+            .expect("ledger lock")
+            .insert(entry.name.clone(), entry.clone());
+        Ok(())
+    }
+}
+
+/// Outcome of one revalidation pass for one bundle.
+#[derive(Debug, PartialEq, Eq)]
+pub enum LookupOutcome {
+    /// Ledger already at/above the bundle's version, or server said 304.
+    Current,
+    /// Bundle content applied; ledger advanced to this version.
+    Applied { version: u32 },
+}
+
+/// Re-validate one lookup bundle and apply it if it changed.
+///
+/// - \`Bundled\` sources compare versions only (no network).
+/// - \`Http\`/\`Ipfs\` sources send the ledger's etag as \`If-None-Match\`; a 304
+///   keeps the current content and just advances the ledger's version marker.
+/// - Application is atomic per bundle: content lands via one
+///   [\`StartupStore::execute_seed\`] call (bundle SQL is authored transactional).
+pub async fn revalidate_lookup<S: StartupStore>(
+    store: &S,
+    ledger: &dyn LookupLedger,
+    client: &reqwest::Client,
+    bundle: &SeedBundle,
+) -> RelationalResult<LookupOutcome> {
+    let prior = ledger.get(&bundle.name).await?;
+    if let Some(prior) = &prior {
+        if prior.version >= bundle.version {
+            return Ok(LookupOutcome::Current);
+        }
+    }
+
+    let (sql, etag) = match &bundle.source {
+        SeedSource::Bundled(sql) => ((*sql).to_owned(), None),
+        _ => {
+            let prior_etag = prior.as_ref().and_then(|p| p.etag.clone());
+            match fetch_if_changed(client, bundle, prior_etag.as_deref()).await? {
+                FetchIfChanged::NotModified => {
+                    ledger
+                        .put(&LookupVersion {
+                            name: bundle.name.clone(),
+                            version: bundle.version,
+                            etag: prior_etag,
+                        })
+                        .await?;
+                    return Ok(LookupOutcome::Current);
+                }
+                FetchIfChanged::Fetched { sql, etag } => (sql, etag),
+            }
+        }
+    };
+
+    store.execute_seed(&sql).await?;
+    ledger
+        .put(&LookupVersion {
+            name: bundle.name.clone(),
+            version: bundle.version,
+            etag,
+        })
+        .await?;
+    Ok(LookupOutcome::Applied {
+        version: bundle.version,
+    })
+}
+
+/// A version bump observed on the sync stream: does it require a refetch?
+/// (Pure decision helper so transports/UI need no ledger access to answer.)
+pub fn bump_needs_refetch(prior: Option<&LookupVersion>, bumped_to: u32) -> bool {
+    prior.map(|p| p.version < bumped_to).unwrap_or(true)
+}
+
+enum FetchIfChanged {
+    NotModified,
+    Fetched { sql: String, etag: Option<String> },
+}
+
+async fn fetch_if_changed(
+    client: &reqwest::Client,
+    bundle: &SeedBundle,
+    prior_etag: Option<&str>,
+) -> RelationalResult<FetchIfChanged> {
+    let url = match &bundle.source {
+        SeedSource::Bundled(_) => unreachable!("bundled sources never fetch"),
+        SeedSource::Http { url } => url.clone(),
+        SeedSource::Ipfs { cid, gateway } => {
+            if cid.trim().is_empty() {
+                return Err(RelationalError::EmptyCid {
+                    name: bundle.name.clone(),
+                });
+            }
+            format!("{}/{cid}", gateway.trim_end_matches('/'))
+        }
+    };
+
+    let mut request = client.get(&url);
+    if let Some(etag) = prior_etag {
+        request = request.header(reqwest::header::IF_NONE_MATCH, etag);
+    }
+    let response = request
+        .send()
+        .await
+        .map_err(|source| RelationalError::SeedFetch {
+            name: bundle.name.clone(),
+            source,
+        })?;
+
+    if response.status() == reqwest::StatusCode::NOT_MODIFIED {
+        return Ok(FetchIfChanged::NotModified);
+    }
+    let response = response
+        .error_for_status()
+        .map_err(|source| RelationalError::SeedFetch {
+            name: bundle.name.clone(),
+            source,
+        })?;
+    let etag = response
+        .headers()
+        .get(reqwest::header::ETAG)
+        .and_then(|v| v.to_str().ok())
+        .map(str::to_owned);
+    let bytes = response
+        .bytes()
+        .await
+        .map_err(|source| RelationalError::SeedFetch {
+            name: bundle.name.clone(),
+            source,
+        })?;
+    let sql = std::str::from_utf8(&bytes)
+        .map(str::to_owned)
+        .map_err(|source| RelationalError::SeedEncoding {
+            name: bundle.name.clone(),
+            source,
+        })?;
+    Ok(FetchIfChanged::Fetched { sql, etag })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::seed::{SeedBundle, SeedSource};
+    use super::super::startup::StartupStore;
+    use super::super::RelationalResult;
+    use super::*;
+
+    #[derive(Default)]
+    struct MemStore {
+        executed: Mutex<Vec<String>>,
+    }
+
+    #[async_trait]
+    impl StartupStore for MemStore {
+        async fn migrate(&self) -> RelationalResult<()> {
+            Ok(())
+        }
+        async fn execute_seed(&self, sql: &str) -> RelationalResult<()> {
+            self.executed.lock().expect("lock").push(sql.to_string());
+            Ok(())
+        }
+    }
+
+    fn bundle(version: u32) -> SeedBundle {
+        SeedBundle {
+            name: "metatypes".into(),
+            version,
+            source: SeedSource::Bundled("INSERT INTO metatypes VALUES ('t1')"),
+        }
+    }
+
+    // Currency loop: first pass applies and ledgers; same version is Current
+    // (no reapply); a bumped version applies again.
+    #[tokio::test]
+    async fn revalidate_applies_once_then_tracks_versions() {
+        let store = MemStore::default();
+        let ledger = MemoryLookupLedger::default();
+        let client = reqwest::Client::new();
+
+        let first = revalidate_lookup(&store, &ledger, &client, &bundle(1))
+            .await
+            .expect("v1");
+        assert_eq!(first, LookupOutcome::Applied { version: 1 });
+        let again = revalidate_lookup(&store, &ledger, &client, &bundle(1))
+            .await
+            .expect("v1 again");
+        assert_eq!(again, LookupOutcome::Current);
+        assert_eq!(store.executed.lock().expect("lock").len(), 1);
+
+        let bumped = revalidate_lookup(&store, &ledger, &client, &bundle(2))
+            .await
+            .expect("v2");
+        assert_eq!(bumped, LookupOutcome::Applied { version: 2 });
+        assert_eq!(store.executed.lock().expect("lock").len(), 2);
+    }
+
+    #[test]
+    fn bump_decision_is_monotonic() {
+        let prior = LookupVersion {
+            name: "metatypes".into(),
+            version: 3,
+            etag: None,
+        };
+        assert!(!bump_needs_refetch(Some(&prior), 3));
+        assert!(bump_needs_refetch(Some(&prior), 4));
+        assert!(bump_needs_refetch(None, 1));
+    }
+}
+EOF
+  cat > "$dir/src/relational/loads.rs" << EOF
+$MARK
+//! One-time data loads (C-122): certain data loads from the server exactly once,
+//! at two well-defined boot moments — before onboarding (anonymous-safe manifest,
+//! catalogs) and after onboarding (preference-driven personalization seeds).
+//! Idempotent via a ledger: a load runs only when its ledger entry is absent or
+//! older. A failed post-onboarding load degrades (retry next boot) — it must
+//! never block the user. See \`references/sync/partial-replication.md\` §3.
+
+use super::lookup::{LookupLedger, LookupVersion};
+use super::seed::SeedBundle;
+use super::startup::StartupStore;
+use super::RelationalResult;
+
+/// DDL for the store-backed load ledger (additive, LFS-INV-3). Ledger entries
+/// share the version-ledger seam ([\`LookupLedger\`]) with lookups; store-backed
+/// impls keep loads in their own table.
+pub const LOAD_LEDGER_DDL: &str = "CREATE TABLE IF NOT EXISTS _load_ledger (\n  load_name TEXT PRIMARY KEY,\n  version INTEGER NOT NULL,\n  completed_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)\n)";
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LoadStage {
+    PreOnboarding,
+    PostOnboarding,
+}
+
+/// A ledgered one-time load: a seed bundle bound to a boot stage.
+#[derive(Debug, Clone)]
+pub struct OneTimeLoad {
+    pub stage: LoadStage,
+    pub bundle: SeedBundle,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum LoadResult {
+    /// Ledger already current — nothing ran.
+    AlreadyLoaded { name: String },
+    /// Load executed and ledgered.
+    Loaded { name: String, version: u32 },
+    /// Load failed; ledger untouched so it retries next boot. Post-onboarding
+    /// failures surface here instead of erroring the whole boot (degrade rule).
+    Deferred { name: String, error: String },
+}
+
+/// Run every load for \`stage\`, idempotently. Pre-onboarding failures are
+/// returned as \`Deferred\` too — the caller decides whether a load is
+/// boot-critical (then treat \`Deferred\` as fatal) or degradable (default).
+pub async fn run_one_time_loads<S: StartupStore>(
+    store: &S,
+    ledger: &dyn LookupLedger,
+    client: &reqwest::Client,
+    loads: &[OneTimeLoad],
+    stage: LoadStage,
+) -> RelationalResult<Vec<LoadResult>> {
+    let mut results = Vec::new();
+    for load in loads.iter().filter(|l| l.stage == stage) {
+        let name = load.bundle.name.clone();
+        let prior = ledger.get(&name).await?;
+        if prior
+            .map(|p| p.version >= load.bundle.version)
+            .unwrap_or(false)
+        {
+            results.push(LoadResult::AlreadyLoaded { name });
+            continue;
+        }
+        match load.bundle.sql(client).await {
+            Ok(sql) => match store.execute_seed(&sql).await {
+                Ok(()) => {
+                    ledger
+                        .put(&LookupVersion {
+                            name: name.clone(),
+                            version: load.bundle.version,
+                            etag: None,
+                        })
+                        .await?;
+                    results.push(LoadResult::Loaded {
+                        name,
+                        version: load.bundle.version,
+                    });
+                }
+                Err(error) => results.push(LoadResult::Deferred {
+                    name,
+                    error: error.to_string(),
+                }),
+            },
+            Err(error) => results.push(LoadResult::Deferred {
+                name,
+                error: error.to_string(),
+            }),
+        }
+    }
+    Ok(results)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::lookup::MemoryLookupLedger;
+    use super::super::seed::{SeedBundle, SeedSource};
+    use super::super::startup::StartupStore;
+    use super::super::{RelationalError, RelationalResult};
+    use super::*;
+    use std::sync::Mutex;
+
+    struct MemStore {
+        executed: Mutex<Vec<String>>,
+        fail: bool,
+    }
+
+    #[async_trait::async_trait]
+    impl StartupStore for MemStore {
+        async fn migrate(&self) -> RelationalResult<()> {
+            Ok(())
+        }
+        async fn execute_seed(&self, sql: &str) -> RelationalResult<()> {
+            if self.fail {
+                return Err(RelationalError::Sync("store down".into()));
+            }
+            self.executed.lock().expect("lock").push(sql.to_string());
+            Ok(())
+        }
+    }
+
+    fn load(stage: LoadStage, name: &str) -> OneTimeLoad {
+        OneTimeLoad {
+            stage,
+            bundle: SeedBundle {
+                name: name.into(),
+                version: 1,
+                source: SeedSource::Bundled("INSERT INTO seeded VALUES (1)"),
+            },
+        }
+    }
+
+    // One-time semantics: a load runs exactly once per version, filtered by stage.
+    #[tokio::test]
+    async fn loads_run_once_per_version_and_stage() {
+        let store = MemStore {
+            executed: Mutex::new(Vec::new()),
+            fail: false,
+        };
+        let ledger = MemoryLookupLedger::default();
+        let client = reqwest::Client::new();
+        let loads = [
+            load(LoadStage::PreOnboarding, "manifest"),
+            load(LoadStage::PostOnboarding, "personalization"),
+        ];
+
+        let pre = run_one_time_loads(&store, &ledger, &client, &loads, LoadStage::PreOnboarding)
+            .await
+            .expect("pre");
+        assert_eq!(
+            pre,
+            vec![LoadResult::Loaded {
+                name: "manifest".into(),
+                version: 1
+            }]
+        );
+
+        let rerun = run_one_time_loads(&store, &ledger, &client, &loads, LoadStage::PreOnboarding)
+            .await
+            .expect("rerun");
+        assert_eq!(
+            rerun,
+            vec![LoadResult::AlreadyLoaded {
+                name: "manifest".into()
+            }]
+        );
+        assert_eq!(store.executed.lock().expect("lock").len(), 1);
+    }
+
+    // Degrade rule: a failing load defers (ledger untouched) so it retries next boot.
+    #[tokio::test]
+    async fn failing_load_defers_and_retries_next_boot() {
+        let failing = MemStore {
+            executed: Mutex::new(Vec::new()),
+            fail: true,
+        };
+        let ledger = MemoryLookupLedger::default();
+        let client = reqwest::Client::new();
+        let loads = [load(LoadStage::PostOnboarding, "personalization")];
+
+        let result = run_one_time_loads(
+            &failing,
+            &ledger,
+            &client,
+            &loads,
+            LoadStage::PostOnboarding,
+        )
+        .await
+        .expect("deferred, not fatal");
+        assert!(matches!(result[0], LoadResult::Deferred { .. }));
+
+        let healthy = MemStore {
+            executed: Mutex::new(Vec::new()),
+            fail: false,
+        };
+        let retry = run_one_time_loads(
+            &healthy,
+            &ledger,
+            &client,
+            &loads,
+            LoadStage::PostOnboarding,
+        )
+        .await
+        .expect("retry");
+        assert!(matches!(retry[0], LoadResult::Loaded { .. }));
+    }
+}
+EOF
   cat > "$dir/src/relational/startup.rs" << EOF
 $MARK
-//! Typestate startup orchestration: migrations -> seeds -> sync attach.
+//! Typestate startup orchestration (LFS-INV-5): migrations -> seed/lookup ->
+//! pre-onboarding load -> [onboarding UI] -> post-onboarding load -> sync attach.
+//! The legacy two-hop path (\`seed_and_attach\`) remains for callers without
+//! onboarding stages; the granular path threads a version ledger and scopes.
 
 use std::{marker::PhantomData, sync::Arc};
 
-use gen_ui_types::sync::SyncTransport;
+use gen_ui_types::sync::{SyncScope, SyncTransport};
 
+use super::loads::{run_one_time_loads, LoadResult, LoadStage, OneTimeLoad};
+use super::lookup::LookupLedger;
 use super::{RelationalResult, SeedBundle};
 
 pub struct Uninitialized;
 pub struct Migrated;
+/// Seeds + lookups applied; pre-onboarding loads not yet run.
+pub struct Seeded;
+/// Pre-onboarding loads ran; the app may show onboarding UI now.
+pub struct PreOnboarded;
 pub struct Ready;
 
 #[async_trait::async_trait]
@@ -2869,12 +3472,20 @@ where
     S: StartupStore,
 {
     pub fn new(store: S) -> Self {
-        Self { store, http: reqwest::Client::new(), _state: PhantomData }
+        Self {
+            store,
+            http: reqwest::Client::new(),
+            _state: PhantomData,
+        }
     }
 
     pub async fn migrate(self) -> RelationalResult<Startup<S, Migrated>> {
         self.store.migrate().await?;
-        Ok(Startup { store: self.store, http: self.http, _state: PhantomData })
+        Ok(Startup {
+            store: self.store,
+            http: self.http,
+            _state: PhantomData,
+        })
     }
 }
 
@@ -2891,13 +3502,112 @@ where
             let sql = bundle.sql(&self.http).await?;
             self.store.execute_seed(&sql).await?;
         }
-        sync.start().await.map_err(|error| super::RelationalError::Sync(error.to_string()))?;
-        Ok(Startup { store: self.store, http: self.http, _state: PhantomData })
+        sync.start()
+            .await
+            .map_err(|error| super::RelationalError::Sync(error.to_string()))?;
+        Ok(Startup {
+            store: self.store,
+            http: self.http,
+            _state: PhantomData,
+        })
+    }
+}
+
+impl<S> Startup<S, Migrated>
+where
+    S: StartupStore,
+{
+    /// Granular path, step 1: apply seed/lookup bundles (no sync attach yet).
+    pub async fn seed(self, bundles: &[SeedBundle]) -> RelationalResult<Startup<S, Seeded>> {
+        for bundle in bundles {
+            let sql = bundle.sql(&self.http).await?;
+            self.store.execute_seed(&sql).await?;
+        }
+        Ok(Startup {
+            store: self.store,
+            http: self.http,
+            _state: PhantomData,
+        })
+    }
+}
+
+impl<S> Startup<S, Seeded>
+where
+    S: StartupStore,
+{
+    /// Granular path, step 2: run pre-onboarding loads (idempotent via ledger).
+    /// Returns per-load results alongside the advanced state so the caller can
+    /// decide whether any \`Deferred\` load is boot-critical.
+    pub async fn pre_onboarding_load(
+        self,
+        ledger: &dyn LookupLedger,
+        loads: &[OneTimeLoad],
+    ) -> RelationalResult<(Startup<S, PreOnboarded>, Vec<LoadResult>)> {
+        let results = run_one_time_loads(
+            &self.store,
+            ledger,
+            &self.http,
+            loads,
+            LoadStage::PreOnboarding,
+        )
+        .await?;
+        Ok((
+            Startup {
+                store: self.store,
+                http: self.http,
+                _state: PhantomData,
+            },
+            results,
+        ))
+    }
+}
+
+impl<S> Startup<S, PreOnboarded>
+where
+    S: StartupStore,
+{
+    /// Granular path, step 3: run post-onboarding loads (only when onboarding
+    /// has completed — pass \`onboarded: false\` to skip them; they run on a later
+    /// boot once the flag flips), then attach sync with the declared scopes.
+    /// Post-onboarding loads never block boot: failures come back \`Deferred\`.
+    pub async fn post_onboarding_and_attach(
+        self,
+        ledger: &dyn LookupLedger,
+        loads: &[OneTimeLoad],
+        onboarded: bool,
+        sync: Arc<dyn SyncTransport>,
+        scopes: &[SyncScope],
+    ) -> RelationalResult<(Startup<S, Ready>, Vec<LoadResult>)> {
+        let results = if onboarded {
+            run_one_time_loads(
+                &self.store,
+                ledger,
+                &self.http,
+                loads,
+                LoadStage::PostOnboarding,
+            )
+            .await?
+        } else {
+            Vec::new()
+        };
+        sync.start_scopes(scopes)
+            .await
+            .map_err(|error| super::RelationalError::Sync(error.to_string()))?;
+        Ok((
+            Startup {
+                store: self.store,
+                http: self.http,
+                _state: PhantomData,
+            },
+            results,
+        ))
     }
 }
 
 impl<S> Startup<S, Ready> {
-    pub fn into_store(self) -> S { self.store }
+    pub fn into_store(self) -> S {
+        self.store
+    }
 }
 EOF
   cat > "$dir/src/relational/postgres.rs" << EOF
@@ -3011,6 +3721,8 @@ mod status;
 #[cfg(not(target_arch = "wasm32"))]
 mod config;
 #[cfg(not(target_arch = "wasm32"))]
+mod loopback;
+#[cfg(not(target_arch = "wasm32"))]
 mod seam;
 #[cfg(not(target_arch = "wasm32"))]
 mod shapes;
@@ -3021,12 +3733,15 @@ mod engine;
 
 pub use status::{SyncStatusHandle, SyncStatusStream};
 // Re-export the frozen seam types so callers use one import path.
-pub use gen_ui_types::sync::{SyncStatus, SyncTransport};
+pub use gen_ui_types::sync::{ScopeKind, SyncScope, SyncStatus, SyncTransport, SCOPE_TENANT_PARAM};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use config::{ShapeSpec, SyncConfig};
 #[cfg(not(target_arch = "wasm32"))]
 pub use engine::SyncEngine;
+// C-122: scope-aware dev loopback (partial replication without a gateway).
+#[cfg(not(target_arch = "wasm32"))]
+pub use loopback::{LoopbackFeed, LoopbackSyncTransport};
 #[cfg(not(target_arch = "wasm32"))]
 pub use seam::{LocalStore, PendingWrite, RowChange, RowOp, WriteOutcome, WriteSink};
 
@@ -3797,6 +4512,234 @@ mod tests {
         assert_eq!(derive_key(a), derive_key(a));
         assert_ne!(derive_key(a), derive_key(b));
         assert!(derive_key(a).starts_with("wq-"));
+    }
+}
+EOF
+
+  # ── sync/loopback.rs — scope-aware dev loopback transport [C-122] ──────────
+  cat > "$dir/src/sync/loopback.rs" << EOF
+$MARK
+//! Scope-aware dev loopback transport (C-122). Runs the partial-replication
+//! contract — scope validation, attach, row-op streaming into a [\`LocalStore\`],
+//! write enqueueing — without any gateway, so slices and tests run today and the
+//! PES/FRF client drops in behind the same seam later (ADR-LFS-1).
+//!
+//! The paired [\`LoopbackFeed\`] plays the server role: push [\`RowChange\`]s and
+//! they apply to the store exactly as a gateway stream would; enqueued writes
+//! are inspectable instead of being sent anywhere.
+
+use super::seam::{LocalStore, RowChange};
+use super::status::{SyncStatusHandle, SyncStatusStream};
+use async_trait::async_trait;
+use gen_ui_types::error::{CoreError, CoreResult};
+use gen_ui_types::sync::{SyncScope, SyncStatus, SyncTransport};
+use std::sync::{Arc, Mutex};
+use tokio::sync::mpsc;
+
+/// Server-side handle: feed row changes and inspect enqueued writes.
+#[derive(Clone)]
+pub struct LoopbackFeed {
+    tx: mpsc::UnboundedSender<Vec<RowChange>>,
+    writes: Arc<Mutex<Vec<String>>>,
+    scopes: Arc<Mutex<Vec<SyncScope>>>,
+}
+
+impl LoopbackFeed {
+    /// Push one batch of row changes ("one transaction" at the seam).
+    pub fn push(&self, changes: Vec<RowChange>) -> CoreResult<()> {
+        self.tx
+            .send(changes)
+            .map_err(|_| CoreError::Terminal("loopback transport stopped".into()))
+    }
+
+    /// Writes enqueued by the client side, in order (change_json payloads).
+    pub fn enqueued_writes(&self) -> Vec<String> {
+        self.writes.lock().expect("loopback writes lock").clone()
+    }
+
+    /// Scopes the client attached (validated).
+    pub fn attached_scopes(&self) -> Vec<SyncScope> {
+        self.scopes.lock().expect("loopback scopes lock").clone()
+    }
+}
+
+pub struct LoopbackSyncTransport {
+    store: Arc<dyn LocalStore>,
+    status: SyncStatusHandle,
+    rx: Mutex<Option<mpsc::UnboundedReceiver<Vec<RowChange>>>>,
+    writes: Arc<Mutex<Vec<String>>>,
+    scopes: Arc<Mutex<Vec<SyncScope>>>,
+}
+
+impl LoopbackSyncTransport {
+    pub fn new(store: Arc<dyn LocalStore>) -> (Arc<Self>, LoopbackFeed) {
+        let (tx, rx) = mpsc::unbounded_channel();
+        let writes = Arc::new(Mutex::new(Vec::new()));
+        let scopes = Arc::new(Mutex::new(Vec::new()));
+        let transport = Arc::new(Self {
+            store,
+            status: SyncStatusHandle::new(),
+            rx: Mutex::new(Some(rx)),
+            writes: Arc::clone(&writes),
+            scopes: Arc::clone(&scopes),
+        });
+        (transport, LoopbackFeed { tx, writes, scopes })
+    }
+
+    /// Subscribe to status transitions (drives the SyncChip in slices).
+    pub fn status_stream(&self) -> SyncStatusStream {
+        self.status.subscribe()
+    }
+
+    fn spawn_pump(&self) -> CoreResult<()> {
+        let mut rx = self
+            .rx
+            .lock()
+            .expect("loopback rx lock")
+            .take()
+            .ok_or_else(|| CoreError::Terminal("loopback transport already started".into()))?;
+        let store = Arc::clone(&self.store);
+        let status = self.status.clone();
+        status.set(SyncStatus::Live);
+        tokio::spawn(async move {
+            while let Some(batch) = rx.recv().await {
+                if let Err(error) = store.apply_batch(&batch).await {
+                    status.set(SyncStatus::Error {
+                        message: error.to_string(),
+                    });
+                    return;
+                }
+                status.set(SyncStatus::Live);
+            }
+            status.set(SyncStatus::Offline);
+        });
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl SyncTransport for LoopbackSyncTransport {
+    async fn start(&self) -> CoreResult<()> {
+        self.spawn_pump()
+    }
+
+    async fn start_scopes(&self, scopes: &[SyncScope]) -> CoreResult<()> {
+        for scope in scopes {
+            scope.validate()?;
+        }
+        *self.scopes.lock().expect("loopback scopes lock") = scopes.to_vec();
+        self.spawn_pump()
+    }
+
+    async fn enqueue_write(&self, change_json: &str) -> CoreResult<()> {
+        let mut writes = self.writes.lock().expect("loopback writes lock");
+        writes.push(change_json.to_string());
+        self.status.set(SyncStatus::Syncing {
+            pending_writes: writes.len() as u32,
+        });
+        Ok(())
+    }
+
+    fn status(&self) -> SyncStatus {
+        self.status.current()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gen_ui_types::sync::{ScopeKind, SyncScope};
+    use std::collections::BTreeMap;
+    use tokio::sync::Mutex as AsyncMutex;
+
+    struct MemStore {
+        applied: AsyncMutex<Vec<RowChange>>,
+    }
+
+    #[async_trait]
+    impl LocalStore for MemStore {
+        async fn apply_batch(&self, changes: &[RowChange]) -> CoreResult<()> {
+            self.applied.lock().await.extend_from_slice(changes);
+            Ok(())
+        }
+        async fn truncate_shape(&self, _table: &str) -> CoreResult<()> {
+            Ok(())
+        }
+    }
+
+    fn row(table: &str, key: &str) -> RowChange {
+        RowChange {
+            table: table.into(),
+            op: super::super::seam::RowOp::Insert,
+            key: format!("\"{key}\""),
+            value_json: format!("{{\"id\":\"{key}\"}}"),
+        }
+    }
+
+    // The partial-replication contract end-to-end without a gateway: attach
+    // validated scopes, stream a batch, observe it applied and status Live.
+    #[tokio::test]
+    async fn scoped_attach_streams_rows_into_the_store() {
+        let store = Arc::new(MemStore {
+            applied: AsyncMutex::new(Vec::new()),
+        });
+        let (transport, feed) = LoopbackSyncTransport::new(store.clone());
+        let scopes = vec![
+            SyncScope::user_subset("user-notes", "user-1"),
+            SyncScope::shared_lookup("lookup-metatypes"),
+        ];
+        transport.start_scopes(&scopes).await.expect("attach");
+        assert_eq!(feed.attached_scopes().len(), 2);
+
+        feed.push(vec![row("notes", "n1"), row("notes", "n2")])
+            .expect("push");
+        // Yield until the pump applies (bounded, no sleeps-forever).
+        for _ in 0..100 {
+            if store.applied.lock().await.len() == 2 {
+                break;
+            }
+            tokio::task::yield_now().await;
+        }
+        assert_eq!(store.applied.lock().await.len(), 2);
+        assert_eq!(transport.status(), SyncStatus::Live);
+    }
+
+    // Fail closed at the seam: a tenantless user-subset scope never attaches.
+    #[tokio::test]
+    async fn tenantless_scope_is_refused() {
+        let store = Arc::new(MemStore {
+            applied: AsyncMutex::new(Vec::new()),
+        });
+        let (transport, feed) = LoopbackSyncTransport::new(store);
+        let bad = SyncScope {
+            name: "user-notes".into(),
+            params: BTreeMap::new(),
+            kind: ScopeKind::UserSubset,
+        };
+        assert!(transport.start_scopes(&[bad]).await.is_err());
+        assert!(feed.attached_scopes().is_empty());
+    }
+
+    // Writes enqueue durably-inspectably and drive Syncing{pending_writes}.
+    #[tokio::test]
+    async fn enqueued_writes_are_inspectable_and_counted() {
+        let store = Arc::new(MemStore {
+            applied: AsyncMutex::new(Vec::new()),
+        });
+        let (transport, feed) = LoopbackSyncTransport::new(store);
+        transport
+            .enqueue_write("{\"op\":\"insert\"}")
+            .await
+            .expect("enqueue");
+        transport
+            .enqueue_write("{\"op\":\"update\"}")
+            .await
+            .expect("enqueue");
+        assert_eq!(feed.enqueued_writes().len(), 2);
+        assert_eq!(
+            transport.status(),
+            SyncStatus::Syncing { pending_writes: 2 }
+        );
     }
 }
 EOF
