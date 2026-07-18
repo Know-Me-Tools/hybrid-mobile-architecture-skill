@@ -2,7 +2,6 @@
 
 ## Reference
 
-* [Prompting publication gates archived through kbd-apply](/karpathy-progress-20260718T114700Z-prompting-publication-gates-archived.md)
 * [Analyze completion for KnowMe PoC codegen and CI phase](/analyze-completion-for-knowme-poc-codegen-and-ci-phase.md)
 * [Android whisper-rs CMake ABI fix for KnowMe PoC launch](/android-whisper-rs-cmake-abi-fix-for-knowme-poc-launch.md)
 * [Assistant UI local chat and persistence verified](/karpathy-progress-20260717T215244Z-local-chat.md)
@@ -252,6 +251,7 @@
 * [PEM sync bridge and mobile tier assessment ready with no changes](/pem-sync-bridge-and-mobile-tier-assessment-ready-with-no-changes.md)
 * [PEM sync bridge and mobile tier execute-ready with c126 pending](/pem-sync-bridge-and-mobile-tier-execute-ready-with-c126-pending.md)
 * [PEM sync bridge and mobile tier executor completed unknown change](/pem-sync-bridge-and-mobile-tier-executor-completed-unknown-change.md)
+* [PEM sync bridge and mobile tier phase complete with no changes](/pem-sync-bridge-and-mobile-tier-phase-complete-with-no-changes.md)
 * [PEM sync bridge and mobile tier plan ready at 13:37](/pem-sync-bridge-and-mobile-tier-plan-ready-at-13-37.md)
 * [PEM sync bridge and mobile tier session completed with unknown change](/pem-sync-bridge-and-mobile-tier-session-completed-with-unknown-change.md)
 * [PES v4 server binary completion and sync engine scope](/pes-v4-server-binary-completion-and-sync-engine-scope.md)
@@ -274,3 +274,13 @@
 * [Scaffold full hybrid project session completed unknown change](/scaffold-full-hybrid-project-session-completed-unknown-change.md)
 * [Shared host and Axum vertical slice launched](/karpathy-progress-20260717T221423Z-axum-host.md)
 * [Worktree consolidation postmortem and runtime verification failures](/worktree-consolidation-postmortem-runtime-verification-failures.md)
+
+## Uncategorized
+
+* [Prompting publication gates archived through kbd-apply](/karpathy-progress-20260718T114700Z-prompting-publication-gates-archived.md)
+
+## karpathy_progress
+
+* [Prompting guide agent orchestration verified](/karpathy-progress-20260718T102556Z-prompting-guide-agent-orchestration.md)
+* [Prompting guide harness and loop playbooks verified](/karpathy-progress-20260718T095418Z-prompting-guide-harness-loops.md)
+* [Prompting guide scenario recipes verified](/karpathy-progress-20260718T101441Z-prompting-guide-scenario-recipes.md)
