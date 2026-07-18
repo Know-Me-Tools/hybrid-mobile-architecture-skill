@@ -1,1 +1,1 @@
-{"totalRuns":8,"failedRuns":0,"lastRun":{"ts":"2026-07-18T13:36:14Z","kind":"assess","edge":"after","name":"pem-sync-bridge-and-mobile-tier","hookId":"legacy-assessment-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}
+{"totalRuns":13,"failedRuns":0,"lastRun":{"ts":"2026-07-18T13:40:48Z","kind":"plan","edge":"after","name":"pem-sync-bridge-and-mobile-tier","hookId":"legacy-plan-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}

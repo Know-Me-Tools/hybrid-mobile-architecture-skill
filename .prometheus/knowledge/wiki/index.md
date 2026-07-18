@@ -249,6 +249,7 @@
 * [Mobile llama.cpp iOS link boundary identified](/karpathy-progress-20260717T230525Z-mobile-llama-link.md)
 * [PEM sync bridge and mobile tier assessment ready at 13:33:00](/pem-sync-bridge-and-mobile-tier-assessment-ready-at-13-33-00.md)
 * [PEM sync bridge and mobile tier assessment ready with no changes](/pem-sync-bridge-and-mobile-tier-assessment-ready-with-no-changes.md)
+* [PEM sync bridge and mobile tier plan ready at 13:37](/pem-sync-bridge-and-mobile-tier-plan-ready-at-13-37.md)
 * [PEM sync bridge and mobile tier session completed with unknown change](/pem-sync-bridge-and-mobile-tier-session-completed-with-unknown-change.md)
 * [PES v4 server binary completion and sync engine scope](/pes-v4-server-binary-completion-and-sync-engine-scope.md)
 * [pglite-oxide Hybrid Tauri Architecture for Mobile PostgreSQL](/pglite-oxide-hybrid-tauri-architecture-for-mobile-postgresql.md)

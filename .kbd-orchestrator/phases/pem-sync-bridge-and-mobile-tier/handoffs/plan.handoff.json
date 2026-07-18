@@ -1,0 +1,11 @@
+{
+  "stage": "plan",
+  "completedAt": "2026-07-18T13:40:47Z",
+  "outputs": [
+    "plan.md"
+  ],
+  "nextStage": "execute",
+  "summaryForNext": "Five changes c126–c130: app-side PEM scope bridge ruled (external package; upstream PR deferred), mobile SQLite lane + frb surface, sqlite-vec tier, RAG IPC + chat chips, vault roster auth. Rounds: (c126,c127) → (c128,c129) → c130. First change: c126-pem-scope-bridge.",
+  "skipped": false,
+  "skipReason": null
+}

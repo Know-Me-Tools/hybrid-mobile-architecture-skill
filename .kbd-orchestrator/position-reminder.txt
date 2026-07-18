@@ -1,5 +1,5 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: pem-sync-bridge-and-mobile-tier
-Step: 0 of 0
-Stage: plan_ready
-Next command: /kbd-plan pem-sync-bridge-and-mobile-tier
+Step: 0 of 5
+Stage: execute_ready
+Next command: /kbd-execute pem-sync-bridge-and-mobile-tier
