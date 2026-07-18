@@ -1,8 +1,10 @@
 # KnowMe Consolidation Goal and Completion Evidence
 
-**Assessment date:** 2026-07-17  
-**Final commit:** `560759187c09964db4b60d9b2e940c9ff693faf9`  
-**Repository:** `Know-Me-Tools/hybrid-mobile-architecture-skill`  
+**Assessment date:** 2026-07-17
+
+**Final commit:** `560759187c09964db4b60d9b2e940c9ff693faf9`
+
+**Repository:** `Know-Me-Tools/hybrid-mobile-architecture-skill`
 **Assessment result:** Goal met, with the evidence qualifications documented below.
 
 ## 1. What the goal was
