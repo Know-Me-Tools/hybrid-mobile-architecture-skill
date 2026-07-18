@@ -31,7 +31,20 @@ export default {
     ['@easyops-cn/docusaurus-search-local', {hashed: true, indexDocs: true, indexPages: true, indexBlog: false, docsRouteBasePath: ['/architecture', '/reference', '/deployment', '/prompting']}]
   ],
   themeConfig: {
-    image: 'img/knowme-social-card.svg',
+    image: 'img/knowme-builder-documentation-og.png',
+    metadata: [
+      {
+        property: 'og:image:alt',
+        content: 'KnowMe Builder documentation homepage: build software that understands its users.'
+      },
+      {property: 'og:image:type', content: 'image/png'},
+      {property: 'og:image:width', content: '3460'},
+      {property: 'og:image:height', content: '2130'},
+      {
+        name: 'twitter:image:alt',
+        content: 'KnowMe Builder documentation homepage: build software that understands its users.'
+      }
+    ],
     colorMode: {defaultMode: 'dark', respectPrefersColorScheme: true, disableSwitch: false},
     navbar: {
       title: 'KnowMe', logo: {alt: 'KnowMe conviction mark', src: 'img/knowme-mark.svg'},
