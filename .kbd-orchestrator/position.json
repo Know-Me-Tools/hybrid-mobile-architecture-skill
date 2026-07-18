@@ -1,22 +1,22 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T11:02:23Z",
+  "updatedAt": "2026-07-18T11:10:45Z",
   "cursor": [
     "local-first-realtime-sync",
-    "c124-peer-profile-vault"
+    "c125-scaffold-audit-propagation"
   ],
   "root": {
     "type": "phase",
     "id": "local-first-realtime-sync",
     "status": "executing",
     "progress": {
-      "done": 4,
+      "done": 5,
       "total": 6
     },
     "children": [
       {
         "type": "change",
-        "id": "c124-peer-profile-vault",
+        "id": "c125-scaffold-audit-propagation",
         "status": "PENDING",
         "progress": {
           "done": 0,

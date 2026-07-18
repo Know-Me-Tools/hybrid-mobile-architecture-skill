@@ -10,13 +10,13 @@
   "implementation_total": 0,
   "implementation_completed": 0,
   "changes_total": 0,
-  "changes_completed": 5,
+  "changes_completed": 6,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 5,
+      "completed": 6,
       "total": 6,
-      "status": "PENDING"
+      "status": "COMPLETE"
     },
     "evidence": {
       "status": "NOT_TRACKED",
@@ -41,7 +41,7 @@
   "createdBy": "kbd-new-phase",
   "updatedAt": "2026-07-18T09:08:47Z",
   "last_updated_by": "claude-code",
-  "last_updated": "2026-07-18T12:20:00Z",
+  "last_updated": "2026-07-18T12:50:00Z",
   "qa": {
     "c120-sync-doctrine-refs": {
       "artifact_refiner": "SKIPPED",
@@ -62,6 +62,10 @@
     "c124-peer-profile-vault": {
       "artifact_refiner": "UNAVAILABLE",
       "compensating_verification": "Rust: privacy-gate refusal test + full suite green, workspace check clean; TS: tsc clean, 13 vitest green incl. two-peer convergence, out-of-order chunk reassembly, PGlite persistence round-trip"
+    },
+    "c125-scaffold-audit-propagation": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "bash -n on all touched scripts; heredoc replay byte-identical; new audit gates run green against the PoC; tsc + 13 vitest green after pglite-sync removal"
     }
   },
   "deferred": [

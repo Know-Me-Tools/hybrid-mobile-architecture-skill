@@ -254,6 +254,33 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
     grep -qE '"(redux|@reduxjs)'       "$PKG" && fail "Redux found — use Zustand" || pass "Redux not present ✓"
     grep -qE '"(jotai|recoil)'         "$PKG" && fail "jotai/recoil found — use Zustand" || pass "jotai/recoil not present ✓"
     grep -qE '"react-router'           "$PKG" && fail "react-router found — use TanStack Router" || pass "react-router not present ✓"
+
+    # C-125 local-first gates (references/sync/doctrine.md).
+    # Declared-but-unused sync deps misrepresent capability (assessment gap 8):
+    # each of these, when declared, must actually be imported somewhere in src/.
+    for dep in "loro-crdt" "@electric-sql/pglite-sync" "@electric-sql/pglite-pgvector"; do
+      if grep -q "\"$dep\"" "$PKG"; then
+        if grep -rq "from '$dep" "$SRC" 2>/dev/null || grep -rq "from \"$dep" "$SRC" 2>/dev/null; then
+          pass "$dep declared and imported ✓"
+        else
+          warn "$dep declared in package.json but never imported — wire it or drop it"
+        fi
+      fi
+    done
+    # Vault is local-class: never a PEM entity, never a sync scope (LFS-INV-4).
+    if grep -rqE "registerEntityTransport\((['\"])[^'\"]*[Vv]ault|_vault_state" --include='*.ts' "$SRC/features/entities" 2>/dev/null; then
+      fail "vault table wired into the entity/sync layer — local-class data never server-syncs"
+    else
+      pass "vault stays out of the entity/sync layer ✓"
+    fi
+    # A chat feature needs its client-RAG vector surface (C-123).
+    if [[ -d "$SRC/features/chat" ]]; then
+      if grep -q '"@electric-sql/pglite-pgvector"' "$PKG"; then
+        pass "chat feature has the pgvector surface ✓"
+      else
+        warn "chat feature present but @electric-sql/pglite-pgvector missing — client RAG has no vector store"
+      fi
+    fi
   else
     fail "package.json not found"
   fi

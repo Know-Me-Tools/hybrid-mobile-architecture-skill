@@ -32,9 +32,6 @@ importers:
       '@electric-sql/pglite-pgvector':
         specifier: 0.0.5
         version: 0.0.5(@electric-sql/pglite@0.5.4)
-      '@electric-sql/pglite-sync':
-        specifier: ^0.4.0
-        version: 0.4.2(@electric-sql/pglite@0.5.4)
       '@fontsource-variable/geist':
         specifier: ^5.2.9
         version: 5.2.9
@@ -526,24 +523,10 @@ packages:
   '@dotenvx/primitives@0.8.0':
     resolution: {integrity: sha512-VYJy0uhFm9zTJ1TxBaW/pA8bjbOM/OttaNMwZ1RHG4JKyRG7DhSdiqD1ipQoAyoD22olUtxbP78W9xY3Wd11bg==}
 
-  '@electric-sql/client@1.5.24':
-    resolution: {integrity: sha512-ItOjBFTfiZvYosglF9Dn4TSqE59yL/psoemHJ7vX8gvEUmElHB2QdP5eQC6q9/lswyv7oqhkZT0Kk8kuq2P5vA==}
-    hasBin: true
-
-  '@electric-sql/experimental@1.0.14':
-    resolution: {integrity: sha512-Wpv9UC7r4JYnQO4GbtQve7SVIX/VcBwAP12Xx11ObK2TBI+NJHtDRimUEKKQorq9Kr6yTAJ3BYOKCINxFsbDIg==}
-    peerDependencies:
-      '@electric-sql/client': 1.0.14
-
   '@electric-sql/pglite-pgvector@0.0.5':
     resolution: {integrity: sha512-KEPAkD/3FN6WlDM6XPi2Ko1Xk0ecjOU9OfzCoclVkiRoEVNRYwKo1iO+tlkelMgp07SszmSC4JdSBueH2p7uOQ==}
     peerDependencies:
       '@electric-sql/pglite': 0.5.4
-
-  '@electric-sql/pglite-sync@0.4.2':
-    resolution: {integrity: sha512-tZNl1zfJ8bSG/1RAvDkww6Y8x0L1Oum+IdOqWdxbAKNQqMVfqJ9Pvt5L1pSc1zdUG0eKu3F3QM8UJjhEstoaqw==}
-    peerDependencies:
-      '@electric-sql/pglite': 0.3.16
 
   '@electric-sql/pglite@0.5.4':
     resolution: {integrity: sha512-yYZUyyXrHU7tPlCjwZQJ6hIG9DscdCCn7Uk0mYKwC1FeHX286AbcmFveMiRBEak8e9iPupjsoVImN3yJZVed2g==}
@@ -840,9 +823,6 @@ packages:
 
   '@mermaid-js/parser@1.2.0':
     resolution: {integrity: sha512-oYPyv8A4As1yH5Bx+04iQEQxXuIQDe0GKCNSRgao6z8AM9jixXIfP0vsppRLvGf+nKIOb9/LdpWA4YuJiVvESA==}
-
-  '@microsoft/fetch-event-source@2.0.1':
-    resolution: {integrity: sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==}
 
   '@mlc-ai/web-llm@0.2.84':
     resolution: {integrity: sha512-hrOWzK4/nGNmgoRKT8pgVmZZ2oEPpbblIWQOwpqNyvK2dysHw3KVB1gNJOuRcQfKOPhucEhX1NJzXzgMDnwSCQ==}
@@ -5723,26 +5703,8 @@ snapshots:
 
   '@dotenvx/primitives@0.8.0': {}
 
-  '@electric-sql/client@1.5.24':
-    dependencies:
-      '@microsoft/fetch-event-source': 2.0.1
-    optionalDependencies:
-      '@rollup/rollup-darwin-arm64': 4.62.2
-
-  '@electric-sql/experimental@1.0.14(@electric-sql/client@1.5.24)':
-    dependencies:
-      '@electric-sql/client': 1.5.24
-    optionalDependencies:
-      '@rollup/rollup-darwin-arm64': 4.62.2
-
   '@electric-sql/pglite-pgvector@0.0.5(@electric-sql/pglite@0.5.4)':
     dependencies:
-      '@electric-sql/pglite': 0.5.4
-
-  '@electric-sql/pglite-sync@0.4.2(@electric-sql/pglite@0.5.4)':
-    dependencies:
-      '@electric-sql/client': 1.5.24
-      '@electric-sql/experimental': 1.0.14(@electric-sql/client@1.5.24)
       '@electric-sql/pglite': 0.5.4
 
   '@electric-sql/pglite@0.5.4': {}
@@ -5986,8 +5948,6 @@ snapshots:
   '@mermaid-js/parser@1.2.0':
     dependencies:
       '@chevrotain/types': 11.1.2
-
-  '@microsoft/fetch-event-source@2.0.1': {}
 
   '@mlc-ai/web-llm@0.2.84':
     dependencies:

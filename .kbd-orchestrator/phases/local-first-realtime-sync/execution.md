@@ -85,7 +85,7 @@ PROGRESS LEDGER
 - [DONE] c122-partial-replication-slice — SELF (archived 2026-07-18; QA: compensating verification, refiner unavailable)
 - [DONE] c123-client-rag-slice — SELF (archived 2026-07-18; QA: compensating verification)
 - [DONE] c124-peer-profile-vault — SELF (archived 2026-07-18; QA: compensating verification)
-- [PENDING] c125-scaffold-audit-propagation — SELF
+- [DONE] c125-scaffold-audit-propagation — SELF (archived 2026-07-18)
 
 OUTPUTS
 

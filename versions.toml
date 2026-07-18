@@ -33,6 +33,16 @@ openspec = "1.6.0+"             # @fission-ai/openspec — never the squatted ba
 surrealdb = "3.2"               # embedded graph/vector/FTS, kv-rocksdb native / kv-indxdb wasm
 pglite_oxide = "0.5.1"          # desktop config-DB only (macOS arm64 / Win x64 / Linux x64+arm64)
 
+[sync]
+# C-125 local-first pins (references/sync/decisions.md ADR-LFS-1..5).
+pglite = "0.5.4"                # web local store (@electric-sql/pglite)
+pglite_pgvector = "0.0.5"       # pgvector for web PGlite — NOT bundled in core wasm (verified C-123)
+pglite_sync = "0.4"             # Electric read-path FALLBACK only (ADR-LFS-1: FRF/PES is the lane)
+loro_crdt = "1.13"              # the CRDT, everywhere (ADR-LFS-5; loro-crdt npm / loro crate)
+sqlite_vec = "0.1"              # mobile vector tier (SQLite + sqlite-vec; PGlite is impossible on mobile)
+flutter_webrtc = "1.4"          # Flutter WebRTC plumbing for the peer vault lane
+embedding_dim = "384"           # one dimension everywhere so vectors survive cross-device sync
+
 # Inference engines are per-lane decisions, not one global choice
 # (assessment 2026-07-16 §3.3: no documented mobile path for mistral.rs/candle;
 # the shipped mobile-LLM ecosystem runs on llama.cpp).
