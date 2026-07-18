@@ -1,0 +1,11 @@
+{
+  "stage": "spec",
+  "completedAt": "2026-07-18T07:04:05Z",
+  "outputs": [
+    "openspec/changes/prompting-guide-foundation/proposal.md"
+  ],
+  "nextStage": "plan",
+  "summaryForNext": "5 OpenSpec changes with 9 capabilities and 62 tasks; zeespec: n/a. Order foundation, harness/loops, scenarios, agent/orchestration, then publication/certification.",
+  "skipped": false,
+  "skipReason": null
+}

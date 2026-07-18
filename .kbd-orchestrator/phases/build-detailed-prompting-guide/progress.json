@@ -5,18 +5,19 @@
   "childPointer": null,
   "assessment_complete": true,
   "analysis_complete": true,
+  "spec_complete": true,
   "plan_complete": false,
   "execute_complete": false,
   "reflect_complete": false,
-  "implementation_total": 0,
+  "implementation_total": 5,
   "implementation_completed": 0,
-  "changes_total": 0,
+  "changes_total": 5,
   "changes_completed": 0,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
       "completed": 0,
-      "total": 0,
+      "total": 5,
       "status": "PENDING"
     },
     "evidence": {
@@ -35,12 +36,63 @@
       "blockers": []
     }
   },
+  "changes": [
+    {
+      "id": "prompting-guide-foundation",
+      "status": "PENDING",
+      "tasks_total": 11,
+      "tasks_done": 0,
+      "depends_on": []
+    },
+    {
+      "id": "prompting-guide-harness-loops",
+      "status": "PENDING",
+      "tasks_total": 14,
+      "tasks_done": 0,
+      "depends_on": [
+        "prompting-guide-foundation"
+      ]
+    },
+    {
+      "id": "prompting-guide-scenario-recipes",
+      "status": "PENDING",
+      "tasks_total": 13,
+      "tasks_done": 0,
+      "depends_on": [
+        "prompting-guide-foundation",
+        "prompting-guide-harness-loops"
+      ]
+    },
+    {
+      "id": "prompting-guide-agent-orchestration",
+      "status": "PENDING",
+      "tasks_total": 10,
+      "tasks_done": 0,
+      "depends_on": [
+        "prompting-guide-foundation",
+        "prompting-guide-harness-loops",
+        "prompting-guide-scenario-recipes"
+      ]
+    },
+    {
+      "id": "prompting-guide-publication-gates",
+      "status": "PENDING",
+      "tasks_total": 14,
+      "tasks_done": 0,
+      "depends_on": [
+        "prompting-guide-foundation",
+        "prompting-guide-harness-loops",
+        "prompting-guide-scenario-recipes",
+        "prompting-guide-agent-orchestration"
+      ]
+    }
+  ],
   "completed_changes": [],
   "active_change": null,
   "blocked_changes": [],
   "sourceTool": "codex",
   "createdBy": "kbd-new-phase",
   "last_updated_by": "codex",
-  "last_updated": "2026-07-18T06:46:36Z",
-  "updatedAt": "2026-07-18T06:46:36Z"
+  "last_updated": "2026-07-18T07:03:13Z",
+  "updatedAt": "2026-07-18T07:03:13Z"
 }
