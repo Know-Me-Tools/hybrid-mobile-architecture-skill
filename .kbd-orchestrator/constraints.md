@@ -1,33 +1,47 @@
 # KBD Constraints
-> Hybrid Mobile Architecture — TJ-ARCH-MOB-001
+
+> Hybrid Mobile Architecture Skill — TJ-ARCH-MOB-001
 
 ## BLOCKING (stop and refuse)
 
-- **NEVER re-implement networking, LLM interaction, inference, MCP, or agent logic in Dart or TypeScript.** These live exclusively in `gen_ui_core` (Rust). Any generated code that duplicates this in the UI layer violates the architecture invariant.
-- **NEVER create a second Tokio runtime.** One global runtime per process, initialized in `gen_ui_core/src/runtime.rs`.
-- **NEVER call `invoke()` from a React component or hook.** `invoke()` / `listen()` are allowed only inside Zustand stores.
-- **NEVER call APIs or services from a Flutter Widget directly.** All external calls go through Riverpod providers → repositories → FFI.
-- **NEVER use manual `Provider(...)` declarations in Flutter.** All providers must use `@riverpod` codegen annotations.
-- **NEVER expose the Supabase service role key to clients.** Key exchange (Kratos session → Supabase JWT) must happen inside the Rust layer.
-- **NEVER skip a step in the 7-step ContentBlock guide** (`references/rust/new-block-type.md`). Skipping steps causes compile-time errors by design; do not work around them.
-- **NEVER create feature-to-feature direct imports.** Cross-feature dependencies go through `app/` or `shared/` only.
-- **NEVER use `any` types in TypeScript** unless explicitly justified in a comment.
-- **NEVER generate or modify files inside `docs/tj-arch-mob-001.html` or `docs/gen_ui_spec.html`** — these are canonical reference documents, not working files.
+- **NEVER re-implement networking, LLM interaction, inference, MCP, agent logic, or persistence in Dart or TypeScript.** These capabilities live in the shared Rust application layer. UI surfaces use typed FFI, Tauri, or WASM adapters.
+- **NEVER create a second Tokio runtime.** Use one global runtime per process. Run CPU-heavy GGUF loading, inference, and similar work through `spawn_blocking`.
+- **NEVER import a Zustand store or call `invoke()` directly from a React visual component.** React follows Component → Hook → Store → Rust/external API.
+- **NEVER call APIs, services, or FFI directly from a Flutter widget.** Flutter follows Widget → generated Riverpod provider → Repository/Service → Rust FFI.
+- **NEVER use manual `Provider(...)` declarations in Flutter.** Use `@riverpod` code generation exclusively.
+- **NEVER introduce TanStack Query.** Use `@prometheus-ags/prometheus-entity-management` 3.x for React server, async, and normalized entity state; Zustand owns transient client UI state.
+- **NEVER expose service credentials, BYOK values, private keys, tokens, or passwords to client bundles or committed configuration.** Use environment references, platform keychains, vaults, or cloud secret managers.
+- **NEVER skip a step in the seven-step ContentBlock guide** at `references/rust/new-block-type.md`. Do not add a fallback that hides a missing variant.
+- **NEVER create direct feature-to-feature dependencies.** Cross-feature behavior goes through `app/`, `shared/`, or explicit domain interfaces.
+- **NEVER use implicit or unjustified `any` in TypeScript.** Prefer generated types, discriminated unions, and exhaustive checks.
+- **NEVER set `panic = "abort"` on Flutter FFI release profiles.** It prevents flutter_rust_bridge from converting Rust panics and terminates the process.
+- **NEVER edit generated reference HTML directly**, including `docs/tj-arch-mob-001.html` and `docs/gen_ui_spec.html`. Update the source or generation pipeline.
+- **NEVER delete, reset, overwrite, or revert unrelated dirty work.** Preserve user changes and use recoverable operations for material cleanup.
+- **NEVER weaken, delete, or ignore a failing acceptance test to claim success.** After two repetitions of the same failed approach, stop and reassess.
 
-## WARNING (flag and confirm before proceeding)
+## WARNING (flag and verify)
 
-- **Adding a new dependency to scaffold templates** — verify it does not conflict with existing workspace deps and that it is the current stable version.
-- **Changing state management patterns** — any deviation from Riverpod (Flutter) or Zustand+TanStack (React) requires explicit justification against TJ-ARCH-MOB-001.
-- **Modifying `scripts/`** — scaffolding scripts are consumed by downstream projects; changes must be backward-compatible or versioned.
-- **Touching `plugin.json` or `marketplace.json`** — these are published marketplace artifacts; changes require a version bump.
-- **Placing business logic in a UI component** — flag as an architectural violation even if the change appears to "work."
-- **Changing the ContentBlock discriminated union** — requires all 7 steps across Rust + Dart/TypeScript; partial changes leave the codebase in a broken state.
+- **Adding or updating dependencies** — verify the current supported version, platform compatibility, license, and responsible scaffold/template.
+- **Changing state management** — Flutter uses Riverpod codegen; React uses Prometheus Entity Management 3.x plus Zustand. Any deviation requires an explicit architectural decision.
+- **Modifying `scripts/`, `assets/templates/`, or `templates/project-skills/`** — downstream projects consume these outputs; propagate fixes to the responsible generator and exercise a scratch scaffold.
+- **Placing business logic in UI code** — treat this as an architectural violation even if the feature appears to work.
+- **Changing ContentBlock or protocol contracts** — update Rust, Dart/FRB, TypeScript, Flutter, React, persistence, and public-boundary verification together.
+- **Changing published plugin or marketplace metadata** — bump the package version, validate both Claude and Codex manifests, and test clean marketplace installation.
+- **Calling an application “working”** — require a clean-checkout install/build, a real launch, persistence proof, and one public-boundary workflow via `hybrid-runtime-verification`.
+- **React UI construction** — prefer Shadcn UI components and Assistant UI for chat behavior; preserve the borderless Flat 2.0 light/dark design contract.
+- **Flutter UI construction** — preserve matching KnowMe tokens, chat bubbles, semantic behavior, and light/dark parity using the Flutter UI skills.
 
 ## STYLE / CONVENTION
 
-- All generated files must begin with `// TJ-ARCH-MOB-001 compliant`.
-- Feature directories follow `data/ → domain/ → presentation/` layering; no deviation.
-- Rust: run `cargo fmt` and `cargo clippy -- -D warnings` mentally before outputting generated code.
-- Flutter: follow `flutter_lints` rules; no wildcard imports.
-- React: follow ESLint config from `references/tauri/eslint-config.md`; strict TypeScript.
-- Commit messages follow conventional commits format (`feat:`, `fix:`, `docs:`, `chore:`, etc.).
+- Generated source files include the `TJ-ARCH-MOB-001 compliant` marker in the target language's comment syntax.
+- Flutter features use `data/domain/presentation`; React features use `api/stores/queries/hooks/components` with visual components importing hooks only.
+- Rust inner-loop verification uses one clippy pass rather than alternating `cargo check` and clippy caches.
+- Features are completed and exercised once before adding 3–5 public-boundary behavior tests; do not mock internal implementation.
+- Commit messages follow conventional commit prefixes such as `feat:`, `fix:`, `docs:`, and `chore:`.
+- Project and private Karpathy records capture verified decisions and failures without credentials or raw private conversation content.
+
+## WORKFLOW TRIGGERS
+
+- On iteration completion, run the configured build-health command when the changed scope affects the documentation site.
+- On deployment-catalog changes, run the configured lint command.
+- Before archiving an application change, run the relevant architecture audit and `hybrid-runtime-verification` public boundary.

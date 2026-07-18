@@ -1,22 +1,17 @@
 {
-  "name": "Hybrid Mobile Architecture",
-  "description": "Skill package and reference library for TJ-ARCH-MOB-001 — scaffolding scripts, reference documents, and templates for building Flutter+Rust FFI mobile and Tauri+React 19 desktop applications sharing a single gen_ui_core Rust crate.",
+  "name": "Hybrid Mobile Architecture Skill",
+  "description": "An agentskills.io skill package for TJ-ARCH-MOB-001 that provides scaffolding scripts, reference documentation, and templates for Flutter/Rust mobile, Tauri/React desktop, React/Axum web, and shared Rust agent runtimes.",
   "active_phase": "phase-codegen-and-ci-verification",
-  "focus_project_path": "~/Projects/hybrid-mobile-architecture-src",
+  "focus_project_path": "/Users/gqadonis/Projects/hybrid-mobile-architecture-src",
   "spec_paths": [
-    "openspec/specs/*.md",
-    "references/arch-standard.md",
-    "references/flutter/patterns.md",
-    "references/tauri/patterns.md",
-    "references/rust/patterns.md",
-    "references/auth/patterns.md"
+    "openspec/specs/*.md"
   ],
   "openspec_available": true,
   "constraint_file": ".kbd-orchestrator/constraints.md",
-  "build_health_command": "bash scripts/check-env.sh",
+  "build_health_command": "npm --prefix site run build",
   "test_command": null,
-  "lint_command": null,
-  "dev_command": null,
+  "lint_command": "bash deploy/scripts/validate-catalog.sh && bash deploy/scripts/validate-gitops.sh",
+  "dev_command": "npm --prefix site run start",
   "preferred_planning_agent": "antigravity",
   "preferred_execution_agents": [],
   "agents_config": {
@@ -25,22 +20,25 @@
       "command_dir": ".claude/commands"
     },
     "codex": {
-      "skill_dir": ".codex/skills"
+      "skill_dir": ".agents/skills",
+      "generated_skill_dir": ".codex/skills"
     },
     "opencode": {
       "skill_dir": ".opencode/skills",
       "command_dir": ".opencode/commands"
     },
     "kimi": {
-      "skill_dir": ".kimi/skills"
+      "skill_dir": ".kimi-code/skills",
+      "generated_skill_dir": ".kimi/skills"
     }
   },
   "workspace": {
     "workspace_file": null,
     "folders": [
       {
-        "path": "~/Projects/hybrid-mobile-architecture-src",
+        "path": "/Users/gqadonis/Projects/hybrid-mobile-architecture-src",
         "role": "focus",
+        "purpose": "Active skill package and KnowMe reference workspace — all KBD writes target this repository",
         "write_access": true
       }
     ]
