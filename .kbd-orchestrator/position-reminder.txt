@@ -1,6 +1,6 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: local-first-realtime-sync
-Step: 1 of 6
+Step: 2 of 6
 Stage: executing
-Active change: c121-local-first-skills
-Next command: /kbd-apply c121-local-first-skills
+Active change: c122-partial-replication-slice
+Next command: /kbd-apply c122-partial-replication-slice

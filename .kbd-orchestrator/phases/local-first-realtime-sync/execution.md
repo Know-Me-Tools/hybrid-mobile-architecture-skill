@@ -81,7 +81,7 @@ VERIFICATION REQUIREMENTS
 PROGRESS LEDGER
 
 - [DONE] c120-sync-doctrine-refs — SELF (archived 2026-07-18; QA skipped: docs-only)
-- [PENDING] c121-local-first-skills — SELF
+- [DONE] c121-local-first-skills — SELF (archived 2026-07-18; QA skipped: skill-content-only)
 - [PENDING] c122-partial-replication-slice — SELF
 - [PENDING] c123-client-rag-slice — SELF
 - [PENDING] c124-peer-profile-vault — SELF

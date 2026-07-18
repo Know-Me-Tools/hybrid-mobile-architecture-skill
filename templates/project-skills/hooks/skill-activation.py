@@ -89,6 +89,32 @@ SKILLS = {
         "model routing", "autonomous development", "agent creator", "skill creator",
         "claude desktop", "saas product", "business ideation", "native agent",
     ],
+    "sync-doctrine": [
+        "sync", "replication", "offline", "local-first", "local first",
+        "realtime", "subscription", "write queue", "conflict", "lww", "bucket",
+        "shape", "sync scope", "lookup data", "reference data", "metatype",
+        "seed data", "onboarding load", "initial load", "hydration", "boot order",
+        "syncchip", "electricsql", "sync engine",
+    ],
+    "pem-local-first": [
+        "entity", "entities", "pem", "entity transport", "registerentitytransport",
+        "useentities", "entity graph", "tanstack query", "react-query", "swr",
+        "query cache", "stale-while-revalidate", "optimistic update", "pglite",
+        "pglite-oxide", "persistence adapter", "durable conversation",
+        "conversation store", "normalized state",
+    ],
+    "client-rag": [
+        "rag", "retrieval", "vector", "embedding", "embed", "semantic search",
+        "similarity", "pgvector", "sqlite-vec", "hnsw", "fastembed",
+        "search chat history", "search conversations", "agent memory", "recall",
+        "bm25", "hybrid search", "rerank", "knowledge base",
+    ],
+    "peer-profile-sync": [
+        "profile", "personal data", "sensitive data", "pii", "vault", "privacy",
+        "private data", "device sync", "device-to-device", "peer sync", "webrtc",
+        "datachannel", "pairing", "pair device", "multi-device", "crdt", "loro",
+        "version vector", "local only", "never store",
+    ],
 }
 
 

@@ -10,11 +10,11 @@
   "implementation_total": 0,
   "implementation_completed": 0,
   "changes_total": 0,
-  "changes_completed": 1,
+  "changes_completed": 2,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 1,
+      "completed": 2,
       "total": 6,
       "status": "PENDING"
     },
@@ -41,11 +41,15 @@
   "createdBy": "kbd-new-phase",
   "updatedAt": "2026-07-18T09:08:47Z",
   "last_updated_by": "claude-code",
-  "last_updated": "2026-07-18T10:05:00Z",
+  "last_updated": "2026-07-18T10:20:00Z",
   "qa": {
     "c120-sync-doctrine-refs": {
       "artifact_refiner": "SKIPPED",
       "reason": "documentation-only change (per kbd-execute QA skip rules)"
+    },
+    "c121-local-first-skills": {
+      "artifact_refiner": "SKIPPED",
+      "reason": "documentation/skill-content-only change"
     }
   }
 }

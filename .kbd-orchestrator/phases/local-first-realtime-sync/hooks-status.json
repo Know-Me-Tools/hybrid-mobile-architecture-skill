@@ -1,1 +1,1 @@
-{"totalRuns":43,"failedRuns":0,"lastRun":{"ts":"2026-07-18T09:47:39Z","kind":"task","edge":"after","name":"c120-sync-doctrine-refs:6","hookId":"legacy-change-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}
+{"totalRuns":68,"failedRuns":0,"lastRun":{"ts":"2026-07-18T09:56:13Z","kind":"task","edge":"after","name":"c121-local-first-skills:6","hookId":"legacy-change-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}

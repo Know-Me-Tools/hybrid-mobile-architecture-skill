@@ -1,22 +1,22 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T09:47:35Z",
+  "updatedAt": "2026-07-18T09:56:09Z",
   "cursor": [
     "local-first-realtime-sync",
-    "c120-sync-doctrine-refs"
+    "c121-local-first-skills"
   ],
   "root": {
     "type": "phase",
     "id": "local-first-realtime-sync",
     "status": "executing",
     "progress": {
-      "done": 0,
+      "done": 1,
       "total": 6
     },
     "children": [
       {
         "type": "change",
-        "id": "c120-sync-doctrine-refs",
+        "id": "c121-local-first-skills",
         "status": "PENDING",
         "progress": {
           "done": 0,
