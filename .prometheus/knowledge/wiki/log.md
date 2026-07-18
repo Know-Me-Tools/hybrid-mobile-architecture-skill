@@ -1,6 +1,7 @@
 # Update Log
 
 ## 2026-07-18
+* **Creation**: [Empty Source Document](/empty-source-document.md)
 * **Creation**: [Local-first realtime sync execute-ready with doctrine refs pending](/local-first-realtime-sync-execute-ready-with-doctrine-refs-pending.md)
 * **Creation**: [Local-first realtime sync executor completed with unknown change](/local-first-realtime-sync-executor-completed-with-unknown-change.md)
 * **Creation**: [Local-first sync assessment finds unused CRDT and PGlite sync deps](/local-first-sync-assessment-finds-unused-crdt-and-pglite-sync-deps.md)

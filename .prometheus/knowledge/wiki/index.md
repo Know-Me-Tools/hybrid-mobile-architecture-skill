@@ -111,6 +111,7 @@
 * [Deployment catalog edge routing and TLS verification](/karpathy-progress-20260718T034621Z-deployment-edge-verification.md)
 * [Deployment catalog implementation started](/karpathy-progress-20260718T021030Z-deployment-catalog.md)
 * [Diagnosing Claude Code model list restrictions without managed settings](/diagnosing-claude-code-model-list-restrictions-without-managed-settings.md)
+* [Empty Source Document](/empty-source-document.md)
 * [EntityRecord dataJson is a schema-agnostic JSON string envelope](/entityrecord-datajson-is-a-schema-agnostic-json-string-envelope.md)
 * [Executor scaffold-full-hybrid-project completed with unknown change](/executor-scaffold-full-hybrid-project-completed-with-unknown-change.md)
 * [First-run Flutter local chat completed end to end](/karpathy-progress-20260717T233336Z-mobile-local-chat.md)

@@ -1,5 +1,4 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: local-first-realtime-sync
-Step: 6 of 6
-Stage: reflect_ready
-Next command: /kbd-reflect local-first-realtime-sync
+Stage: phase_complete
+Next command: /kbd-next-phase (seeds pem-sync-bridge-and-mobile-tier from reflection.md) — awaiting user decision
