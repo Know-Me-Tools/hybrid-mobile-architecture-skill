@@ -251,6 +251,12 @@ impl SyncSettings {
             consumer_id: self.consumer_id,
             write_batch: 32,
             max_write_attempts: 5,
+            // C-124: declare the server-syncable tables (mirrors PgLocalStore's
+            // SYNCED_TABLES allow-list); everything else is Local and the write
+            // queue refuses it at enqueue (fail closed).
+            privacy: gen_ui_types::sync::PrivacyRegistry::default()
+                .declare("notes", gen_ui_types::sync::PrivacyClass::Trusted)
+                .declare("memories", gen_ui_types::sync::PrivacyClass::Trusted),
         }
     }
 }

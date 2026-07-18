@@ -1,6 +1,6 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: local-first-realtime-sync
-Step: 4 of 6
+Step: 5 of 6
 Stage: executing
-Active change: c124-peer-profile-vault
-Next command: /kbd-apply c124-peer-profile-vault
+Active change: c125-scaffold-audit-propagation
+Next command: /kbd-apply c125-scaffold-audit-propagation

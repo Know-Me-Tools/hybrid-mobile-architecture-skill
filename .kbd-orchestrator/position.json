@@ -1,22 +1,22 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T10:41:43Z",
+  "updatedAt": "2026-07-18T11:02:23Z",
   "cursor": [
     "local-first-realtime-sync",
-    "c123-client-rag-slice"
+    "c124-peer-profile-vault"
   ],
   "root": {
     "type": "phase",
     "id": "local-first-realtime-sync",
     "status": "executing",
     "progress": {
-      "done": 3,
+      "done": 4,
       "total": 6
     },
     "children": [
       {
         "type": "change",
-        "id": "c123-client-rag-slice",
+        "id": "c124-peer-profile-vault",
         "status": "PENDING",
         "progress": {
           "done": 0,

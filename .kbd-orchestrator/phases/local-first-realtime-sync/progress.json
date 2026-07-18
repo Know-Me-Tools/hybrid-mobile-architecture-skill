@@ -10,11 +10,11 @@
   "implementation_total": 0,
   "implementation_completed": 0,
   "changes_total": 0,
-  "changes_completed": 4,
+  "changes_completed": 5,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 4,
+      "completed": 5,
       "total": 6,
       "status": "PENDING"
     },
@@ -41,7 +41,7 @@
   "createdBy": "kbd-new-phase",
   "updatedAt": "2026-07-18T09:08:47Z",
   "last_updated_by": "claude-code",
-  "last_updated": "2026-07-18T11:40:00Z",
+  "last_updated": "2026-07-18T12:20:00Z",
   "qa": {
     "c120-sync-doctrine-refs": {
       "artifact_refiner": "SKIPPED",
@@ -58,6 +58,15 @@
     "c123-client-rag-slice": {
       "artifact_refiner": "UNAVAILABLE",
       "compensating_verification": "clippy 0 warnings; 30 Rust tests green (engine ordering/dedup/budget, dim discipline); desktop tsc clean + 10 vitest green; pgvector empirically verified in PGlite 0.5.4 incl. HNSW"
+    },
+    "c124-peer-profile-vault": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "Rust: privacy-gate refusal test + full suite green, workspace check clean; TS: tsc clean, 13 vitest green incl. two-peer convergence, out-of-order chunk reassembly, PGlite persistence round-trip"
     }
-  }
+  },
+  "deferred": [
+    "native webrtc-rs lane in gen_ui_core (web/Tauri-webview lane shipped; native mobile lane follows OD-2c)",
+    "FRF SignalService production signaling swap",
+    "vault-scoped local-only vector index implementation"
+  ]
 }

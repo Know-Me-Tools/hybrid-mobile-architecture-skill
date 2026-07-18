@@ -30,6 +30,40 @@ pub enum ScopeKind {
 /// The tenant-binding parameter every `UserSubset` scope must carry.
 pub const SCOPE_TENANT_PARAM: &str = "sub";
 
+/// Privacy class of an entity table (`references/sync/peer-crdt.md`). `Local`
+/// data is structurally excluded from every server sync path — the write queue
+/// refuses it at enqueue. Unknown tables classify as `Local` (fail closed).
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum PrivacyClass {
+    Public,
+    Trusted,
+    Local,
+}
+
+/// Table → privacy-class declarations. Apps declare every server-syncable
+/// table explicitly; anything undeclared is `Local` and never enqueues
+/// (LFS-INV-4 — the fail-closed default is the security property).
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct PrivacyRegistry {
+    classes: BTreeMap<String, PrivacyClass>,
+}
+
+impl PrivacyRegistry {
+    #[must_use]
+    pub fn declare(mut self, table: impl Into<String>, class: PrivacyClass) -> Self {
+        self.classes.insert(table.into(), class);
+        self
+    }
+
+    pub fn classify(&self, table: &str) -> PrivacyClass {
+        self.classes
+            .get(table)
+            .copied()
+            .unwrap_or(PrivacyClass::Local)
+    }
+}
+
 /// A declared unit of partial replication (bucket descriptor). See
 /// `references/sync/partial-replication.md` — the device never mirrors the
 /// server database; it attaches scopes.

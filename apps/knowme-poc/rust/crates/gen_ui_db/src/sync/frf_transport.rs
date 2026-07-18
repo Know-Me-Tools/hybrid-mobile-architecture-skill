@@ -49,6 +49,9 @@ pub struct FrfSyncConfig {
     pub write_batch: usize,
     /// Failed replays before a write is quarantined as poison.
     pub max_write_attempts: u32,
+    /// Table → privacy-class declarations (C-124); undeclared tables are
+    /// `Local` and the write queue refuses them (fail closed, LFS-INV-4).
+    pub privacy: gen_ui_types::sync::PrivacyRegistry,
 }
 
 /// One decoded CDC row change as it appears in an `EventEnvelope.payload`.
@@ -139,6 +142,7 @@ impl FrfSyncTransport {
             shapes: Vec::new(),
             write_batch: cfg.write_batch,
             max_write_attempts: cfg.max_write_attempts,
+            privacy: cfg.privacy.clone(),
         };
         let queue = Arc::new(WriteQueue::new(&queue_cfg, sink, status.clone()));
         Self {
@@ -223,7 +227,7 @@ impl SyncTransport for FrfSyncTransport {
                 change_json: change_json.to_string(),
                 attempts: 0,
             })
-            .await;
+            .await?;
         Ok(())
     }
 
@@ -318,6 +322,8 @@ mod tests {
             consumer_id: "test".into(),
             write_batch: 8,
             max_write_attempts: 3,
+            privacy: gen_ui_types::sync::PrivacyRegistry::default()
+                .declare("notes", gen_ui_types::sync::PrivacyClass::Trusted),
         };
         let t = FrfSyncTransport::new(
             cfg,
