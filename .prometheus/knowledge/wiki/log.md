@@ -1,6 +1,8 @@
 # Update Log
 
 ## 2026-07-18
+* **Creation**: [Build detailed prompting guide executor completed with unknown change](/build-detailed-prompting-guide-executor-completed-with-unknown-change.md)
+* **Creation**: [Detailed prompting guide build session completed with no changes](/detailed-prompting-guide-build-session-completed-with-no-changes.md)
 * **Creation**: [Prompting publication gates archived through kbd-apply](/karpathy-progress-20260718T114700Z-prompting-publication-gates-archived.md)
 
 ## 2026-07-13
