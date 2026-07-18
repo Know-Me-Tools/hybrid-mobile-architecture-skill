@@ -1,0 +1,53 @@
+{
+  "id": "harness-zed",
+  "name": "Zed",
+  "verified_at": "2026-07-18",
+  "freshness_days": 45,
+  "official_sources": [
+    {
+      "id": "zed-ai-overview",
+      "url": "https://zed.dev/docs/ai/overview",
+      "accessed_at": "2026-07-18",
+      "supports": ["instruction_discovery", "plan_build_critic", "interruption_resume"]
+    },
+    {
+      "id": "zed-external-agents",
+      "url": "https://zed.dev/docs/ai/external-agents",
+      "accessed_at": "2026-07-18",
+      "supports": ["skills_plugins", "handoff_examples"]
+    },
+    {
+      "id": "zed-mcp",
+      "url": "https://zed.dev/docs/ai/mcp",
+      "accessed_at": "2026-07-18",
+      "supports": ["mcp_configuration"]
+    },
+    {
+      "id": "zed-acp",
+      "url": "https://zed.dev/acp",
+      "accessed_at": "2026-07-18",
+      "supports": ["handoff_examples"]
+    }
+  ],
+  "required_sections": [
+    "installation_version_checks",
+    "instruction_discovery",
+    "skills_plugins",
+    "mcp_configuration",
+    "permissions",
+    "plan_build_critic",
+    "autonomous_budgets",
+    "evidence_capture",
+    "interruption_resume",
+    "handoff_examples"
+  ],
+  "instruction_sources": ["project files", "Zed agent context", "ACP agent instructions"],
+  "skills": ["native Zed agent skills when supported", "ACP agent skills", "terminal-thread CLI skills"],
+  "mcp": "Use Zed MCP settings for native agents and the external agent's own MCP configuration for ACP agents.",
+  "permissions": "Distinguish native Zed tool permissions from ACP or terminal-thread tool permissions.",
+  "autonomy": "Use Zed Agent Panel, ACP external agents, or terminal threads deliberately; do not mix their guarantees.",
+  "evidence_capture": "Use Zed review surfaces, terminal logs, screenshots, and KBD artifacts.",
+  "handoff": "Move between native, ACP, and terminal paths through repository artifacts, not UI memory.",
+  "recovery": "If a capability exists only in one Zed path, switch paths explicitly and record the reason.",
+  "public_boundary_verification": "Use the running app, rendered route, command, or package output as completion evidence."
+}

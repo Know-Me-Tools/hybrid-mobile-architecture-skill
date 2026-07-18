@@ -1,0 +1,29 @@
+{
+  "id": "scenario-full-stack-automation",
+  "title": "Full-stack automation product",
+  "scenario": "Build a Hands-style automation product with workflow state, approval checkpoints, resumability, replay, AG-UI events, artifacts, destructive-action controls, and operator verification.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-antigravity", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "content-block-ui", "deploy-hybrid-agentic-stack", "hybrid-runtime-verification", "a11y-gate", "karpathy-progress-memory", "external:workflow-agent-design"],
+  "recommended_roles": ["role-frontier-architect", "role-balanced-producer", "role-research-synthesizer", "role-independent-critic"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research", "authority-external-publish"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-validation-report", "artifact-karpathy-memory"],
+  "evidence": ["evidence-public-boundary", "evidence-clean-checkout", "evidence-independent-critic", "evidence-karpathy-record"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint", "recovery-clean-checkout-repro"],
+  "termination": "Stop only when one real workflow pauses for approval, resumes, emits inspectable AG-UI events, produces an artifact, blocks or confirms destructive actions, and can be replayed from durable state.",
+  "prompts": {
+    "prerequisites": "Verify a typed workflow domain, explicit tool authority model, durable event store, operator UI, artifact storage path, and at least one real safe workflow target.",
+    "discovery": "Read project architecture, agent runtime docs, ContentBlock/AG-UI contracts, tool permission rules, deployment constraints, and current workflow/event storage.",
+    "feynman": "Explain the workflow state machine, approval boundary, replay model, and how AG-UI events represent progress, citations, thinking, artifacts, tool calls, approvals, and errors.",
+    "kbd_assess": "Assess workflow personas, safe/destructive actions, resumability, replay, artifact evidence, operator controls, permissions, and failure handling.",
+    "kbd_analyze": "Analyze existing agent runtime, event model, persistence layer, UI event rendering, scheduler, approval storage, and deployment profile.",
+    "kbd_spec": "Specify workflow states, event types, approval gates, destructive checkpoints, artifact references, replay API, operator UI, and public workflow proof.",
+    "kbd_plan": "Plan domain state first, then event persistence/projection, approval policy, UI event timeline, artifact handling, replay, runtime verification, critic, and retention.",
+    "research": "Confirm current AG-UI/ContentBlock, workflow, artifact, and deployment APIs from official or local source before designing the workflow protocol.",
+    "implementation": "Implement one bounded workflow slice. Make destructive actions impossible without explicit approval. Persist every decision and event needed to replay the workflow.",
+    "public_boundary_verification": "Run one real workflow that pauses for approval, denies or confirms a destructive action, resumes, emits visible events, produces an artifact, and reconstructs from replay.",
+    "independent_critic": "Verify the event log is complete, approvals are enforceable, destructive actions cannot bypass checkpoints, artifacts are durable, and replay matches the original run.",
+    "reflection_retention": "Record workflow failures, missing event types, approval UX lessons, replay evidence, and skill/template improvements.",
+    "recovery": "If replay or approval enforcement fails twice, stop and return to the state-machine spec before adding more workflows.",
+    "stop_conditions": "Stop for missing authority model, unbounded tool access, unreplayable events, destructive action ambiguity, artifact loss, or simulated-only workflow proof."
+  }
+}

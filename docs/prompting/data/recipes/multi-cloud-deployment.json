@@ -1,0 +1,29 @@
+{
+  "id": "scenario-multi-cloud-deployment",
+  "title": "Source-built multi-cloud deployment",
+  "scenario": "Build from pinned source locks into attested images, promote immutable digests, run Compose/CNPG locally, and render GitOps-ready GKE/AKS/EKS manifests with NGINX, Traefik, and Envoy Gateway ingress options plus wildcard and Let's Encrypt TLS examples.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "deploy-hybrid-agentic-stack", "hybrid-runtime-verification", "karpathy-progress-memory", "external:argocd-multicloud"],
+  "recommended_roles": ["role-frontier-architect", "role-balanced-producer", "role-research-synthesizer", "role-independent-critic"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research", "authority-external-publish"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-validation-report", "artifact-karpathy-memory"],
+  "evidence": ["evidence-official-source", "evidence-public-boundary", "evidence-clean-checkout", "evidence-independent-critic", "evidence-karpathy-record"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint", "recovery-clean-checkout-repro"],
+  "termination": "Stop only when locks reject floating refs, images build from pinned sources, SBOM/provenance exists, Compose profiles are ready, CNPG catalogs render, GKE/AKS/EKS overlays render with NGINX/Traefik/Envoy options and TLS examples, and CI contains no direct deployment commands.",
+  "prompts": {
+    "prerequisites": "Verify source repositories, full commit SHAs, GHCR ownership, cloud registry targets, OIDC trust, external GitOps repository, BuildKit/buildx, Kustomize, Compose, and CNPG version.",
+    "discovery": "Read deployment catalog docs, Docker/BuildKit source context docs, GitHub attestations docs, CNPG docs, Kustomize overlays, ingress/gateway docs, cert-manager/certbot notes, and TJ-CICD-001 ownership.",
+    "feynman": "Explain the split between reproducible image build, digest publication, GitOps promotion, ArgoCD reconciliation, and Terraform-owned infrastructure.",
+    "kbd_assess": "Assess image inventory, third-party digests, Compose profiles, Kubernetes services, cloud overlays, ingress/gateway options, TLS methods, CI authority, and smoke tests.",
+    "kbd_analyze": "Analyze current deploy catalog, Dockerfiles, docker-bake graph, lock files, Compose profiles, CNPG catalog, Kustomize overlays, GitHub Actions, and no-direct-deploy checks.",
+    "kbd_spec": "Specify pinned locks, BuildKit contexts, SBOM/provenance, GHCR digests, cloud mirrors, Compose profiles, CNPG catalogs, GKE/AKS/EKS overlays, NGINX/Traefik/Envoy examples, wildcard and Let's Encrypt TLS, and direct-deploy prohibition.",
+    "kbd_plan": "Plan lock validation first, then local builds, Compose readiness, Kustomize rendering, ingress/gateway/TLS variants, CI attestations, promotion PR, critic, and retention.",
+    "research": "Use official Docker, GitHub Actions attestations, CNPG, Kubernetes Kustomize, NGINX Ingress, Traefik, Envoy Gateway, cert-manager, Let's Encrypt, and cloud identity docs with access dates.",
+    "implementation": "Implement catalog changes without copying upstream source. Use pinned Git contexts or source locks. Keep CI publishing digests and opening GitOps promotions; do not run kubectl apply, helm upgrade, or ArgoCD sync.",
+    "public_boundary_verification": "Validate lock schemas, build amd64 images, render Compose profiles, query readiness, render all GKE/AKS/EKS overlays, scan for inline secrets and direct deploy commands, and verify ingress/gateway/TLS examples compile.",
+    "independent_critic": "Review pinning, digest use, SBOM/provenance, Compose readiness, CNPG version alignment, cloud overlay separation, NGINX/Traefik/Envoy coverage, TLS examples, and CI authority boundaries.",
+    "reflection_retention": "Record deferred native-architecture builds, lock gaps, ingress/TLS lessons, CI authority decisions, and proof commands in Karpathy memory.",
+    "recovery": "If a source cannot build reproducibly on the current machine, mark the build target deferred with architecture/toolchain reason and preserve all locks/docs for the native builder.",
+    "stop_conditions": "Stop for floating refs, missing digests, unpinned third-party images, inline secrets, direct deployment commands, non-rendering overlays, unsupported PG extension claims, or missing TLS option coverage."
+  }
+}

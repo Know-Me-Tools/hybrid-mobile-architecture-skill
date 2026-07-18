@@ -1,0 +1,29 @@
+{
+  "id": "scenario-ideation-studio",
+  "title": "Business ideation and validation studio",
+  "scenario": "Build a business ideation studio that uses Feynman loops, falsification, counter-evidence, experiment design, scoring, decision journals, Karpathy retention, skill thresholds, and critic review.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-antigravity", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "karpathy-progress-memory", "external:deep-research", "external:product-discovery"],
+  "recommended_roles": ["role-research-synthesizer", "role-frontier-architect", "role-balanced-producer", "role-independent-critic"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-validation-report", "artifact-karpathy-memory"],
+  "evidence": ["evidence-official-source", "evidence-public-boundary", "evidence-independent-critic", "evidence-karpathy-record"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint"],
+  "termination": "Stop only when the idea has falsifiable assumptions, counter-evidence, experiment plan, scoring rubric, decision journal, critic review, and retained lessons; generated enthusiasm is not evidence.",
+  "prompts": {
+    "prerequisites": "Verify target market, customer/job hypothesis, evidence-quality rubric, source policy, experiment budget, and decision owner.",
+    "discovery": "Read existing product notes, market constraints, research sources, Feynman loop guide, Karpathy retention rules, and any business-domain source material.",
+    "feynman": "Explain the customer, job-to-be-done, painful alternative, adoption trigger, buyer, channel, and evidence needed to disprove the idea.",
+    "kbd_assess": "Assess assumptions, target users, risks, counter-evidence, experiment budget, success thresholds, and decision timing.",
+    "kbd_analyze": "Analyze market sources, comparable products, contrary evidence, user segments, pricing constraints, distribution channels, and legal/ethical constraints.",
+    "kbd_spec": "Specify assumption ledger, falsification tests, experiment cards, scoring rubric, decision journal, research source registry, and retention policy.",
+    "kbd_plan": "Plan learning work before build work: Feynman gaps, research, interview/smoke tests, prototype threshold, critic review, and retention.",
+    "research": "Use primary sources where possible, label vendor/marketing claims, seek disconfirming evidence first, and record access dates.",
+    "implementation": "Build only the minimum prototype or research artifact needed to test the highest-risk assumption. Do not expand product scope until the evidence threshold is met.",
+    "public_boundary_verification": "Run the selected experiment, collect evidence, score the result, update the decision journal, and show what decision the evidence supports.",
+    "independent_critic": "Challenge the idea, evidence quality, scoring, market assumptions, customer specificity, and whether the next build step follows from evidence.",
+    "reflection_retention": "Record assumptions disproven, prompt improvements, new skill thresholds, decision rationale, and private context boundaries in Karpathy memory.",
+    "recovery": "If research becomes confirmatory or vague, rerun the Feynman loop with a falsification rubric and independent critic.",
+    "stop_conditions": "Stop for no falsifiable assumption, no counter-evidence, unsupported market claims, unclear buyer, missing scoring rubric, or evidence that fails the build threshold."
+  }
+}

@@ -1,10 +1,10 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: build-detailed-prompting-guide
-Step: 0 of 5
-Stage: execute_ready
-Next command: /kbd-execute build-detailed-prompting-guide
+Step: 5 of 5
+Stage: executing
+Next command: /kbd-reflect build-detailed-prompting-guide
 
 Required signal format (emit BEFORE any tool call):
-  Starting kbd-execute — build-detailed-prompting-guide (step 0 of 5)
+  Starting kbd-reflect — build-detailed-prompting-guide
   [do work]
-  Completed kbd-execute — build-detailed-prompting-guide (step 0 of 5)
+  Completed kbd-reflect — build-detailed-prompting-guide

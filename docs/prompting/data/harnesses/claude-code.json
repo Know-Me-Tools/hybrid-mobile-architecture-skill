@@ -1,0 +1,41 @@
+{
+  "id": "harness-claude-code",
+  "name": "Claude Code",
+  "verified_at": "2026-07-18",
+  "freshness_days": 45,
+  "official_sources": [
+    {
+      "id": "anthropic-claude-code-settings",
+      "url": "https://docs.anthropic.com/en/docs/claude-code/settings",
+      "accessed_at": "2026-07-18",
+      "supports": ["permissions", "skills_plugins", "instruction_discovery"]
+    },
+    {
+      "id": "anthropic-claude-code-sdk",
+      "url": "https://docs.anthropic.com/en/docs/claude-code/sdk",
+      "accessed_at": "2026-07-18",
+      "supports": ["autonomous_budgets", "mcp_configuration", "evidence_capture"]
+    }
+  ],
+  "required_sections": [
+    "installation_version_checks",
+    "instruction_discovery",
+    "skills_plugins",
+    "mcp_configuration",
+    "permissions",
+    "plan_build_critic",
+    "autonomous_budgets",
+    "evidence_capture",
+    "interruption_resume",
+    "handoff_examples"
+  ],
+  "instruction_sources": ["CLAUDE.md", ".claude/settings.json", ".mcp.json"],
+  "skills": [".claude/skills"],
+  "mcp": "Use project .mcp.json and configured Claude Code MCP settings.",
+  "permissions": "Use Claude Code settings and hooks to constrain tools and external side effects.",
+  "autonomy": "Headless and streaming loops require explicit wall-clock budgets, retry limits, and human checkpoints.",
+  "evidence_capture": "Use hooks, transcript output, command logs, and artifacts; retain only sanitized public synthesis.",
+  "handoff": "Handoff through KBD waypoint files, summary artifacts, and committed evidence.",
+  "recovery": "When hooks or handoffs fail, stop at the KBD gate and repair missing artifacts before continuing.",
+  "public_boundary_verification": "A Claude Code producer needs a separate critic pass and public-boundary evidence before completion."
+}

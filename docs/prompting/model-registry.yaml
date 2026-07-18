@@ -1,172 +1,475 @@
-schema_version: 1
-verified_at: "2026-07-17"
-disclaimer: "Capabilities and availability change; refresh from official sources before routing production work. Vendor benchmarks are vendor-reported."
+schema_version: 2
+verified_at: "2026-07-18"
+disclaimer: "Capabilities and availability change; refresh from official sources before routing production work. Vendor benchmarks are vendor-reported. Bare gpt-5.6 is invalid; use exact routed IDs such as gpt-5.6-sol."
+freshness_policy:
+  max_age_days: 45
+  refresh_required_before_production_routing: true
+requested_inventory:
+  - requested_label: GPT-5.6 Sol
+    canonical_model_id: gpt-5.6-sol
+    registry_status: supported_exact
+  - requested_label: GPT-5.6 Terra
+    canonical_model_id: gpt-5.6-terra
+    registry_status: supported_exact
+  - requested_label: GPT-5.6 Luna
+    canonical_model_id: gpt-5.6-luna
+    registry_status: supported_exact
+  - requested_label: Claude Sonnet 5
+    canonical_model_id: claude-sonnet-5
+    registry_status: supported_exact
+  - requested_label: Claude Opus 4.8
+    canonical_model_id: claude-opus-4-8
+    registry_status: supported_exact
+  - requested_label: Claude Fable 5
+    canonical_model_id: claude-fable-5
+    registry_status: supported_exact
+  - requested_label: Kimi K3
+    canonical_model_id: k3
+    registry_status: supported_exact
+  - requested_label: Kimi K2.7 Code
+    canonical_model_id: kimi-for-coding
+    registry_status: supported_exact
+  - requested_label: Kimi K2.6
+    canonical_model_id: kimi-k2.6
+    canonical_family: Kimi K2.6
+    registry_status: supported_family
+    evidence_gap: "Official Kimi Code docs describe K2.6 as the route used when thinking is disabled for K3 or K2.7; no standalone exact API model ID was confirmed in this audit."
+  - requested_label: MiniMax M3
+    canonical_model_id: MiniMax-M3
+    registry_status: supported_exact
+  - requested_label: Qwen 3.7 Max
+    canonical_model_id: qwen3.7-max
+    registry_status: supported_exact
+  - requested_label: Qwen 3.6 variants
+    canonical_model_id: qwen3.6-plus-or-flash
+    registry_status: supported_family
+  - requested_label: DeepSeek V4 Pro
+    canonical_model_id: deepseek-v4-pro
+    registry_status: supported_exact
+  - requested_label: DeepSeek V4 Flash
+    canonical_model_id: deepseek-v4-flash
+    registry_status: supported_exact
 models:
   - provider: OpenAI
     model_id: gpt-5.6-sol
+    model_id_kind: exact
     model_family: GPT-5.6
-    verified_at: "2026-07-17"
+    requested_aliases: [GPT-5.6 Sol]
+    verified_at: "2026-07-18"
     official_sources: [https://openai.com/index/gpt-5-6/, https://developers.openai.com/api/docs/models]
+    sources:
+      - id: openai-gpt-56-announcement
+        url: https://openai.com/index/gpt-5-6/
+        accessed_at: "2026-07-18"
+        publisher: OpenAI
+        official: true
+      - id: openai-api-models
+        url: https://developers.openai.com/api/docs/models
+        accessed_at: "2026-07-18"
+        publisher: OpenAI
+        official: true
+    claims:
+      - id: model-availability
+        summary: "Listed as an available GPT-5.6 model for frontier agentic coding work."
+        source_ids: [openai-gpt-56-announcement, openai-api-models]
+        vendor_reported: true
+        confidence: high
     context_window: 1050000
     modalities: [text, image]
     tool_use: true
-    reasoning_modes: [low, medium, high, xhigh, max, ultra]
-    recommended_roles: [architecture, cross_repository_synthesis, difficult_debugging, final_verification]
+    reasoning_modes: [none, low, medium, high, xhigh, max]
+    recommended_roles: [role-frontier-architect, role-independent-critic]
     known_constraints: [highest_cost_tier, ultra_is_harness_dependent]
     availability: generally_available
+    confidence: high
   - provider: OpenAI
     model_id: gpt-5.6-terra
+    model_id_kind: exact
     model_family: GPT-5.6
-    verified_at: "2026-07-17"
+    requested_aliases: [GPT-5.6 Terra]
+    verified_at: "2026-07-18"
     official_sources: [https://developers.openai.com/api/docs/models/gpt-5.6-terra]
+    sources:
+      - id: openai-terra-model-page
+        url: https://developers.openai.com/api/docs/models/gpt-5.6-terra
+        accessed_at: "2026-07-18"
+        publisher: OpenAI
+        official: true
+    claims:
+      - id: model-availability
+        summary: "Listed as a GPT-5.6 model suitable for implementation and review."
+        source_ids: [openai-terra-model-page]
+        vendor_reported: true
+        confidence: high
     context_window: 1050000
     modalities: [text, image]
     tool_use: true
-    reasoning_modes: [low, medium, high, xhigh, max]
-    recommended_roles: [implementation, review, balanced_agent_work]
+    reasoning_modes: [none, low, medium, high, xhigh, max]
+    recommended_roles: [role-balanced-producer]
     known_constraints: [long_inputs_have_different_pricing]
     availability: generally_available
+    confidence: high
   - provider: OpenAI
     model_id: gpt-5.6-luna
+    model_id_kind: exact
     model_family: GPT-5.6
-    verified_at: "2026-07-17"
+    requested_aliases: [GPT-5.6 Luna]
+    verified_at: "2026-07-18"
     official_sources: [https://openai.com/index/gpt-5-6/, https://developers.openai.com/api/docs/models]
+    sources:
+      - id: openai-luna-gpt-56-announcement
+        url: https://openai.com/index/gpt-5-6/
+        accessed_at: "2026-07-18"
+        publisher: OpenAI
+        official: true
+      - id: openai-luna-api-models
+        url: https://developers.openai.com/api/docs/models
+        accessed_at: "2026-07-18"
+        publisher: OpenAI
+        official: true
+    claims:
+      - id: model-availability
+        summary: "Listed as a GPT-5.6 model for lower-cost bounded transformations."
+        source_ids: [openai-luna-gpt-56-announcement, openai-luna-api-models]
+        vendor_reported: true
+        confidence: high
     context_window: 1050000
     modalities: [text, image]
     tool_use: true
-    reasoning_modes: [low, medium, high]
-    recommended_roles: [bounded_transformation, high_volume_mechanical_work]
+    reasoning_modes: [none, low, medium, high, xhigh, max]
+    recommended_roles: [role-mechanical-transformer]
     known_constraints: [not_default_for_architecture]
     availability: generally_available
+    confidence: high
   - provider: Anthropic
     model_id: claude-sonnet-5
+    model_id_kind: exact
     model_family: Claude 5
+    requested_aliases: [Claude Sonnet 5]
     verified_at: "2026-07-17"
-    official_sources: [https://www-cdn.anthropic.com/73ad94ca3c0502e75e46637cc62c8bd9532a7f2c/Claude%20Sonnet%205%20System%20Card.pdf]
-    context_window: null
+    official_sources: [https://www.anthropic.com/news/claude-sonnet-5, https://docs.anthropic.com/en/docs/about-claude/models/overview]
+    sources:
+      - id: anthropic-sonnet-5-news
+        url: https://www.anthropic.com/news/claude-sonnet-5
+        accessed_at: "2026-07-18"
+        publisher: Anthropic
+        official: true
+      - id: anthropic-models-overview
+        url: https://docs.anthropic.com/en/docs/about-claude/models/overview
+        accessed_at: "2026-07-18"
+        publisher: Anthropic
+        official: true
+    claims:
+      - id: model-availability
+        summary: "System card describes Claude Sonnet 5 behavior and constraints."
+        source_ids: [anthropic-sonnet-5-news, anthropic-models-overview]
+        vendor_reported: true
+        confidence: medium
+    context_window: 200000
     modalities: [text, image]
     tool_use: true
-    reasoning_modes: [adaptive]
-    recommended_roles: [everyday_agentic_implementation, parallel_worker]
-    known_constraints: [context_not_recorded_until_official_model_page_is_verified]
-    availability: verify_before_use
+    reasoning_modes: [low, medium, high, xhigh]
+    recommended_roles: [role-balanced-producer]
+    known_constraints: [introductory_pricing_until_2026_08_31, cyber_safeguards_enabled]
+    availability: generally_available
+    confidence: high
   - provider: Anthropic
     model_id: claude-opus-4-8
+    model_id_kind: exact
     model_family: Claude 4
-    verified_at: "2026-07-17"
+    requested_aliases: [Claude Opus 4.8]
+    verified_at: "2026-07-18"
     official_sources: [https://www.anthropic.com/news/claude-opus-4-8, https://www.anthropic.com/claude/opus]
-    context_window: 1000000
+    sources:
+      - id: anthropic-opus-48-news
+        url: https://www.anthropic.com/news/claude-opus-4-8
+        accessed_at: "2026-07-18"
+        publisher: Anthropic
+        official: true
+      - id: anthropic-opus-page
+        url: https://www.anthropic.com/claude/opus
+        accessed_at: "2026-07-18"
+        publisher: Anthropic
+        official: true
+    claims:
+      - id: model-availability
+        summary: "Published as an Opus model for long-running and difficult coding work."
+        source_ids: [anthropic-opus-48-news, anthropic-opus-page]
+        vendor_reported: true
+        confidence: high
+    context_window: 200000
     modalities: [text, image]
     tool_use: true
-    reasoning_modes: [adaptive, effort_control]
-    recommended_roles: [long_running_repository_work, difficult_coding, independent_verification]
+    reasoning_modes: [high, xhigh, max]
+    recommended_roles: [role-frontier-architect, role-independent-critic]
     known_constraints: [higher_cost]
     availability: generally_available
+    confidence: high
   - provider: Anthropic
     model_id: claude-fable-5
+    model_id_kind: exact
     model_family: Claude 5
-    verified_at: "2026-07-17"
+    requested_aliases: [Claude Fable 5]
+    verified_at: "2026-07-18"
     official_sources: [https://www.anthropic.com/claude/fable, https://www.anthropic.com/news/fable-safeguards-jailbreak-framework]
-    context_window: null
+    sources:
+      - id: anthropic-fable-page
+        url: https://www.anthropic.com/claude/fable
+        accessed_at: "2026-07-18"
+        publisher: Anthropic
+        official: true
+      - id: anthropic-fable-safeguards
+        url: https://www.anthropic.com/news/fable-safeguards-jailbreak-framework
+        accessed_at: "2026-07-18"
+        publisher: Anthropic
+        official: true
+    claims:
+      - id: model-availability
+        summary: "Published as a research and critic-capable Claude 5 model with documented safeguards."
+        source_ids: [anthropic-fable-page, anthropic-fable-safeguards]
+        vendor_reported: true
+        confidence: high
+    context_window: 200000
     modalities: [text, image]
     tool_use: true
-    reasoning_modes: [adaptive]
-    recommended_roles: [long_horizon_research, synthesis, science, critic]
-    known_constraints: [some_cyber_and_biology_requests_fallback, high_cost]
+    reasoning_modes: [high, xhigh, max]
+    recommended_roles: [role-research-synthesizer, role-independent-critic]
+    known_constraints: [some_cyber_and_biology_requests_fallback, high_cost, requires_30_day_data_retention_for_safety_monitoring]
     availability: generally_available
+    confidence: high
   - provider: Moonshot AI
     model_id: k3
+    model_id_kind: exact
     model_family: Kimi K3
-    verified_at: "2026-07-17"
-    official_sources: [https://www.kimi.com/code/docs/en/kimi-code/models.html]
+    requested_aliases: [Kimi K3]
+    verified_at: "2026-07-18"
+    official_sources: [https://www.kimi.com/code/docs/en/kimi-code/models]
+    sources:
+      - id: kimi-code-models
+        url: https://www.kimi.com/code/docs/en/kimi-code/models
+        accessed_at: "2026-07-18"
+        publisher: Moonshot AI
+        official: true
+    claims:
+      - id: model-availability
+        summary: "Listed in Kimi Code model documentation."
+        source_ids: [kimi-code-models]
+        vendor_reported: true
+        confidence: high
     context_window: 1000000
     modalities: [text, image]
     tool_use: true
     reasoning_modes: [max]
-    recommended_roles: [large_context, multimodal, swarm_coordination]
+    recommended_roles: [role-long-context-cartographer, role-multimodal-reviewer]
     known_constraints: [model_id_and_harness_availability_vary]
     availability: kimi_code
+    confidence: high
   - provider: Moonshot AI
     model_id: kimi-for-coding
+    model_id_kind: exact
     model_family: Kimi K2.7 Code
-    verified_at: "2026-07-17"
-    official_sources: [https://www.kimi.com/code/docs/en/kimi-code/models.html]
-    context_window: 262144
+    requested_aliases: [Kimi K2.7 Code]
+    verified_at: "2026-07-18"
+    official_sources: [https://www.kimi.com/code/docs/en/kimi-code/models]
+    sources:
+      - id: kimi-code-k2-models
+        url: https://www.kimi.com/code/docs/en/kimi-code/models
+        accessed_at: "2026-07-18"
+        publisher: Moonshot AI
+        official: true
+    claims:
+      - id: model-availability
+        summary: "Listed as the Kimi coding model in Kimi Code documentation."
+        source_ids: [kimi-code-k2-models]
+        vendor_reported: true
+        confidence: high
+    context_window: 256000
     modalities: [text]
     tool_use: true
     reasoning_modes: [thinking]
-    recommended_roles: [long_horizon_coding]
+    recommended_roles: [role-balanced-producer, role-long-context-cartographer]
     known_constraints: [coding_specialized]
     availability: kimi_code
+    confidence: high
   - provider: Moonshot AI
     model_id: kimi-k2.6
+    model_id_kind: family
     model_family: Kimi K2.6
-    verified_at: "2026-07-17"
-    official_sources: [https://platform.kimi.com/docs/guide/kimi-k2-6-quickstart]
+    requested_aliases: [Kimi K2.6]
+    verified_at: "2026-07-18"
+    official_sources: [https://www.kimi.com/code/docs/en/kimi-code/models]
+    sources:
+      - id: kimi-k26-routing
+        url: https://www.kimi.com/code/docs/en/kimi-code/models
+        accessed_at: "2026-07-18"
+        publisher: Moonshot AI
+        official: true
+    claims:
+      - id: model-availability
+        summary: "Kimi Code documentation says disabling thinking for K3 or K2.7 routes the request to K2.6."
+        source_ids: [kimi-k26-routing]
+        vendor_reported: true
+        confidence: medium
     context_window: 262144
-    modalities: [text, image, video]
+    modalities: [text]
     tool_use: true
     reasoning_modes: [thinking, non_thinking]
-    recommended_roles: [general_multimodal, mixed_knowledge, agent_swarm]
-    known_constraints: [vendor_benchmarks_require_independent_validation]
-    availability: api_and_kimi_code
+    recommended_roles: [role-balanced-producer, role-mechanical-transformer]
+    known_constraints: [route_behavior_not_confirmed_as_standalone_model_id]
+    availability: kimi_code_route
+    confidence: medium
   - provider: MiniMax
     model_id: MiniMax-M3
+    model_id_kind: exact
     model_family: MiniMax M3
-    verified_at: "2026-07-17"
+    requested_aliases: [MiniMax M3]
+    verified_at: "2026-07-18"
     official_sources: [https://www.minimax.io/models/text/m3, https://www.minimax.io/blog/minimax-m3]
+    sources:
+      - id: minimax-m3-page
+        url: https://www.minimax.io/models/text/m3
+        accessed_at: "2026-07-18"
+        publisher: MiniMax
+        official: true
+      - id: minimax-m3-blog
+        url: https://www.minimax.io/blog/minimax-m3
+        accessed_at: "2026-07-18"
+        publisher: MiniMax
+        official: true
+    claims:
+      - id: model-availability
+        summary: "MiniMax pages describe M3 as a long-context multimodal model."
+        source_ids: [minimax-m3-page, minimax-m3-blog]
+        vendor_reported: true
+        confidence: high
     context_window: 1000000
     modalities: [text, image, video]
     tool_use: true
     reasoning_modes: [thinking, non_thinking]
-    recommended_roles: [long_context_multimodal, producer_verifier_loop]
+    recommended_roles: [role-long-context-cartographer, role-multimodal-reviewer, role-independent-critic]
     known_constraints: [one_million_context_service_tier_dependent]
     availability: api
+    confidence: high
   - provider: Alibaba Cloud
     model_id: qwen3.7-max
+    model_id_kind: exact
     model_family: Qwen 3.7
-    verified_at: "2026-07-17"
-    official_sources: [https://modelstudio.alibabacloud.com/, https://www.alibabacloud.com/help/en/model-studio/model-pricing]
+    requested_aliases: [Qwen 3.7 Max]
+    verified_at: "2026-07-18"
+    official_sources: [https://www.alibabacloud.com/help/en/model-studio/models, https://www.alibabacloud.com/help/en/model-studio/claude-code]
+    sources:
+      - id: qwen-model-studio
+        url: https://www.alibabacloud.com/help/en/model-studio/models
+        accessed_at: "2026-07-18"
+        publisher: Alibaba Cloud
+        official: true
+      - id: qwen-pricing
+        url: https://www.alibabacloud.com/help/en/model-studio/claude-code
+        accessed_at: "2026-07-18"
+        publisher: Alibaba Cloud
+        official: true
+    claims:
+      - id: model-availability
+        summary: "Model Studio docs list Qwen3.7 family models and Claude Code examples mention qwen3.7-max; exact overview evidence remains weaker than OpenAI/Anthropic entries."
+        source_ids: [qwen-model-studio, qwen-pricing]
+        vendor_reported: true
+        confidence: low
     context_window: null
-    modalities: [text]
+    modalities: [text, image]
     tool_use: true
     reasoning_modes: [thinking]
-    recommended_roles: [high_end_reasoning, tool_workflows, sustained_execution]
-    known_constraints: [refresh_exact_context_from_model_studio_before_use]
+    recommended_roles: [role-frontier-architect, role-balanced-producer]
+    known_constraints: [exact_qwen37_max_evidence_is_configuration_example_not_primary_model_card]
     availability: model_studio
+    confidence: low
   - provider: Alibaba Cloud
     model_id: qwen3.6-plus-or-flash
+    model_id_kind: family
     model_family: Qwen 3.6
-    verified_at: "2026-07-17"
-    official_sources: [https://www.alibabacloud.com/help/en/model-studio/model-pricing]
+    requested_aliases: [Qwen 3.6 variants]
+    verified_at: "2026-07-18"
+    official_sources: [https://www.alibabacloud.com/help/en/model-studio/models, https://www.alibabacloud.com/help/en/model-studio/claude-code]
+    sources:
+      - id: qwen36-pricing
+        url: https://www.alibabacloud.com/help/en/model-studio/models
+        accessed_at: "2026-07-18"
+        publisher: Alibaba Cloud
+        official: true
+    claims:
+      - id: family-availability
+        summary: "Model Studio docs expose Qwen3.6 Plus and Claude Code examples expose qwen3.6-plus and qwen3.6-flash."
+        source_ids: [qwen36-pricing]
+        vendor_reported: true
+        confidence: low
     context_window: null
-    modalities: [text]
+    modalities: [text, image]
     tool_use: true
     reasoning_modes: [thinking, non_thinking]
-    recommended_roles: [large_codebase, cost_sensitive_work]
+    recommended_roles: [role-balanced-producer, role-mechanical-transformer]
     known_constraints: [select_and_verify_a_concrete_model_id_before_use]
     availability: model_studio
+    confidence: low
   - provider: DeepSeek
     model_id: deepseek-v4-pro
+    model_id_kind: exact
     model_family: DeepSeek V4
-    verified_at: "2026-07-17"
-    official_sources: [https://api-docs.deepseek.com/updates/, https://api-docs.deepseek.com/quick_start/pricing]
+    requested_aliases: [DeepSeek V4 Pro]
+    verified_at: "2026-07-18"
+    official_sources: [https://api-docs.deepseek.com/updates, https://api-docs.deepseek.com/quick_start/pricing/]
+    sources:
+      - id: deepseek-updates
+        url: https://api-docs.deepseek.com/updates
+        accessed_at: "2026-07-18"
+        publisher: DeepSeek
+        official: true
+      - id: deepseek-pricing
+        url: https://api-docs.deepseek.com/quick_start/pricing/
+        accessed_at: "2026-07-18"
+        publisher: DeepSeek
+        official: true
+    claims:
+      - id: model-availability
+        summary: "DeepSeek API documentation is the source for V4 naming, pricing, and availability."
+        source_ids: [deepseek-updates, deepseek-pricing]
+        vendor_reported: true
+        confidence: high
     context_window: 1000000
     modalities: [text]
     tool_use: true
     reasoning_modes: [thinking, non_thinking]
-    recommended_roles: [hard_reasoning, coding]
+    recommended_roles: [role-frontier-architect, role-balanced-producer]
     known_constraints: [vendor_reported_benchmarks]
     availability: api
+    confidence: high
   - provider: DeepSeek
     model_id: deepseek-v4-flash
+    model_id_kind: exact
     model_family: DeepSeek V4
-    verified_at: "2026-07-17"
-    official_sources: [https://api-docs.deepseek.com/updates/, https://api-docs.deepseek.com/quick_start/pricing]
+    requested_aliases: [DeepSeek V4 Flash]
+    verified_at: "2026-07-18"
+    official_sources: [https://api-docs.deepseek.com/updates, https://api-docs.deepseek.com/quick_start/pricing/]
+    sources:
+      - id: deepseek-flash-updates
+        url: https://api-docs.deepseek.com/updates
+        accessed_at: "2026-07-18"
+        publisher: DeepSeek
+        official: true
+      - id: deepseek-flash-pricing
+        url: https://api-docs.deepseek.com/quick_start/pricing/
+        accessed_at: "2026-07-18"
+        publisher: DeepSeek
+        official: true
+    claims:
+      - id: model-availability
+        summary: "DeepSeek API documentation is the source for V4 Flash naming, pricing, and availability."
+        source_ids: [deepseek-flash-updates, deepseek-flash-pricing]
+        vendor_reported: true
+        confidence: high
     context_window: 1000000
     modalities: [text]
     tool_use: true
     reasoning_modes: [thinking, non_thinking]
-    recommended_roles: [high_throughput_agent_work]
+    recommended_roles: [role-mechanical-transformer, role-balanced-producer]
     known_constraints: [legacy_aliases_retire_2026_07_24]
     availability: api
+    confidence: high

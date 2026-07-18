@@ -5,7 +5,19 @@
   "scripts": {
     "start": "docusaurus start",
     "sanitize": "node scripts/sanitize.mjs",
-    "build": "npm run sanitize && docusaurus build",
+    "validate:prompting": "node scripts/validate-prompting.mjs",
+    "test:prompting-fixtures": "node scripts/test-prompting-fixtures.mjs",
+    "generate:model-routing": "node scripts/generate-model-routing.mjs",
+    "check:model-routing": "node scripts/generate-model-routing.mjs --check",
+    "validate:skill-parity": "node scripts/validate-skill-parity.mjs",
+    "test:orchestration-skill": "node scripts/test-orchestration-skill.mjs",
+    "validate:style": "node scripts/validate-style-contract.mjs",
+    "validate:built": "node scripts/validate-built-site.mjs",
+    "links:internal": "node scripts/check-links.mjs internal",
+    "links:external": "node scripts/check-links.mjs external",
+    "test:browser": "node scripts/browser-publication-gate.mjs",
+    "release:check": "npm run sanitize && npm run validate:prompting && npm run test:prompting-fixtures && npm run validate:skill-parity && npm run test:orchestration-skill && npm run validate:style && npm run check:model-routing && npm run build && npm run validate:built && npm run links:internal && npm run links:external && npm run test:browser",
+    "build": "npm run sanitize && npm run validate:prompting && npm run check:model-routing && docusaurus build",
     "serve": "docusaurus serve",
     "clear": "docusaurus clear"
   },
@@ -13,19 +25,29 @@
     "@docusaurus/core": "3.10.1",
     "@docusaurus/plugin-content-docs": "3.10.1",
     "@docusaurus/preset-classic": "3.10.1",
-    "@docusaurus/theme-mermaid": "3.10.1",
     "@docusaurus/theme-common": "3.10.1",
+    "@docusaurus/theme-mermaid": "3.10.1",
     "@easyops-cn/docusaurus-search-local": "0.55.2",
     "@mdx-js/react": "3.1.1",
     "@mermaid-js/layout-elk": "0.1.9",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
     "clsx": "2.1.1",
     "prism-react-renderer": "2.4.1",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "yaml": "2.8.1"
   },
-  "engines": {"node": ">=24"},
+  "engines": {
+    "node": ">=24"
+  },
   "overrides": {
     "@docusaurus/theme-common": "3.10.1",
     "serialize-javascript": "7.0.5"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.54.2",
+    "linkinator": "^6.1.2"
   }
 }

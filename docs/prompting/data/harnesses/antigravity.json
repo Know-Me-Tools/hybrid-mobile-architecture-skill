@@ -1,0 +1,47 @@
+{
+  "id": "harness-antigravity",
+  "name": "Google Antigravity",
+  "verified_at": "2026-07-18",
+  "freshness_days": 45,
+  "official_sources": [
+    {
+      "id": "antigravity-home",
+      "url": "https://antigravity.google/docs/home",
+      "accessed_at": "2026-07-18",
+      "supports": ["instruction_discovery", "skills_plugins"]
+    },
+    {
+      "id": "antigravity-cli-features",
+      "url": "https://antigravity.google/docs/cli/features",
+      "accessed_at": "2026-07-18",
+      "supports": ["skills_plugins", "mcp_configuration", "permissions"]
+    },
+    {
+      "id": "antigravity-artifacts",
+      "url": "https://antigravity.google/docs/artifacts",
+      "accessed_at": "2026-07-18",
+      "supports": ["evidence_capture", "handoff_examples"]
+    }
+  ],
+  "required_sections": [
+    "installation_version_checks",
+    "instruction_discovery",
+    "skills_plugins",
+    "mcp_configuration",
+    "permissions",
+    "plan_build_critic",
+    "autonomous_budgets",
+    "evidence_capture",
+    "interruption_resume",
+    "handoff_examples"
+  ],
+  "instruction_sources": ["workspace rules", "global rules", "project skills"],
+  "skills": ["workspace skills", "global skills", "plugin-packaged skills"],
+  "mcp": "Use Antigravity MCP configuration and distinguish SDK features from CLI features.",
+  "permissions": "Keep approvals explicit for external actions and artifact publication.",
+  "autonomy": "Use planning artifacts, version checks, budgets, and human checkpoints before implementation loops.",
+  "evidence_capture": "Retain visual artifacts, plans, command output, and KBD memory.",
+  "handoff": "Export artifact references and KBD waypoints for cross-harness continuation.",
+  "recovery": "If the installed SDK lacks a documented feature, record the version gap and route through another verified harness.",
+  "public_boundary_verification": "Use Antigravity artifacts as evidence only when paired with a runnable public boundary."
+}

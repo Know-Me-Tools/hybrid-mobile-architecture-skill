@@ -1,0 +1,11 @@
+{
+  "stage": "execute",
+  "phase": "build-detailed-prompting-guide",
+  "createdAt": "2026-07-18T09:13:18Z",
+  "summary": "OpenSpec was selected as the execution backend. The KBD apply driver owns per-task progress, beginning with prompting-guide-foundation task 1.1.",
+  "artifacts": [
+    ".kbd-orchestrator/phases/build-detailed-prompting-guide/execution.md",
+    ".kbd-orchestrator/phases/build-detailed-prompting-guide/progress.json"
+  ],
+  "nextCommand": "/kbd-apply prompting-guide-foundation"
+}

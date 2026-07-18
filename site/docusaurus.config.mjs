@@ -27,12 +27,13 @@ export default {
   plugins: [
     ['@docusaurus/plugin-content-docs', {id: 'reference', path: 'docs/reference', routeBasePath: 'reference', sidebarPath: './sidebars.reference.mjs'}],
     ['@docusaurus/plugin-content-docs', {id: 'deployment', path: 'docs/deployment', routeBasePath: 'deployment', sidebarPath: './sidebars.deployment.mjs'}],
-    ['@docusaurus/plugin-content-docs', {id: 'prompting', path: 'docs/prompting', routeBasePath: 'prompting', sidebarPath: './sidebars.prompting.mjs'}],
+    ['@docusaurus/plugin-content-docs', {id: 'prompting', path: '../docs/prompting', routeBasePath: 'prompting', sidebarPath: './sidebars.prompting.mjs'}],
     ['@easyops-cn/docusaurus-search-local', {hashed: true, indexDocs: true, indexPages: true, indexBlog: false, docsRouteBasePath: ['/architecture', '/reference', '/deployment', '/prompting']}]
   ],
   themeConfig: {
     image: 'img/knowme-builder-documentation-og.png',
     metadata: [
+      {property: 'og:image', content: `${siteUrl}${baseUrl}img/knowme-builder-documentation-og.png`},
       {
         property: 'og:image:alt',
         content: 'KnowMe Builder documentation homepage: build software that understands its users.'
@@ -40,6 +41,8 @@ export default {
       {property: 'og:image:type', content: 'image/png'},
       {property: 'og:image:width', content: '3460'},
       {property: 'og:image:height', content: '2130'},
+      {name: 'twitter:card', content: 'summary_large_image'},
+      {name: 'twitter:image', content: `${siteUrl}${baseUrl}img/knowme-builder-documentation-og.png`},
       {
         name: 'twitter:image:alt',
         content: 'KnowMe Builder documentation homepage: build software that understands its users.'

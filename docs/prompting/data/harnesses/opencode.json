@@ -1,0 +1,47 @@
+{
+  "id": "harness-opencode",
+  "name": "OpenCode",
+  "verified_at": "2026-07-18",
+  "freshness_days": 45,
+  "official_sources": [
+    {
+      "id": "opencode-skills",
+      "url": "https://opencode.ai/docs/skills/",
+      "accessed_at": "2026-07-18",
+      "supports": ["skills_plugins", "permissions"]
+    },
+    {
+      "id": "opencode-agents",
+      "url": "https://opencode.ai/docs/agents/",
+      "accessed_at": "2026-07-18",
+      "supports": ["plan_build_critic", "permissions"]
+    },
+    {
+      "id": "opencode-mcp",
+      "url": "https://opencode.ai/docs/mcp-servers/",
+      "accessed_at": "2026-07-18",
+      "supports": ["mcp_configuration"]
+    }
+  ],
+  "required_sections": [
+    "installation_version_checks",
+    "instruction_discovery",
+    "skills_plugins",
+    "mcp_configuration",
+    "permissions",
+    "plan_build_critic",
+    "autonomous_budgets",
+    "evidence_capture",
+    "interruption_resume",
+    "handoff_examples"
+  ],
+  "instruction_sources": ["AGENTS.md", "opencode.json", ".opencode/commands"],
+  "skills": [".opencode/skills", ".agents/skills", ".claude/skills"],
+  "mcp": "Configure MCP servers in opencode.json and verify the agent can see them before use.",
+  "permissions": "Use allow, ask, and deny policy in opencode.json to keep producer and critic authority narrow.",
+  "autonomy": "Use separate named producer and critic agents with bounded tasks.",
+  "evidence_capture": "Capture command output, agent summaries, rendered artifacts, and KBD state.",
+  "handoff": "Use OpenCode commands plus KBD handoff files for resumable phases.",
+  "recovery": "If a permission is missing, update the narrow rule and rerun the failed public boundary only.",
+  "public_boundary_verification": "Do not accept OpenCode task completion without public route, CLI, test, or deployment evidence."
+}

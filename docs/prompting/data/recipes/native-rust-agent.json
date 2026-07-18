@@ -1,0 +1,29 @@
+{
+  "id": "scenario-native-rust-agent",
+  "title": "Native Rust agent",
+  "scenario": "Generate a native Rust agent when a skill is insufficient, using one core behavior implementation with HTTP/OpenAI-compatible, MCP, ACP, AG-UI, and A2A adapters only as needed.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "karpathy-progress-memory", "external:create-native-agent", "external:axum-patterns", "external:agent-protocol-design"],
+  "recommended_roles": ["role-frontier-architect", "role-balanced-producer", "role-research-synthesizer", "role-independent-critic"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research", "authority-external-publish"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-validation-report", "artifact-skill", "artifact-karpathy-memory"],
+  "evidence": ["evidence-official-source", "evidence-public-boundary", "evidence-clean-checkout", "evidence-independent-critic", "evidence-karpathy-record"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint", "recovery-clean-checkout-repro"],
+  "termination": "Stop only when the generated agent builds, launches, exposes each declared protocol through real consumers, shares one behavior core across adapters, has Docker proof, and passes skill-versus-agent justification review.",
+  "prompts": {
+    "prerequisites": "Verify stable job definition, protocol consumers, runtime choice, config/security model, Docker target, and whether a skill would be sufficient instead of an agent.",
+    "discovery": "Read native-agent creator instructions, Axum/Rust patterns, protocol docs, OpenAI proxy case study, packaging conventions, and current repository templates.",
+    "feynman": "Explain why this capability needs a native agent rather than a skill, and how one core behavior maps to protocol adapters without duplicate logic.",
+    "kbd_assess": "Assess capability boundary, consumers, protocols, persistence, auth, configuration, observability, packaging, and operator deployment needs.",
+    "kbd_analyze": "Analyze generator outputs, one-core/adapters architecture, Axum routes, MCP/ACP/AG-UI/A2A contracts, Dockerfile, and integration tests.",
+    "kbd_spec": "Specify core traits, adapters, config, health/readiness, protocol consumers, Docker image, security defaults, and public-boundary tests.",
+    "kbd_plan": "Plan capability classification first, then generator invocation, core implementation, adapters, protocol tests, Docker launch, critic, and retention.",
+    "research": "Use official protocol documentation and local case-study source to confirm current adapter requirements; do not copy stale model catalogs or unsupported auth patterns.",
+    "implementation": "Generate or implement the agent with one behavior core. Add only required adapters. Keep protocol glue thin and test each declared consumer.",
+    "public_boundary_verification": "Build the agent, run it, exercise each declared protocol with a real consumer or smoke request, build the Docker image, and prove health/readiness.",
+    "independent_critic": "Review whether a skill would have been enough, adapters duplicate logic, protocols are real, Docker proof exists, security defaults are safe, and the case-study lessons were applied correctly.",
+    "reflection_retention": "Record generator gaps, protocol decisions, adapter lessons, packaging proof, and whether a new reusable skill/template is needed.",
+    "recovery": "If a protocol adapter fails twice, stop and either narrow declared protocols or return to KBD analysis for that adapter contract.",
+    "stop_conditions": "Stop for unclear job definition, no consumer, duplicated adapter logic, unsupported protocol claims, failed launch, missing Docker proof, or unjustified native-agent scope."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "scenario-branded-docs-portal",
+  "title": "Branded documentation portal",
+  "scenario": "Build a KnowMe-branded documentation portal with content classification, canonical source docs, Flat 2.0 light/dark themes, Mermaid/search, GitHub Pages, container delivery, sanitization, accessibility, screenshots, OpenGraph image metadata, recovery, and publication proof.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-antigravity", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "build-branded-docusaurus", "hybrid-design-tokens", "reference-ui-fidelity", "a11y-gate", "karpathy-progress-memory"],
+  "recommended_roles": ["role-frontier-architect", "role-balanced-producer", "role-mechanical-transformer", "role-independent-critic", "role-multimodal-reviewer"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research", "authority-external-publish"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-site-build", "artifact-validation-report", "artifact-karpathy-memory"],
+  "evidence": ["evidence-official-source", "evidence-public-boundary", "evidence-clean-checkout", "evidence-independent-critic", "evidence-karpathy-record", "evidence-redaction-review"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint", "recovery-clean-checkout-repro"],
+  "termination": "Stop only when the site builds from canonical source, contains no private material, is visibly KnowMe-branded in light/dark Flat 2.0, supports Mermaid/search, publishes to GitHub Pages or a configured target, exposes OpenGraph metadata, and passes critic review.",
+  "prompts": {
+    "prerequisites": "Verify content owner, public/private classification, brand source, site framework choice, GitHub Pages target, OpenGraph image, search strategy, and container delivery need.",
+    "discovery": "Read documentation source tree, content-source manifest, KnowMe UI standard, Flat 2.0 rules, Docusaurus/Starlight decision notes, Pages workflow, sanitizer, and OpenGraph assets.",
+    "feynman": "Explain how content moves from private/project memory into public docs safely, how brand tokens implement Flat 2.0, and how Pages/container publication is proven.",
+    "kbd_assess": "Assess content taxonomy, private/public boundary, branding, navigation, search, Mermaid, Pages URL, container, screenshots, accessibility, and OpenGraph thumbnail behavior.",
+    "kbd_analyze": "Analyze current docs, site config, theme CSS, content source manifest, sanitizer patterns, GitHub Actions, Pages settings, static assets, and generated routes.",
+    "kbd_spec": "Specify canonical source ownership, sanitized content classes, KnowMe branding, no-border Flat 2.0 themes, Mermaid/search, Pages workflow, docs container, OpenGraph tags, accessibility gates, and screenshots.",
+    "kbd_plan": "Plan content classification first, then source migration, theme tokens, navigation/search/Mermaid, sanitizer, OpenGraph asset, Pages/container build, visual/a11y checks, critic, and retention.",
+    "research": "Use official framework, GitHub Pages, OpenGraph, Mermaid, search, and accessibility docs when capabilities or configuration may have changed.",
+    "implementation": "Edit canonical docs and site source only. Do not publish raw memory or private paths. Use supported theme variables before swizzling. Keep all default branding removed.",
+    "public_boundary_verification": "Run sanitize, schema checks, production build, local serve or Pages URL check, representative route checks, OpenGraph metadata inspection, and light/dark visual review.",
+    "independent_critic": "Review whether the site is actually branded, private content is absent, Flat 2.0 has no decorative borders/shadows, Mermaid/search work, OpenGraph points to the expected image, and Pages/container proof exists.",
+    "reflection_retention": "Record publication evidence, redactions, theme decisions, broken-link fixes, OpenGraph proof, and reusable docs-skill improvements.",
+    "recovery": "If private content leaks or build publication fails twice, stop and repair classification/sanitizer before adding content.",
+    "stop_conditions": "Stop for private raw content, default branding, missing OpenGraph image, broken build, unverified Pages publication, inaccessible navigation, or unsupported framework claims."
+  }
+}

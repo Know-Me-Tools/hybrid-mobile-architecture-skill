@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1",
+  "updatedAt": "2026-07-18T11:33:00Z",
+  "cursor": [
+    "build-detailed-prompting-guide",
+    "reflect",
+    "phase-closure"
+  ],
+  "root": {
+    "type": "phase",
+    "id": "build-detailed-prompting-guide",
+    "status": "executing",
+    "progress": {
+        "done": 5,
+      "total": 5
+    },
+    "children": [
+      {
+        "type": "change",
+        "id": "prompting-guide-publication-gates",
+        "status": "COMPLETE",
+        "progress": {
+          "done": 14,
+          "total": 14
+        }
+      }
+    ],
+    "annotations": []
+  }
+}
