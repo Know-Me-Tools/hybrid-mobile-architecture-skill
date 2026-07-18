@@ -4,7 +4,7 @@
     "id": "hybrid-mobile-architecture",
     "name": "Hybrid Mobile Architecture",
     "slug": "hybrid-mobile-architecture",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "status": "published",
     "visibility": "public",
     "tier": "professional",
@@ -16,7 +16,7 @@
       "organization": "Prometheus AGS"
     },
     "summary": "Production-grade hybrid mobile/desktop architecture: Flutter + Rust FFI for iOS/Android, Tauri + React 19 for desktop. Shared gen_ui_core infrastructure. Includes AI agent patterns, A2UI/AG-UI protocols, local LLM inference, MCP tool use, SurrealDB, and auth.",
-    "description": "A comprehensive architecture skill for building production applications across mobile and desktop platforms using a shared Rust infrastructure core.\n\n**What it does:**\n- Scaffolds complete hybrid projects (Flutter mobile + Tauri desktop + shared Rust)\n- Installs and configures all required tools (Flutter 3.29+, Rust 1.80+, Tauri 2.10+, Node 22+)\n- Enforces feature-based clean architecture in both Flutter and React codebases\n- Sets up Riverpod 3.x (Flutter) and Zustand 5 + Prometheus Entity Management 3.x + TanStack Router/Table (React)\n- Integrates Ory Kratos and/or Supabase authentication with best-practice patterns\n- Wires the gen_ui_core Rust crate: Anthropic API, local inference, MCP clients, SurrealDB, A2UI/AG-UI protocols, Universal Agent Runtime\n- Generates feature modules, ContentBlock variants, MCP integrations, and auth flows\n- Audits existing codebases for architectural compliance\n\n**Standards enforced:**\n- TJ-ARCH-MOB-001: Mobile Platform Architecture Standard\n- Strict layer boundaries: Component → Hook → Store → Rust/API\n- shadcn/ui (React) and shadcn_flutter (Flutter) component systems\n- Zustand owns client-side state; Prometheus Entity Management 3.x owns normalized server/async/entity state\n- Visual components never import stores directly; always via hooks\n\n**Products supported:** KnowMe, LLC · Prometheus AGS · TribeHealth.ai",
+    "description": "A comprehensive architecture skill for building production applications across mobile and desktop platforms using a shared Rust infrastructure core.\n\n**What it does:**\n- Scaffolds complete hybrid projects (Flutter mobile + Tauri desktop + shared Rust)\n- Installs and configures the required toolchain (current Flutter beta, Rust 1.96+, Tauri 2.10+, Node 24+)\n- Enforces feature-based clean architecture in both Flutter and React codebases\n- Sets up Riverpod 3.x (Flutter) and Zustand 5 + Prometheus Entity Management 3.x + TanStack Router/Table (React)\n- Integrates Ory Kratos and/or Supabase authentication with best-practice patterns\n- Wires the gen_ui_core Rust crate: configured cloud APIs, llama.cpp local inference, MCP clients, SurrealDB, A2UI/AG-UI protocols, and Universal Agent Runtime\n- Generates feature modules, ContentBlock variants, MCP integrations, and auth flows\n- Audits existing codebases for architectural compliance\n\n**Standards enforced:**\n- TJ-ARCH-MOB-001: Mobile Platform Architecture Standard\n- Strict layer boundaries: Component → Hook → Store → Rust/API\n- shadcn/ui (React) and shadcn_flutter (Flutter) component systems\n- Zustand owns client-side state; Prometheus Entity Management 3.x owns normalized server/async/entity state\n- Visual components never import stores directly; always via hooks\n\n**Products supported:** KnowMe, LLC · Prometheus AGS · TribeHealth.ai",
     "categories": [
       "architecture",
       "mobile-development",
@@ -27,9 +27,9 @@
       "react"
     ],
     "tags": [
-      "flutter", "tauri", "rust", "riverpod", "zustand", "tanstack",
+      "flutter", "tauri", "rust", "riverpod", "zustand", "prometheus-entity-management",
       "react-19", "gen-ui", "a2ui", "ag-ui", "mcp", "surrealdb",
-      "candle", "local-inference", "ory-kratos", "supabase",
+      "llama-cpp", "local-inference", "ory-kratos", "supabase",
       "clean-architecture", "hybrid-app", "ios", "android",
       "macos", "windows", "universal-agent-runtime"
     ],
@@ -53,10 +53,10 @@
       "tools": ["bash", "git"]
     },
     "frameworks": {
-      "flutter": ">=3.29.0",
-      "rust": ">=1.80.0",
+      "flutter": "beta",
+      "rust": ">=1.96.0",
       "tauri": ">=2.10.3",
-      "node": ">=22.0.0",
+      "node": ">=24.0.0",
       "react": ">=19.0.0"
     },
     "screenshots": [],
@@ -66,11 +66,11 @@
       "Create a new feature module called 'memory-browser' in my Flutter app following clean architecture",
       "Add Ory Kratos authentication to my Tauri + React application using the standard patterns",
       "Check my Flutter app for compliance with the hybrid mobile architecture standard",
-      "Wire up local candle inference to my Flutter app using the gen_ui_core InferenceEngine",
+      "Wire up pinned llama.cpp local inference to my Flutter app using the gen_ui_core InferenceEngine",
       "Scaffold a new ContentBlock type for displaying database query results with full Rust + Dart + widget stack",
       "Set up Supabase authentication in my React/Tauri desktop app with RLS policies and Prometheus Entity Management 3.x integration"
     ],
     "published_at": "2026-03-25",
-    "updated_at": "2026-03-25"
+    "updated_at": "2026-07-17"
   }
 }

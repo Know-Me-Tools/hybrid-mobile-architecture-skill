@@ -1,0 +1,39 @@
+{
+  "name": "hybrid-mobile-architecture",
+  "version": "1.1.0",
+  "description": "Prometheus AGS hybrid application architecture, scaffolders, verification utilities, and project-local skills for Flutter, Tauri, React, Axum, and shared Rust runtimes.",
+  "author": {
+    "name": "Travis James",
+    "email": "travis@prometheusags.ai",
+    "url": "https://travisjames.ai"
+  },
+  "homepage": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill",
+  "repository": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill",
+  "license": "MIT",
+  "keywords": [
+    "flutter",
+    "tauri",
+    "react",
+    "rust",
+    "hybrid-app",
+    "prometheus-entity-management",
+    "agentic-ui"
+  ],
+  "skills": [
+    "./",
+    "./templates/project-skills/a11y-gate",
+    "./templates/project-skills/build-branded-docusaurus",
+    "./templates/project-skills/content-block-ui",
+    "./templates/project-skills/deploy-hybrid-agentic-stack",
+    "./templates/project-skills/flutter-golden-ui",
+    "./templates/project-skills/hybrid-design-tokens",
+    "./templates/project-skills/hybrid-runtime-verification",
+    "./templates/project-skills/karpathy-progress-memory",
+    "./templates/project-skills/mobile-navigation",
+    "./templates/project-skills/orchestrate-prometheus-application",
+    "./templates/project-skills/reference-ui-fidelity",
+    "./templates/project-skills/tauri-custom-titlebar",
+    "./templates/project-skills/tauri-ui-review"
+  ],
+  "mcpServers": "./.mcp.json"
+}

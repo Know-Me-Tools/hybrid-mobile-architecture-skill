@@ -1,0 +1,37 @@
+{
+  "name": "knowme-hybrid-architecture",
+  "version": "1.1.0",
+  "description": "KnowMe and Prometheus AGS hybrid application architecture skills and scaffolders.",
+  "owner": {
+    "name": "KnowMe Tools",
+    "url": "https://github.com/Know-Me-Tools"
+  },
+  "interface": {
+    "displayName": "KnowMe Hybrid Architecture"
+  },
+  "plugins": [
+    {
+      "name": "hybrid-mobile-architecture",
+      "description": "Build and verify Flutter mobile, Tauri desktop, React/Axum web, and shared Rust agentic applications.",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "version": "1.1.0",
+      "category": "development",
+      "tags": [
+        "flutter",
+        "tauri",
+        "react",
+        "rust",
+        "mobile",
+        "desktop",
+        "agentic"
+      ],
+      "policy": {
+        "installation": "INSTALLED_BY_DEFAULT",
+        "authentication": "ON_INSTALL"
+      }
+    }
+  ]
+}

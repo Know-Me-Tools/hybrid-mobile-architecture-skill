@@ -84,6 +84,17 @@ Kimi.
 bash scripts/check-env.sh --install
 ```
 
+### Install skills and utilities globally
+```bash
+bash scripts/install-global-harnesses.sh
+```
+
+This installs the architecture and companion skills for Claude Code, OpenCode, Codex,
+Kimi Code CLI, and Zed, and merges the project Dart/shadcn MCP utilities into each
+harness's global configuration. See
+[Global harness installation](docs/global-harness-installation.md) for marketplace setup
+and verification commands.
+
 ### Scaffold a new hybrid project
 ```bash
 bash scripts/scaffold-hybrid.sh my-app
@@ -136,7 +147,9 @@ hybrid-mobile-architecture/
   SKILL.md                          # Skill instructions + triggering
   AGENT_BASE_RULES.md               # The 40 Prometheus Base Rules (canonical)
   CLAUDE.md / AGENTS.md             # Repo rules for coding agents (all harnesses)
-  plugin.json / marketplace.json    # Claude Code plugin + marketplace listing
+  .claude-plugin/                   # Claude Code plugin + marketplace listing
+  .agents/plugins/                  # Codex plugin marketplace listing
+  plugin.json / marketplace.json    # Legacy catalog metadata
   .mcp.json / opencode.json /       # Project-level MCP config (Dart/Flutter + shadcn)
   .codex/config.toml / .kimi-code/  #   for Claude Code, OpenCode, Codex, Kimi
   docs/

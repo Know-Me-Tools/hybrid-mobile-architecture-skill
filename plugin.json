@@ -1,7 +1,7 @@
 {
   "name": "hybrid-mobile-architecture",
   "displayName": "Hybrid Mobile Architecture",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Scaffold, extend, and maintain applications built on the Prometheus AGS hybrid mobile architecture: Flutter + Rust FFI for iOS/Android, Tauri + React 19 for desktop, sharing a single gen_ui_core Rust crate. Covers environment setup, feature-based clean architecture, Riverpod and Zustand + Prometheus Entity Management 3.x state management, TanStack Router/Table, Ory Kratos/Supabase auth, A2UI/AG-UI protocols, local inference, MCP tool use, SurrealDB integration, and UAR embedding.",
   "author": {
     "name": "Travis James",
@@ -13,13 +13,13 @@
   "homepage": "https://travisjames.ai",
   "repository": {
     "type": "git",
-    "url": "https://github.com/prometheusags/hybrid-mobile-skill"
+    "url": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill"
   },
   "keywords": [
     "flutter", "tauri", "rust", "mobile", "desktop", "hybrid",
-    "riverpod", "zustand", "tanstack", "react", "gen_ui",
+    "riverpod", "zustand", "prometheus-entity-management", "react", "gen_ui",
     "a2ui", "ag-ui", "mcp", "surrealdb", "ory-kratos",
-    "supabase", "universal-agent-runtime", "candle", "inference",
+    "supabase", "universal-agent-runtime", "llama-cpp", "inference",
     "knowme", "prometheus-ags", "travisjames"
   ],
   "categories": [
@@ -36,11 +36,11 @@
     "claude": ">=3.5"
   },
   "compatibility": {
-    "flutter": ">=3.29.0",
-    "rust": ">=1.80.0",
-    "node": ">=22.0.0",
+    "flutter": "beta",
+    "rust": ">=1.96.0",
+    "node": ">=24.0.0",
     "tauri": ">=2.10.3",
-    "dart": ">=3.4.0"
+    "dart": "latest-beta"
   },
   "commands": [
     {
