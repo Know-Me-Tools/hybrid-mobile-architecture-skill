@@ -1,0 +1,29 @@
+{
+  "id": "scenario-multi-tenant-saas",
+  "title": "Multi-tenant SaaS",
+  "scenario": "Build an optionally authenticated multi-tenant SaaS with threat modeling, RLS, Kratos identity, Gate authentication, Keto authorization, Forge/Fabric isolation, BYOK provider keys, anonymous-mode decisioning, and tenant-boundary proof.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "deploy-hybrid-agentic-stack", "hybrid-runtime-verification", "a11y-gate", "karpathy-progress-memory", "external:auth-security-patterns"],
+  "recommended_roles": ["role-frontier-architect", "role-balanced-producer", "role-research-synthesizer", "role-independent-critic"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research", "authority-external-publish"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-validation-report", "artifact-karpathy-memory"],
+  "evidence": ["evidence-official-source", "evidence-public-boundary", "evidence-clean-checkout", "evidence-independent-critic", "evidence-karpathy-record"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint", "recovery-clean-checkout-repro"],
+  "termination": "Stop only when cross-tenant access fails at API and database boundaries, BYOK references are tenant-scoped and encrypted or externally secret-managed, realtime events are isolated, anonymous mode is explicitly accepted or disabled, and deployment manifests contain no inline secrets.",
+  "prompts": {
+    "prerequisites": "Verify tenancy model, threat model owner, Postgres/RLS strategy, secret manager target, optional Kratos/Gate/Keto decision, Forge/Fabric availability, and BYOK provider list.",
+    "discovery": "Read auth/security patterns, deployment catalog, Forge/Fabric/Gate docs, Kratos/Keto docs, database policies, tenant identity model, and current app configuration.",
+    "feynman": "Explain tenant isolation from request identity through API, RLS, realtime channels, BYOK secret access, audit logs, and anonymous mode.",
+    "kbd_assess": "Assess tenants, roles, data classes, BYOK risks, anonymous access, realtime scope, audit needs, onboarding, and deployment environments.",
+    "kbd_analyze": "Analyze existing auth adapters, database schema, RLS policies, secret references, Forge/Fabric isolation, Gate/Kratos/Keto integration points, and deployment overlays.",
+    "kbd_spec": "Specify threat model, tenant IDs, identity mapping, authorization tuples, RLS, BYOK storage references, realtime isolation, audit events, anonymous-mode decision, and tenant-boundary tests.",
+    "kbd_plan": "Plan identity and tenant types first, then RLS, API enforcement, BYOK secret references, realtime isolation, UI settings, deployment manifests, tests, critic, and retention.",
+    "research": "Use official Ory, Kubernetes, Postgres, cloud secret manager, and local Flint project sources to confirm current integration behavior and configuration constraints.",
+    "implementation": "Implement tenant identity as a required domain type. Do not pass raw provider keys through logs or public docs. Make anonymous mode an explicit product decision, not a default accident.",
+    "public_boundary_verification": "Attempt cross-tenant reads/writes through public API, database policy, realtime subscription, and BYOK access. Render deployment manifests and scan for inline secrets.",
+    "independent_critic": "Review threat model coverage, RLS proof, auth/authorization boundaries, BYOK handling, Forge/Fabric isolation, anonymous mode, deployment secrets, and audit evidence.",
+    "reflection_retention": "Record security decisions, tenant-boundary failures, redactions, manifest proof, and reusable SaaS skill/template improvements.",
+    "recovery": "If tenant isolation fails, stop feature work and repair the identity/RLS model before UI or deployment expansion.",
+    "stop_conditions": "Stop for missing threat model, unscoped BYOK keys, inline secrets, ambiguous anonymous mode, unverified RLS, cross-tenant leak, or direct production deployment."
+  }
+}

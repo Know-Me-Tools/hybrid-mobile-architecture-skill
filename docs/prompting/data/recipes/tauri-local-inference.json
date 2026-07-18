@@ -1,0 +1,29 @@
+{
+  "id": "scenario-tauri-local-inference",
+  "title": "Tauri local inference desktop",
+  "scenario": "Build a Tauri desktop application with React 19 UI, shared Rust core commands, local model cache/fallback, offline persistence, shadcn-ui and Assistant UI chat, Prometheus Entity Management 3.x with Zustand, and pglite-oxide where configured.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "content-block-ui", "hybrid-design-tokens", "tauri-custom-titlebar", "tauri-ui-review", "reference-ui-fidelity", "hybrid-runtime-verification", "karpathy-progress-memory"],
+  "recommended_roles": ["role-frontier-architect", "role-balanced-producer", "role-independent-critic", "role-multimodal-reviewer"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-validation-report", "artifact-karpathy-memory"],
+  "evidence": ["evidence-public-boundary", "evidence-clean-checkout", "evidence-independent-critic", "evidence-karpathy-record"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint", "recovery-clean-checkout-repro"],
+  "termination": "Stop only when a real Tauri launch streams a local-model conversation offline or through an explicit configured provider, persists conversation history, reopens it after restart, emits diagnostics, and passes package-equivalent build proof.",
+  "prompts": {
+    "prerequisites": "Verify Tauri CLI, Rust 1.96+, Node 24+, local default model availability or download path, app-data write access, and PEM 3.x package source.",
+    "discovery": "Read AGENTS.md, CLAUDE.md, Tauri/React/Rust patterns, KnowMe UI standard, mood board, shadcn-ui setup, Assistant UI usage, PEM/Zustand conventions, and pglite-oxide docs.",
+    "feynman": "Explain how React components use shadcn-ui/Assistant UI and hooks/stores while Rust core owns model loading, inference, diagnostics, and desktop persistence.",
+    "kbd_assess": "Assess chat bubbles, model source selection, offline-first launch, model cache/fallback, conversation history, AG-UI events, diagnostics, package build, and restart behavior.",
+    "kbd_analyze": "Analyze current Tauri commands, React stores, PEM integration, local package exports, pglite-oxide path, diagnostics file, model cache, and UI composition.",
+    "kbd_spec": "Specify shadcn-ui/Assistant UI chat, ContentBlock/AG-UI rendering, no borders Flat 2.0 styling, PEM/Zustand state, pglite-oxide/shared Rust persistence, local fallback model, and boot diagnostics.",
+    "kbd_plan": "Plan Rust command/runtime work first, then PEM/Zustand stores, Assistant UI chat shell, model settings, diagnostics, launch proof, packaging proof, tests, critic, and retention.",
+    "research": "Confirm current Tauri, Assistant UI, shadcn-ui, PEM 3.x, Zustand, PGlite/pglite-oxide, and local model runtime APIs from official or local source before coding.",
+    "implementation": "Implement one waypoint at a time. Use shadcn-ui components over raw HTML where available, Assistant UI for chat structure, PEM 3.x/Zustand for client entity state, and Rust commands for all inference/persistence behavior.",
+    "public_boundary_verification": "Run typecheck/tests, production build, Tauri dev or no-bundle launch, disable network where relevant, stream a local-model chat, inspect diagnostics, restart, and reopen the persisted conversation.",
+    "independent_critic": "Review whether chat actually uses Assistant UI/shadcn patterns, avoids positive TanStack Query recommendations, persists multiple conversations, handles offline fallback, and proves real Tauri launch instead of screenshots only.",
+    "reflection_retention": "Record model/runtime constraints, UI fidelity deltas, persistence proof, diagnostics paths in sanitized form, failed assumptions, and reusable scaffold fixes.",
+    "recovery": "If launch, model loading, or persistence fails twice, stop and return to KBD analysis with command output and diagnostics. If UI components are missing, add a skill/template repair.",
+    "stop_conditions": "Stop for missing local model strategy, broken package exports, unsupported pglite-oxide assumptions, repeated Tauri launch failure, or no restart persistence evidence."
+  }
+}

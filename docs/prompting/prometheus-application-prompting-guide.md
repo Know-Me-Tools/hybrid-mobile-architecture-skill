@@ -1,3 +1,9 @@
+---
+sidebar_position: 1
+title: Application prompting playbook
+slug: /playbook
+---
+
 # Prometheus application prompting and orchestration guide
 
 **Research verification date:** 2026-07-17

@@ -94,7 +94,7 @@ Assignments were selected by skill activation reliability, frontier reasoning ne
 |---|---:|---|
 | Architecture-defining / distributed correctness | `C-001`, `C-005`, `C-012` | Claude Code · **Opus 4.8** |
 | Skill-heavy novel work: SurrealDB 3.x, Riverpod 3, Flint SDKs, skills, wasm forensics | `C-002`, `C-004`, `C-006`, `C-009`, `C-010` | Claude Code · **Sonnet 5** |
-| High-volume established-pattern backend + TypeScript-heavy frontend | `C-003`, `C-011` | Codex · **GPT-5.6** |
+| High-volume established-pattern backend + TypeScript-heavy frontend | `C-003`, `C-011` | Codex · **gpt-5.6-sol** |
 | Mechanical glue: `flutter_rust_bridge`/Tauri skeletons | `C-007` | OpenCode · **GLM 5.2** |
 | Documentation rewrite with long-context read/edit | `C-008` | Kimi Code CLI · **K2.6** |
 | C-006 API digestion sub-lane | part of `C-006` | Kimi Code CLI · **K2.7** |

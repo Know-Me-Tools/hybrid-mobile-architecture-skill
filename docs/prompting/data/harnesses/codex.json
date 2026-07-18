@@ -1,0 +1,38 @@
+{
+  "id": "harness-codex",
+  "name": "Codex",
+  "verified_at": "2026-07-18",
+  "freshness_days": 45,
+  "official_sources": [
+    {
+      "id": "openai-codex-skills",
+      "url": "https://developers.openai.com/codex/build-skills",
+      "accessed_at": "2026-07-18",
+      "supports": ["skills_plugins", "instruction_discovery"]
+    }
+  ],
+  "local_observations": [
+    "This repository uses AGENTS.md, .agents/skills, Codex goals, plugin search, commentary/final channels, and explicit git directives in the installed Codex desktop environment."
+  ],
+  "required_sections": [
+    "installation_version_checks",
+    "instruction_discovery",
+    "skills_plugins",
+    "mcp_configuration",
+    "permissions",
+    "plan_build_critic",
+    "autonomous_budgets",
+    "evidence_capture",
+    "interruption_resume",
+    "handoff_examples"
+  ],
+  "instruction_sources": ["AGENTS.md", "CLAUDE.md when present for repo-specific compatibility"],
+  "skills": [".agents/skills", ".codex/skills"],
+  "mcp": "Use repo-local .codex/config.toml when trusted by the local Codex installation; verify available tools before claiming support.",
+  "permissions": "Respect the active sandbox and approval policy. Treat external writes, destructive cleanup, and publication as separate authority.",
+  "autonomy": "Use goals only when requested, keep bounded steps, and update plans for multi-step work.",
+  "evidence_capture": "Record command output, file diffs, verification gates, screenshots where relevant, and Karpathy memory at phase boundaries.",
+  "handoff": "Use current waypoint files, final summaries, and git directives for staged work.",
+  "recovery": "If a capability is not installed, search tools/plugins first, then label the missing support rather than inventing it.",
+  "public_boundary_verification": "Run the public command, app, site, package, or API boundary that corresponds to the claim."
+}

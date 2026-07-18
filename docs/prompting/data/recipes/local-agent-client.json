@@ -1,0 +1,29 @@
+{
+  "id": "scenario-local-agent-client",
+  "title": "Local desktop agent client",
+  "scenario": "Build a Claude Desktop-style local agent client with MCP trust boundaries, file grants, skills, conversations and AG-UI events, model routing, approval denial, audit replay, and public workflow proof.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "content-block-ui", "tauri-ui-review", "hybrid-design-tokens", "hybrid-runtime-verification", "karpathy-progress-memory", "external:agent-protocol-design"],
+  "recommended_roles": ["role-frontier-architect", "role-balanced-producer", "role-research-synthesizer", "role-independent-critic"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-validation-report", "artifact-karpathy-memory"],
+  "evidence": ["evidence-public-boundary", "evidence-clean-checkout", "evidence-independent-critic", "evidence-karpathy-record"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint", "recovery-clean-checkout-repro"],
+  "termination": "Stop only when a permissioned MCP workflow succeeds, a denied approval is enforced, file grants are scoped, conversations/events are persisted and replayable, model routing is explained from the registry, and the UI proves the public workflow.",
+  "prompts": {
+    "prerequisites": "Verify desktop shell, local persistence, MCP host strategy, file-grant model, skill directory, model registry, and at least one safe MCP server for proof.",
+    "discovery": "Read agent protocol docs, MCP trust model, local skill loading rules, model registry, Tauri/Rust patterns, UI standard, and conversation/event store docs.",
+    "feynman": "Explain how MCP server trust, file grants, model routing, skills, approvals, conversations, and audit replay fit together without granting broad filesystem authority.",
+    "kbd_assess": "Assess trusted/untrusted tools, file grants, approval UX, denial behavior, model routing, conversation history, event replay, and offline/local behavior.",
+    "kbd_analyze": "Analyze current MCP host, permission store, skill loader, conversation/event schema, model registry, UI timeline, and Tauri command boundaries.",
+    "kbd_spec": "Specify MCP server registry, per-tool permissions, file grants, approval/denial events, conversation store, model route selection, audit replay, and UI proof.",
+    "kbd_plan": "Plan permission/domain types first, then MCP host, skill loader, conversation/event persistence, chat UI, denial flow, replay, verification, critic, and retention.",
+    "research": "Use official MCP/ACP/AG-UI/local protocol docs and local source to confirm current protocol contracts and security expectations.",
+    "implementation": "Implement one safe public workflow. Require explicit file grants, persist approvals and denials, route models from the dated registry, and render the full event chain.",
+    "public_boundary_verification": "Run a tool through the UI with a granted permission, deny another request, show enforcement, persist the conversation/events, and replay the audit trail after restart.",
+    "independent_critic": "Review trust boundaries, file grants, denial enforcement, skill loading, model routing, event completeness, replay, and whether the workflow is real rather than mocked.",
+    "reflection_retention": "Record protocol decisions, permission failures, model-routing gaps, replay evidence, and reusable agent-client lessons.",
+    "recovery": "If denial enforcement or replay fails twice, stop and repair the permission/event model before adding more tool integrations.",
+    "stop_conditions": "Stop for broad file grants, untrusted MCP execution, missing denial proof, non-replayable conversations, stale model claims, or simulated workflow evidence."
+  }
+}

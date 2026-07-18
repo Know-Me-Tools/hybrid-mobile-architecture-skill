@@ -1,0 +1,29 @@
+{
+  "id": "scenario-full-knowme-hybrid",
+  "title": "Full KnowMe hybrid application",
+  "scenario": "Build the KnowMe reference application with Flutter mobile, Tauri desktop, React/Axum web, and one shared Rust core that owns networking, persistence, inference, sync, and agent behavior.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "hybrid-runtime-verification", "content-block-ui", "hybrid-design-tokens", "mobile-navigation", "flutter-golden-ui", "tauri-ui-review", "a11y-gate", "deploy-hybrid-agentic-stack", "karpathy-progress-memory"],
+  "recommended_roles": ["role-frontier-architect", "role-balanced-producer", "role-research-synthesizer", "role-independent-critic", "role-multimodal-reviewer"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research", "authority-external-publish"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-guide-page", "artifact-validation-report", "artifact-karpathy-memory"],
+  "evidence": ["evidence-official-source", "evidence-public-boundary", "evidence-clean-checkout", "evidence-independent-critic", "evidence-karpathy-record"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint", "recovery-clean-checkout-repro"],
+  "termination": "Stop only when Flutter mobile, Tauri desktop, and Axum/React web execute the same persisted conversation workflow, local chat works without a key, the app survives restart, a clean checkout reproduces the build, and an independent critic accepts the evidence.",
+  "prompts": {
+    "prerequisites": "Verify Flutter beta, Rust 1.96+, Node 24+, Tauri 2.10+, a local model path or download strategy, and the Prometheus Entity Management 3.x package source before planning.",
+    "discovery": "Read AGENTS.md, CLAUDE.md, references/arch-standard.md, React/Tauri, Flutter, Rust, deployment, UI, and local skill docs. Inventory existing app surfaces, generated templates, and current KBD/OpenSpec state.",
+    "feynman": "Explain how one shared Rust core serves Flutter mobile, Tauri desktop, and Axum web while React/Flutter remain thin UI layers. Grade the explanation and list gaps before design decisions.",
+    "kbd_assess": "Assess user-visible outcomes: chat bubbles, ContentBlock/AG-UI events, multiple conversations, local-first persistence, BYOK-ready configuration, launch proof, and cross-surface parity.",
+    "kbd_analyze": "Analyze current source, templates, KnowMe specs, mood board, PEM/Zustand/PGlite integration, pglite-oxide desktop persistence, Flutter providers, and Axum hosting requirements.",
+    "kbd_spec": "Write OpenSpec deltas requiring shared Rust ownership, React component→hook→store layering, Flutter screen→provider→domain/data layering, no TanStack Query, Flat 2.0 UI, and public-boundary proof.",
+    "kbd_plan": "Plan surface-owned tasks: Rust core contracts first, React/Tauri UI and persistence, Flutter providers/FFI, Axum host, deployment/docs updates, then integrated verification.",
+    "research": "Use official/local sources to confirm current package APIs, Tauri, Flutter, Axum, PGlite, pglite-oxide, Assistant UI, shadcn-ui, ContentBlock/AG-UI, and model runtime constraints.",
+    "implementation": "Implement one bounded waypoint at a time. Keep networking, inference, sync, persistence, and agent logic in Rust. React and Flutter components call hooks/providers only. Use PEM 3.x with Zustand/PGlite for web state and pglite-oxide/shared Rust for desktop where configured.",
+    "public_boundary_verification": "Launch Tauri, serve the production web bundle or Axum host, launch a simulator/device, create and reopen multiple conversations, stream a local-model chat, display ContentBlocks, prove persistence after restart, and run clean-checkout build gates.",
+    "independent_critic": "As critic, compare the app against the original hybrid goal, mood board, UI standard, Rust ownership invariant, launch evidence, local-model behavior, persistence proof, and clean-checkout reproduction.",
+    "reflection_retention": "Record decisions, failures, launch evidence, missing surfaces, reusable scaffolding fixes, and private context boundaries in Karpathy memory.",
+    "recovery": "If any surface fails twice, stop and re-enter KBD analyze for that surface. If a repeated process gap appears, create/update a skill before continuing.",
+    "stop_conditions": "Stop for missing toolchain authority, unsupported package claims, repeated launch failure, private content leakage, or inability to prove one shared persisted workflow across surfaces."
+  }
+}

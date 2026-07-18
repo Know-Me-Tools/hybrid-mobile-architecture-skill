@@ -1,0 +1,44 @@
+{
+  "id": "harness-kimi-code-cli",
+  "name": "Kimi Code CLI",
+  "verified_at": "2026-07-18",
+  "freshness_days": 45,
+  "official_sources": [
+    {
+      "id": "kimi-command-reference",
+      "url": "https://www.kimi.com/code/docs/en/kimi-code-cli/reference/kimi-command.html",
+      "accessed_at": "2026-07-18",
+      "supports": ["installation_version_checks", "plan_build_critic", "autonomous_budgets"]
+    },
+    {
+      "id": "kimi-slash-commands",
+      "url": "https://www.kimi.com/code/docs/en/kimi-code-cli/reference/slash-commands.html",
+      "accessed_at": "2026-07-18",
+      "supports": ["skills_plugins", "interruption_resume"]
+    }
+  ],
+  "local_observations": [
+    "This repository treats .kimi-code/skills and .kimi-code/mcp.json as project-local Kimi surfaces, but the exact installed Kimi config search path should be verified in each environment."
+  ],
+  "required_sections": [
+    "installation_version_checks",
+    "instruction_discovery",
+    "skills_plugins",
+    "mcp_configuration",
+    "permissions",
+    "plan_build_critic",
+    "autonomous_budgets",
+    "evidence_capture",
+    "interruption_resume",
+    "handoff_examples"
+  ],
+  "instruction_sources": ["AGENTS.md", ".kimi-code/mcp.json"],
+  "skills": [".kimi-code/skills", ".agents/skills"],
+  "mcp": "Use the installed Kimi MCP configuration surface and verify tool visibility before relying on it.",
+  "permissions": "Prefer plan mode until authority and stop conditions are explicit; use auto mode only for bounded implementation.",
+  "autonomy": "Use non-interactive or auto execution with step limits and checkpoints.",
+  "evidence_capture": "Capture CLI output, generated artifacts, and KBD waypoint transitions.",
+  "handoff": "Use phase artifacts and KBD state so another harness can resume.",
+  "recovery": "If Kimi config behavior differs locally, label it unverified and fall back to project instructions plus explicit prompts.",
+  "public_boundary_verification": "The Kimi producer path needs the same public-boundary proof and independent critic as other harnesses."
+}

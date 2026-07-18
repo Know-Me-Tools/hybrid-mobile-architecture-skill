@@ -1,0 +1,29 @@
+{
+  "id": "scenario-flutter-rust-ffi",
+  "title": "Flutter-only mobile with Rust FFI",
+  "scenario": "Build an iOS/Android Flutter application where UI is Flutter and all networking, persistence, sync, inference, and agent behavior live in the Rust core behind a Rust FFI boundary.",
+  "harnesses": ["harness-codex", "harness-claude-code", "harness-opencode", "harness-kimi-code-cli", "harness-zed"],
+  "required_skills": ["orchestrate-prometheus-application", "mobile-navigation", "flutter-golden-ui", "hybrid-design-tokens", "a11y-gate", "hybrid-runtime-verification", "karpathy-progress-memory"],
+  "recommended_roles": ["role-frontier-architect", "role-balanced-producer", "role-independent-critic", "role-multimodal-reviewer"],
+  "authority": ["authority-repo-local-write", "authority-supporting-repo-read", "authority-network-research"],
+  "artifacts": ["artifact-plan", "artifact-recipe-page", "artifact-validation-report", "artifact-karpathy-memory"],
+  "evidence": ["evidence-public-boundary", "evidence-clean-checkout", "evidence-independent-critic", "evidence-karpathy-record"],
+  "recovery": ["recovery-two-failure-stop", "recovery-replan-at-kbd", "recovery-skill-gap", "recovery-human-checkpoint", "recovery-clean-checkout-repro"],
+  "termination": "Stop only when a real simulator or device launch crosses the Flutter/Rust FFI boundary, persists domain state, survives restart, proves provider/domain layering, and passes critic review.",
+  "prompts": {
+    "prerequisites": "Verify Flutter beta, Dart codegen, Xcode/Android toolchains, Rust 1.96+, flutter_rust_bridge_codegen version alignment, and device/simulator availability.",
+    "discovery": "Read AGENTS.md, CLAUDE.md, arch standard, Flutter patterns, Rust patterns, FRB configuration, generated file conventions, and existing mobile source layout.",
+    "feynman": "Explain Flutter screen→Riverpod provider→domain/data repository→Rust FFI layering and why Flutter must not own networking, persistence, or agent behavior.",
+    "kbd_assess": "Assess the mobile feature goal, platform targets, device launch proof, restart persistence, offline behavior, parity expectations, and UI/accessibility standard.",
+    "kbd_analyze": "Analyze current Flutter features, provider generation, Rust API surface, bridge generation, build scripts, platform linker settings, and persistence flows.",
+    "kbd_spec": "Specify domain contracts, Riverpod providers, FRB-generated API, Rust-owned services, UI shell, golden/a11y checks, launch evidence, and restart persistence.",
+    "kbd_plan": "Plan Rust API changes before Dart adapters, then provider/domain implementation, screen wiring, code generation, platform build repair, launch proof, tests, critic, and retention.",
+    "research": "Use official Flutter/Dart/FRB/Rust sources and local templates to confirm current codegen and platform build requirements before implementation.",
+    "implementation": "Implement one waypoint at a time. Move domain behavior out of screens, use generated Riverpod providers, regenerate FRB and build_runner outputs, and keep all side effects behind Rust/domain boundaries.",
+    "public_boundary_verification": "Run code generation, flutter analyze, flutter test, build or launch iOS/Android, create state through the UI, restart, and verify the persisted state returns through the Rust boundary.",
+    "independent_critic": "Review layering, generated outputs, platform launch logs, restart persistence, UI parity, and whether any Dart screen directly owns persistence or network behavior.",
+    "reflection_retention": "Record toolchain versions, bridge failures, platform fixes, launch evidence, and reusable mobile-scaffold lessons in Karpathy memory.",
+    "recovery": "If codegen or launch fails twice for the same reason, stop and return to KBD analysis with exact tool output and platform state.",
+    "stop_conditions": "Stop for missing simulator/device, FFI generation mismatch, platform linker failure, hidden direct persistence in UI, repeated launch failure, or missing restart proof."
+  }
+}

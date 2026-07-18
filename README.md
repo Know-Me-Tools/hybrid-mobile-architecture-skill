@@ -8,6 +8,11 @@ platform** — Flutter iOS/Android, Tauri macOS/Windows/Linux, and web via WASM.
 **Public documentation:**
 [KnowMe Builder documentation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/)
 
+**Prompting guide:**
+[Prometheus application prompting playbook](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/prompting/playbook)
+and
+[scenario prompt packs](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/prompting/scenarios)
+
 ---
 
 ## What this skill does
@@ -95,6 +100,20 @@ harness's global configuration. See
 [Global harness installation](docs/global-harness-installation.md) for marketplace setup
 and verification commands.
 
+### Build and verify the documentation site
+
+```bash
+cd site
+npm ci
+npm run release:check
+```
+
+The release gate sanitizes public content, rejects unsuffixed model IDs such as
+`gpt-5.6`, validates prompt recipes and harness source maps, checks generated model
+routing drift, builds the KnowMe-branded Docusaurus site, verifies required routes,
+runs internal/external link checks, and launches browser accessibility checks at
+desktop/dark and mobile/light sizes before GitHub Pages upload.
+
 ### Scaffold a new hybrid project
 ```bash
 bash scripts/scaffold-hybrid.sh my-app
@@ -129,6 +148,7 @@ bash scripts/audit.sh all .                        # both surfaces + workspace d
 | Agent conduct | [AGENT_BASE_RULES.md](AGENT_BASE_RULES.md) — the 40 Prometheus Base Rules, binding for humans, agents, skills, and generated projects |
 | KnowMe UI/UX | [KnowMe UI/UX standard](docs/knowme-ui-ux-standard.md) — Shadcn UI, Assistant UI, strict borderless Flat 2.0, rich chat events, and React/Flutter theme parity |
 | State management | Riverpod 3.3 codegen (Flutter) · Zustand 5 + Prometheus Entity Management 3.x (React); TanStack Router/Table only |
+| Model routing | Exact model IDs only; `gpt-5.6` is invalid by itself, use routed IDs such as `gpt-5.6-sol` |
 | Component layer | Components → Hooks → Stores → API/Rust (stores are the only `invoke()` layer) |
 | Architecture | Feature-based clean arch (`data/domain/presentation` · `api/stores/queries/hooks/components`) |
 | UI components | shadcn_flutter (Flutter) · shadcn/ui (React) |
@@ -157,6 +177,9 @@ hybrid-mobile-architecture/
     gen_ui_spec.html                # gen_ui technical specification
     reference-app/                  # KnowMe reference docs (PoC source material)
     pglite-oxide-tauri-hybrid.md    # Embedded Postgres options (desktop/web)
+    prompting/                      # Model registry, harness playbooks, loops,
+                                    #   scenario prompt packs, and agent orchestration
+  site/                             # KnowMe-branded Docusaurus documentation site
   references/                       # Patterns: flutter/ tauri/ rust/ auth/ + wasm-targets,
                                     #   compile-speed, ui-skills (features-first testing)
   scripts/

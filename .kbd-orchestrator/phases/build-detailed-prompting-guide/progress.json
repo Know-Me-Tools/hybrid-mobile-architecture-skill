@@ -1,6 +1,6 @@
 {
   "phase": "build-detailed-prompting-guide",
-  "status": "execute_ready",
+  "status": "complete",
   "parentPhase": null,
   "childPhases": [],
   "childPointer": null,
@@ -8,60 +8,60 @@
   "analysis_complete": true,
   "spec_complete": true,
   "plan_complete": true,
-  "execute_complete": false,
-  "reflect_complete": false,
+  "execute_complete": true,
+  "reflect_complete": true,
   "implementation_total": 5,
-  "implementation_completed": 0,
+  "implementation_completed": 5,
   "changes_total": 5,
-  "changes_completed": 0,
+  "changes_completed": 5,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 0,
+      "completed": 5,
       "total": 5,
-      "status": "PENDING"
+      "status": "COMPLETE"
     },
     "evidence": {
-      "status": "NOT_TRACKED",
-      "summary": null,
+      "status": "COMPLETE",
+      "summary": "All prompting-guide publication evidence is recorded in docs/prompting/publication-evidence.md and project/private Karpathy wiki records.",
       "blockers": []
     },
     "certification": {
-      "status": "NOT_TRACKED",
-      "summary": null,
+      "status": "COMPLETE",
+      "summary": "OpenSpec strict validation, local release gate, and fresh clone release gate passed.",
       "blockers": []
     },
     "publication": {
-      "status": "NOT_TRACKED",
-      "summary": null,
+      "status": "COMPLETE",
+      "summary": "GitHub Pages workflow runs release:check before artifact upload with full-SHA action pins.",
       "blockers": []
     }
   },
   "changes": [
     {
       "id": "prompting-guide-foundation",
-      "status": "PENDING",
+      "status": "COMPLETE",
       "wave": 0,
       "tasks_total": 11,
-      "tasks_done": 0,
+      "tasks_done": 11,
       "depends_on": []
     },
     {
       "id": "prompting-guide-harness-loops",
-      "status": "PENDING",
+      "status": "COMPLETE",
       "wave": 1,
       "tasks_total": 14,
-      "tasks_done": 0,
+      "tasks_done": 14,
       "depends_on": [
         "prompting-guide-foundation"
       ]
     },
     {
       "id": "prompting-guide-scenario-recipes",
-      "status": "PENDING",
+      "status": "COMPLETE",
       "wave": 2,
       "tasks_total": 13,
-      "tasks_done": 0,
+      "tasks_done": 13,
       "depends_on": [
         "prompting-guide-foundation",
         "prompting-guide-harness-loops"
@@ -69,10 +69,10 @@
     },
     {
       "id": "prompting-guide-agent-orchestration",
-      "status": "PENDING",
+      "status": "COMPLETE",
       "wave": 3,
       "tasks_total": 10,
-      "tasks_done": 0,
+      "tasks_done": 10,
       "depends_on": [
         "prompting-guide-foundation",
         "prompting-guide-harness-loops",
@@ -81,10 +81,10 @@
     },
     {
       "id": "prompting-guide-publication-gates",
-      "status": "PENDING",
+      "status": "ARCHIVED",
       "wave": 4,
       "tasks_total": 14,
-      "tasks_done": 0,
+      "tasks_done": 14,
       "depends_on": [
         "prompting-guide-foundation",
         "prompting-guide-harness-loops",
@@ -93,12 +93,18 @@
       ]
     }
   ],
-  "completed_changes": [],
+  "completed_changes": [
+    "prompting-guide-foundation",
+    "prompting-guide-harness-loops",
+    "prompting-guide-scenario-recipes",
+    "prompting-guide-agent-orchestration",
+    "prompting-guide-publication-gates"
+  ],
   "active_change": null,
   "blocked_changes": [],
   "sourceTool": "codex",
   "createdBy": "kbd-new-phase",
   "last_updated_by": "codex",
-  "last_updated": "2026-07-18T08:59:53Z",
-  "updatedAt": "2026-07-18T08:59:53Z"
+  "last_updated": "2026-07-18T11:47:00Z",
+  "updatedAt": "2026-07-18T11:47:00Z"
 }
