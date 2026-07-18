@@ -1,0 +1,72 @@
+name: Mirror and promote image digests
+
+on:
+  workflow_dispatch:
+    inputs:
+      source: {description: "GHCR image including sha256 digest", required: true, type: string}
+      image_name: {description: "Catalog image name", required: true, type: string}
+      gitops_repository: {description: "owner/repository for live ArgoCD state", required: true, type: string}
+
+permissions: {contents: read, id-token: write}
+
+jobs:
+  mirror:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: cloud-registry-production
+    steps:
+      - name: Install registry copy client from the pinned runner distribution
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends skopeo
+          skopeo --version
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with: {workload_identity_provider: "${{ vars.GCP_WIF_PROVIDER }}", service_account: "${{ vars.GCP_SERVICE_ACCOUNT }}"}
+      - uses: azure/login@1384c340ab2dda50fed2bee3041d1d87018aa5e8 # v2
+        with: {client-id: "${{ vars.AZURE_CLIENT_ID }}", tenant-id: "${{ vars.AZURE_TENANT_ID }}", subscription-id: "${{ vars.AZURE_SUBSCRIPTION_ID }}"}
+      - uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100 # v5
+        with: {role-to-assume: "${{ vars.AWS_ROLE_ARN }}", aws-region: "${{ vars.AWS_REGION }}"}
+      - name: Authenticate target registries
+        shell: bash
+        run: |
+          gcloud auth configure-docker "${{ vars.GCP_REGISTRY_HOST }}" --quiet
+          az acr login --name "${{ vars.ACR_NAME }}"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "${{ vars.ECR_REGISTRY }}"
+      - name: Mirror exact digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_ref='${{ inputs.source }}'
+          case "$source_ref" in *@sha256:*) ;; *) echo "source must be digest pinned" >&2; exit 1;; esac
+          digest="${source_ref##*@}"
+          immutable_tag="${digest#sha256:}"
+          for target in \
+            "${{ vars.ACR_REGISTRY }}/${{ inputs.image_name }}" \
+            "${{ vars.GCP_REGISTRY_HOST }}/${{ vars.GCP_PROJECT }}/${{ vars.GCP_REPOSITORY }}/${{ inputs.image_name }}" \
+            "${{ vars.ECR_REGISTRY }}/${{ inputs.image_name }}"; do
+            skopeo copy --all "docker://$source_ref" "docker://$target:$immutable_tag"
+            mirrored="$(skopeo inspect "docker://$target:$immutable_tag" --format '{{.Digest}}')"
+            test "$mirrored" = "$digest"
+          done
+
+  promote:
+    needs: mirror
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions: {contents: write}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          repository: ${{ inputs.gitops_repository }}
+          token: ${{ secrets.GITOPS_REPOSITORY_TOKEN }}
+      - name: Commit immutable promotion
+        shell: bash
+        run: |
+          set -euo pipefail
+          yq -i '.images."${{ inputs.image_name }}" = "${{ inputs.source }}"' images.lock.yaml
+          git config user.name prometheus-image-promoter
+          git config user.email image-promoter@users.noreply.github.com
+          git add images.lock.yaml
+          git diff --cached --quiet || git commit -m "promote ${{ inputs.image_name }}"
+          git push

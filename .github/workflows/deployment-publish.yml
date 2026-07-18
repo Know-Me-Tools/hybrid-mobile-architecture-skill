@@ -1,0 +1,120 @@
+name: Publish deployment catalog
+
+on:
+  release: {types: [published]}
+  workflow_dispatch:
+    inputs:
+      tag: {description: Immutable release tag, required: true, type: string}
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    environment: image-production
+    env:
+      TAG: ${{ inputs.tag || github.event.release.tag_name }}
+      REGISTRY: ghcr.io/prometheus-ags
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/bake-action@5be5f02ff8819ecd3092ea6b2e6261c31774f2b4 # v6
+        with:
+          files: deploy/docker-bake.hcl
+          targets: publish
+          push: true
+      - uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+      - name: Record published digests
+        id: digests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for image in knowme-web knowme-docs flint-forge-gateway flint-realtime-fabric flint-gate prometheus-postgres18; do
+            digest="$(docker buildx imagetools inspect "$REGISTRY/$image:$TAG" --format '{{json .Manifest.Digest}}' | tr -d '"')"
+            test "${digest#sha256:}" != "$digest"
+            printf '%s=%s\n' "${image//-/_}" "$digest" >> "$GITHUB_OUTPUT"
+          done
+      - name: Sign immutable subjects with GitHub OIDC
+        shell: bash
+        run: |
+          set -euo pipefail
+          for image in \
+            knowme-web knowme-docs flint-forge-gateway flint-realtime-fabric flint-gate \
+            prometheus-postgres18 postgres-extension-flint-llm postgres-extension-flint-vault \
+            postgres-extension-flint-meta postgres-extension-flint-auth postgres-extension-flint-hooks \
+            postgres-extension-pg-net postgres-extension-pg-cron postgres-extension-pgvector; do
+            digest="$(docker buildx imagetools inspect "$REGISTRY/$image:$TAG" --format '{{json .Manifest.Digest}}' | tr -d '"')"
+            cosign sign --yes "$REGISTRY/$image@$digest"
+          done
+      - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-name: ghcr.io/prometheus-ags/knowme-web
+          subject-digest: ${{ steps.digests.outputs.knowme_web }}
+          push-to-registry: true
+      - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-name: ghcr.io/prometheus-ags/knowme-docs
+          subject-digest: ${{ steps.digests.outputs.knowme_docs }}
+          push-to-registry: true
+      - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-name: ghcr.io/prometheus-ags/flint-forge-gateway
+          subject-digest: ${{ steps.digests.outputs.flint_forge_gateway }}
+          push-to-registry: true
+      - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-name: ghcr.io/prometheus-ags/flint-realtime-fabric
+          subject-digest: ${{ steps.digests.outputs.flint_realtime_fabric }}
+          push-to-registry: true
+      - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-name: ghcr.io/prometheus-ags/flint-gate
+          subject-digest: ${{ steps.digests.outputs.flint_gate }}
+          push-to-registry: true
+      - uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-name: ghcr.io/prometheus-ags/prometheus-postgres18
+          subject-digest: ${{ steps.digests.outputs.prometheus_postgres18 }}
+          push-to-registry: true
+
+  scan:
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions: {contents: read, packages: read}
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - knowme-web
+          - knowme-docs
+          - flint-forge-gateway
+          - flint-realtime-fabric
+          - flint-gate
+          - prometheus-postgres18
+          - postgres-extension-flint-llm
+          - postgres-extension-flint-vault
+          - postgres-extension-flint-meta
+          - postgres-extension-flint-auth
+          - postgres-extension-flint-hooks
+          - postgres-extension-pg-net
+          - postgres-extension-pg-cron
+          - postgres-extension-pgvector
+    steps:
+      - uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
+        with:
+          image-ref: ghcr.io/prometheus-ags/${{ matrix.image }}:${{ inputs.tag || github.event.release.tag_name }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"

@@ -80,6 +80,15 @@ SKILLS = {
         "phase boundary", "continuous improvement", "prometheus wiki",
         "private wiki", "record the lesson", "record our path", "handoff",
     ],
+    "build-branded-docusaurus": [
+        "docusaurus", "documentation site", "docs portal", "github pages",
+        "branded docs", "documentation container", "mermaid docs", "local search",
+    ],
+    "orchestrate-prometheus-application": [
+        "prompting guide", "prompt pack", "feynman loop", "kbd loop", "pmpo",
+        "model routing", "autonomous development", "agent creator", "skill creator",
+        "claude desktop", "saas product", "business ideation", "native agent",
+    ],
 }
 
 

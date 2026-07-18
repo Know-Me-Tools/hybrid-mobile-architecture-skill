@@ -1,0 +1,7 @@
+.hero{padding:8rem max(1.5rem,8vw) 6rem;background:var(--km-canvas)}
+.hero h1{max-width:900px;font-size:clamp(3rem,7vw,6rem);line-height:.98;letter-spacing:-.055em;margin:1rem 0 1.5rem}
+.hero p{max-width:680px;font-size:1.25rem;color:var(--km-text-muted)}
+.eyebrow{font-family:var(--ifm-font-family-monospace);color:var(--km-ember);letter-spacing:.18em}
+.actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:2.5rem}.primary,.secondary{padding:.9rem 1.2rem;border-radius:.75rem;text-decoration:none;font-weight:700}.primary{background:var(--km-ember);color:#0b0f14}.secondary{background:var(--km-raised);color:var(--km-text)}
+.grid{padding:1.5rem max(1.5rem,8vw) 7rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;background:var(--km-chrome)}
+.card{display:block;padding:1.5rem;border-radius:1rem;background:var(--km-surface);text-decoration:none;color:var(--km-text)}.card:hover{background:var(--km-raised);text-decoration:none}.card span{font-size:1.2rem;font-weight:700}.card p{color:var(--km-text-muted);margin:.6rem 0 0}

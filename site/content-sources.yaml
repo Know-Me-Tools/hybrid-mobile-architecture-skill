@@ -1,0 +1,13 @@
+schema_version: 1
+sources:
+  - path: ../references
+    classification: public_normalize
+  - path: ../docs
+    classification: public_normalize
+  - path: ../.prometheus
+    classification: private_synthesis_only
+  - path: PRIVATE_KARPATHY_WIKI
+    classification: private_synthesis_only
+  - path: conversation_logs
+    classification: excluded
+    reason: private raw interaction history

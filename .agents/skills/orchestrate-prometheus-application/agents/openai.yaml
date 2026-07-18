@@ -1,0 +1,4 @@
+interface:
+  display_name: Orchestrate Prometheus Application
+  short_description: Plan and run evidence-driven Prometheus application loops.
+  default_prompt: Use $orchestrate-prometheus-application to classify this product and generate a staged, verifiable build sequence.

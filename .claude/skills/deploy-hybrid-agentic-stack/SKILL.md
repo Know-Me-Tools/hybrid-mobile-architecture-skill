@@ -41,6 +41,10 @@ Read [architecture.md](references/architecture.md) before implementing service o
 changes. Read [deployment.md](references/deployment.md) before emitting containers or
 Kubernetes resources.
 
+When a Prometheus deployment catalog is available, consume its pinned sources,
+immutable image digests, Compose profiles, PostgreSQL distribution, and GitOps
+components. Do not invent a second build path inside a generated application.
+
 ## Asset modes for Axum
 
 - **Embedded:** `build.rs` consumes `KNOWME_WEB_DIST_DIR` or invokes the tracked package

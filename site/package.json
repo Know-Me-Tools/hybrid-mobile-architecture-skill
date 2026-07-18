@@ -1,0 +1,31 @@
+{
+  "name": "knowme-documentation",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "docusaurus start",
+    "sanitize": "node scripts/sanitize.mjs",
+    "build": "npm run sanitize && docusaurus build",
+    "serve": "docusaurus serve",
+    "clear": "docusaurus clear"
+  },
+  "dependencies": {
+    "@docusaurus/core": "3.10.1",
+    "@docusaurus/plugin-content-docs": "3.10.1",
+    "@docusaurus/preset-classic": "3.10.1",
+    "@docusaurus/theme-mermaid": "3.10.1",
+    "@docusaurus/theme-common": "3.10.1",
+    "@easyops-cn/docusaurus-search-local": "0.55.2",
+    "@mdx-js/react": "3.1.1",
+    "@mermaid-js/layout-elk": "0.1.9",
+    "clsx": "2.1.1",
+    "prism-react-renderer": "2.4.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "engines": {"node": ">=24"},
+  "overrides": {
+    "@docusaurus/theme-common": "3.10.1",
+    "serialize-javascript": "7.0.5"
+  }
+}
