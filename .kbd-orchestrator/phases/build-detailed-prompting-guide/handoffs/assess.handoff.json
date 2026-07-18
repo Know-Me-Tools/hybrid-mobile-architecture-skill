@@ -1,0 +1,11 @@
+{
+  "stage": "assess",
+  "completedAt": "2026-07-18T06:34:23Z",
+  "outputs": [
+    "assessment.md"
+  ],
+  "nextStage": "analyze",
+  "summaryForNext": "The site and Pages pipeline are healthy, but zero of ten scenarios and zero of six harnesses meet the requested operational prompt schema. Analyze should define canonical-source publication, recipe/harness schemas, model evidence gates, case-study boundaries, and machine-verifiable acceptance checks.",
+  "skipped": false,
+  "skipReason": null
+}

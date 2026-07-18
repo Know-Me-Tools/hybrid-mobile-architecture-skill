@@ -3,7 +3,7 @@
   "parentPhase": null,
   "childPhases": [],
   "childPointer": null,
-  "assessment_complete": false,
+  "assessment_complete": true,
   "plan_complete": false,
   "execute_complete": false,
   "reflect_complete": false,
@@ -37,7 +37,9 @@
   "completed_changes": [],
   "active_change": null,
   "blocked_changes": [],
-  "sourceTool": "unknown",
+  "sourceTool": "codex",
   "createdBy": "kbd-new-phase",
-  "updatedAt": "2026-07-18T06:16:00Z"
+  "last_updated_by": "codex",
+  "last_updated": "2026-07-18T06:34:00Z",
+  "updatedAt": "2026-07-18T06:34:00Z"
 }

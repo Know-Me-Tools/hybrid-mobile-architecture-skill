@@ -1,69 +1,18 @@
 {
   "phase": "build-detailed-prompting-guide",
-  "status": "assessment_ready",
+  "status": "analysis_ready",
   "previousPhase": "phase-codegen-and-ci-verification",
-  "changes": [
-    {
-      "id": "2026-07-15-c101-bootstrap-pillars",
-      "status": "merged",
-      "wave": 0
-    },
-    {
-      "id": "2026-07-15-c102-poc-scaffold-first-codegen",
-      "status": "merged",
-      "wave": 0
-    },
-    {
-      "id": "2026-07-15-c103-chat-live-e2e",
-      "status": "merged",
-      "wave": 1
-    },
-    {
-      "id": "2026-07-15-c104-memory-graph-rag",
-      "status": "in_progress",
-      "wave": 1
-    },
-    {
-      "id": "2026-07-15-c105-local-model-desktop",
-      "status": "pending",
-      "wave": 1
-    },
-    {
-      "id": "2026-07-15-c106-sync-local-first",
-      "status": "pending",
-      "wave": 1
-    },
-    {
-      "id": "2026-07-15-c107-whisper-scribe",
-      "status": "in_progress",
-      "wave": 1
-    },
-    {
-      "id": "2026-07-15-c110-ci",
-      "status": "in_progress",
-      "wave": 1
-    },
-    {
-      "id": "2026-07-15-c108-mcp-skill-and-agent",
-      "status": "pending",
-      "wave": 2
-    },
-    {
-      "id": "2026-07-15-c109-settings-mobile-model",
-      "status": "pending",
-      "wave": 2
-    }
-  ],
-  "completedChanges": 3,
-  "totalChanges": 10,
-  "startedAt": "2026-07-15T22:04:29Z",
-  "nextCommand": "/kbd-apply 2026-07-15-c104-memory-graph-rag",
-  "firstChange": "2026-07-15-c101-bootstrap-pillars",
-  "nextChange": "2026-07-15-c104-memory-graph-rag",
+  "changes": [],
+  "completedChanges": 0,
+  "totalChanges": 0,
+  "startedAt": "2026-07-18T06:16:00Z",
+  "nextCommand": "/kbd-analyze build-detailed-prompting-guide",
+  "firstChange": null,
+  "nextChange": null,
   "change": null,
-  "currentTask": "run kbd-assess for build-detailed-prompting-guide",
+  "currentTask": "run kbd-analyze for build-detailed-prompting-guide",
   "nextPendingChange": null,
-  "exactNextCommand": "/kbd-assess build-detailed-prompting-guide",
+  "exactNextCommand": "/kbd-analyze build-detailed-prompting-guide",
   "parentPhase": null,
   "childPhases": [],
   "childPointer": null,
@@ -74,5 +23,5 @@
   "publicationStatus": "NOT_TRACKED",
   "changesCompleted": 0,
   "changesTotal": 0,
-  "updatedAt": "2026-07-18T06:16:00Z"
+  "updatedAt": "2026-07-18T06:34:00Z"
 }
