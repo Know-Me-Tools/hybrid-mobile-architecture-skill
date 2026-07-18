@@ -10,11 +10,11 @@
   "implementation_total": 0,
   "implementation_completed": 0,
   "changes_total": 0,
-  "changes_completed": 2,
+  "changes_completed": 3,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 2,
+      "completed": 3,
       "total": 6,
       "status": "PENDING"
     },
@@ -41,7 +41,7 @@
   "createdBy": "kbd-new-phase",
   "updatedAt": "2026-07-18T09:08:47Z",
   "last_updated_by": "claude-code",
-  "last_updated": "2026-07-18T10:20:00Z",
+  "last_updated": "2026-07-18T11:05:00Z",
   "qa": {
     "c120-sync-doctrine-refs": {
       "artifact_refiner": "SKIPPED",
@@ -50,6 +50,10 @@
     "c121-local-first-skills": {
       "artifact_refiner": "SKIPPED",
       "reason": "documentation/skill-content-only change"
+    },
+    "c122-partial-replication-slice": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "cargo clippy -D warnings clean; 27 behavior tests green (scope validation, loopback attach/stream/refusal, lookup currency, one-time loads); wasm32 gate green; scaffold heredocs proven byte-identical to app sources"
     }
   }
 }

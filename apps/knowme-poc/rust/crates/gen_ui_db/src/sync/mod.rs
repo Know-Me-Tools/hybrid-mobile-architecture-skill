@@ -34,6 +34,8 @@ mod engine;
 #[cfg(not(target_arch = "wasm32"))]
 mod frf_transport;
 #[cfg(not(target_arch = "wasm32"))]
+mod loopback;
+#[cfg(not(target_arch = "wasm32"))]
 mod seam;
 #[cfg(not(target_arch = "wasm32"))]
 mod shapes;
@@ -46,7 +48,7 @@ mod local_store;
 
 pub use status::{SyncStatusHandle, SyncStatusStream};
 // Re-export the frozen seam types so callers use one import path.
-pub use gen_ui_types::sync::{SyncStatus, SyncTransport};
+pub use gen_ui_types::sync::{ScopeKind, SyncScope, SyncStatus, SyncTransport, SCOPE_TENANT_PARAM};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use config::{ShapeSpec, SyncConfig};
@@ -56,8 +58,11 @@ pub use engine::SyncEngine;
 // read-path store. `SyncEngine` above stays for the Electric lane until it is removed.
 #[cfg(not(target_arch = "wasm32"))]
 pub use frf_transport::{row_change_from_payload, FrfSyncConfig, FrfSyncTransport};
+// C-122: scope-aware dev loopback (partial replication without a gateway).
 #[cfg(all(not(target_arch = "wasm32"), feature = "pg"))]
 pub use local_store::PgLocalStore;
+#[cfg(not(target_arch = "wasm32"))]
+pub use loopback::{LoopbackFeed, LoopbackSyncTransport};
 #[cfg(not(target_arch = "wasm32"))]
 pub use seam::{LocalStore, PendingWrite, RowChange, RowOp, WriteOutcome, WriteSink};
 

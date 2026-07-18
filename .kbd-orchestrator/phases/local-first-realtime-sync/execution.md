@@ -82,7 +82,7 @@ PROGRESS LEDGER
 
 - [DONE] c120-sync-doctrine-refs — SELF (archived 2026-07-18; QA skipped: docs-only)
 - [DONE] c121-local-first-skills — SELF (archived 2026-07-18; QA skipped: skill-content-only)
-- [PENDING] c122-partial-replication-slice — SELF
+- [DONE] c122-partial-replication-slice — SELF (archived 2026-07-18; QA: compensating verification, refiner unavailable)
 - [PENDING] c123-client-rag-slice — SELF
 - [PENDING] c124-peer-profile-vault — SELF
 - [PENDING] c125-scaffold-audit-propagation — SELF

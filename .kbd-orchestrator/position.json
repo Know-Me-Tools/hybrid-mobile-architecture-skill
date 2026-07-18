@@ -1,22 +1,22 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T09:56:09Z",
+  "updatedAt": "2026-07-18T10:22:50Z",
   "cursor": [
     "local-first-realtime-sync",
-    "c121-local-first-skills"
+    "c122-partial-replication-slice"
   ],
   "root": {
     "type": "phase",
     "id": "local-first-realtime-sync",
     "status": "executing",
     "progress": {
-      "done": 1,
+      "done": 2,
       "total": 6
     },
     "children": [
       {
         "type": "change",
-        "id": "c121-local-first-skills",
+        "id": "c122-partial-replication-slice",
         "status": "PENDING",
         "progress": {
           "done": 0,

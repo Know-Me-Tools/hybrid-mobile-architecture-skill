@@ -1,6 +1,6 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: local-first-realtime-sync
-Step: 2 of 6
+Step: 3 of 6
 Stage: executing
-Active change: c122-partial-replication-slice
-Next command: /kbd-apply c122-partial-replication-slice
+Active change: c123-client-rag-slice
+Next command: /kbd-apply c123-client-rag-slice

@@ -1,1 +1,1 @@
-{"totalRuns":68,"failedRuns":0,"lastRun":{"ts":"2026-07-18T09:56:13Z","kind":"task","edge":"after","name":"c121-local-first-skills:6","hookId":"legacy-change-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}
+{"totalRuns":87,"failedRuns":0,"lastRun":{"ts":"2026-07-18T10:23:01Z","kind":"task","edge":"after","name":"c122-partial-replication-slice:6","hookId":"legacy-change-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}
