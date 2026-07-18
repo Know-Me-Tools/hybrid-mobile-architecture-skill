@@ -1,4 +1,4 @@
-# 2026-07-18-c125-scaffold-audit-propagation
+# c125-scaffold-audit-propagation
 
 > Phase: local-first-realtime-sync · Status: proposed
 > Assigned harness/model: claude/fable-5

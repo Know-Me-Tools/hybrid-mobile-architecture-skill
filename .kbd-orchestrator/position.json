@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1",
+  "updatedAt": "2026-07-18T09:47:35Z",
+  "cursor": [
+    "local-first-realtime-sync",
+    "c120-sync-doctrine-refs"
+  ],
+  "root": {
+    "type": "phase",
+    "id": "local-first-realtime-sync",
+    "status": "executing",
+    "progress": {
+      "done": 0,
+      "total": 6
+    },
+    "children": [
+      {
+        "type": "change",
+        "id": "c120-sync-doctrine-refs",
+        "status": "PENDING",
+        "progress": {
+          "done": 0,
+          "total": 0
+        }
+      }
+    ],
+    "annotations": []
+  }
+}

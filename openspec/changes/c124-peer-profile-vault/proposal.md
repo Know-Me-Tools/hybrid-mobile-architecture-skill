@@ -1,13 +1,13 @@
-# 2026-07-18-c120-sync-doctrine-refs
+# c124-peer-profile-vault
 
 > Phase: local-first-realtime-sync · Status: proposed
 > Assigned harness/model: claude/fable-5
-> Depends on: NONE
+> Depends on: c120
 > Binding: AGENT_BASE_RULES.md (all 40 rules)
 
 ## Why
 
-Author the sync doctrine: references/sync/{doctrine,partial-replication,peer-crdt,client-rag}.md + ADRs ratifying OD-2/OD-3/OD-4/OD-7 and the Loro choice. Supplies the goal-5 peer-CRDT design the master plan lacks; every other change cites these docs.
+knowme-poc vertical slice: sensitive profile data as a Loro vault persisted locally, structurally excluded from server sync (fail-closed privacy-class filter), synced device-to-device over WebRTC DataChannels (dev signaler; FRF SignalService is the production lane). Resolves the unused loro-crdt dependency.
 
 Derived from plan.md (full description, decisions, success criteria) and assessment.md
 (seven-goal gap analysis). Follows the CLAUDE.md Development Philosophy: features first,

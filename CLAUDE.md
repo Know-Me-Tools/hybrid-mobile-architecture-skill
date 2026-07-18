@@ -452,6 +452,11 @@ All generated files must include `// TJ-ARCH-MOB-001 compliant` at the top.
 | `references/rust/testing.md` | cargo test, tokio::test, wiremock, SurrealDB integration tests |
 | `references/rust/wasm-targets.md` | Any web/WASM work — SurrealDB kv-indxdb, fetch/EventSource, PGlite interop, wasm MSRV (C-002 spike findings) |
 | `references/auth/patterns.md` | Auth strategy selection, full Kratos + Supabase examples |
+| `references/sync/doctrine.md` | ANY sync/local-first/offline work — three-way data split, LFS-INV-1…7, write queue, fail-closed rules, thin-client fallback |
+| `references/sync/partial-replication.md` | Scope descriptors, lookup/metatype currency (ETag + bump events), pre-/post-onboarding one-time loads |
+| `references/sync/peer-crdt.md` | Profile vault — `local`-class data, Loro doc, WebRTC device-to-device sync, pairing/signaling, agent momentary context |
+| `references/sync/client-rag.md` | Client-side vectors (pgvector/sqlite-vec, 384-dim), embed-on-write, the RagEngine retrieval loop |
+| `references/sync/decisions.md` | ADR-LFS-1…5 — sync gateway lane, PEM adapter path, envelope vs columnar, PEM-only, Loro |
 | `docs/pglite-oxide-tauri-hybrid.md` | Embedded PostgreSQL via pglite-oxide (alternative to SurrealDB for relational needs) |
 | `docs/reference-app/knowme-agentic-deployment-plan.md` | KnowMe web/Axum, Flint realtime, BYOK, deployment profiles, and continuous-learning execution plan |
 | `docs/tj-arch-mob-001.html` | Full architectural standard |

@@ -1,4 +1,4 @@
-# 2026-07-18-c122-partial-replication-slice
+# c122-partial-replication-slice
 
 > Phase: local-first-realtime-sync · Status: proposed
 > Assigned harness/model: claude/fable-5

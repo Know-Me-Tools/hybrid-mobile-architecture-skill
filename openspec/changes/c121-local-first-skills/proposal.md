@@ -1,4 +1,4 @@
-# 2026-07-18-c124-peer-profile-vault
+# c121-local-first-skills
 
 > Phase: local-first-realtime-sync · Status: proposed
 > Assigned harness/model: claude/fable-5
@@ -7,7 +7,7 @@
 
 ## Why
 
-knowme-poc vertical slice: sensitive profile data as a Loro vault persisted locally, structurally excluded from server sync (fail-closed privacy-class filter), synced device-to-device over WebRTC DataChannels (dev signaler; FRF SignalService is the production lane). Resolves the unused loro-crdt dependency.
+Four new project-local skills (sync-doctrine, pem-local-first, client-rag, peer-profile-sync) with activation hooks, propagation via add-project-skills.sh, and .claude/skills mirror — the skill package's core deliverable for this phase.
 
 Derived from plan.md (full description, decisions, success criteria) and assessment.md
 (seven-goal gap analysis). Follows the CLAUDE.md Development Philosophy: features first,
