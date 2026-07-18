@@ -1,22 +1,22 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T15:01:08Z",
+  "updatedAt": "2026-07-18T15:13:45Z",
   "cursor": [
     "pem-sync-bridge-and-mobile-tier",
-    "c127-mobile-local-store-and-frb"
+    "c128-sqlite-vec-vector-store"
   ],
   "root": {
     "type": "phase",
     "id": "pem-sync-bridge-and-mobile-tier",
     "status": "executing",
     "progress": {
-      "done": 1,
+      "done": 2,
       "total": 5
     },
     "children": [
       {
         "type": "change",
-        "id": "c127-mobile-local-store-and-frb",
+        "id": "c128-sqlite-vec-vector-store",
         "status": "PENDING",
         "progress": {
           "done": 0,

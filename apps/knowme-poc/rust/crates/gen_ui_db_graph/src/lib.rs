@@ -26,6 +26,11 @@ mod config;
 mod corpus;
 mod embed;
 mod error;
+// C-128: mobile's client-RAG VectorStore/Embedder adapter over the memory
+// table above — native-only for the same reason `sync` is (gen_ui_db::rag's
+// seam types compile only off the workspace's non-wasm sync feature set).
+#[cfg(not(target_arch = "wasm32"))]
+mod rag;
 mod rrf;
 mod schema;
 mod store;
@@ -39,6 +44,8 @@ pub use config::{ModelPref, Provider};
 pub use corpus::{corpus_len, seed_corpus};
 pub use embed::{Embedder, EmbeddingModelInfo, EMBED_DIM};
 pub use error::GraphError;
+#[cfg(not(target_arch = "wasm32"))]
+pub use rag::{GraphRagEmbedder, GraphVectorStore};
 pub use rrf::{rrf_fuse, RrfConfig};
 pub use store::{GraphStore, GraphStoreConfig, MemoryHit, MemoryRecord, RelatedEntity, SearchMode};
 // `SurrealLocalStore` stays crate-private: reach it via `GraphStore::local_store()`,

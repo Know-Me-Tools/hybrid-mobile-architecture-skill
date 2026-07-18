@@ -1,6 +1,6 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: pem-sync-bridge-and-mobile-tier
-Step: 2 of 5
+Step: 3 of 5
 Stage: executing
-Active change: c128-sqlite-vec-vector-store
-Next command: /kbd-apply c128-sqlite-vec-vector-store
+Active change: c129-rag-ipc-and-chat-wiring
+Next command: /kbd-apply c129-rag-ipc-and-chat-wiring

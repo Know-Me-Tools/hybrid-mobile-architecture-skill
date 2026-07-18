@@ -6,7 +6,9 @@
 mod fake_embedder;
 
 use fake_embedder::HashEmbedder;
-use gen_ui_db_graph::{GraphStore, GraphStoreConfig, MemoryRecord};
+use gen_ui_db_graph::{
+    GraphRagEmbedder, GraphStore, GraphStoreConfig, GraphVectorStore, MemoryRecord,
+};
 use std::sync::Arc;
 
 /// Run a test body on the process-global runtime, NOT a per-test one.
@@ -255,5 +257,68 @@ fn relate_binds_endpoint_ids_not_literal_param_names() {
         assert!(!edges
             .iter()
             .any(|(from, to)| from.starts_with('$') || to.starts_with('$')));
+    });
+}
+
+/// C-128: ingest through the crate's existing `memory_ingest`, retrieve
+/// through the new `gen_ui_db::rag::VectorStore` adapter — proving the
+/// adapter reuses mobile's ALREADY-PRESENT vector store correctly rather
+/// than needing a second (sqlite-vec) engine.
+///
+/// `open_store()` returns the process-global `GraphStore` singleton (see
+/// `run_test`'s doc comment), so other tests' memories are ALSO in the same
+/// table — assert the ingested memory is present and ranked first for its
+/// own text, not an exact hit count (that would be order-dependent on which
+/// tests ran first, per this crate's own singleton constraint).
+#[test]
+fn rag_seam_retrieves_through_the_existing_memory_store() {
+    use gen_ui_db::rag::{Embedder as RagEmbedder, RetrievalScope, VectorStore as RagVectorStore};
+
+    run_test(async {
+        let store = Arc::new(open_store().await);
+        store
+            .memory_ingest(MemoryRecord {
+                id: None,
+                text: "the user prefers a dark UI theme everywhere".into(),
+                kind: "note".into(),
+                entity: None,
+            })
+            .await
+            .expect("ingest");
+
+        let vector_store = GraphVectorStore::new(Arc::clone(&store));
+        let embedder = GraphRagEmbedder::new(Arc::new(HashEmbedder));
+        let query_vec = embedder
+            .embed("dark UI theme everywhere")
+            .await
+            .expect("embed");
+
+        let hits = vector_store
+            .search(&RetrievalScope::AllConversations, &query_vec, 5)
+            .await
+            .expect("search");
+        assert_eq!(
+            hits.first().map(|h| h.text.as_str()),
+            Some("the user prefers a dark UI theme everywhere"),
+            "own text should rank first for its own query"
+        );
+        assert!(!hits[0].provenance.updated_at.is_empty());
+    });
+}
+
+/// C-128: Vault scope is refused — an embedding of `local`-class data is
+/// `local` (LFS-INV-4); mobile's vault gets its own local-only index, never
+/// this shared memory store.
+#[test]
+fn rag_seam_refuses_vault_scope() {
+    use gen_ui_db::rag::{RetrievalScope, VectorStore as RagVectorStore};
+
+    run_test(async {
+        let store = Arc::new(open_store().await);
+        let vector_store = GraphVectorStore::new(store);
+        let result = vector_store
+            .search(&RetrievalScope::Vault, &[1.0; 384], 5)
+            .await;
+        assert!(result.is_err());
     });
 }

@@ -1,1 +1,1 @@
-{"totalRuns":12,"failedRuns":0,"lastRun":{"ts":"2026-07-18T15:00:44Z","kind":"task","edge":"before","name":"c127-mobile-local-store-and-frb:5","hookId":"kbd-memory-log","layer":"builtin","mode":"augment","status":0},"lastFailure":null}
+{"totalRuns":18,"failedRuns":0,"lastRun":{"ts":"2026-07-18T15:13:17Z","kind":"task","edge":"before","name":"c128-sqlite-vec-vector-store:4","hookId":"kbd-memory-log","layer":"builtin","mode":"augment","status":0},"lastFailure":null}

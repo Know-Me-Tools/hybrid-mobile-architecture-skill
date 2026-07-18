@@ -271,19 +271,74 @@ impl GraphStore {
                 let rows: Vec<HitRow> = res.take(last)?;
                 Ok(rows.into_iter().map(HitRow::into_hit).collect())
             }
-            SearchMode::Vector => {
-                // Single statement, so the rows are at index 0 — no `$q` binding,
-                // because with no lexical lane there is nothing to match text against.
-                let mut res = self
-                    .db
-                    .query(VECTOR_SEARCH_QUERY)
-                    .bind(("qvec", qvec))
-                    .bind(("k", k as i64))
-                    .await?;
-                let rows: Vec<HitRow> = res.take(0)?;
-                Ok(rows.into_iter().map(HitRow::into_hit).collect())
-            }
+            SearchMode::Vector => self.search_by_vector(qvec, k).await,
         }
+    }
+
+    /// INTENT: vector-only recall against an ALREADY-COMPUTED query embedding
+    /// (no text re-embedding — the caller owns embedding, e.g. C-128's
+    /// `gen_ui_db::rag::VectorStore` adapter, which embeds once via its own
+    /// `Embedder` seam and must not pay for a second embed here).
+    pub async fn search_by_vector(
+        &self,
+        qvec: Vec<f32>,
+        k: usize,
+    ) -> Result<Vec<MemoryHit>, GraphError> {
+        let mut res = self
+            .db
+            .query(VECTOR_SEARCH_QUERY)
+            .bind(("qvec", qvec))
+            .bind(("k", k as i64))
+            .await?;
+        let rows: Vec<HitRow> = res.take(0)?;
+        Ok(rows.into_iter().map(HitRow::into_hit).collect())
+    }
+
+    /// Like [`Self::search_by_vector`], but also projects `created` (RFC3339)
+    /// so callers needing provenance (C-128's `VectorStore` adapter — its
+    /// `RetrievedChunk::provenance.updated_at` contract) get a real timestamp
+    /// rather than a placeholder. A separate query, not a `MemoryHit` field
+    /// addition, so the crate's existing intent-level return type is untouched.
+    pub async fn search_by_vector_with_timestamps(
+        &self,
+        qvec: Vec<f32>,
+        k: usize,
+    ) -> Result<Vec<(MemoryHit, String)>, GraphError> {
+        #[derive(SurrealValue)]
+        struct TimedHitRow {
+            id: String,
+            text: String,
+            kind: String,
+            score: f32,
+            created: String,
+        }
+        let mut res = self
+            .db
+            .query(
+                "SELECT meta::id(id) AS id, text, kind, \
+                 math::fixed(1.0 / (1.0 + vector::distance::knn()), 6) AS score, \
+                 <string> created AS created \
+                 FROM memory WHERE embedding <|64,64|> $qvec \
+                 ORDER BY score DESC LIMIT $k;",
+            )
+            .bind(("qvec", qvec))
+            .bind(("k", k as i64))
+            .await?;
+        let rows: Vec<TimedHitRow> = res.take(0)?;
+        Ok(rows
+            .into_iter()
+            .map(|r| {
+                (
+                    MemoryHit {
+                        id: r.id,
+                        text: r.text,
+                        kind: r.kind,
+                        score: r.score,
+                    },
+                    r.created,
+                )
+            })
+            .collect())
     }
 
     /// INTENT: expand the graph outward from `entity_id` up to `depth` RELATE hops,
