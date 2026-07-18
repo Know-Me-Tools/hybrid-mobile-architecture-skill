@@ -40,6 +40,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             commands::run_migrations,
             commands::load_seeds,
             commands::attach_sync_shapes,
+            commands::attach_sync_scopes,
+            commands::run_one_time_loads,
             commands::memory_ingest,
             commands::entity_runtime_start,
             commands::entity_runtime_stop,

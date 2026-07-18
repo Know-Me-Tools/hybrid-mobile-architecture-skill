@@ -26,6 +26,10 @@ surrealdb = { workspace = true, features = ["kv-rocksdb", "kv-mem"] }
 # fastembed pulls ONNX Runtime — native only. On wasm the embedder is supplied by
 # the host (JS transformers.js) through the Embedder trait, so fastembed is absent.
 fastembed = { workspace = true, optional = true }
+# C-127: mobile's sync LocalStore (this crate's SurrealLocalStore) implements
+# gen_ui_db::sync::LocalStore — native-only, mirroring how gen_ui_db's own sync
+# module compiles to a no-op stub on wasm32 (no Postgres/tonic in-browser).
+gen_ui_db = { path = "../gen_ui_db" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 surrealdb = { workspace = true, features = ["kv-indxdb"] }

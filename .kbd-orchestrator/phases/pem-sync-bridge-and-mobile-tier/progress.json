@@ -2,7 +2,7 @@
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 1,
+      "completed": 2,
       "total": 5,
       "status": "PENDING"
     },
@@ -27,12 +27,17 @@
   "reflection_complete": false,
   "seeded_from": "local-first-realtime-sync/reflection.md",
   "last_updated_by": "claude-code",
-  "last_updated": "2026-07-18T09:20:00Z",
-  "changes_completed": 1,
+  "last_updated": "2026-07-18T10:05:00Z",
+  "changes_completed": 2,
   "qa": {
     "c126-pem-scope-bridge": {
       "artifact_refiner": "UNAVAILABLE",
       "compensating_verification": "tsc clean; 18/18 desktop vitest green (5 new: 3 compileListQuery + 2 bridgeTableToGraph with injected live seam after discovering the real @electric-sql/pglite/live extension hangs any vitest pool). One real defect caught by tests: missing disposed-guard in the live callback, fixed."
+    },
+    "c127-mobile-local-store-and-frb": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "cargo check/clippy clean on all touched crates (26 pre-existing llama-cpp warnings, zero new); 8 gen_ui_db_graph tests green incl 2 new SurrealLocalStore boundary tests; full workspace check green excluding gen_ui_ffi (env-blocked: frb codegen times out on this cold worktree, a standing limitation — Rust/Tauri side verified via temporary local stub, never committed)"
     }
-  }
+  },
+  "design_correction": "Plan called for SqliteLocalStore on mobile; investigation found mobile config/memory store is SurrealDB (SqliteEntityStore is entity-envelope-only, a separate concern), and the crate author had already tracked this exact gap as C-106 T5 with an explicit warning against smuggling a row-persistence surface into gen_ui_db_graph without a deliberate design decision. Implemented SurrealLocalStore as a new crate-internal module (gen_ui_db_graph::sync) reached only via GraphStore::local_store() -> Arc<dyn LocalStore>, keeping the INTENT-LEVEL public boundary intact."
 }

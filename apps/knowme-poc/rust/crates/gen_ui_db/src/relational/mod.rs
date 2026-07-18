@@ -30,4 +30,4 @@ pub use postgres::PostgresStore;
 pub use seed::{SeedBundle, SeedSource};
 #[cfg(feature = "sqlite")]
 pub use sqlite_entity::SqliteEntityStore;
-pub use startup::{Migrated, PreOnboarded, Ready, Seeded, Startup, Uninitialized};
+pub use startup::{Migrated, PreOnboarded, Ready, Seeded, Startup, StartupStore, Uninitialized};

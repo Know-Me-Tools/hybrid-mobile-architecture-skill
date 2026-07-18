@@ -401,6 +401,23 @@ impl GraphStore {
         &self.db
     }
 
+    /// C-127: the sync `LocalStore` seam over this SAME connection — one
+    /// embedded store per process, not a second one opened for sync. This is
+    /// the one sanctioned way outside this crate to reach the raw connection;
+    /// everything else stays intent-level (`memory_ingest` / `memory_search` /
+    /// `graph_expand`), per the crate's documented boundary in lib.rs.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub async fn local_store(
+        &self,
+    ) -> Result<std::sync::Arc<dyn gen_ui_db::sync::LocalStore>, GraphError> {
+        let store = crate::sync::SurrealLocalStore::new(self.db.clone());
+        store
+            .ensure_schema()
+            .await
+            .map_err(|e| GraphError::Surreal(e.to_string()))?;
+        Ok(std::sync::Arc::new(store))
+    }
+
     /// Test-only boundary for a relation whose source table violates schema.
     #[doc(hidden)]
     pub async fn relate_raw_for_test(

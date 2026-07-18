@@ -203,7 +203,9 @@ mod tests {
     async fn a_write_that_fails_offline_replays_when_the_server_returns() {
         let sink = ScriptedSink::new(vec![WriteOutcome::Retry, WriteOutcome::Applied]);
         let q = queue(sink.clone(), 5);
-        q.enqueue(write("k1")).await.expect("declared table enqueues");
+        q.enqueue(write("k1"))
+            .await
+            .expect("declared table enqueues");
 
         assert_eq!(q.drain().await, 0, "the write must land, not be dropped");
         assert_eq!(sink.calls(), 2, "it should have been retried exactly once");
@@ -219,7 +221,9 @@ mod tests {
     async fn a_transient_write_is_quarantined_once_attempts_run_out() {
         let sink = ScriptedSink::new(vec![WriteOutcome::Retry]);
         let q = queue(sink.clone(), 3);
-        q.enqueue(write("k1")).await.expect("declared table enqueues");
+        q.enqueue(write("k1"))
+            .await
+            .expect("declared table enqueues");
 
         // Drain until it gives up. Each pass burns one attempt.
         for _ in 0..3 {
@@ -239,7 +243,9 @@ mod tests {
             reason: "400".into(),
         }]);
         let q = queue(sink.clone(), 5);
-        q.enqueue(write("k1")).await.expect("declared table enqueues");
+        q.enqueue(write("k1"))
+            .await
+            .expect("declared table enqueues");
 
         assert_eq!(q.drain().await, 0);
         assert_eq!(sink.calls(), 1, "must not retry a terminal rejection");
@@ -270,7 +276,9 @@ mod tests {
             seen: Mutex::new(Vec::new()),
         });
         let q = queue(spy.clone(), 5);
-        q.enqueue(write("stable-key")).await.expect("declared table enqueues");
+        q.enqueue(write("stable-key"))
+            .await
+            .expect("declared table enqueues");
 
         for _ in 0..3 {
             q.drain().await;
@@ -307,8 +315,12 @@ mod tests {
             seen: Mutex::new(Vec::new()),
         });
         let q = queue(spy.clone(), 5);
-        q.enqueue(write("first")).await.expect("declared table enqueues");
-        q.enqueue(write("second")).await.expect("declared table enqueues");
+        q.enqueue(write("first"))
+            .await
+            .expect("declared table enqueues");
+        q.enqueue(write("second"))
+            .await
+            .expect("declared table enqueues");
 
         q.drain().await;
         q.drain().await;

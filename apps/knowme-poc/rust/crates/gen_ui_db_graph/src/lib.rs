@@ -29,6 +29,11 @@ mod error;
 mod rrf;
 mod schema;
 mod store;
+// C-127: mobile's sync LocalStore. Native-only, like gen_ui_db::sync itself
+// (no Postgres/tonic in-browser) — a distinct concern from the intent-level
+// memory/graph API above, sharing only the already-open SurrealDB connection.
+#[cfg(not(target_arch = "wasm32"))]
+mod sync;
 
 pub use config::{ModelPref, Provider};
 pub use corpus::{corpus_len, seed_corpus};
@@ -36,6 +41,9 @@ pub use embed::{Embedder, EmbeddingModelInfo, EMBED_DIM};
 pub use error::GraphError;
 pub use rrf::{rrf_fuse, RrfConfig};
 pub use store::{GraphStore, GraphStoreConfig, MemoryHit, MemoryRecord, RelatedEntity, SearchMode};
+// `SurrealLocalStore` stays crate-private: reach it via `GraphStore::local_store()`,
+// which returns it as `impl gen_ui_db::sync::LocalStore` at the call site (the
+// concrete type never needs to leave this crate — see lib.rs's INTENT-LEVEL boundary).
 
 #[cfg(feature = "embed-native")]
 pub use embed::FastEmbedder;

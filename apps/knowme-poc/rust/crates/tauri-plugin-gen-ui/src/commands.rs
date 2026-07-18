@@ -191,6 +191,19 @@ pub async fn load_seeds() -> Result<()> {
 /// unrunnable for everyone who is not doing sync work today.
 #[tauri::command]
 pub async fn attach_sync_shapes<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> {
+    attach_sync_scopes(app, Vec::new()).await
+}
+
+/// C-127 parity command: attach sync with explicit partial-replication scopes
+/// (`gen_ui_types::sync::SyncScope` JSON) instead of the all-or-nothing legacy
+/// `attach_sync_shapes`. Empty `scope_json` preserves the exact prior
+/// behavior (FRF consumes its own configured shapes regardless — scopes are
+/// additive metadata for future PES buckets, ADR-LFS-1).
+#[tauri::command]
+pub async fn attach_sync_scopes<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    scope_json: Vec<String>,
+) -> Result<()> {
     use gen_ui_db::sync::{FrfSyncTransport, PgLocalStore, SyncTransport};
 
     let data_dir = app_data_dir(&app)?;
@@ -199,6 +212,12 @@ pub async fn attach_sync_shapes<R: Runtime>(app: tauri::AppHandle<R>) -> Result<
         tracing::info!("sync ready in local-only mode");
         return Ok(());
     };
+
+    let scopes = scope_json
+        .iter()
+        .map(|json| serde_json::from_str(json))
+        .collect::<std::result::Result<Vec<gen_ui_types::sync::SyncScope>, serde_json::Error>>()
+        .map_err(|e| gen_ui_types::CoreError::Serde(e.to_string()))?;
 
     // The pool the read lane writes into is the SAME pglite store `run_migrations`
     // opened — `PgliteStore::open` is a per-process singleton, so this hands back the
@@ -215,13 +234,54 @@ pub async fn attach_sync_shapes<R: Runtime>(app: tauri::AppHandle<R>) -> Result<
     )?;
 
     let transport = FrfSyncTransport::new(cfg.into_transport_config(), local, sink);
-    transport.start().await?;
+    transport.start_scopes(&scopes).await?;
 
     // Hold the transport for the process lifetime: dropping it stops the drain loop and
     // the read lane (they only live as long as the Arcs they captured).
     SYNC.set(Arc::new(transport))
         .map_err(|_| gen_ui_types::CoreError::Terminal("sync already attached".into()))?;
     Ok(())
+}
+
+/// C-127 parity command: ledgered one-time loads (`stage`: "pre" | "post").
+/// Runs against the SAME pglite store `run_migrations` opened — `PgliteStore`
+/// wraps `PostgresStore`, which already implements `StartupStore`, so no
+/// second store type is needed here (unlike mobile's SurrealDB tier).
+#[tauri::command]
+pub async fn run_one_time_loads<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    stage: String,
+) -> Result<Vec<String>> {
+    let parsed_stage = match stage.as_str() {
+        "pre" => gen_ui_db::relational::LoadStage::PreOnboarding,
+        "post" => gen_ui_db::relational::LoadStage::PostOnboarding,
+        other => {
+            return Err(gen_ui_types::CoreError::Terminal(format!(
+                "run_one_time_loads: unknown stage {other:?} (expected \"pre\" or \"post\")"
+            ))
+            .into())
+        }
+    };
+    let data_dir = app_data_dir(&app)?;
+    let store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    // No bundles ship yet (no desktop-specific pre/post-onboarding bundle
+    // today) — this proves the boot-order contract; bundles arrive with the
+    // first real onboarding flow that needs one.
+    let loads: Vec<gen_ui_db::relational::OneTimeLoad> = Vec::new();
+    let ledger = gen_ui_db::relational::MemoryLookupLedger::default();
+    let client = reqwest::Client::new();
+    let results = gen_ui_db::relational::run_one_time_loads(
+        store.store(),
+        &ledger,
+        &client,
+        &loads,
+        parsed_stage,
+    )
+    .await
+    .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    Ok(results.into_iter().map(|r| format!("{r:?}")).collect())
 }
 
 /// The live sync transport. `OnceCell` mirrors `gen_ui_agent::state`'s process-lifetime

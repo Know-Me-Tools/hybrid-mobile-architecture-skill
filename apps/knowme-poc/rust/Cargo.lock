@@ -3780,6 +3780,7 @@ dependencies = [
  "async-trait",
  "fastembed",
  "futures",
+ "gen_ui_db",
  "gen_ui_runtime",
  "gen_ui_types",
  "serde",
@@ -3797,6 +3798,7 @@ version = "0.1.0"
 dependencies = [
  "android_logger 0.14.1",
  "anyhow",
+ "async-trait",
  "flutter_rust_bridge",
  "gen_ui_agent",
  "gen_ui_audio",
@@ -3811,6 +3813,7 @@ dependencies = [
  "log",
  "once_cell",
  "oslog",
+ "reqwest 0.12.28",
  "serde_json",
  "tracing",
 ]
@@ -10914,6 +10917,7 @@ dependencies = [
  "keyring",
  "log",
  "once_cell",
+ "reqwest 0.12.28",
  "serde",
  "serde_json",
  "sqlx",

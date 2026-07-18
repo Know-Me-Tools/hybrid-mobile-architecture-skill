@@ -1,6 +1,6 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: pem-sync-bridge-and-mobile-tier
-Step: 1 of 5
+Step: 2 of 5
 Stage: executing
-Active change: c127-mobile-local-store-and-frb
-Next command: /kbd-apply c127-mobile-local-store-and-frb
+Active change: c128-sqlite-vec-vector-store
+Next command: /kbd-apply c128-sqlite-vec-vector-store
