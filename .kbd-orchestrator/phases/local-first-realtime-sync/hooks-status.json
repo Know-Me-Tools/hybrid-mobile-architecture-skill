@@ -1,1 +1,1 @@
-{"totalRuns":8,"failedRuns":0,"lastRun":{"ts":"2026-07-18T09:27:33Z","kind":"assess","edge":"after","name":"local-first-realtime-sync","hookId":"legacy-assessment-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}
+{"totalRuns":13,"failedRuns":0,"lastRun":{"ts":"2026-07-18T09:37:10Z","kind":"plan","edge":"after","name":"local-first-realtime-sync","hookId":"legacy-plan-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}

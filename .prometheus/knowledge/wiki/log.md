@@ -1,6 +1,8 @@
 # Update Log
 
 ## 2026-07-18
+* **Creation**: [Local-first realtime sync executor completed with unknown change](/local-first-realtime-sync-executor-completed-with-unknown-change.md)
+* **Creation**: [Local-first sync assessment finds unused CRDT and PGlite sync deps](/local-first-sync-assessment-finds-unused-crdt-and-pglite-sync-deps.md)
 * **Creation**: [Local-first realtime sync assessment ready at 09:16:56](/local-first-realtime-sync-assessment-ready-at-09-16-56.md)
 * **Creation**: [Local-first realtime sync executor completed with unknown change](/local-first-realtime-sync-executor-completed-with-unknown-change.md)
 * **Creation**: [Local-first realtime sync assessment ready at 09:10:25](/local-first-realtime-sync-assessment-ready-at-09-10-25.md)

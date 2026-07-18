@@ -1,4 +1,5 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: local-first-realtime-sync
-Stage: assessment_complete
-Next command: /kbd-plan local-first-realtime-sync
+Step: 0 of 6
+Stage: execute_ready
+Next command: /kbd-execute local-first-realtime-sync
