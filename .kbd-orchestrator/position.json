@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T11:33:00Z",
+  "updatedAt": "2026-07-18T11:36:46Z",
   "cursor": [
     "build-detailed-prompting-guide",
     "reflect",
@@ -9,7 +9,7 @@
   "root": {
     "type": "phase",
     "id": "build-detailed-prompting-guide",
-    "status": "executing",
+    "status": "complete",
     "progress": {
         "done": 5,
       "total": 5
@@ -25,6 +25,8 @@
         }
       }
     ],
-    "annotations": []
+    "annotations": [
+      "KBD reflect complete; all five prompting-guide OpenSpec changes are complete and published."
+    ]
   }
 }

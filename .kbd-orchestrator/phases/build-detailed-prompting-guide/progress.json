@@ -1,6 +1,6 @@
 {
   "phase": "build-detailed-prompting-guide",
-  "status": "executing",
+  "status": "complete",
   "parentPhase": null,
   "childPhases": [],
   "childPointer": null,
@@ -9,7 +9,7 @@
   "spec_complete": true,
   "plan_complete": true,
   "execute_complete": true,
-  "reflect_complete": false,
+  "reflect_complete": true,
   "implementation_total": 5,
   "implementation_completed": 5,
   "changes_total": 5,
@@ -105,6 +105,6 @@
   "sourceTool": "codex",
   "createdBy": "kbd-new-phase",
   "last_updated_by": "codex",
-  "last_updated": "2026-07-18T11:33:00Z",
-  "updatedAt": "2026-07-18T11:33:00Z"
+  "last_updated": "2026-07-18T11:36:46Z",
+  "updatedAt": "2026-07-18T11:36:46Z"
 }
