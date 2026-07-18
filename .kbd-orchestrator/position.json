@@ -1,22 +1,22 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T11:10:45Z",
+  "updatedAt": "2026-07-18T14:16:28Z",
   "cursor": [
-    "local-first-realtime-sync",
-    "c125-scaffold-audit-propagation"
+    "pem-sync-bridge-and-mobile-tier",
+    "c126-pem-scope-bridge"
   ],
   "root": {
     "type": "phase",
-    "id": "local-first-realtime-sync",
+    "id": "pem-sync-bridge-and-mobile-tier",
     "status": "executing",
     "progress": {
-      "done": 5,
-      "total": 6
+      "done": 0,
+      "total": 5
     },
     "children": [
       {
         "type": "change",
-        "id": "c125-scaffold-audit-propagation",
+        "id": "c126-pem-scope-bridge",
         "status": "PENDING",
         "progress": {
           "done": 0,

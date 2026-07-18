@@ -1,5 +1,6 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: pem-sync-bridge-and-mobile-tier
-Step: 0 of 5
-Stage: execute_ready
-Next command: /kbd-execute pem-sync-bridge-and-mobile-tier
+Step: 1 of 5
+Stage: executing
+Active change: c127-mobile-local-store-and-frb
+Next command: /kbd-apply c127-mobile-local-store-and-frb
