@@ -2,9 +2,9 @@
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 3,
+      "completed": 5,
       "total": 5,
-      "status": "PENDING"
+      "status": "COMPLETE"
     },
     "evidence": {
       "status": "NOT_TRACKED",
@@ -27,8 +27,8 @@
   "reflection_complete": false,
   "seeded_from": "local-first-realtime-sync/reflection.md",
   "last_updated_by": "claude-code",
-  "last_updated": "2026-07-18T10:35:00Z",
-  "changes_completed": 3,
+  "last_updated": "2026-07-18T10:52:00Z",
+  "changes_completed": 5,
   "qa": {
     "c126-pem-scope-bridge": {
       "artifact_refiner": "UNAVAILABLE",
@@ -41,6 +41,10 @@
     "c128-sqlite-vec-vector-store": {
       "artifact_refiner": "UNAVAILABLE",
       "compensating_verification": "9/9 integration tests green (2 new, stable across 3 repeated runs); workspace check clean; clippy 0 new warnings"
+    },
+    "c130-vault-roster-auth": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "22/22 desktop tests green (2 new, stable across 3 repeated runs); tsc clean; caught and fixed a real async-ordering race in the handshake via frame-processing serialization"
     }
   },
   "design_correction": "Plan called for SqliteLocalStore on mobile; investigation found mobile config/memory store is SurrealDB (SqliteEntityStore is entity-envelope-only, a separate concern), and the crate author had already tracked this exact gap as C-106 T5 with an explicit warning against smuggling a row-persistence surface into gen_ui_db_graph without a deliberate design decision. Implemented SurrealLocalStore as a new crate-internal module (gen_ui_db_graph::sync) reached only via GraphStore::local_store() -> Arc<dyn LocalStore>, keeping the INTENT-LEVEL public boundary intact. | Second correction (c128): plan called for sqlite-vec on mobile; investigation found mobile already has a production 384-dim HNSW+BM25 vector store in SurrealDB (GraphStore::memory_search/memory_ingest) — the exact client-RAG capability c123 built pgvector for on desktop/web. Implemented GraphVectorStore/GraphRagEmbedder as adapters over the EXISTING store instead of a second unused vector engine."

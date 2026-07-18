@@ -25,6 +25,7 @@
     "@electric-sql/pglite-pgvector": "0.0.5",
     "@fontsource-variable/geist": "^5.2.9",
     "@mlc-ai/web-llm": "0.2.84",
+    "@noble/ed25519": "^3.1.0",
     "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
     "@prometheus-ags/prometheus-entity-management": "3.0.0-alpha.0",
     "@prometheus-ags/tauri-plugin-gen-ui": "file:../rust/crates/tauri-plugin-gen-ui/guest-js",

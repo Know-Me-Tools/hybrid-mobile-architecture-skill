@@ -1,6 +1,5 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: pem-sync-bridge-and-mobile-tier
-Step: 3 of 5
-Stage: executing
-Active change: c129-rag-ipc-and-chat-wiring
-Next command: /kbd-apply c129-rag-ipc-and-chat-wiring
+Step: 5 of 5
+Stage: reflect_ready
+Next command: /kbd-reflect pem-sync-bridge-and-mobile-tier

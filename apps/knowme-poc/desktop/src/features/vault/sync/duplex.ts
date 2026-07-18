@@ -16,17 +16,60 @@ export const MAX_MESSAGE_BYTES = 256 * 1024
 export type VaultMessage =
   | { kind: 'hello'; versionVector: Uint8Array }
   | { kind: 'delta'; update: Uint8Array }
+  // C-130 protocol v2: a peer session opens with a challenge/response
+  // handshake BEFORE any hello/delta is processed (see peerSync.ts). Payload
+  // is JSON-in-bytes since these carry structured fields, not raw CRDT bytes.
+  | { kind: 'challenge'; nonce: Uint8Array; deviceId: string }
+  | { kind: 'response'; nonce: Uint8Array; deviceId: string; publicKey: Uint8Array; signature: Uint8Array }
 
 const KIND_HELLO = 1
 const KIND_DELTA = 2
+const KIND_CHALLENGE = 3
+const KIND_RESPONSE = 4
+
+function textEncode(value: unknown): Uint8Array {
+  return new TextEncoder().encode(JSON.stringify(value))
+}
+function textDecode(bytes: Uint8Array): unknown {
+  return JSON.parse(new TextDecoder().decode(bytes))
+}
+function bytesToB64(bytes: Uint8Array): string {
+  return btoa(String.fromCharCode(...bytes))
+}
+function b64ToBytes(b64: string): Uint8Array {
+  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
+}
 
 /** Encode one logical message into 16 KiB frames: [msgId u32][seq u16][total u16][kind u8][chunk]. */
 export function encodeFrames(message: VaultMessage, msgId: number): Uint8Array[] {
-  const payload = message.kind === 'hello' ? message.versionVector : message.update
+  let kind: number
+  let payload: Uint8Array
+  switch (message.kind) {
+    case 'hello':
+      kind = KIND_HELLO
+      payload = message.versionVector
+      break
+    case 'delta':
+      kind = KIND_DELTA
+      payload = message.update
+      break
+    case 'challenge':
+      kind = KIND_CHALLENGE
+      payload = textEncode({ nonce: bytesToB64(message.nonce), deviceId: message.deviceId })
+      break
+    case 'response':
+      kind = KIND_RESPONSE
+      payload = textEncode({
+        nonce: bytesToB64(message.nonce),
+        deviceId: message.deviceId,
+        publicKey: bytesToB64(message.publicKey),
+        signature: bytesToB64(message.signature),
+      })
+      break
+  }
   if (payload.length > MAX_MESSAGE_BYTES) {
     throw new Error(`vault message exceeds ${MAX_MESSAGE_BYTES} bytes — blobs do not go in the doc`)
   }
-  const kind = message.kind === 'hello' ? KIND_HELLO : KIND_DELTA
   const total = Math.max(1, Math.ceil(payload.length / FRAME_PAYLOAD_BYTES))
   const frames: Uint8Array[] = []
   for (let seq = 0; seq < total; seq++) {
@@ -73,8 +116,32 @@ export class FrameAssembler {
       payload.set(part, offset)
       offset += part.length
     }
-    return entry.kind === KIND_HELLO
-      ? { kind: 'hello', versionVector: payload }
-      : { kind: 'delta', update: payload }
+    switch (entry.kind) {
+      case KIND_HELLO:
+        return { kind: 'hello', versionVector: payload }
+      case KIND_DELTA:
+        return { kind: 'delta', update: payload }
+      case KIND_CHALLENGE: {
+        const { nonce, deviceId } = textDecode(payload) as { nonce: string; deviceId: string }
+        return { kind: 'challenge', nonce: b64ToBytes(nonce), deviceId }
+      }
+      case KIND_RESPONSE: {
+        const { nonce, deviceId, publicKey, signature } = textDecode(payload) as {
+          nonce: string
+          deviceId: string
+          publicKey: string
+          signature: string
+        }
+        return {
+          kind: 'response',
+          nonce: b64ToBytes(nonce),
+          deviceId,
+          publicKey: b64ToBytes(publicKey),
+          signature: b64ToBytes(signature),
+        }
+      }
+      default:
+        return null // unknown frame kind — drop rather than crash (forward-compat)
+    }
   }
 }

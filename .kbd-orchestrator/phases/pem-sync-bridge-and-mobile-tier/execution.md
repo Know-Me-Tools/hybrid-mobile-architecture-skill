@@ -45,7 +45,7 @@ PROGRESS LEDGER
 - [DONE] c127-mobile-local-store-and-frb — SELF (archived 2026-07-18; design corrected mid-flight, see progress.json)
 - [DONE] c128-sqlite-vec-vector-store — SELF (archived 2026-07-18; design corrected, see progress.json)
 - [PENDING] c129-rag-ipc-and-chat-wiring — SELF
-- [PENDING] c130-vault-roster-auth — SELF
+- [DONE] c130-vault-roster-auth — SELF (archived 2026-07-18)
 
 OUTPUTS
 

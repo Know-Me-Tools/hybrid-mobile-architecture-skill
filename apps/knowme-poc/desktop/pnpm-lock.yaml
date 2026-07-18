@@ -38,6 +38,9 @@ importers:
       '@mlc-ai/web-llm':
         specifier: 0.2.84
         version: 0.2.84
+      '@noble/ed25519':
+        specifier: ^3.1.0
+        version: 3.1.0
       '@prometheus-ags/gen-ui-react':
         specifier: file:../packages/gen-ui-react
         version: file:../packages/gen-ui-react(react@19.2.7)
@@ -842,6 +845,9 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
+
+  '@noble/ed25519@3.1.0':
+    resolution: {integrity: sha512-pfcObRY3CtvwfaG9Mt5XqZdKmAQppl37tHUeuBhDUbiwJBCVY4/A4lbMvb1xKhMDx96AqAqZpMWuBX1HulhX4g==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -5981,6 +5987,8 @@ snapshots:
       '@emnapi/runtime': 1.11.1
       '@tybys/wasm-util': 0.10.3
     optional: true
+
+  '@noble/ed25519@3.1.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
