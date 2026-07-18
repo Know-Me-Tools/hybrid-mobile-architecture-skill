@@ -1,0 +1,389 @@
+{
+  "phase": "build-detailed-prompting-guide",
+  "generated_at": "2026-07-18T06:41:53Z",
+  "research_budget": {
+    "max_queries_per_tier": 8,
+    "max_minutes": 20,
+    "queries_used": {
+      "tier_1_github": 8,
+      "tier_2_context7_docfork": 0,
+      "tier_3_registries": 8,
+      "tier_4_firecrawl": 8
+    }
+  },
+  "gaps_addressed": [
+    "gap-canonical-prompting-source",
+    "gap-ten-scenario-recipes",
+    "gap-six-harness-playbooks",
+    "gap-loop-invocations",
+    "gap-model-evidence-routing",
+    "gap-openai-proxy-case-study",
+    "gap-orchestration-skill",
+    "gap-content-verification",
+    "gap-publication-boundary"
+  ],
+  "candidates": [
+    {
+      "id": "cand-001",
+      "name": "Docusaurus and @docusaurus/plugin-content-docs",
+      "kind": "framework",
+      "repo_url": "https://github.com/facebook/docusaurus",
+      "registry": "npm",
+      "fit_for_gap": "gap-canonical-prompting-source",
+      "verdict": "adopt",
+      "coverage_estimate": 0.95,
+      "license": "MIT",
+      "maintenance": {
+        "last_release": "3.10.2"
+      },
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/@docusaurus/plugin-content-docs",
+          "claim": "The npm registry reported 3.10.2, MIT, Node >=20, modified 2026-07-10. The project already proves pinned 3.10.1 builds."
+        },
+        {
+          "tier": 4,
+          "source_url": "https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-docs",
+          "claim": "The official plugin supports a docs path relative to the site directory and configurable sidebar ownership."
+        }
+      ],
+      "risks": [
+        "The external parent-directory path must be proven in the clean CI layout.",
+        "A patch update from the proven 3.10.1 pin is unrelated and should be separate."
+      ],
+      "decision_rationale": "The framework and Pages site already work; changing frameworks would not create the missing content."
+    },
+    {
+      "id": "cand-002",
+      "name": "@easyops-cn/docusaurus-search-local",
+      "kind": "library",
+      "repo_url": "https://github.com/easyops-cn/docusaurus-search-local",
+      "registry": "npm",
+      "fit_for_gap": "gap-canonical-prompting-source",
+      "verdict": "adopt",
+      "coverage_estimate": 1.0,
+      "license": "MIT",
+      "maintenance": {
+        "last_release": "0.55.2",
+        "stars": 894,
+        "open_issues": 93
+      },
+      "evidence": [
+        {
+          "tier": 1,
+          "source_url": "https://github.com/easyops-cn/docusaurus-search-local",
+          "claim": "Repository search identified active Docusaurus v2/v3 offline search support and a 2026-05-31 push."
+        },
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/@easyops-cn/docusaurus-search-local",
+          "claim": "The npm registry reported current 0.55.2, matching the installed project version."
+        }
+      ],
+      "risks": [
+        "Search completeness still needs a route/index assertion."
+      ],
+      "decision_rationale": "It is already configured for /prompting and provides the required deterministic local search."
+    },
+    {
+      "id": "cand-003",
+      "name": "Ajv",
+      "kind": "library",
+      "repo_url": "https://github.com/ajv-validator/ajv",
+      "registry": "npm",
+      "fit_for_gap": "gap-content-verification and gap-model-evidence-routing",
+      "verdict": "adopt",
+      "coverage_estimate": 0.85,
+      "license": "MIT",
+      "maintenance": {
+        "last_release": "8.20.0"
+      },
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/ajv",
+          "claim": "The npm registry reported 8.20.0, MIT, modified 2026-04-24."
+        },
+        {
+          "tier": 4,
+          "source_url": "https://ajv.js.org/json-schema.html",
+          "claim": "Official documentation confirms support for JSON Schema 2020-12."
+        }
+      ],
+      "risks": [
+        "JSON Schema cannot express source liveness, referenced skill existence, or producer/critic separation."
+      ],
+      "decision_rationale": "Use a standard validator for shape and retain small project-owned semantic checks for cross-file invariants."
+    },
+    {
+      "id": "cand-004",
+      "name": "Linkinator",
+      "kind": "library",
+      "repo_url": "https://github.com/JustinBeckwith/linkinator",
+      "registry": "npm",
+      "fit_for_gap": "gap-content-verification",
+      "verdict": "adapt",
+      "coverage_estimate": 0.75,
+      "license": "MIT",
+      "maintenance": {
+        "last_release": "7.6.1"
+      },
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/linkinator",
+          "claim": "The npm registry reported 7.6.1, MIT, Node >=20, modified 2026-02-27."
+        }
+      ],
+      "risks": [
+        "Firecrawl returned no indexed official documentation result.",
+        "External link checks can fail for rate limits or transient vendor outages."
+      ],
+      "decision_rationale": "Use it as a bounded built-site/external-link gate with retries and allowlists, not as the internal-link authority."
+    },
+    {
+      "id": "cand-005",
+      "name": "Playwright Test",
+      "kind": "library",
+      "repo_url": "https://github.com/microsoft/playwright",
+      "registry": "npm",
+      "fit_for_gap": "gap-content-verification",
+      "verdict": "adopt",
+      "coverage_estimate": 0.9,
+      "license": "Apache-2.0",
+      "maintenance": {
+        "last_release": "1.61.1"
+      },
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/@playwright/test",
+          "claim": "The npm registry reported 1.61.1, Apache-2.0, Node >=18, modified 2026-07-18."
+        },
+        {
+          "tier": 4,
+          "source_url": "https://playwright.dev/docs/test-webserver",
+          "claim": "Official documentation supports launching the documentation server as part of the test run."
+        },
+        {
+          "tier": 4,
+          "source_url": "https://playwright.dev/docs/test-projects",
+          "claim": "Official projects support representative browser and viewport configurations."
+        }
+      ],
+      "risks": [
+        "Browser installation adds CI time and cache requirements."
+      ],
+      "decision_rationale": "It provides observable route, search, theme, responsive, and copy-button proof that a Markdown-only validator cannot."
+    },
+    {
+      "id": "cand-006",
+      "name": "@axe-core/playwright",
+      "kind": "library",
+      "repo_url": "https://github.com/dequelabs/axe-core-npm",
+      "registry": "npm",
+      "fit_for_gap": "gap-content-verification",
+      "verdict": "adopt",
+      "coverage_estimate": 0.8,
+      "license": "MPL-2.0",
+      "maintenance": {
+        "last_release": "4.12.1"
+      },
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/@axe-core/playwright",
+          "claim": "The npm registry reported 4.12.1, MPL-2.0, modified 2026-07-08."
+        }
+      ],
+      "risks": [
+        "Firecrawl returned no indexed official GitHub documentation result.",
+        "Automated rules do not replace keyboard and visual accessibility review."
+      ],
+      "decision_rationale": "Integrate with Playwright for repeatable WCAG checks on representative public routes."
+    },
+    {
+      "id": "cand-007",
+      "name": "Agent Skills specification",
+      "kind": "pattern",
+      "repo_url": "https://agentskills.io/specification",
+      "registry": "none",
+      "fit_for_gap": "gap-six-harness-playbooks and gap-orchestration-skill",
+      "verdict": "adopt",
+      "coverage_estimate": 0.7,
+      "license": "NOASSERTION",
+      "maintenance": {
+        "last_release": "accessed-2026-07-18"
+      },
+      "evidence": [
+        {
+          "tier": 4,
+          "source_url": "https://agentskills.io/specification",
+          "claim": "The specification defines portable SKILL.md frontmatter and folder conventions used across supported harnesses."
+        },
+        {
+          "tier": 4,
+          "source_url": "https://agentskills.io/skill-creation/best-practices",
+          "claim": "The official guidance recommends compact core skills with detailed resources loaded progressively."
+        }
+      ],
+      "risks": [
+        "The standard does not normalize harness-specific commands, permissions, plugins, or session semantics."
+      ],
+      "decision_rationale": "Use it as the shared skill packaging contract while documenting every harness on its own terms."
+    },
+    {
+      "id": "cand-008",
+      "name": "orchestrate-prometheus-application project skill",
+      "kind": "skeleton",
+      "repo_url": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/tree/main/templates/project-skills/orchestrate-prometheus-application",
+      "registry": "none",
+      "fit_for_gap": "gap-orchestration-skill",
+      "verdict": "adapt",
+      "coverage_estimate": 0.55,
+      "license": "NOASSERTION",
+      "maintenance": {
+        "last_release": "repository-main-2026-07-18"
+      },
+      "evidence": [
+        {
+          "tier": 1,
+          "source_url": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/tree/main/templates/project-skills/orchestrate-prometheus-application",
+          "claim": "The existing template classifies all ten scenarios and is copied identically to six project harness directories."
+        }
+      ],
+      "risks": [
+        "The current 270-word checklist does not generate or validate scenario/harness artifacts."
+      ],
+      "decision_rationale": "Extend the existing portable router instead of creating a competing orchestration skill."
+    },
+    {
+      "id": "cand-009",
+      "name": "OpenAI Proxy repository",
+      "kind": "skeleton",
+      "repo_url": "https://github.com/GQAdonis/openai-proxy",
+      "registry": "none",
+      "fit_for_gap": "gap-openai-proxy-case-study",
+      "verdict": "reference",
+      "coverage_estimate": 0.8,
+      "license": "NOASSERTION",
+      "maintenance": {
+        "last_release": "commit-7833663"
+      },
+      "evidence": [
+        {
+          "tier": 1,
+          "source_url": "https://github.com/GQAdonis/openai-proxy",
+          "claim": "Local source inspection found Axum OpenAI-compatible routes, AG-UI, optional A2A, MCP stdio/HTTP, ACP stdio, memory, Docker, and an OpenCode plugin."
+        }
+      ],
+      "risks": [
+        "The repository contains no license declaration.",
+        "Generator lineage is operator-provided and must be labeled unless commit evidence establishes it.",
+        "Authentication and model catalog text can become stale."
+      ],
+      "decision_rationale": "Use it as a source-inspected case study, not a dependency or unquestioned template."
+    },
+    {
+      "id": "cand-010",
+      "name": "remark-lint-frontmatter-schema",
+      "kind": "library",
+      "repo_url": "https://github.com/JulianCataldo/remark-lint-frontmatter-schema",
+      "registry": "npm",
+      "fit_for_gap": "gap-content-verification",
+      "verdict": "reject",
+      "coverage_estimate": 0.3,
+      "license": "ISC",
+      "maintenance": {
+        "last_release": "3.15.4",
+        "stars": 79,
+        "open_issues": 9
+      },
+      "evidence": [
+        {
+          "tier": 1,
+          "source_url": "https://github.com/JulianCataldo/remark-lint-frontmatter-schema",
+          "claim": "Repository search found a focused frontmatter-to-JSON-Schema remark rule."
+        },
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/remark-lint-frontmatter-schema",
+          "claim": "The npm registry reported the latest release was modified in 2023."
+        }
+      ],
+      "risks": [
+        "Stale registry release.",
+        "Only validates frontmatter and does not cover cross-file prompt requirements."
+      ],
+      "decision_rationale": "Ajv plus one project validator covers the broader contract with less plugin-specific surface."
+    },
+    {
+      "id": "cand-011",
+      "name": "Existing GitHub Pages Actions workflow",
+      "kind": "service",
+      "repo_url": "https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site",
+      "registry": "none",
+      "fit_for_gap": "gap-publication-boundary",
+      "verdict": "adopt",
+      "coverage_estimate": 0.95,
+      "license": "NOASSERTION",
+      "maintenance": {
+        "last_release": "accessed-2026-07-18"
+      },
+      "evidence": [
+        {
+          "tier": 4,
+          "source_url": "https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site",
+          "claim": "GitHub supports custom Actions workflows for static-site generators."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/.github/workflows/docs-pages.yml",
+          "claim": "The current pinned workflow builds, uploads, and deploys the Docusaurus artifact from main."
+        }
+      ],
+      "risks": [
+        "The workflow currently has no recipe, source-currency, browser, accessibility, or route-completeness gates."
+      ],
+      "decision_rationale": "Extend its build job with evidence gates; do not replace the working publication mechanism."
+    }
+  ],
+  "build_required": [
+    {
+      "need": "Ten complete Prometheus scenario recipe pages",
+      "why_no_candidate": "The prompts encode project-specific architecture, skills, evidence, authority, and stop conditions that generic libraries cannot author or certify.",
+      "capability_gap_id": "gap-ten-scenario-recipes"
+    },
+    {
+      "need": "Six operational harness playbooks",
+      "why_no_candidate": "Each harness has different instruction discovery, skills, plugins, permissions, autonomous modes, and handoff semantics that require official-source synthesis.",
+      "capability_gap_id": "gap-six-harness-playbooks"
+    },
+    {
+      "need": "Recipe, harness, and cross-file semantic validator",
+      "why_no_candidate": "Ajv validates schema shape but cannot enforce non-empty staged prompts, existing skill references, producer/critic separation, architecture invariants, or public-boundary criteria.",
+      "capability_gap_id": "gap-content-verification"
+    },
+    {
+      "need": "Model claim evidence and routing generator",
+      "why_no_candidate": "Exact model-source correspondence, dated availability, role vocabulary, confidence, and generated project routing are repository-specific policy.",
+      "capability_gap_id": "gap-model-evidence-routing"
+    },
+    {
+      "need": "Executable Feynman, KBD, Karpathy, PMPO, producer-critic, recovery, and retention examples",
+      "why_no_candidate": "The installed Prometheus skills define the actual local commands and artifacts; the guide must synthesize and verify those exact contracts.",
+      "capability_gap_id": "gap-loop-invocations"
+    },
+    {
+      "need": "OpenAI Proxy generator-to-product case study",
+      "why_no_candidate": "The case study requires source and commit-history analysis plus explicit separation of generated, current, verified, inferred, and unsupported behavior.",
+      "capability_gap_id": "gap-openai-proxy-case-study"
+    },
+    {
+      "need": "Representative Codex and ACP/CLI execution fixtures",
+      "why_no_candidate": "Harness execution evidence depends on this repository's prompts, installed tools, authority limits, and retained artifacts.",
+      "capability_gap_id": "gap-content-verification"
+    }
+  ]
+}

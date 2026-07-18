@@ -4,6 +4,7 @@
   "childPhases": [],
   "childPointer": null,
   "assessment_complete": true,
+  "analysis_complete": true,
   "plan_complete": false,
   "execute_complete": false,
   "reflect_complete": false,
@@ -40,6 +41,6 @@
   "sourceTool": "codex",
   "createdBy": "kbd-new-phase",
   "last_updated_by": "codex",
-  "last_updated": "2026-07-18T06:34:00Z",
-  "updatedAt": "2026-07-18T06:34:00Z"
+  "last_updated": "2026-07-18T06:46:36Z",
+  "updatedAt": "2026-07-18T06:46:36Z"
 }

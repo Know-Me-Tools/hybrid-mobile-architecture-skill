@@ -1,1 +1,1 @@
-{"totalRuns":8,"failedRuns":0,"lastRun":{"ts":"2026-07-18T06:35:38Z","kind":"assess","edge":"after","name":"build-detailed-prompting-guide","hookId":"legacy-assessment-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}
+{"totalRuns":10,"failedRuns":0,"lastRun":{"ts":"2026-07-18T06:37:47Z","kind":"analyze","edge":"before","name":"build-detailed-prompting-guide","hookId":"kbd-memory-log","layer":"builtin","mode":"augment","status":0},"lastFailure":null}

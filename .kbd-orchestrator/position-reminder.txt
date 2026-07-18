@@ -1,10 +1,10 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: build-detailed-prompting-guide
 Step: 0 of 0
-Stage: analysis_ready
-Next command: /kbd-analyze build-detailed-prompting-guide
+Stage: spec_ready
+Next command: /kbd-spec build-detailed-prompting-guide
 
 Required signal format (emit BEFORE any tool call):
-  Starting kbd-analyze — build-detailed-prompting-guide (step 0 of 0)
+  Starting kbd-spec — build-detailed-prompting-guide (step 0 of 0)
   [do work]
-  Completed kbd-analyze — build-detailed-prompting-guide (step 0 of 0)
+  Completed kbd-spec — build-detailed-prompting-guide (step 0 of 0)

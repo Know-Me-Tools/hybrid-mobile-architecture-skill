@@ -1,18 +1,18 @@
 {
   "phase": "build-detailed-prompting-guide",
-  "status": "analysis_ready",
+  "status": "spec_ready",
   "previousPhase": "phase-codegen-and-ci-verification",
   "changes": [],
   "completedChanges": 0,
   "totalChanges": 0,
   "startedAt": "2026-07-18T06:16:00Z",
-  "nextCommand": "/kbd-analyze build-detailed-prompting-guide",
+  "nextCommand": "/kbd-spec build-detailed-prompting-guide",
   "firstChange": null,
   "nextChange": null,
   "change": null,
-  "currentTask": "run kbd-analyze for build-detailed-prompting-guide",
+  "currentTask": "run kbd-spec for build-detailed-prompting-guide",
   "nextPendingChange": null,
-  "exactNextCommand": "/kbd-analyze build-detailed-prompting-guide",
+  "exactNextCommand": "/kbd-spec build-detailed-prompting-guide",
   "parentPhase": null,
   "childPhases": [],
   "childPointer": null,
@@ -23,5 +23,5 @@
   "publicationStatus": "NOT_TRACKED",
   "changesCompleted": 0,
   "changesTotal": 0,
-  "updatedAt": "2026-07-18T06:34:00Z"
+  "updatedAt": "2026-07-18T06:46:36Z"
 }
