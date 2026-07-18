@@ -1,7 +1,7 @@
 {
   "name": "Hybrid Mobile Architecture Skill",
   "description": "An agentskills.io skill package for TJ-ARCH-MOB-001 that provides scaffolding scripts, reference documentation, and templates for Flutter/Rust mobile, Tauri/React desktop, React/Axum web, and shared Rust agent runtimes.",
-  "active_phase": "build-detailed-prompting-guide",
+  "active_phase": "pem-sync-bridge-and-mobile-tier",
   "focus_project_path": "/Users/gqadonis/Projects/hybrid-mobile-architecture-src",
   "spec_paths": [
     "openspec/specs/*.md"
@@ -43,6 +43,6 @@
       }
     ]
   },
-  "activePhase": "local-first-realtime-sync",
+  "activePhase": "pem-sync-bridge-and-mobile-tier",
   "updatedAt": "2026-07-18T09:08:47Z"
 }

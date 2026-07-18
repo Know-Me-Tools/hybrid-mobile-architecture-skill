@@ -1,6 +1,11 @@
 # Update Log
 
 ## 2026-07-18
+* **Creation**: [PEM sync bridge and mobile tier session completed with unknown change](/pem-sync-bridge-and-mobile-tier-session-completed-with-unknown-change.md)
+* **Creation**: [PEM sync bridge and mobile tier assessment ready at 13:33:00](/pem-sync-bridge-and-mobile-tier-assessment-ready-at-13-33-00.md)
+* **Creation**: [PEM sync bridge and mobile tier assessment ready with no changes](/pem-sync-bridge-and-mobile-tier-assessment-ready-with-no-changes.md)
+* **Creation**: [Local-first realtime sync executor completed with unknown change](/local-first-realtime-sync-executor-completed-with-unknown-change.md)
+* **Creation**: [Local-first realtime sync phase plan c120-c125](/local-first-realtime-sync-phase-plan-c120-c125.md)
 * **Creation**: [Empty Source Document](/empty-source-document.md)
 * **Creation**: [Local-first realtime sync execute-ready with doctrine refs pending](/local-first-realtime-sync-execute-ready-with-doctrine-refs-pending.md)
 * **Creation**: [Local-first realtime sync executor completed with unknown change](/local-first-realtime-sync-executor-completed-with-unknown-change.md)

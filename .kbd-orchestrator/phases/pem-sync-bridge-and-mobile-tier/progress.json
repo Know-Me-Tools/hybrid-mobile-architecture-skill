@@ -1,0 +1,31 @@
+{
+  "completion": {
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 0,
+      "total": 0,
+      "status": "PENDING"
+    },
+    "evidence": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "certification": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "publication": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    }
+  },
+  "assessment_complete": true,
+  "plan_complete": false,
+  "reflection_complete": false,
+  "seeded_from": "local-first-realtime-sync/reflection.md",
+  "last_updated_by": "claude-code",
+  "last_updated": "2026-07-18T13:36:00Z"
+}
