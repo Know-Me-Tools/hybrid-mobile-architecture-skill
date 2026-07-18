@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T11:36:46Z",
+  "updatedAt": "2026-07-18T11:47:00Z",
   "cursor": [
     "build-detailed-prompting-guide",
     "reflect",
@@ -18,7 +18,7 @@
       {
         "type": "change",
         "id": "prompting-guide-publication-gates",
-        "status": "COMPLETE",
+        "status": "ARCHIVED",
         "progress": {
           "done": 14,
           "total": 14
@@ -27,6 +27,7 @@
     ],
     "annotations": [
       "KBD reflect complete; all five prompting-guide OpenSpec changes are complete and published."
+      ,"kbd-apply prompting-guide-publication-gates verified and archived the change into OpenSpec specs."
     ]
   }
 }

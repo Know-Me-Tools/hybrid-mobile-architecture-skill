@@ -1,5 +1,8 @@
 # Update Log
 
+## 2026-07-18
+* **Creation**: [Prompting publication gates archived through kbd-apply](/karpathy-progress-20260718T114700Z-prompting-publication-gates-archived.md)
+
 ## 2026-07-13
 * **Creation**: [pglite-oxide Hybrid Tauri Architecture for Mobile PostgreSQL](/pglite-oxide-hybrid-tauri-architecture-for-mobile-postgresql.md)
 

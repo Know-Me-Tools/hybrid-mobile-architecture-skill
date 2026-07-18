@@ -2,6 +2,7 @@
 
 ## Reference
 
+* [Prompting publication gates archived through kbd-apply](/karpathy-progress-20260718T114700Z-prompting-publication-gates-archived.md)
 * [Analyze completion for KnowMe PoC codegen and CI phase](/analyze-completion-for-knowme-poc-codegen-and-ci-phase.md)
 * [Android whisper-rs CMake ABI fix for KnowMe PoC launch](/android-whisper-rs-cmake-abi-fix-for-knowme-poc-launch.md)
 * [Bootstrap prerequisite analysis for KnowMe PoC phase](/bootstrap-prerequisite-analysis-for-knowme-poc-phase.md)

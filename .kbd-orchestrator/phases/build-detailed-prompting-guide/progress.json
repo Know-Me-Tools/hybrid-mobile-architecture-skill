@@ -81,7 +81,7 @@
     },
     {
       "id": "prompting-guide-publication-gates",
-      "status": "COMPLETE",
+      "status": "ARCHIVED",
       "wave": 4,
       "tasks_total": 14,
       "tasks_done": 14,
@@ -105,6 +105,6 @@
   "sourceTool": "codex",
   "createdBy": "kbd-new-phase",
   "last_updated_by": "codex",
-  "last_updated": "2026-07-18T11:36:46Z",
-  "updatedAt": "2026-07-18T11:36:46Z"
+  "last_updated": "2026-07-18T11:47:00Z",
+  "updatedAt": "2026-07-18T11:47:00Z"
 }
