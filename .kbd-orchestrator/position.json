@@ -1,22 +1,22 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T10:22:50Z",
+  "updatedAt": "2026-07-18T10:41:43Z",
   "cursor": [
     "local-first-realtime-sync",
-    "c122-partial-replication-slice"
+    "c123-client-rag-slice"
   ],
   "root": {
     "type": "phase",
     "id": "local-first-realtime-sync",
     "status": "executing",
     "progress": {
-      "done": 2,
+      "done": 3,
       "total": 6
     },
     "children": [
       {
         "type": "change",
-        "id": "c122-partial-replication-slice",
+        "id": "c123-client-rag-slice",
         "status": "PENDING",
         "progress": {
           "done": 0,

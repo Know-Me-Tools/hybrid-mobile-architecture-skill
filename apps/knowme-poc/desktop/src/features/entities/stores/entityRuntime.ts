@@ -11,6 +11,7 @@ import {
   type EntityRecord as PluginEntityRecord,
 } from '@prometheus-ags/tauri-plugin-gen-ui'
 import { PGlite } from '@electric-sql/pglite'
+import { vector } from '@electric-sql/pglite-pgvector'
 import {
   createPGlitePersistenceAdapter,
   registerEntityFromSql,
@@ -101,8 +102,13 @@ async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSessi
   // keeps the app usable there without letting Emscripten fall through a noisy
   // filesystem error. The full browser deployment remains durable by default.
   const dataDir = typeof indexedDB === 'undefined' ? 'memory://' : 'idb://gen-ui'
-  const db = await PGlite.create(dataDir, { relaxedDurability: true })
+  const db = await PGlite.create(dataDir, {
+    relaxedDurability: true,
+    // C-123: pgvector powers the client-RAG vector surface (384-dim standard).
+    extensions: { vector },
+  })
   browserDb = db
+  await db.exec('CREATE EXTENSION IF NOT EXISTS vector')
   await db.exec(schemaSql)
   registerEntityTransport('Project', pgliteTransport(db, 'projects', tenantId))
   registerEntityTransport('Note', pgliteTransport(db, 'notes', tenantId))

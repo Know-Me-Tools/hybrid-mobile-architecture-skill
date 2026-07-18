@@ -10,11 +10,11 @@
   "implementation_total": 0,
   "implementation_completed": 0,
   "changes_total": 0,
-  "changes_completed": 3,
+  "changes_completed": 4,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 3,
+      "completed": 4,
       "total": 6,
       "status": "PENDING"
     },
@@ -41,7 +41,7 @@
   "createdBy": "kbd-new-phase",
   "updatedAt": "2026-07-18T09:08:47Z",
   "last_updated_by": "claude-code",
-  "last_updated": "2026-07-18T11:05:00Z",
+  "last_updated": "2026-07-18T11:40:00Z",
   "qa": {
     "c120-sync-doctrine-refs": {
       "artifact_refiner": "SKIPPED",
@@ -54,6 +54,10 @@
     "c122-partial-replication-slice": {
       "artifact_refiner": "UNAVAILABLE",
       "compensating_verification": "cargo clippy -D warnings clean; 27 behavior tests green (scope validation, loopback attach/stream/refusal, lookup currency, one-time loads); wasm32 gate green; scaffold heredocs proven byte-identical to app sources"
+    },
+    "c123-client-rag-slice": {
+      "artifact_refiner": "UNAVAILABLE",
+      "compensating_verification": "clippy 0 warnings; 30 Rust tests green (engine ordering/dedup/budget, dim discipline); desktop tsc clean + 10 vitest green; pgvector empirically verified in PGlite 0.5.4 incl. HNSW"
     }
   }
 }
