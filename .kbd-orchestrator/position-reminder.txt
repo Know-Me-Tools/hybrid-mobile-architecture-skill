@@ -1,5 +1,4 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: pem-sync-bridge-and-mobile-tier
-Step: 5 of 5
-Stage: reflect_ready
-Next command: /kbd-reflect pem-sync-bridge-and-mobile-tier
+Stage: phase_complete
+Next command: /kbd-next-phase (seeds vault-ui-and-conversation-scoped-rag from reflection.md)
