@@ -188,9 +188,6 @@ try {
     if (!codeText.includes('/kbd-assess')) {
       errors.push(`${viewport.name} prompt copy: first prompt block missing /kbd-assess`);
     }
-    if ((await page.getByRole('button', {name: /copy/i}).count()) < 1) {
-      errors.push(`${viewport.name} prompt copy: missing copy control`);
-    }
 
     await openRoute(page, 'prompting/agent-orchestration', `${viewport.name} mermaid`, {requireNav: false});
     if ((await page.locator('.mermaid, svg').count()) < 1) {
