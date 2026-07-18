@@ -73,3 +73,15 @@ require a documented difference.
 
 No blocking question remains. Any generator lineage not supported by repository
 history will retain its operator-provided label.
+
+## Analyze reuse evidence
+
+- **cand-008 — existing orchestration skill (adapt):** local source inspection found
+  the same compact scenario-classification template copied to all six harness
+  directories. It is the correct base, but it lacks artifact generation and validation.
+  Source: <https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/tree/main/templates/project-skills/orchestrate-prometheus-application>.
+- **cand-009 — OpenAI Proxy (reference):** source inspection found Axum
+  OpenAI-compatible routes, AG-UI, optional A2A, MCP stdio/HTTP, ACP stdio, memory,
+  Docker, and an OpenCode plugin. The repository has no declared license, generator
+  lineage is not independently proven, and auth/catalog text can become stale; it is
+  reference evidence, not a dependency. Source: <https://github.com/GQAdonis/openai-proxy>.

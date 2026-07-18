@@ -81,3 +81,19 @@ file/line diagnostics, and run before content generation and the production buil
 No blocking product decision remains. Execution must prove whether direct parent-path
 consumption works with the pinned Docusaurus version; that proof selects the documented
 fallback automatically.
+
+## Analyze reuse evidence
+
+- **cand-001 — Docusaurus/plugin-content-docs (adopt):** npm reported Docusaurus
+  3.10.2/MIT/Node 20+ on 2026-07-18, while this project already proves its pinned
+  3.10.1 build; official plugin documentation confirms a docs path relative to the
+  site directory. Sources: <https://www.npmjs.com/package/@docusaurus/plugin-content-docs>,
+  <https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-docs>.
+- **cand-002 — local search (adopt):** the active MIT repository supports Docusaurus
+  v2/v3 offline search and npm 0.55.2 matches this project's installed version.
+  Sources: <https://github.com/easyops-cn/docusaurus-search-local>,
+  <https://www.npmjs.com/package/@easyops-cn/docusaurus-search-local>.
+- **cand-003 — Ajv (adopt):** npm reported 8.20.0/MIT and official documentation
+  confirms JSON Schema 2020-12 support. Ajv covers shape only; project semantics remain
+  explicit code. Sources: <https://www.npmjs.com/package/ajv>,
+  <https://ajv.js.org/json-schema.html>.

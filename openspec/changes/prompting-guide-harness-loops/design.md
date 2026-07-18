@@ -72,3 +72,12 @@ create another source-of-truth problem.
 No content decision blocks implementation. The locally installed ACP/CLI harness used
 for release evidence will be selected during the publication-gates change based on
 authenticated availability.
+
+## Analyze reuse evidence
+
+- **cand-007 — Agent Skills specification (adopt):** the specification defines the
+  portable `SKILL.md` frontmatter/folder contract, and its best-practices guidance
+  recommends compact skills with progressively disclosed resources. It does not
+  normalize harness commands, permissions, plugins, or session semantics, which is why
+  the six playbooks remain separate. Sources: <https://agentskills.io/specification>,
+  <https://agentskills.io/skill-creation/best-practices>.

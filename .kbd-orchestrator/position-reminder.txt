@@ -1,10 +1,10 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
 Phase: build-detailed-prompting-guide
 Step: 0 of 5
-Stage: plan_ready
-Next command: /kbd-plan build-detailed-prompting-guide
+Stage: execute_ready
+Next command: /kbd-execute build-detailed-prompting-guide
 
 Required signal format (emit BEFORE any tool call):
-  Starting kbd-plan — build-detailed-prompting-guide (step 0 of 5)
+  Starting kbd-execute — build-detailed-prompting-guide (step 0 of 5)
   [do work]
-  Completed kbd-plan — build-detailed-prompting-guide (step 0 of 5)
+  Completed kbd-execute — build-detailed-prompting-guide (step 0 of 5)

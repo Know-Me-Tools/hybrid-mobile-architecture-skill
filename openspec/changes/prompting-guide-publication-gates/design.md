@@ -83,3 +83,26 @@ cover machine-detectable and interaction issues.
 
 Execution will select OpenCode, Kimi, or Zed for the ACP/CLI fixture based on installed
 authenticated capability. No architecture or content decision is blocked.
+
+## Analyze reuse evidence
+
+- **cand-003 — Ajv (adopt):** npm 8.20.0/MIT plus official JSON Schema 2020-12
+  documentation support the shape-validation layer; project scripts retain semantic
+  rules. Sources: <https://www.npmjs.com/package/ajv>,
+  <https://ajv.js.org/json-schema.html>.
+- **cand-004 — Linkinator (adapt):** npm reported 7.6.1/MIT/Node 20+. Firecrawl did not
+  retrieve indexed official docs, and external sites are flaky, so it is bounded by
+  explicit timeouts, retries, and an allowlist. Source:
+  <https://www.npmjs.com/package/linkinator>.
+- **cand-005 — Playwright Test (adopt):** npm reported 1.61.1/Apache-2.0, and official
+  docs support managed web servers and multi-project browser/viewport configurations.
+  Sources: <https://www.npmjs.com/package/@playwright/test>,
+  <https://playwright.dev/docs/test-webserver>,
+  <https://playwright.dev/docs/test-projects>.
+- **cand-006 — axe Playwright (adopt):** npm reported 4.12.1/MPL-2.0; automated scans
+  are supplemented by keyboard and visual review because automation is incomplete.
+  Source: <https://www.npmjs.com/package/@axe-core/playwright>.
+- **cand-011 — current Pages workflow (adopt):** GitHub supports custom Actions Pages
+  workflows, and this repository already has a pinned build/upload/deploy workflow.
+  Sources: <https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site>,
+  <https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/.github/workflows/docs-pages.yml>.

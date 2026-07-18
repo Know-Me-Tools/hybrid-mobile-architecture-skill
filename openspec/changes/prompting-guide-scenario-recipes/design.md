@@ -79,3 +79,11 @@ and explicit stop state. A prose completion claim cannot satisfy the recipe.
 
 No product-scope question blocks the recipes. Exact producer/critic model candidates
 remain registry-derived at build time, as required by the foundation change.
+
+## Analyze build-required evidence
+
+No adoptable library can author or certify the ten Prometheus-specific recipes. Analyze
+classified `gap-ten-scenario-recipes` as build-required because the prompt packs must
+encode this repository's architecture, skills, authority, evidence, and stop contracts.
+The scenario work reuses the foundation and harness capabilities but does not outsource
+its substantive content to a generic generator.

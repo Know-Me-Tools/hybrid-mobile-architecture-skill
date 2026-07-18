@@ -1,12 +1,13 @@
 {
   "phase": "build-detailed-prompting-guide",
+  "status": "execute_ready",
   "parentPhase": null,
   "childPhases": [],
   "childPointer": null,
   "assessment_complete": true,
   "analysis_complete": true,
   "spec_complete": true,
-  "plan_complete": false,
+  "plan_complete": true,
   "execute_complete": false,
   "reflect_complete": false,
   "implementation_total": 5,
@@ -40,6 +41,7 @@
     {
       "id": "prompting-guide-foundation",
       "status": "PENDING",
+      "wave": 0,
       "tasks_total": 11,
       "tasks_done": 0,
       "depends_on": []
@@ -47,6 +49,7 @@
     {
       "id": "prompting-guide-harness-loops",
       "status": "PENDING",
+      "wave": 1,
       "tasks_total": 14,
       "tasks_done": 0,
       "depends_on": [
@@ -56,6 +59,7 @@
     {
       "id": "prompting-guide-scenario-recipes",
       "status": "PENDING",
+      "wave": 2,
       "tasks_total": 13,
       "tasks_done": 0,
       "depends_on": [
@@ -66,6 +70,7 @@
     {
       "id": "prompting-guide-agent-orchestration",
       "status": "PENDING",
+      "wave": 3,
       "tasks_total": 10,
       "tasks_done": 0,
       "depends_on": [
@@ -77,6 +82,7 @@
     {
       "id": "prompting-guide-publication-gates",
       "status": "PENDING",
+      "wave": 4,
       "tasks_total": 14,
       "tasks_done": 0,
       "depends_on": [
@@ -93,6 +99,6 @@
   "sourceTool": "codex",
   "createdBy": "kbd-new-phase",
   "last_updated_by": "codex",
-  "last_updated": "2026-07-18T07:03:13Z",
-  "updatedAt": "2026-07-18T07:03:13Z"
+  "last_updated": "2026-07-18T08:59:53Z",
+  "updatedAt": "2026-07-18T08:59:53Z"
 }

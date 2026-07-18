@@ -1,6 +1,6 @@
 {
   "phase": "build-detailed-prompting-guide",
-  "status": "plan_ready",
+  "status": "execute_ready",
   "previousPhase": "phase-codegen-and-ci-verification",
   "changes": [
     "prompting-guide-foundation",
@@ -12,13 +12,15 @@
   "completedChanges": 0,
   "totalChanges": 5,
   "startedAt": "2026-07-18T06:16:00Z",
-  "nextCommand": "/kbd-plan build-detailed-prompting-guide",
+  "nextCommand": "/kbd-execute build-detailed-prompting-guide",
   "firstChange": "prompting-guide-foundation",
-  "nextChange": null,
-  "change": null,
-  "currentTask": "order the five specified changes for build-detailed-prompting-guide",
+  "nextChange": "prompting-guide-foundation",
+  "change": "prompting-guide-foundation",
+  "currentTask": "prepare the dispatch contract for prompting-guide-foundation",
   "nextPendingChange": "prompting-guide-foundation",
-  "exactNextCommand": "/kbd-plan build-detailed-prompting-guide",
+  "next_pending_change": "prompting-guide-foundation",
+  "exactNextCommand": "/kbd-execute build-detailed-prompting-guide",
+  "exact_next_command": "/kbd-execute build-detailed-prompting-guide",
   "parentPhase": null,
   "childPhases": [],
   "childPointer": null,
@@ -29,5 +31,5 @@
   "publicationStatus": "NOT_TRACKED",
   "changesCompleted": 0,
   "changesTotal": 5,
-  "updatedAt": "2026-07-18T07:03:13Z"
+  "updatedAt": "2026-07-18T08:59:53Z"
 }

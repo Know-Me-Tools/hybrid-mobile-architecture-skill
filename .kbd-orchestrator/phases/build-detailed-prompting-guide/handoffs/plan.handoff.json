@@ -1,0 +1,11 @@
+{
+  "stage": "plan",
+  "completedAt": "2026-07-18T09:03:09Z",
+  "outputs": [
+    "plan.md"
+  ],
+  "nextStage": "execute",
+  "summaryForNext": "5 serial OpenSpec changes; contracts and official evidence first, content second, publication/certification last. First change: prompting-guide-foundation.",
+  "skipped": false,
+  "skipReason": null
+}
