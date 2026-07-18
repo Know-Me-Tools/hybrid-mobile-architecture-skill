@@ -1,0 +1,11 @@
+{
+  "stage": "assess",
+  "completedAt": "2026-07-18T09:27:33Z",
+  "outputs": [
+    "assessment.md"
+  ],
+  "nextStage": "analyze",
+  "summaryForNext": "Seven-goal gap report: desktop/web PEM+PGlite and Electric read-sync are real; buckets/partial replication, peer CRDT profile sync (goal 5 — also unspecified in the master plan), client RAG loop, mobile tier, and ALL local-first skills/reference-docs/scripts are missing. Analyze/plan must cut a vertical slice on existing seams (SyncTransport frozen for PES later) and force decisions OD-2/OD-3/OD-4 before execute.",
+  "skipped": false,
+  "skipReason": null
+}

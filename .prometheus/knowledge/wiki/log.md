@@ -1,5 +1,11 @@
 # Update Log
 
+## 2026-07-18
+* **Creation**: [Local-first realtime sync assessment ready at 09:16:56](/local-first-realtime-sync-assessment-ready-at-09-16-56.md)
+* **Creation**: [Local-first realtime sync executor completed with unknown change](/local-first-realtime-sync-executor-completed-with-unknown-change.md)
+* **Creation**: [Local-first realtime sync assessment ready at 09:10:25](/local-first-realtime-sync-assessment-ready-at-09-10-25.md)
+* **Creation**: [Local-first realtime sync assessment ready with pending prompting guide](/local-first-realtime-sync-assessment-ready-with-pending-prompting-guide.md)
+
 ## 2026-07-13
 * **Creation**: [pglite-oxide Hybrid Tauri Architecture for Mobile PostgreSQL](/pglite-oxide-hybrid-tauri-architecture-for-mobile-postgresql.md)
 

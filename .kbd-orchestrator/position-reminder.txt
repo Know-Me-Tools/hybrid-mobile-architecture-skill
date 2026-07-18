@@ -1,10 +1,4 @@
 POSITION REMINDER — read this as your FIRST tool call every turn
-Phase: build-detailed-prompting-guide
-Step: 0 of 5
-Stage: execute_ready
-Next command: /kbd-execute build-detailed-prompting-guide
-
-Required signal format (emit BEFORE any tool call):
-  Starting kbd-execute — build-detailed-prompting-guide (step 0 of 5)
-  [do work]
-  Completed kbd-execute — build-detailed-prompting-guide (step 0 of 5)
+Phase: local-first-realtime-sync
+Stage: assessment_complete
+Next command: /kbd-plan local-first-realtime-sync
