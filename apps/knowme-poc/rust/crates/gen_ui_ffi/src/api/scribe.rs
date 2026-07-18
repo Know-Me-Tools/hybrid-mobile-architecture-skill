@@ -4,6 +4,10 @@
 //! entirely to `gen_ui_audio` (shared with tauri-plugin-gen-ui desktop) — no
 //! duplicated business logic between mobile/desktop.
 //!
+//! This module is behind `mobile-scribe`. The default iOS FFI build uses
+//! llama.cpp for local chat; whisper.cpp must move to a separate Apple framework
+//! before both GGML implementations can coexist safely in one application.
+//!
 //! One recording in flight at a time per process, mirroring gen_ui_agent's
 //! single-chat-turn precedent: `scribe_start` errors if a recording is already
 //! live rather than silently discarding it.

@@ -21,3 +21,27 @@ pub fn resolve_api_key(api_key_ref: &str) -> Result<String, AgentError> {
         .get_password()
         .map_err(|e| AgentError::Config(format!("keychain read for '{api_key_ref}': {e}")))
 }
+
+/// Write or replace a provider secret in platform-secure storage.
+pub fn store_api_key(api_key_ref: &str, api_key: &str) -> Result<(), AgentError> {
+    if api_key.trim().is_empty() {
+        return Err(AgentError::Config("API key cannot be empty".into()));
+    }
+    let entry = keyring::Entry::new(SERVICE, api_key_ref)
+        .map_err(|e| AgentError::Config(format!("keychain entry for '{api_key_ref}': {e}")))?;
+    entry
+        .set_password(api_key)
+        .map_err(|e| AgentError::Config(format!("keychain write for '{api_key_ref}': {e}")))
+}
+
+/// Remove a provider secret. A missing secret is already the requested state.
+pub fn delete_api_key(api_key_ref: &str) -> Result<(), AgentError> {
+    let entry = keyring::Entry::new(SERVICE, api_key_ref)
+        .map_err(|e| AgentError::Config(format!("keychain entry for '{api_key_ref}': {e}")))?;
+    match entry.delete_credential() {
+        Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
+        Err(error) => Err(AgentError::Config(format!(
+            "keychain delete for '{api_key_ref}': {error}"
+        ))),
+    }
+}

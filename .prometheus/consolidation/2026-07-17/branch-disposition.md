@@ -44,6 +44,6 @@ the wiki manifest.
 All application/scaffold dependency declarations for
 `@prometheus-ags/prometheus-entity-management` use the owned 3.x line,
 `3.0.0-alpha.0`. That version was verified both in the local owner repository at
-`/Users/gqadonis/Projects/prometheus/prometheus-entity-management` and in the npm
+`$PROMETHEUS_ENTITY_MANAGEMENT_REPO` and in the npm
 registry. Local development resolves tracked TypeScript sources; publish-time
 exports resolve built `dist` artifacts.

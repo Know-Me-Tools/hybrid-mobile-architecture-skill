@@ -11,9 +11,12 @@ members = [
     "crates/gen_ui_inference",
     "crates/gen_ui_audio",
     "crates/gen_ui_agent",
+    "crates/gen_ui_host",
     "crates/gen_ui_ffi",
     "crates/tauri-plugin-gen-ui",
     "crates/gen_ui_wasm",
+    "crates/gen_ui_server_axum",
+    "crates/knowme-web-server",
     "crates/workspace-hack",
 ]
 
@@ -39,12 +42,21 @@ anyhow            = "1.0"
 futures           = "0.3"
 async-trait       = "0.1"
 tracing           = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 uuid              = { version = "1.10", features = ["v4", "fast-rng", "serde"] }
 chrono            = { version = "0.4",  features = ["serde"] }
 # --- native-heavy (feature/target gated inside crates) ---
 tokio             = { version = "1.40", default-features = false }
 tokio-stream      = { version = "0.1",  features = ["sync"] }
+axum              = { version = "0.8", features = ["json", "tokio", "http1"] }
+tower-http        = { version = "0.6", features = ["trace"] }
+async-stream      = "0.3"
+rust-embed        = { version = "8.7", features = ["interpolate-folder-path"] }
+mime_guess        = "2.0"
 reqwest           = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+sha2              = "0.10"
+encoding_rs       = "0.8"
+llama-cpp-2       = { version = "0.1.151", default-features = false }
 reqwest-eventsource = "0.6"
 # --- Flint platform SDK (FRF realtime spine). Nothing is published to crates.io —
 #     all FRF inter-crate deps are PATH deps in-repo, and the repo is private, so a
@@ -112,7 +124,8 @@ apple-native-keyring-store = { version = "1", default-features = false, features
 # tokio multithread) for the wasm32 web target — same crate, feature-gated.
 #     ── VERIFIED HEAD (2026-07-16): 78b7496ca7b09a1aa6c3c666af0a149bbdf5249f ──
 liter-llm         = { git = "https://github.com/GQAdonis/liter-llm.git", rev = "78b7496ca7b09a1aa6c3c666af0a149bbdf5249f", default-features = false }
-# Local inference, desktop lane (versions.toml [inference] desktop = "mistral.rs").
+# Optional mistral.rs desktop experiment; the reference app defaults to the
+# pinned llama.cpp/Qwen lane so first-run local chat stays reproducible.
 # User's fork, pinned by SHA (Rule 22/23). Workspace v0.8.3, its own MSRV is 1.88 —
 # clears our 1.96 floor. Metal + accelerate are the macOS acceleration features.
 # Consumed ONLY by gen_ui_inference, target-gated to desktop: mistral.rs/candle have
@@ -157,12 +170,20 @@ path = "crates/workspace-hack"
 # still floats, held by Cargo.lock alone.
 #
 # Only candle-core/-nn are patched: the metal-kernels/flash-attn crates aren't in our
-# resolved graph (Metal kernels ship inside candle-core; flash-attn is CUDA-only), and
-# Cargo warns on patch entries it can't place. Add them here if a feature pulls them in.
+# normal resolved graph (Metal kernels are disabled until the fork's Candle versions
+# agree; flash-attn is CUDA-only). Revisit the Metal lane with an upstream-compatible pin.
 #     ── upstream candle rev per mistral.rs's own fallback comment: 5404348 ──
 [patch."https://github.com/GQAdonis/candle.git"]
 candle-core = { git = "https://github.com/huggingface/candle.git", rev = "5404348" }
 candle-nn = { git = "https://github.com/huggingface/candle.git", rev = "5404348" }
+
+# llama-cpp-2 0.1.151 declares `common` as optional, but its dependency on
+# llama-cpp-sys-2 still enables the sys crate's default `common` feature. On iOS
+# that compiles llama.cpp's HTTP tooling and leaves unresolved `httplib::Client`
+# symbols in the final app. This source-preserving local patch changes only those
+# dependency edges to `default-features = false`; see vendor/llama-cpp-2/PATCH.md.
+[patch.crates-io]
+llama-cpp-2 = { path = "vendor/llama-cpp-2" }
 
 # ─────────────────────────── Compile profiles ───────────────────────────────
 # Development: fast iteration on host. Deps compiled well once (opt-2) then cached;

@@ -7,6 +7,7 @@ pub mod chat;
 pub mod config;
 pub mod error;
 pub mod memory;
+pub mod provider_admin;
 pub mod secrets;
 pub mod state;
 pub mod tools;

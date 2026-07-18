@@ -1,5 +1,6 @@
 // TJ-ARCH-MOB-001 compliant — component imports the hook only.
 import { useEffect } from 'react'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useLane } from '../hooks/useLane'
 
 /**
@@ -22,26 +23,28 @@ export function LaneSwitcher() {
   const isLocal = lane === 'local'
 
   return (
-    <div className="flex items-center gap-3 border-b border-[color:var(--color-border)] px-4 py-2 text-xs">
-      <div role="radiogroup" aria-label="Inference lane" className="flex gap-1">
+    <div className="flex min-h-12 items-center gap-3 bg-[color:var(--color-bg-2)] px-4 py-2 text-xs">
+      <ToggleGroup
+        aria-label="Inference lane"
+        value={[lane]}
+        disabled={isLoading}
+        onValueChange={(values) => {
+          const next = values.at(-1)
+          if (next === 'cloud' || next === 'local') void switchLane(next)
+        }}
+        className="rounded-xl bg-[color:var(--color-surface)] p-1"
+      >
         {(['cloud', 'local'] as const).map((option) => (
-          <button
+          <ToggleGroupItem
             key={option}
-            type="button"
-            role="radio"
-            aria-checked={lane === option}
-            disabled={isLoading}
-            onClick={() => void switchLane(option)}
-            className={
-              lane === option
-                ? 'rounded-md bg-[color:var(--color-ember)] px-3 py-1 font-medium text-white disabled:opacity-50'
-                : 'rounded-md border border-[color:var(--color-border)] px-3 py-1 text-[color:var(--color-fg)] disabled:opacity-50'
-            }
+            value={option}
+            aria-label={option === 'cloud' ? 'Cloud' : 'On-device'}
+            className="h-7 rounded-lg px-3 text-[color:var(--color-fg-sub)] data-pressed:bg-[color:var(--color-ember)] data-pressed:text-white"
           >
             {option === 'cloud' ? 'Cloud' : 'On-device'}
-          </button>
+          </ToggleGroupItem>
         ))}
-      </div>
+      </ToggleGroup>
 
       {/* Progress and throughput are announced politely — they update mid-run
           and shouldn't interrupt a screen-reader user's current context. */}

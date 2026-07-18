@@ -12,18 +12,21 @@ description: ALWAYS invoke after building or changing any React/Tauri UI surface
 # Tauri / React UI Review Loop
 
 A React/Tauri surface is not done until it has passed a screenshot-driven review at every
-breakpoint in both themes. This catches overflow, layout jumps, contrast failures, and
-template-generic output before it ships.
+breakpoint in both themes. When reference screenshots/HTML/designs exist, invoke
+`reference-ui-fidelity` first and treat those artifacts as the acceptance oracle. This
+catches missing product surfaces—not only overflow, layout jumps, and contrast failures.
 
 ## The loop
 
 1. **Run the app** and navigate to the surface (`pnpm tauri dev`, or the web dev server for
    the browser target).
-2. **Capture screenshots** at **320, 768, 1024, 1440** px wide, in **both light and dark**
+2. Build the complete route/state coverage matrix from `reference-ui-fidelity`. A screenshot
+   of one easy page cannot stand in for the product.
+3. **Capture screenshots** at **320, 768, 1024, 1440** px wide, in **both light and dark**
    themes. Use BrowserClaw (`screenshot`) or Playwright. That is 8 shots for a themed
    surface.
-3. **Inspect each** against the checklist below.
-4. **Fix and re-capture** only the shots that regressed. Do not declare done from a single
+4. **Inspect each** against the checklist below and its approved reference when one exists.
+5. **Fix and re-capture** only the shots that regressed. Do not declare done from a single
    viewport.
 
 ## Checklist (per shot)
@@ -32,6 +35,8 @@ template-generic output before it ships.
       (tables, code, diagrams) scrolls inside its own `overflow-x:auto` container.
 - [ ] **No layout shift** from streaming content or async data (reserve space; explicit
       image `width`/`height`).
+- [ ] **Complete product coverage.** Every specified destination and meaningful state is
+      implemented; no placeholder/absent route is hidden by a polished shell.
 - [ ] **Hierarchy through scale contrast**, not uniform emphasis.
 - [ ] **Intentional rhythm** — spacing varies with meaning, not uniform padding everywhere.
 - [ ] **Designed hover / focus / active states** on every interactive element.
@@ -40,13 +45,16 @@ template-generic output before it ships.
 - [ ] **Not a default template.** Fails if it reads as stock shadcn/Tailwind with no point
       of view (centered hero + gradient blob + generic CTA; uniform card grid; gray-on-white
       with one accent). See the design-quality bar below.
+- [ ] **KnowMe Flat 2.0:** no visible borders, divider lines, or layout shadows; adjacent
+      regions are distinguished through background-color changes.
+- [ ] **Shadcn/Assistant UI are mounted at the real boundary**, not merely installed.
 - [ ] **Motion is compositor-friendly** (opacity/transform/clip-path only).
 - [ ] **Touch targets ≥ 44px** at the 320/768 widths.
 
 ## Design-quality bar
 
 Every meaningful surface should demonstrate **at least four**: clear hierarchy via scale
-contrast; intentional spacing rhythm; depth/layering (overlap, surfaces, shadow, motion);
+contrast; intentional spacing rhythm; depth/layering through flat surface color and motion;
 typography with a real pairing; semantic (not decorative) color; designed interaction
 states; editorial/bento composition where it fits; atmosphere/texture when apt; motion that
 clarifies flow; data-viz treated as part of the design system.
@@ -55,7 +63,7 @@ clarifies flow; data-viz treated as part of the design system.
 
 - Components import only hooks. No direct store imports, no `invoke()`/`listen()` in a
   component or hook — those live only in Zustand stores.
-- Server/async data via TanStack Query; client/UI state via Zustand; shareable state (tab,
+- Server/async/entity data via `@prometheus-ags/prometheus-entity-management` 3.x; client/UI state via Zustand; shareable state (tab,
   filter, sort) in the URL.
 
 ## Related skills
@@ -65,3 +73,4 @@ clarifies flow; data-viz treated as part of the design system.
 - [[hybrid-design-tokens]] — the tokens every surface must use
 - [[a11y-gate]] — the accessibility half of "done"
 - [[content-block-ui]] — reviewing chat/ContentBlock surfaces
+- [[reference-ui-fidelity]] — reference discovery, screen inventory, and comparison oracle

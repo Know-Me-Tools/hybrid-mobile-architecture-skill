@@ -348,7 +348,7 @@ body { font-family: var(--body); background: var(--bg); color: var(--fg); line-h
       <div class="pcard-body">
         <div class="pcard-item"><div class="pcard-dot"></div>WebView rendering — WKWebView on macOS/iOS, Chromium on desktop</div>
         <div class="pcard-item"><div class="pcard-dot"></div>JSON IPC boundary — invoke() + emit() for Rust↔JS</div>
-        <div class="pcard-item"><div class="pcard-dot"></div>Full web ecosystem: assistant-ui, shadcn/ui, TanStack</div>
+        <div class="pcard-item"><div class="pcard-dot"></div>Full web ecosystem: assistant-ui, shadcn/ui, Prometheus Entity Management 3.x, TanStack Router/Table</div>
         <div class="pcard-item"><div class="pcard-dot"></div>Vite 7 HMR — submillisecond UI development cycle</div>
         <div class="pcard-item"><div class="pcard-dot"></div>3–10 MB installer vs 15–30 MB Flutter desktop bundle</div>
         <div class="pcard-item"><div class="pcard-dot"></div>Native accessibility via OS WebView accessibility tree</div>
@@ -662,7 +662,7 @@ body { font-family: var(--body); background: var(--bg); color: var(--fg); line-h
     <div class="layer l5">
       <div class="layer-ey">Dimension 01 · UI component ecosystem</div>
       <div class="layer-title">React 19 + the web ecosystem is the richest native desktop UI toolkit that exists</div>
-      <div class="layer-desc">Every shadcn/ui component, Radix primitive, TanStack utility (Router, Query, Table, Virtual), Recharts, Sandpack for artifact previews, assistant-ui's streaming primitives — all available immediately with zero adaptation. The gen_ui <code>ArtifactBlock</code> viewer in Flutter required building a custom data table, document renderer, and code viewer from first principles. In React, those are <code>@tanstack/react-table</code>, <code>react-markdown</code>, and Sandpack respectively — three imports and a day of integration work versus several days of custom widget construction.</div>
+      <div class="layer-desc">Every shadcn/ui component, Radix primitive, Prometheus Entity Management 3.x entity/query primitive, TanStack Router/Table/Virtual utility, Recharts, Sandpack for artifact previews, and assistant-ui streaming primitive is available immediately. The gen_ui <code>ArtifactBlock</code> viewer in Flutter required building a custom data table, document renderer, and code viewer from first principles. In React, those are <code>@tanstack/react-table</code>, <code>react-markdown</code>, and Sandpack respectively — three imports and a day of integration work versus several days of custom widget construction.</div>
       <div class="layer-meta">
         <div class="layer-meta-label">Specific advantage for gen_ui</div>
         <div class="layer-meta-text">assistant-ui ships streaming ContentPart components that map directly to A2UI events. The gen_ui ContentBlock system would be composed from assistant-ui primitives rather than built from scratch in Dart.</div>
@@ -704,11 +704,12 @@ body { font-family: var(--body); background: var(--bg); color: var(--fg); line-h
       <div class="rule-item"><div class="rule-dot"></div>Leverage assistant-ui's streaming ContentPart components for A2UI rendering</div>
       <div class="rule-item"><div class="rule-dot"></div>Use Sandpack for ArtifactBlock code and UI component previews</div>
       <div class="rule-item"><div class="rule-dot"></div>Connect Rust via Tauri commands for request/response and events for streaming</div>
-      <div class="rule-item"><div class="rule-dot"></div>Use Zustand 5 + TanStack Query for state management parity with gen_ui's Riverpod model</div>
+      <div class="rule-item"><div class="rule-dot"></div>Use Zustand 5 for client/UI state and Prometheus Entity Management 3.x for normalized server, async, and entity state</div>
     </div>
     <div class="rule-card dont">
       <div class="rule-card-ey">✗ Do not — Tauri desktop</div>
       <div class="rule-item"><div class="rule-dot"></div>Do not rebuild assistant-ui or shadcn/ui from scratch — consume them as dependencies</div>
+      <div class="rule-item"><div class="rule-dot"></div>Do not add TanStack Query — Prometheus Entity Management 3.x is the required replacement</div>
       <div class="rule-item"><div class="rule-dot"></div>Do not implement Rust business logic in TypeScript — maintain the core boundary</div>
       <div class="rule-item"><div class="rule-dot"></div>Do not use Tauri's window.webview for custom WebView panels inside the app — prefer Sandpack's session isolation</div>
       <div class="rule-item"><div class="rule-dot"></div>Do not try to achieve pixel parity with the Flutter mobile app — optimize each platform's UI independently</div>
@@ -1075,7 +1076,7 @@ body { font-family: var(--body); background: var(--bg); color: var(--fg); line-h
       <rect x="445" y="85" width="340" height="90" rx="10" fill="#FEF3C7" stroke="#FCD34D" stroke-width="2"/>
       <text x="615" y="110" font-family="Space Grotesk,sans-serif" font-size="11" fill="#78350F" text-anchor="middle" font-weight="700">Tauri Application</text>
       <text x="615" y="126" font-family="JetBrains Mono,monospace" font-size="8" fill="#D97706" text-anchor="middle">React 19 · Zustand 5 · shadcn/ui · assistant-ui</text>
-      <text x="615" y="140" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#D97706" text-anchor="middle">TanStack Router/Query/Table · Sandpack</text>
+      <text x="615" y="140" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#D97706" text-anchor="middle">PEM 3.x · TanStack Router/Table · Sandpack</text>
       <text x="615" y="153" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#D97706" text-anchor="middle">A2UI/AG-UI TypeScript consumers · IPC bridge</text>
 
       <!-- Arrows from platforms to apps -->

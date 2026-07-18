@@ -40,6 +40,8 @@ Full specifications:
 - `docs/tj-arch-mob-001.html` — complete architectural standard.
 - `docs/gen_ui_spec.html` — gen_ui technical spec with SVG diagrams.
 - `docs/pglite-oxide-tauri-hybrid.md` — embedded PostgreSQL option via pglite-oxide.
+- `docs/reference-app/knowme-agentic-deployment-plan.md` — authoritative KnowMe web,
+  Axum, Flint realtime, BYOK, deployment, and continuous-learning plan.
 
 ## The one invariant
 
@@ -206,12 +208,17 @@ npm run tauri build
 - **Generated files** must include `// TJ-ARCH-MOB-001 compliant` at the top.
 - **Feature-based clean architecture** in both Flutter and React:
   - Flutter: `features/<name>/{data,domain,presentation}`
-  - React: `features/<name>/{api,stores,queries,hooks,components,types.ts}`
+  - React: `features/<name>/{api,stores,entities,hooks,components,types.ts}`
 - **Strict layering:**
   - Flutter: Widget → `@riverpod` provider → Repository/Service → `gen_ui_core`
   - React: Component → Hook → Store → `[Rust invoke() / external API]`
 - Use `@riverpod` codegen annotations exclusively — never manual `Provider(...)` declarations.
 - React visual components import **only hooks**; no direct store imports and no `invoke()` calls.
+- React server/async/entity state uses `@prometheus-ags/prometheus-entity-management` 3.x. Never add TanStack Query.
+- Prefer shadcn/ui components over raw HTML controls in React; prefer shadcn_flutter equivalents in Flutter.
+- Assistant UI is mandatory for React chat/thread/composer behavior; do not hand-roll a chat transcript or composer when its primitives apply.
+- Durable chat uses Prometheus Entity Management 3.x over PGlite in browsers and typed Rust commands over pglite-oxide on Tauri. Zustand owns transient interaction state only.
+- Flat 2.0 is binding: no visible borders, divider lines, outlines used as decoration, or layout shadows. Separate regions only with background-color changes in light and dark themes.
 
 ## Project-level MCP servers and skills (all 4 harnesses)
 

@@ -80,7 +80,7 @@ export type ChatLane = "cloud" | "local";
 export function streamAgentA2ui(userMessage: string, messages: string[]): Promise<string> {
   return invoke<string>(cmd("stream_agent_a2ui"), { userMessage, messages });
 }
-/** Which lane chat turns currently run on. Defaults to "cloud". */
+/** Which lane chat turns currently run on. Zero-config installs prefer local. */
 export function getActiveLane(): Promise<ChatLane> {
   return invoke<ChatLane>(cmd("get_active_lane"));
 }
@@ -95,6 +95,49 @@ export function setActiveLane(lane: ChatLane): Promise<void> {
 /** Whether this build has a local-inference engine — gate the toggle on this. */
 export function hasLocalEngine(): Promise<boolean> {
   return invoke<boolean>(cmd("has_local_engine"));
+}
+export interface ProviderCatalogEntry {
+  id: string;
+  displayName: string;
+  defaultBaseUrl: string | null;
+  requiresApiKey: boolean;
+  supportsChat: boolean;
+}
+export interface ConfiguredProvider {
+  id: string;
+  kind: string;
+  baseUrl: string | null;
+  enabled: boolean;
+  hasApiKey: boolean;
+}
+export interface SaveProviderRequest {
+  id: string;
+  kind: string;
+  baseUrl: string | null;
+  apiKey: string | null;
+  enabled: boolean;
+}
+export interface ConfiguredCloudModel {
+  providerId: string;
+  modelId: string;
+}
+export function providerCatalog(): Promise<ProviderCatalogEntry[]> {
+  return invoke<ProviderCatalogEntry[]>(cmd("provider_catalog"));
+}
+export function providerList(): Promise<ConfiguredProvider[]> {
+  return invoke<ConfiguredProvider[]>(cmd("provider_list"));
+}
+export function providerSave(request: SaveProviderRequest): Promise<void> {
+  return invoke<void>(cmd("provider_save"), { request });
+}
+export function providerDelete(id: string): Promise<void> {
+  return invoke<void>(cmd("provider_delete"), { id });
+}
+export function cloudModelGet(): Promise<ConfiguredCloudModel | null> {
+  return invoke<ConfiguredCloudModel | null>(cmd("cloud_model_get"));
+}
+export function cloudModelSave(providerId: string, modelId: string): Promise<void> {
+  return invoke<void>(cmd("cloud_model_save"), { request: { providerId, modelId } });
 }
 export function entityList(view: ViewDescriptor): Promise<ListResult> {
   return invoke<ListResult>(cmd("entity_list"), { view });

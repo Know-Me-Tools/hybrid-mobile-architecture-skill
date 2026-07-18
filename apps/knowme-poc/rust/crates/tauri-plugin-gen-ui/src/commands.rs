@@ -8,13 +8,11 @@
 use std::sync::{Arc, Mutex};
 
 use crate::error::Result;
-use gen_ui_agent::ConfigBackend;
-use gen_ui_db_graph::{
-    FastEmbedder, GraphStore, GraphStoreConfig, MemoryHit, RelatedEntity, SearchMode,
-};
+use gen_ui_db_graph::{MemoryHit, RelatedEntity, SearchMode};
 use gen_ui_types::transport::{EntityRecord, ListResult};
 use gen_ui_types::view::ViewDescriptor;
 use once_cell::sync::OnceCell;
+use sqlx::Row;
 use tauri::{Manager, Runtime};
 
 fn app_data_dir<R: Runtime>(app: &tauri::AppHandle<R>) -> Result<std::path::PathBuf> {
@@ -67,6 +65,58 @@ pub async fn has_local_engine() -> Result<bool> {
     Ok(gen_ui_agent::chat::has_local_engine())
 }
 
+#[tauri::command]
+pub fn provider_catalog() -> Result<Vec<gen_ui_agent::provider_admin::ProviderCatalogEntry>> {
+    gen_ui_agent::provider_admin::catalog()
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
+}
+
+#[tauri::command]
+pub async fn provider_list() -> Result<Vec<gen_ui_agent::provider_admin::ConfiguredProvider>> {
+    gen_ui_agent::provider_admin::list()
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
+}
+
+#[tauri::command]
+pub async fn provider_save(
+    request: gen_ui_agent::provider_admin::SaveProviderRequest,
+) -> Result<()> {
+    gen_ui_agent::provider_admin::save(request)
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
+}
+
+#[tauri::command]
+pub async fn provider_delete(id: String) -> Result<()> {
+    gen_ui_agent::provider_admin::delete(&id)
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
+}
+
+#[tauri::command]
+pub async fn cloud_model_get() -> Result<Option<gen_ui_agent::provider_admin::ConfiguredCloudModel>>
+{
+    gen_ui_agent::provider_admin::get_cloud_model()
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
+}
+
+#[tauri::command]
+pub async fn cloud_model_save(
+    request: gen_ui_agent::provider_admin::SaveCloudModelRequest,
+) -> Result<()> {
+    gen_ui_agent::provider_admin::save_cloud_model(request)
+        .await
+        .map_err(gen_ui_types::CoreError::from)
+        .map_err(Into::into)
+}
+
 /// Boot-order invariant, step 1: open the config store (pglite-oxide) AND the
 /// memory/graph-RAG store (embedded SurrealDB — a separate concern from config
 /// storage, see gen_ui_agent::state::init's doc comment: memory is
@@ -89,48 +139,19 @@ pub async fn run_migrations<R: Runtime>(app: tauri::AppHandle<R>) -> Result<()> 
     std::fs::create_dir_all(&data_dir).map_err(|e| {
         tauri::Error::from(std::io::Error::new(e.kind(), format!("app data dir: {e}")))
     })?;
-    let config_store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
-        .await
-        .map_err(|e| {
-            tracing::error!(error = %e, "config store open failed");
-            gen_ui_types::CoreError::Transient(e.to_string())
-        })?;
-    config_store.migrate().await.map_err(|e| {
-        tracing::error!(error = %e, "config migrations failed");
-        gen_ui_types::CoreError::Transient(e.to_string())
-    })?;
-
-    let embed_cache = data_dir.join("model-cache/fastembed");
-    std::fs::create_dir_all(&embed_cache).map_err(|e| {
-        tauri::Error::from(std::io::Error::new(
-            e.kind(),
-            format!("model cache dir: {e}"),
-        ))
-    })?;
-    let embedder = gen_ui_runtime::spawn_blocking(move || FastEmbedder::new(embed_cache))
-        .await
-        .map_err(|e| gen_ui_types::CoreError::Transient(format!("embedder task join: {e}")))?
-        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
-    let memory_store = GraphStore::open(GraphStoreConfig {
-        endpoint: format!("rocksdb://{}", data_dir.join("memory-db").display()),
-        namespace: "knowme".to_string(),
-        database: "poc".to_string(),
-        embedder: Arc::new(embedder),
-    })
-    .await
-    .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
-
-    // Desktop's local-inference lane. Constructing the engine is cheap — no model
-    // is touched until a `local`-lane chat turn calls load() — so this is
-    // unconditional; the cost is only paid by users who switch to local.
-    let inference: Arc<dyn gen_ui_types::inference::InferenceProvider> =
-        Arc::new(gen_ui_inference::MistralEngine::new());
-
-    gen_ui_agent::state::init_with_inference(
-        ConfigBackend::Postgres(Arc::new(config_store)),
-        Arc::new(memory_store),
-        Some(inference),
+    // Desktop's zero-configuration local-inference lane. It shares the same
+    // revision-pinned, checksum-gated Qwen GGUF engine as mobile; the first local
+    // turn downloads into app data, and later turns reuse that durable cache.
+    let inference: Arc<dyn gen_ui_types::inference::InferenceProvider> = Arc::new(
+        gen_ui_inference::LlamaCppEngine::new(data_dir.join("model-cache")),
     );
+
+    gen_ui_host::AppServices::bootstrap(
+        gen_ui_host::HostConfig::knowme(data_dir.clone()),
+        Some(inference),
+    )
+    .await
+    .map_err(|error| gen_ui_types::CoreError::Transient(error.to_string()))?;
     tracing::info!(path = %data_dir.display(), "desktop migrations ready");
     Ok(())
 }
@@ -279,33 +300,120 @@ pub async fn entity_runtime_stop() -> Result<()> {
 }
 
 #[tauri::command]
-pub async fn entity_list(view: ViewDescriptor) -> Result<ListResult> {
-    let _ = view;
+pub async fn entity_list<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    view: ViewDescriptor,
+) -> Result<ListResult> {
+    let store = gen_ui_db::relational::PgliteStore::open(app_data_dir(&app)?.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    let limit = i64::from(view.limit.unwrap_or(200).min(1_000));
+    let rows = sqlx::query(
+        "SELECT id, entity_type, data_json::text AS data_json FROM entity_records \
+         WHERE entity_type = $1 ORDER BY updated_at DESC LIMIT $2",
+    )
+    .bind(&view.entity_type)
+    .bind(limit)
+    .fetch_all(store.store().pool())
+    .await
+    .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
     Ok(ListResult {
-        items: Vec::new(),
+        items: rows
+            .into_iter()
+            .map(|row| EntityRecord {
+                id: row.get("id"),
+                entity_type: row.get("entity_type"),
+                data_json: row.get("data_json"),
+            })
+            .collect(),
         next_cursor: None,
     })
 }
 
 #[tauri::command]
-pub async fn entity_get(entity_type: String, id: String) -> Result<Option<EntityRecord>> {
-    let _ = (entity_type, id);
-    Ok(None)
+pub async fn entity_get<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    entity_type: String,
+    id: String,
+) -> Result<Option<EntityRecord>> {
+    let store = gen_ui_db::relational::PgliteStore::open(app_data_dir(&app)?.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    let row = sqlx::query(
+        "SELECT id, entity_type, data_json::text AS data_json FROM entity_records \
+         WHERE entity_type = $1 AND id = $2",
+    )
+    .bind(&entity_type)
+    .bind(&id)
+    .fetch_optional(store.store().pool())
+    .await
+    .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    Ok(row.map(|row| EntityRecord {
+        id: row.get("id"),
+        entity_type: row.get("entity_type"),
+        data_json: row.get("data_json"),
+    }))
 }
 
 #[tauri::command]
-pub async fn entity_create(record: EntityRecord) -> Result<EntityRecord> {
+pub async fn entity_create<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    record: EntityRecord,
+) -> Result<EntityRecord> {
+    let store = gen_ui_db::relational::PgliteStore::open(app_data_dir(&app)?.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    sqlx::query(
+        "INSERT INTO entity_records (entity_type, id, data_json, updated_at) \
+         VALUES ($1, $2, $3::jsonb, CURRENT_TIMESTAMP)",
+    )
+    .bind(&record.entity_type)
+    .bind(&record.id)
+    .bind(&record.data_json)
+    .execute(store.store().pool())
+    .await
+    .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
     Ok(record)
 }
 
 #[tauri::command]
-pub async fn entity_update(record: EntityRecord) -> Result<EntityRecord> {
+pub async fn entity_update<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    record: EntityRecord,
+) -> Result<EntityRecord> {
+    let store = gen_ui_db::relational::PgliteStore::open(app_data_dir(&app)?.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    sqlx::query(
+        "INSERT INTO entity_records (entity_type, id, data_json, updated_at) \
+         VALUES ($1, $2, $3::jsonb, CURRENT_TIMESTAMP) \
+         ON CONFLICT (entity_type, id) DO UPDATE SET data_json = EXCLUDED.data_json, \
+         updated_at = CURRENT_TIMESTAMP",
+    )
+    .bind(&record.entity_type)
+    .bind(&record.id)
+    .bind(&record.data_json)
+    .execute(store.store().pool())
+    .await
+    .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
     Ok(record)
 }
 
 #[tauri::command]
-pub async fn entity_delete(entity_type: String, id: String) -> Result<()> {
-    let _ = (entity_type, id);
+pub async fn entity_delete<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    entity_type: String,
+    id: String,
+) -> Result<()> {
+    let store = gen_ui_db::relational::PgliteStore::open(app_data_dir(&app)?.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    sqlx::query("DELETE FROM entity_records WHERE entity_type = $1 AND id = $2")
+        .bind(entity_type)
+        .bind(id)
+        .execute(store.store().pool())
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
     Ok(())
 }
 

@@ -7,10 +7,10 @@ description: >
   Use this skill whenever: (1) creating a new Flutter, Tauri, or hybrid mobile/desktop
   app; (2) adding AI agent features to an existing codebase; (3) wiring Rust inference,
   MCP, SurrealDB, or A2UI/AG-UI protocols into any UI layer; (4) setting up feature-based
-  clean architecture with Riverpod (Flutter) or Zustand+TanStack (React); (5) integrating
+  clean architecture with Riverpod (Flutter) or Zustand + Prometheus Entity Management 3.x (React); (5) integrating
   Ory Kratos or Supabase authentication; (6) scaffolding the shared Rust core (gen_ui_core)
   with networking, LLM interaction, local inference, and UAR support. Always trigger for
-  any mention of gen_ui, hybrid app, flutter rust, tauri react, riverpod, zustand tanstack,
+  any mention of gen_ui, hybrid app, flutter rust, tauri react, riverpod, zustand, prometheus entity management,
   universal agent runtime, A2UI, AG-UI, MCP mobile, or on-device inference.
 version: 1.0.0
 author: Travis James <travis@prometheusags.ai>
@@ -93,7 +93,7 @@ Ask the user which of these they need. Read the relevant reference file afterwar
 
 ### 2d. Audit
 - Check architecture compliance against TJ-ARCH-MOB-001
-- Verify state management patterns (Riverpod / Zustand+TanStack)
+- Verify state management patterns (Riverpod / Zustand + Prometheus Entity Management 3.x)
 - Verify clean architecture boundaries (no direct store→API calls in components)
 
 ---
@@ -122,7 +122,7 @@ Read `references/flutter/patterns.md` for the full Riverpod architecture.
 - ContentBlock mutations happen only via `ChatNotifier.streamBlock()` — never direct state assignment
 - Feature modules own their providers; cross-feature deps go through the domain layer
 
-### Tauri + React 19 state management (Zustand 5 + TanStack)
+### Tauri + React 19 state management (Zustand 5 + Prometheus Entity Management 3.x)
 
 Read `references/tauri/patterns.md` for the full React architecture.
 
@@ -138,10 +138,10 @@ Component → Hook → Store → [Rust IPC / API]
 - Use `@tauri-apps/plugin-store` for Zustand persistence when state must survive restarts
 - Rust-side state extension via the Tauri Zustand plugin for shared state crossing the IPC boundary
 
-**TanStack Query (server-side state):**
-- All server-side / async data fetching goes through TanStack Query
-- `useQuery` / `useMutation` are the only entry points to remote data
-- `queryClient.invalidateQueries` is how Zustand actions trigger TQ refetch
+**Prometheus Entity Management 3.x (server/async/entity state):**
+- Always use `@prometheus-ags/prometheus-entity-management` 3.x instead of TanStack Query
+- Register each entity transport once, then read through `useEntities`, `useEntityQuery`, or `useEntity`
+- Perform graph-aware writes with `useEntityMutation`; normalized entities update every subscribed view
 - Never call `fetch`/`invoke` directly from a component
 
 **TanStack Router:**
@@ -154,7 +154,9 @@ Component → Hook → Store → [Rust IPC / API]
 - No direct store imports in components
 - No `invoke()` calls in components
 
-**shadcn-equivalent (React):** Use `shadcn/ui` with Tailwind 4. Run `npx shadcn@latest init` during scaffold.
+**shadcn-equivalent (React):** Prefer `shadcn/ui` components over raw HTML controls with Tailwind 4. Run `npx shadcn@latest init` during scaffold.
+
+**React chat:** Use Assistant UI for thread, composer, thread-list, streaming, attachment, and message-action behavior. Persist normalized conversation entities with Prometheus Entity Management 3.x: PGlite on web and pglite-oxide through Rust on Tauri. Zustand is transient UI state only. Apply the Flat 2.0 contract—no visible borders, divider lines, or layout shadows.
 
 **shadcn-equivalent (Flutter):** Use `shadcn_flutter` package — see `references/flutter/patterns.md`.
 
@@ -197,7 +199,7 @@ For embedded mode, `gen_ui_core` already contains the full UAR implementation:
 - `agent/mod.rs` — PMPO loop
 - `mcp/` — MCP client + registry
 - `protocol/` — A2UI + AG-UI pipeline
-- `inference/` — local inference behind the `InferenceProvider` trait (mistral.rs desktop Metal / llama-cpp-2 mobile / WebLLM web — see `versions.toml` `[inference]`)
+- `inference/` — local inference behind the `InferenceProvider` trait (pinned llama.cpp/Qwen on desktop + mobile, WebLLM on web; mistral.rs optional — see `versions.toml` `[inference]`)
 
 For external mode, configure the URL in `gen_ui_core/src/config.rs` and the crate switches to HTTP client mode.
 
@@ -227,8 +229,8 @@ When adding a new ContentBlock type, always do all 7 steps in `references/rust/n
 | `references/flutter/patterns.md` | Any Flutter work — Riverpod, clean arch, shadcn_flutter, FFI wiring |
 | `references/flutter/auth.md` | Flutter Kratos/Supabase — full implementation including GoRouter guards |
 | `references/flutter/testing.md` | Flutter testing — Riverpod test, widget tests, golden tests |
-| `references/tauri/patterns.md` | Any Tauri/React work — Zustand, TanStack, IPC, layer contract |
-| `references/tauri/auth.md` | React Kratos/Supabase — full store + TanStack Query + component |
+| `references/tauri/patterns.md` | Any Tauri/React work — Zustand, Prometheus Entity Management 3.x, TanStack Router/Table, IPC, layer contract |
+| `references/tauri/auth.md` | React Kratos/Supabase — full store + Prometheus Entity Management + component |
 | `references/tauri/eslint-config.md` | ESLint 9 flat config, tsconfig strict, Prettier, Vitest setup |
 | `references/tauri/testing.md` | Vitest, React Testing Library, layer contract enforcement tests |
 | `references/rust/patterns.md` | gen_ui_core module structure, FFI rules, Tauri commands, UAR modes |

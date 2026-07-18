@@ -16,6 +16,12 @@ import sys
 
 # skill name -> trigger words (lowercased substring match against the prompt)
 SKILLS = {
+    "reference-ui-fidelity": [
+        "reference app", "reference ui", "standalone html", "prototype",
+        "mood board", "moodboard", "screenshot", "attached image",
+        "match this design", "visual fidelity", "pixel parity", "redesign",
+        "product shell", "all screens", "design spec",
+    ],
     "content-block-ui": [
         "contentblock", "content block", "chat message", "streaming block",
         "a2ui", "render message", "block variant", "toolresult", "tooluse",
@@ -31,6 +37,21 @@ SKILLS = {
         "responsive", "breakpoint", "screenshot", "visual check", "ui review",
         "web ui", "does it look",
     ],
+    "tauri-custom-titlebar": [
+        "titlebar", "title bar", "window chrome", "window decorations",
+        "decorations false", "startdragging", "data-tauri-drag-region",
+        "traffic lights", "window controls", "minimize", "maximize", "close button",
+        "frameless", "drag region", "custom header",
+    ],
+    "mobile-navigation": [
+        "navigation", "nav bar", "navigation bar", "bottom nav", "tab bar", "tabs",
+        "navigationbar", "navigationrail", "bottomnavigationbar", "tabbar", "rail",
+        "sidebar", "app shell", "destinations", "shellroute", "router layout",
+        "pwa navigation", "mobile layout", "responsive nav",
+        # The wrong turn this skill exists to prevent: branching nav on OS rather
+        # than width. Catch the check itself, not just the nav vocabulary.
+        "platform.isios", "platform.isandroid", "useragent", "user agent",
+    ],
     "flutter-golden-ui": [
         "flutter widget", "flutter screen", "golden test", "golden file",
         "widget test", "visual regression", "shadcn_flutter", "consumerwidget",
@@ -40,6 +61,24 @@ SKILLS = {
         "accessibility", "a11y", "wcag", "screen reader", "keyboard navigation",
         "focus", "aria", "semantics", "contrast", "alt text", "reduced motion",
         "tab order", "accessible name", "focus trap",
+    ],
+    "hybrid-runtime-verification": [
+        "working app", "application works", "app works", "actually runs",
+        "runnable", "runtime verification", "verify runtime", "real launch",
+        "production build", "clean checkout", "fresh clone", "smoke test",
+        "end-to-end", "e2e", "ready to ship", "shippable", "release gate",
+        "working example", "launch the app", "launch ios", "launch tauri",
+    ],
+    "deploy-hybrid-agentic-stack": [
+        "axum", "web server", "dockerfile", "docker compose", "docker-compose",
+        "kubernetes", "kustomize", "flint forge", "flint fabric", "flint gate",
+        "ory kratos", "byok", "liter-llm", "realtime sync", "web deployment",
+        "agentic stack", "embedded web assets",
+    ],
+    "karpathy-progress-memory": [
+        "karpathy", "running llm wiki", "progress memory", "session log",
+        "phase boundary", "continuous improvement", "prometheus wiki",
+        "private wiki", "record the lesson", "record our path", "handoff",
     ],
 }
 
@@ -62,7 +101,7 @@ def main() -> int:
 
     lines = [
         "TJ-ARCH-MOB-001 project skills relevant to this prompt "
-        "— invoke each via the Skill tool BEFORE writing UI code:",
+        "— invoke each via the Skill tool before doing the matching work:",
     ]
     lines += [f"  - {name}" for name in hits]
 

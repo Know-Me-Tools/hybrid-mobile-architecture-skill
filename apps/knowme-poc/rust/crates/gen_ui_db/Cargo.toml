@@ -35,6 +35,7 @@ pg = ["sqlx/postgres"]
 # feature-independent and always compiled + tested.
 frf = []
 pglite = ["pg", "dep:pglite-oxide", "dep:virtual-net", "pglite-oxide/bundled"]
+sqlite = ["sqlx/sqlite"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio        = { workspace = true, features = ["rt", "sync", "time", "macros"] }

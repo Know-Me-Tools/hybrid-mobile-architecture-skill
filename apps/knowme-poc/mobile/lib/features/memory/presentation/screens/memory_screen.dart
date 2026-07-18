@@ -8,7 +8,9 @@
 // (FFI errors are still terminal — no silent retry — that's enforced in the notifier).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as shad;
 
+import '../../../../shared/widgets/knowme_screen.dart';
 import '../../../../shared/widgets/sync_chip.dart';
 import '../../../../core/theme/tokens.dart';
 import '../providers/memory_notifier.dart';
@@ -36,17 +38,11 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
   Widget build(BuildContext context) {
     final result = ref.watch(memoryProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Memory'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: Center(child: SyncChip()),
-          ),
-        ],
-      ),
-      body: Column(
+    final colors = shad.Theme.of(context).colorScheme;
+    return KnowMeScreen(
+      title: 'Memory',
+      trailing: const [SyncChip()],
+      child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
@@ -58,17 +54,14 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
+                      child: shad.TextField(
                         controller: _ingestController,
-                        decoration: const InputDecoration(
-                          hintText: 'Add a memory…',
-                          border: OutlineInputBorder(),
-                        ),
+                        placeholder: const Text('Add a memory…'),
                         onSubmitted: _isIngesting ? null : (_) => _ingest(),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    FilledButton(
+                    shad.PrimaryButton(
                       onPressed: _isIngesting ? null : _ingest,
                       child: _isIngesting
                           ? const SizedBox(
@@ -86,19 +79,17 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
+                      child: shad.TextField(
                         controller: _searchController,
-                        decoration: const InputDecoration(
-                          hintText: 'Hybrid graph-RAG search…',
-                          border: OutlineInputBorder(),
-                        ),
+                        placeholder: const Text('Hybrid graph-RAG search…'),
                         onSubmitted: _isSearching ? null : (_) => _search(),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    IconButton.filled(
+                    shad.PrimaryButton(
                       onPressed: _isSearching ? null : _search,
-                      icon: _isSearching
+                      density: shad.ButtonDensity.icon,
+                      child: _isSearching
                           ? const SizedBox(
                               width: 18,
                               height: 18,
@@ -111,7 +102,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
               ],
             ),
           ),
-          const Divider(height: 1),
+          Container(height: 8, color: colors.secondary),
           Expanded(
             child: result.hits.isEmpty
                 ? Center(
@@ -128,13 +119,37 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, i) {
                       final hit = result.hits[i];
-                      return ListTile(
-                        leading: const Icon(Icons.memory),
-                        title: Text(hit.text),
-                        subtitle: Text(hit.kind),
-                        trailing: Text(
-                          hit.score.toStringAsFixed(3),
-                          style: T.uiMd.copyWith(color: T.textTertiary),
+                      return Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: colors.card,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.memory, color: colors.primary),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(hit.text),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    hit.kind,
+                                    style: TextStyle(
+                                      color: colors.mutedForeground,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              hit.score.toStringAsFixed(3),
+                              style: T.uiMd.copyWith(color: T.textTertiary),
+                            ),
+                          ],
                         ),
                       );
                     },

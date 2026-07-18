@@ -1,5 +1,5 @@
 # Tauri + React 19 Patterns Reference
-> Tauri 2.10+ · React 19 · Vite 8 · Zustand 5 · TanStack · shadcn/ui · Tailwind 4
+> Tauri 2.10+ · React 19 · Vite 8 · Zustand 5 · Prometheus Entity Management 3.x · TanStack Router/Table · shadcn/ui · Tailwind 4
 
 ## Package versions (package.json — current March 2026)
 
@@ -12,7 +12,7 @@
     "@tauri-apps/plugin-shell": "^2.0.0",
     "@tauri-apps/plugin-store": "^2.0.0",
     "zustand": "^5.0.0",
-    "@tanstack/react-query": "^5.0.0",
+    "@prometheus-ags/prometheus-entity-management": "^3.0.0-alpha.0",
     "@tanstack/react-router": "^1.0.0",
     "@tanstack/react-table": "^8.0.0",
     "@tanstack/react-virtual": "^3.0.0",
@@ -27,7 +27,7 @@
     "@codemirror/lang-javascript": "^6.0.0",
     "@sandpack/react": "^2.0.0",
     "framer-motion": "^11.0.0",
-    "assistant-ui": "^0.8.0",
+    "@assistant-ui/react": "^0.14.27",
     "immer": "^10.0.0"
   },
   "devDependencies": {
@@ -50,7 +50,7 @@
 src/
   app/
     router.tsx              # TanStack Router root
-    queryClient.ts          # TanStack Query client
+    entityRuntime.ts        # Entity transports and graph runtime registration
     providers.tsx           # App provider tree
   core/
     types/                  # Shared TypeScript types
@@ -61,7 +61,7 @@ src/
     <feature-name>/
       api/                  # Tauri invoke() wrappers (called only from stores)
       stores/               # Zustand stores (client-side state)
-      queries/              # TanStack Query hooks (server-side state)
+      entities/             # Prometheus Entity Management hooks/transports
       hooks/                # Composed hooks (what components use)
       components/           # Feature UI components
       types.ts              # Feature-specific types
@@ -82,8 +82,12 @@ Component → Hook → Store → [Rust IPC invoke() / external API]
 ```
 
 **Components** import only hooks. Never `useXxxStore` directly in components.
-**Hooks** compose from stores and TanStack Query. Never call `invoke()` in hooks.
+**Hooks** compose from stores and Prometheus Entity Management hooks. Never call `invoke()` in hooks.
 **Stores** call `invoke()` / `emit()` and manage all side effects.
+
+`@prometheus-ags/prometheus-entity-management` 3.x is the required normalized server/async/entity-state layer. Do not add TanStack Query. Register transports once at the store/runtime boundary, read entities through `useEntities` / `useEntityQuery` / `useEntity`, and perform graph-aware writes through `useEntityMutation`.
+
+For chat, Assistant UI owns thread/composer/thread-list behavior and Shadcn UI owns general interaction primitives. Conversation, message, block, citation, attachment, draft, and append-only protocol-event entities are normalized by Prometheus Entity Management. PGlite persists them in the browser; typed Tauri commands persist the same logical model in pglite-oxide. Zustand may assemble an in-flight stream and track selection/drafts, but it is not the durable conversation database. All chat surfaces follow Flat 2.0: no visible borders, divider lines, or layout shadows; adjacent regions differ by background color.
 
 ### Zustand store pattern (client-side state)
 
@@ -145,34 +149,27 @@ export const useChatStore = create<ChatState & ChatActions>()(
 );
 ```
 
-### TanStack Query hook (server-side / async state)
+### Prometheus Entity Management hook (server-side / async entity state)
 
 ```typescript
-// features/memory/queries/useMemorySearch.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { invoke } from '@tauri-apps/api/core';
+// features/memory/entities/useMemories.ts
+import {
+  useEntities,
+  useEntityMutation,
+} from '@prometheus-ags/prometheus-entity-management';
+import { memoryApi } from '../api/memoryApi';
 
-// Keys factory
-export const memoryKeys = {
-  all: ['memory'] as const,
-  search: (q: string) => [...memoryKeys.all, 'search', q] as const,
-};
-
-export function useMemorySearch(query: string) {
-  return useQuery({
-    queryKey: memoryKeys.search(query),
-    queryFn: () => invoke<MemoryRecord[]>('memory_search', { query, namespace: 'default', limit: 10 }),
-    enabled: query.length > 2,
-    staleTime: 30_000,
+export function useMemoryEntities(search: string) {
+  const list = useEntities<MemoryRecord>('Memory', {
+    search,
+    enabled: search.length > 2,
   });
-}
-
-export function useMemoryWrite() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (params: MemoryWriteParams) => invoke('memory_write', params),
-    onSuccess: () => qc.invalidateQueries({ queryKey: memoryKeys.all }),
+  const write = useEntityMutation<MemoryWriteParams, MemoryRecord, MemoryRecord>({
+    type: 'Memory',
+    mutate: memoryApi.write,
+    normalize: (record) => ({ id: record.id, data: record }),
   });
+  return { ...list, writeMemory: write.mutate, writeState: write.state };
 }
 ```
 
@@ -180,22 +177,21 @@ export function useMemoryWrite() {
 
 ```typescript
 // features/memory/hooks/useMemory.ts
-// ✓ Components import ONLY this hook — never stores or queries directly
+// ✓ Components import ONLY this hook — never stores or entity modules directly
 
-import { useMemorySearch, useMemoryWrite } from '../queries/useMemorySearch';
+import { useMemoryEntities } from '../entities/useMemories';
 import { useChatStore } from '../../chat/stores/chatStore';
 
 export function useMemory(query: string) {
-  const { data: memories, isLoading } = useMemorySearch(query);
-  const { mutate: writeMemory, isPending: isWriting } = useMemoryWrite();
+  const { items: memories, isLoading, writeMemory, writeState } = useMemoryEntities(query);
   // Access chat store state needed for memory context
   const activeRunId = useChatStore((s) => s.activeRunId);
 
   return {
-    memories: memories ?? [],
+    memories,
     isLoading,
     writeMemory,
-    isWriting,
+    isWriting: writeState.isPending,
     hasContext: activeRunId !== null,
   };
 }
@@ -268,7 +264,7 @@ import { Card, CardContent, CardHeader } from '@/shared/components/ui/card';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 
 // For AI-specific components, use assistant-ui
-import { Thread, Message, ThreadMessages } from 'assistant-ui';
+import { ThreadPrimitive, MessagePrimitive } from '@assistant-ui/react';
 ```
 
 ## Tauri IPC patterns (stores only)

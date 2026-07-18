@@ -1,0 +1,23 @@
+[package]
+name = "gen_ui_inference"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[features]
+default = []
+local-llama = ["dep:llama-cpp-2", "dep:reqwest", "dep:sha2", "dep:encoding_rs"]
+
+[dependencies]
+gen_ui_types = { path = "../gen_ui_types" }
+gen_ui_runtime = { path = "../gen_ui_runtime" }
+async-trait.workspace = true
+futures.workspace = true
+tracing.workspace = true
+tokio = { workspace = true, features = ["sync", "fs", "io-util"] }
+tokio-stream.workspace = true
+llama-cpp-2 = { workspace = true, optional = true }
+reqwest = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
+encoding_rs = { workspace = true, optional = true }

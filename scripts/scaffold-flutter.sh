@@ -255,10 +255,6 @@ Future<void> initRustBridge({String? dataDir}) async {
   // await ffi.initCore(workerThreads: null, dataDir: dataDir);
 }
 
-Future<void> setApiKey(String key) async {
-  // await ffi.setApiKey(key: key);
-}
-
 /// chat_send(thread_id, message) -> run_id. FFI call; terminal on Rust error.
 Future<String> chatSend(String threadId, String message) async {
   // return await ffi.chatSend(threadId: threadId, message: message);
@@ -718,6 +714,7 @@ cat > lib/features/chat/presentation/screens/chat_screen.dart << 'EOF'
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gen_ui_widgets/gen_ui_widgets.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as shad;
 
 import '../../../../shared/widgets/sync_chip.dart';
 import '../providers/chat_notifier.dart';
@@ -748,10 +745,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(chatProvider);
+    final colors = shad.Theme.of(context).colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Chat'), actions: const [Padding(padding: EdgeInsets.only(right: 12), child: Center(child: SyncChip()))]),
-      body: Column(children: [
+    return shad.Scaffold(
+      headerBackgroundColor: colors.secondary,
+      headers: const [SafeArea(bottom: false, child: Padding(padding: EdgeInsets.all(16), child: Row(children: [Expanded(child: Text('Chat', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700))), SyncChip()])))],
+      child: Column(children: [
         Expanded(
           child: ListView.separated(
             padding: const EdgeInsets.all(16),
@@ -759,12 +758,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             separatorBuilder: (_, __) => const SizedBox(height: 16),
             itemBuilder: (context, i) {
               final msg = state.messages[i];
-              return Column(
-                crossAxisAlignment: msg.role == 'user' ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                children: [
-                  for (final block in msg.content) ContentBlockView(block: block),
-                  if (msg.isStreaming) const Padding(padding: EdgeInsets.only(top: 4), child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))),
-                ],
+              return Align(
+                alignment: msg.role == 'user' ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(color: msg.role == 'user' ? colors.muted : colors.card, borderRadius: BorderRadius.circular(16)),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    for (final block in msg.content) ContentBlockView(block: block),
+                    if (msg.isStreaming) const Padding(padding: EdgeInsets.only(top: 4), child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))),
+                  ]),
+                ),
               );
             },
           ),
@@ -774,16 +777,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             padding: const EdgeInsets.all(12),
             child: Row(children: [
               Expanded(
-                child: TextField(
+                child: shad.TextField(
                   controller: _controller,
-                  decoration: const InputDecoration(hintText: 'Message…', border: OutlineInputBorder()),
+                  placeholder: const Text('Ask anything…'),
                   onSubmitted: _isSending ? null : (_) => _send(),
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton.filled(
+              shad.PrimaryButton(
                 onPressed: _isSending ? null : _send,
-                icon: _isSending
+                density: shad.ButtonDensity.icon,
+                child: _isSending
                     ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.send),
               ),
@@ -929,6 +933,7 @@ cat > lib/features/notes/presentation/screens/notes_screen.dart << 'EOF'
 // TJ-ARCH-MOB-001 compliant
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as shad;
 import '../providers/notes_provider.dart';
 
 class NotesScreen extends ConsumerWidget {
@@ -1077,12 +1082,11 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
   Widget build(BuildContext context) {
     final result = ref.watch(memoryProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Memory'),
-        actions: const [Padding(padding: EdgeInsets.only(right: 12), child: Center(child: SyncChip()))],
-      ),
-      body: Column(children: [
+    final colors = shad.Theme.of(context).colorScheme;
+    return shad.Scaffold(
+      headerBackgroundColor: colors.secondary,
+      headers: const [SafeArea(bottom: false, child: Padding(padding: EdgeInsets.all(16), child: Row(children: [Expanded(child: Text('Memory', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700))), SyncChip()])))],
+      child: Column(children: [
         Padding(
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1090,14 +1094,14 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
             const SizedBox(height: 6),
             Row(children: [
               Expanded(
-                child: TextField(
+                child: shad.TextField(
                   controller: _ingestController,
-                  decoration: const InputDecoration(hintText: 'Add a memory…', border: OutlineInputBorder()),
+                  placeholder: const Text('Add a memory…'),
                   onSubmitted: _isIngesting ? null : (_) => _ingest(),
                 ),
               ),
               const SizedBox(width: 8),
-              FilledButton(
+              shad.PrimaryButton(
                 onPressed: _isIngesting ? null : _ingest,
                 child: _isIngesting
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
@@ -1109,23 +1113,24 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
             const SizedBox(height: 6),
             Row(children: [
               Expanded(
-                child: TextField(
+                child: shad.TextField(
                   controller: _searchController,
-                  decoration: const InputDecoration(hintText: 'Hybrid graph-RAG search…', border: OutlineInputBorder()),
+                  placeholder: const Text('Hybrid graph-RAG search…'),
                   onSubmitted: _isSearching ? null : (_) => _search(),
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton.filled(
+              shad.PrimaryButton(
                 onPressed: _isSearching ? null : _search,
-                icon: _isSearching
+                density: shad.ButtonDensity.icon,
+                child: _isSearching
                     ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.search),
               ),
             ]),
           ]),
         ),
-        const Divider(height: 1),
+        Container(height: 8, color: colors.secondary),
         Expanded(
           child: result.hits.isEmpty
               ? Center(child: Text(result.query.isEmpty ? 'No search yet' : 'No hits for "${result.query}"', style: T.uiMd.copyWith(color: T.textTertiary)))
@@ -1314,6 +1319,7 @@ cat > lib/app/router.dart << 'EOF'
 // TJ-ARCH-MOB-001 compliant
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as shad;
 
 import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/notes/presentation/screens/notes_screen.dart';
@@ -1349,16 +1355,19 @@ class _Shell extends StatelessWidget {
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     final index = _tabs.indexWhere((t) => location.startsWith(t.$1));
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: index < 0 ? 0 : index,
-        onDestinationSelected: (i) => context.go(_tabs[i].$1),
-        destinations: [
-          for (final (_, icon, label) in _tabs)
-            NavigationDestination(icon: Icon(icon), label: label),
-        ],
-      ),
+    final selected = ValueKey(_tabs[index < 0 ? 0 : index].$1);
+    final colors = shad.Theme.of(context).colorScheme;
+    return shad.Scaffold(
+      footerBackgroundColor: colors.secondary,
+      footers: [SafeArea(top: false, child: shad.NavigationBar(
+        selectedKey: selected,
+        backgroundColor: colors.secondary,
+        alignment: shad.NavigationBarAlignment.spaceEvenly,
+        labelType: shad.NavigationLabelType.selected,
+        onSelected: (key) { if (key is ValueKey<String>) context.go(key.value); },
+        children: [for (final (path, icon, label) in _tabs) shad.NavigationItem(key: ValueKey(path), label: Text(label), child: Icon(icon))],
+      ))],
+      child: child,
     );
   }
 }
@@ -1367,7 +1376,7 @@ ok "lib/app/router.dart"
 
 cat > lib/main.dart << 'MAINEOF'
 // TJ-ARCH-MOB-001 compliant
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Staged for the post-codegen bootstrap below (kept imported so uncommenting is
@@ -1375,6 +1384,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // ignore: unused_import
 import 'package:path_provider/path_provider.dart';
 import 'package:prometheus_entity_management/prometheus_entity_management.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as shad;
 
 import 'app/router.dart';
 // ignore: unused_import
@@ -1385,15 +1395,16 @@ import 'shared/providers/entity_transport.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    systemNavigationBarColor: Colors.transparent,
+    statusBarColor: Color(0x00000000),
+    systemNavigationBarColor: Color(0x00000000),
   ));
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Initialise the Rust runtime BEFORE runApp (uncomment after frb codegen):
   // final dir = await getApplicationDocumentsDirectory();
   // await initRustBridge(dataDir: dir.path);
-  // await setApiKey(const String.fromEnvironment('ANTHROPIC_API_KEY'));
+  // Local chat needs no credential. Optional cloud providers are configured
+  // through the provider-admin intent surface and platform secure storage.
 
   runApp(
     ProviderScope(
@@ -1410,23 +1421,37 @@ Future<void> main() async {
 class AppRoot extends StatelessWidget {
   const AppRoot({super.key});
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: 'Prometheus Hybrid',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData.dark(useMaterial3: true),
-        // StartupGate blocks the router shell until the first-run boot sequence
-        // (migrations → seeds → shapes) reaches ready. Then it renders the app.
-        home: StartupGate(child: _RouterHost()),
-      );
-}
-
-class _RouterHost extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData.dark(useMaterial3: true),
-        routerConfig: appRouter,
-      );
+  Widget build(BuildContext context) {
+    final dark = shad.LegacyColorSchemes.darkZinc().copyWith(
+      background: () => const Color(0xFF0B0F14),
+      foreground: () => const Color(0xFFE8EDF3),
+      card: () => const Color(0xFF1C2535),
+      primary: () => const Color(0xFFFF6A3D),
+      secondary: () => const Color(0xFF161D29),
+      muted: () => const Color(0xFF253044),
+      border: () => const Color(0x00000000),
+      input: () => const Color(0xFF161D29),
+    );
+    final light = shad.LegacyColorSchemes.lightZinc().copyWith(
+      background: () => const Color(0xFFF7F7F8),
+      foreground: () => const Color(0xFF0B0F14),
+      card: () => const Color(0xFFFFFFFF),
+      primary: () => const Color(0xFFE04E28),
+      secondary: () => const Color(0xFFFAFBFC),
+      muted: () => const Color(0xFFF2F4F7),
+      border: () => const Color(0x00000000),
+      input: () => const Color(0xFFFAFBFC),
+    );
+    return shad.ShadcnApp.router(
+      title: 'Prometheus Hybrid',
+      debugShowCheckedModeBanner: false,
+      theme: shad.ThemeData(colorScheme: light, radius: 0.75),
+      darkTheme: shad.ThemeData(colorScheme: dark, radius: 0.75),
+      themeMode: shad.ThemeMode.system,
+      routerConfig: appRouter,
+      builder: (context, child) => StartupGate(child: child ?? const SizedBox.shrink()),
+    );
+  }
 }
 MAINEOF
 ok "lib/main.dart"

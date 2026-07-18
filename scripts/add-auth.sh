@@ -395,7 +395,7 @@ export const supabaseAuth = {
 
   signOut: () => supabase.auth.signOut().then(({ error }) => { if (error) throw error; }),
 
-  // Export for use in TanStack Query hooks
+  // Export for registered Prometheus Entity Management transports
   client: supabase,
 };
 EOF

@@ -90,7 +90,7 @@ export function Titlebar() {
     <header
       data-tauri-drag-region
       onMouseDown={startDrag}
-      className="flex h-9 shrink-0 items-center border-b border-[color:var(--color-border)] bg-[color:var(--color-bg-2)] select-none"
+      className="flex h-9 shrink-0 items-center bg-[color:var(--color-bg-2)] select-none"
     >
       {isMac && <WindowControlsMac />}
       <div className="flex flex-1 items-center justify-center gap-2 text-[color:var(--color-fg)]">

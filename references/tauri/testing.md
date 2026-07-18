@@ -78,18 +78,10 @@ composition are real.
 ```typescript
 // src/features/memory/hooks/useMemory.test.ts
 import { renderHook, waitFor } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { vi, describe, it, expect } from 'vitest'
 import { useMemory } from './useMemory'
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() })) // the real IO boundary
-
-const wrapper = () => {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={qc}>{children}</QueryClientProvider>
-  )
-}
 
 describe('useMemory', () => {
   it('filters memories by query', async () => {
@@ -98,7 +90,7 @@ describe('useMemory', () => {
       { key: 'note-1', value: 'Flutter patterns', memoryType: 'semantic', namespace: 'default' },
       { key: 'note-2', value: 'Rust patterns',    memoryType: 'semantic', namespace: 'default' },
     ])
-    const { result } = renderHook(() => useMemory('Flutter'), { wrapper: wrapper() })
+    const { result } = renderHook(() => useMemory('Flutter'))
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.memories).toHaveLength(1)
     expect(result.current.memories[0].key).toBe('note-1')

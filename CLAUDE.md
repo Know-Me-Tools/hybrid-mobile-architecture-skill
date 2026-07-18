@@ -225,18 +225,22 @@ Widget (ConsumerWidget) → @riverpod provider → Repository/Service (via FFI) 
 - `ContentBlock` mutations happen only via `ChatNotifier.streamBlock()` — never direct state assignment
 - `ref.watch` in build/provider bodies; `ref.read` in callbacks
 
-### Tauri + React 19 (Zustand 5 + TanStack)
+### Tauri + React 19 (Zustand 5 + Prometheus Entity Management 3.x)
 
 ```
 Component → Hook → Store → [Rust invoke() / external API]
 ```
 
 - **Components** import only hooks (`useFeatureName` pattern). No direct store imports. No `invoke()` calls.
-- **Hooks** compose from Zustand stores and TanStack Query. No `invoke()` calls.
+- **Hooks** compose from Zustand stores and Prometheus Entity Management hooks. No `invoke()` calls.
 - **Stores** are the only layer that calls `invoke()` / `listen()`.
 - **Zustand** owns client-side state (UI, selection, filters, streaming).
-- **TanStack Query** owns server-side / async data (queries, mutations, caching).
+- **`@prometheus-ags/prometheus-entity-management` 3.x** owns normalized server/async/entity state, transport deduplication, mutations, and cross-view reactivity. Do not add TanStack Query.
 - **TanStack Router** handles routing with `beforeLoad` auth guards.
+- **Visual components prefer shadcn/ui** over raw HTML controls so behavior and styling stay consistent.
+- **Assistant UI owns React chat behavior**: thread, composer, streaming lifecycle, thread list, attachments, and message actions. Do not hand-roll substitutes.
+- **Durable conversations** are PEM 3.x entities backed by browser PGlite or Tauri pglite-oxide; Zustand is transient interaction state only.
+- **Flat 2.0 is mandatory**: no visible borders, divider lines, decorative outlines, or layout shadows. Use background-color changes for region separation in both themes.
 
 ---
 
@@ -265,7 +269,7 @@ lib/features/<feature-name>/
 src/features/<feature-name>/
   api/          # Tauri invoke() wrappers (called only from stores)
   stores/       # Zustand stores (client-side state)
-  queries/      # TanStack Query hooks (server-side state)
+  entities/     # Prometheus Entity Management hooks/transports (server/entity state)
   hooks/        # Composed hooks (what components import)
   components/   # Feature UI components
   types.ts      # Feature-specific types
@@ -439,7 +443,7 @@ All generated files must include `// TJ-ARCH-MOB-001 compliant` at the top.
 | `references/flutter/patterns.md` | Any Flutter work — Riverpod, clean arch, FFI wiring, shadcn_flutter, GoRouter |
 | `references/flutter/auth.md` | Flutter Kratos/Supabase implementation |
 | `references/flutter/testing.md` | Riverpod test, widget tests, golden tests |
-| `references/tauri/patterns.md` | Any Tauri/React work — Zustand, TanStack, IPC, layer contract |
+| `references/tauri/patterns.md` | Any Tauri/React work — Zustand, Prometheus Entity Management 3.x, TanStack Router/Table, IPC, layer contract |
 | `references/tauri/auth.md` | React Kratos/Supabase implementation |
 | `references/tauri/eslint-config.md` | ESLint 9 flat config, tsconfig strict, Prettier, Vitest setup |
 | `references/tauri/testing.md` | Vitest, RTL, layer contract enforcement tests |
@@ -449,6 +453,7 @@ All generated files must include `// TJ-ARCH-MOB-001 compliant` at the top.
 | `references/rust/wasm-targets.md` | Any web/WASM work — SurrealDB kv-indxdb, fetch/EventSource, PGlite interop, wasm MSRV (C-002 spike findings) |
 | `references/auth/patterns.md` | Auth strategy selection, full Kratos + Supabase examples |
 | `docs/pglite-oxide-tauri-hybrid.md` | Embedded PostgreSQL via pglite-oxide (alternative to SurrealDB for relational needs) |
+| `docs/reference-app/knowme-agentic-deployment-plan.md` | KnowMe web/Axum, Flint realtime, BYOK, deployment profiles, and continuous-learning execution plan |
 | `docs/tj-arch-mob-001.html` | Full architectural standard |
 | `docs/gen_ui_spec.html` | Full gen_ui technical specification and SVG architecture diagrams |
 

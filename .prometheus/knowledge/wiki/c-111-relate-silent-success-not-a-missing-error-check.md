@@ -1,3 +1,17 @@
+---
+type: Reference
+id: c-111-relate-silent-success-not-a-missing-error-check
+title: "C-111 RELATE bug was silent success, not a missing error check"
+tags:
+- surrealdb
+- graph-store
+- error-handling
+timestamp: 2026-07-17T00:00:00Z
+created_at: 2026-07-17T00:00:00Z
+updated_at: 2026-07-17T00:00:00Z
+revision: 1
+---
+
 # C-111 RELATE bug was silent success, not a missing error check
 
 _2026-07-17 — phase-codegen-and-ci-verification, gen_ui_db_graph_

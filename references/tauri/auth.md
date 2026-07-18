@@ -29,21 +29,16 @@ bootstrap()
 ```typescript
 // src/app/router.tsx
 import {
-  createRouter, createRootRouteWithContext, createRoute,
+  createRouter, createRootRoute, createRoute,
   redirect, Outlet,
 } from '@tanstack/react-router'
-import type { QueryClient } from '@tanstack/react-query'
 import type { AuthState } from '@/features/auth/stores/authStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { AppShell } from '@/shared/components/AppShell'
 import { LoginScreen } from '@/features/auth/components/LoginScreen'
 import { ChatScreen } from '@/features/chat/components/ChatScreen'
 
-interface RouterContext {
-  queryClient: QueryClient
-}
-
-const rootRoute = createRootRouteWithContext<RouterContext>()({
+const rootRoute = createRootRoute({
   component: Outlet,
 })
 
@@ -98,7 +93,6 @@ export const router = createRouter({
     loginRoute,
     protectedRoute.addChildren([indexRoute, chatRoute, settingsRoute]),
   ]),
-  context: { queryClient: undefined! },
 })
 
 declare module '@tanstack/react-router' {
@@ -115,7 +109,7 @@ import { persist, subscribeWithSelector } from 'zustand/middleware'
 import { createClient, type Session, type User } from '@supabase/supabase-js'
 import { getVersion } from '@tauri-apps/api/app'
 
-// Client is module-level — shared across the store and TanStack Query hooks
+// Client is module-level — shared across the store and registered entity transports
 export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY,
@@ -237,17 +231,18 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 )
 ```
 
-## Supabase TanStack Query hooks
+## Supabase Prometheus Entity Management hooks
 
 ```typescript
-// src/features/auth/queries/profileQueries.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+// src/features/auth/entities/profileEntities.ts
+import {
+  makeRestTransport,
+  registerEntityTransport,
+  useEntities,
+  useEntityMutation,
+} from '@prometheus-ags/prometheus-entity-management'
 import { supabase } from '../stores/authStore'
 import { useAuthStore } from '../stores/authStore'
-
-export const profileKeys = {
-  me: () => ['profile', 'me'] as const,
-}
 
 export interface UserProfile {
   id:           string
@@ -258,33 +253,23 @@ export interface UserProfile {
   created_at:   string
 }
 
-// Get current user's profile (server-side state — TanStack Query)
+registerEntityTransport('UserProfile', makeRestTransport({ supabase, table: 'profiles' }))
+
+// Get current user's profile from the normalized entity graph.
 export function useMyProfile() {
   const userId = useAuthStore((s) => s.user?.id)
-  return useQuery({
-    queryKey:  profileKeys.me(),
-    queryFn:   () => supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId!)
-      .single()
-      .then(({ data, error }) => {
-        if (error) throw error
-        return data as UserProfile
-      }),
-    enabled:   !!userId,
-    staleTime: 5 * 60_000, // 5 minutes
-  })
+  const profiles = useEntities<UserProfile>('UserProfile', { enabled: !!userId })
+  return { ...profiles, data: profiles.items.find((profile) => profile.id === userId) ?? null }
 }
 
 export function useUpdateProfile() {
-  const qc     = useQueryClient()
   const userId = useAuthStore.getState().user?.id
-  return useMutation({
-    mutationFn: (updates: Partial<UserProfile>) =>
+  return useEntityMutation<Partial<UserProfile>, UserProfile, UserProfile>({
+    type: 'UserProfile',
+    mutate: (updates) =>
       supabase.from('profiles').update(updates).eq('id', userId!).select().single()
-        .then(({ data, error }) => { if (error) throw error; return data }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: profileKeys.me() }),
+        .then(({ data, error }) => { if (error) throw error; return data as UserProfile }),
+    normalize: (profile) => ({ id: profile.id, data: profile }),
   })
 }
 ```

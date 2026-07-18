@@ -19,11 +19,15 @@ pub use gen_ui_db_graph::{MemoryHit, RelatedEntity};
 pub use gen_ui_types::CoreError;
 
 /// Start a chat turn; returns the run_id whose events arrive on chat_events(run_id).
-/// `thread_id` is reserved for multi-thread history (not yet used — the agent
-/// layer takes the full turn history via `message` for now).
-pub async fn chat_send(thread_id: String, message: String) -> Result<String, CoreError> {
+/// `messages` is the selected conversation's role/text history. The thread id
+/// remains transport metadata; persistence is owned by the entity repository.
+pub async fn chat_send(
+    thread_id: String,
+    message: String,
+    messages: Vec<String>,
+) -> Result<String, CoreError> {
     let _ = thread_id;
-    gen_ui_agent::chat::send(message, Vec::new())
+    gen_ui_agent::chat::send(message, messages)
         .await
         .map_err(Into::into)
 }

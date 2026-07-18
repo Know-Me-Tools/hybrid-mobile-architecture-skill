@@ -1,0 +1,50 @@
+{
+  "artifact_type": "ui",
+  "variants": [
+    {
+      "name": "desktop-chat-dark",
+      "file": "dist/previews/knowme-reference-ui/desktop-chat-dark.png",
+      "format": "png",
+      "description": "Rendered React 19 chat surface with the Assistant UI thread/composer/thread-list boundary and KnowMe Flat 2.0 dark theme."
+    },
+    {
+      "name": "ios-home-light",
+      "file": "dist/previews/knowme-reference-ui/ios-home-light.png",
+      "format": "png",
+      "description": "Simulator-native capture of the Flutter Home destination after FRB initialization and ordered startup completed."
+    }
+  ],
+  "preview": {
+    "required": true,
+    "runs": [
+      {
+        "artifact_id": "knowme-reference-ui-desktop-chat-dark",
+        "status": "success",
+        "screenshot": "dist/previews/knowme-reference-ui/desktop-chat-dark.png",
+        "report": "dist/previews/knowme-reference-ui/preview-report.json",
+        "runtime_source": "local",
+        "runtime_detail": "Vite/Tauri dev server on localhost with Assistant UI and PGlite runtime mounted."
+      },
+      {
+        "artifact_id": "knowme-reference-ui-ios-home-light",
+        "status": "success",
+        "screenshot": "dist/previews/knowme-reference-ui/ios-home-light.png",
+        "report": "dist/previews/knowme-reference-ui/preview-report.json",
+        "runtime_source": "local",
+        "runtime_detail": "iPhone 17 simulator, iOS 26.4, Flutter debug build installed and launched through simctl."
+      }
+    ]
+  },
+  "validation": {
+    "preview_status": "partial",
+    "has_console_errors": false,
+    "has_request_failures": false,
+    "notes": [
+      "Desktop and iOS representative previews rendered successfully.",
+      "The complete destination x breakpoint x theme screenshot matrix remains incomplete.",
+      "The Rust local-inference live test is blocked by the missing optional Xcode Metal Toolchain component."
+    ]
+  },
+  "sizes": [1440, 1000, 1206, 2622],
+  "generated_at": "2026-07-17T20:44:47Z"
+}

@@ -14,3 +14,8 @@
 # Build outputs (not part of the skill source)
 *.skill
 dist/
+
+# Local runtime and verification artifacts
+.knowme-data/
+.playwright-mcp/
+**/__pycache__/

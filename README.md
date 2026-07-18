@@ -113,7 +113,8 @@ bash scripts/audit.sh all .                        # both surfaces + workspace d
 | Standard | Rule |
 |---|---|
 | Agent conduct | [AGENT_BASE_RULES.md](AGENT_BASE_RULES.md) — the 40 Prometheus Base Rules, binding for humans, agents, skills, and generated projects |
-| State management | Riverpod 3.3 codegen (Flutter) · Zustand 5 + TanStack (React) |
+| KnowMe UI/UX | [KnowMe UI/UX standard](docs/knowme-ui-ux-standard.md) — Shadcn UI, Assistant UI, strict borderless Flat 2.0, rich chat events, and React/Flutter theme parity |
+| State management | Riverpod 3.3 codegen (Flutter) · Zustand 5 + Prometheus Entity Management 3.x (React); TanStack Router/Table only |
 | Component layer | Components → Hooks → Stores → API/Rust (stores are the only `invoke()` layer) |
 | Architecture | Feature-based clean arch (`data/domain/presentation` · `api/stores/queries/hooks/components`) |
 | UI components | shadcn_flutter (Flutter) · shadcn/ui (React) |

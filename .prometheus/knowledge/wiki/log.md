@@ -258,3 +258,6 @@
 * **Creation**: [Codegen and CI verification session ended at 01:58 with no changes](/codegen-and-ci-verification-session-ended-at-01-58-with-no-changes.md)
 * **Creation**: [Codegen and CI verification session ended at 01:42 with no changes](/codegen-and-ci-verification-session-ended-at-01-42-with-no-changes.md)
 * **Creation**: [KnowMe PoC build probe during codegen and CI verification](/knowme-poc-build-probe-during-codegen-and-ci-verification.md)
+* **Creation**: [Prometheus Entity Management 3.x replaces TanStack Query](/prometheus-entity-management-3-x-replaces-tanstack-query.md)
+* **Creation**: [KnowMe world-class chat and Flat 2.0 UI contract](/knowme-world-class-chat-and-flat-2-ui-contract.md)
+* **Revision 2**: [KnowMe world-class chat and Flat 2.0 UI contract — local-inference verification finding](/knowme-world-class-chat-and-flat-2-ui-contract.md)

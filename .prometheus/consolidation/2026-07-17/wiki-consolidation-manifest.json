@@ -2,6 +2,22 @@
   "purpose": "Lossless Prometheus wiki and event consolidation",
   "redactions": [
     {
+      "kind": "temporary-directory-path",
+      "occurrences": 3,
+      "original_sha256": "98a8776c22d172d51396a2891b48feefdea0662d4d956dcd00c26c7ee33ee68f",
+      "path": ".prometheus/consolidation/2026-07-17/verification.md",
+      "scope": "consolidation-evidence",
+      "source": "primary"
+    },
+    {
+      "kind": "home-directory",
+      "occurrences": 1,
+      "original_sha256": "aa82b516790411039325d7917fde1a1b8a0ed495384b13bd4aad67a17fd70170",
+      "path": ".prometheus/consolidation/2026-07-17/branch-disposition.md",
+      "scope": "consolidation-evidence",
+      "source": "primary"
+    },
+    {
       "kind": "repository-worktree-path",
       "occurrences": 1,
       "original_sha256": "632492eff913d487972b7a1e9447faf1d8723af06494c85e5a159d2bd8f9a90e",

@@ -62,7 +62,7 @@ pub fn init(config: ConfigBackend, memory: Arc<GraphStore>) {
 }
 
 /// `init`, plus a local-inference engine for platforms that have one (desktop
-/// passes `gen_ui_inference::MistralEngine`). Kept as a separate constructor
+/// passes an engine such as `gen_ui_inference::LlamaCppEngine`). Kept as a separate constructor
 /// rather than a fourth `init` parameter: the engine is genuinely optional and
 /// platform-specific, and every existing `init` call site stays correct.
 pub fn init_with_inference(

@@ -3,6 +3,9 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - "lib/bridge/generated_api.dart"
+    - "lib/bridge/frb_generated*.dart"
+    - "lib/bridge/api/*.dart"
+    - "lib/bridge/third_party/*.dart"
     - "**/*.g.dart"
     - "**/*.freezed.dart"
   errors:

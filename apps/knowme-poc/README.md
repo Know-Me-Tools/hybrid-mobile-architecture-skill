@@ -8,7 +8,7 @@ Built on the [Prometheus AGS Hybrid Mobile Architecture](docs/tj-arch-mob-001.ht
 apps/knowme-poc/
 ├── rust/               ← Shared layered Rust workspace (gen_ui_core + leaves: ffi, tauri-plugin, wasm)
 ├── mobile/             ← Flutter iOS/Android application (Riverpod, gen_ui widgets)
-├── desktop/            ← Tauri macOS/Windows/Linux application (React 19, Zustand, TanStack)
+├── desktop/            ← Tauri macOS/Windows/Linux application (React 19, Zustand, Prometheus Entity Management 3.x, TanStack Router/Table)
 ├── packages/           ← Publishable npm packages (@prometheus-ags/gen-ui-react, gen-ui-wasm)
 ├── flutter_packages/   ← Publishable pub.dev packages (gen_ui_flutter FFI plugin, gen_ui_widgets)
 └── docs/               ← Architecture documentation
@@ -26,10 +26,8 @@ bash scripts/android/build.sh release
 # Build shared Rust core (iOS/macOS)
 bash scripts/ios/build-xcframework.sh release
 
-# Generate Flutter FFI bindings
-flutter_rust_bridge_codegen generate \
-  --rust-input rust/gen_ui_core/src/api.rs \
-  --dart-output mobile/lib/bridge/generated_api.dart
+# Generate Flutter FFI bindings from the multi-crate contract
+(cd rust && flutter_rust_bridge_codegen generate --config-file flutter_rust_bridge.yaml)
 
 # Run Flutter
 cd mobile && flutter run
@@ -42,3 +40,8 @@ cd desktop && pnpm tauri dev
 
 See [TJ-ARCH-MOB-001](docs/tj-arch-mob-001.html) for platform selection criteria,
 state management standards, and enforcement rules.
+
+The reference UI is governed by the repository-level
+[KnowMe UI/UX standard](../../docs/knowme-ui-ux-standard.md), including Shadcn UI,
+Assistant UI, strict borderless Flat 2.0 styling, durable conversations, rich AG-UI
+events, and matching React/Flutter light and dark themes.

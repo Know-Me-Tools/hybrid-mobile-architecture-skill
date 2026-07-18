@@ -1,5 +1,5 @@
 # Rust Core Patterns Reference
-> gen_ui_core · Rust 1.96+ · Tokio 1.40 · mistral.rs (desktop) / llama-cpp-2 (mobile) · **SurrealDB 3.2** · flutter_rust_bridge 2.12 · Tauri 2.x
+> gen_ui_core · Rust 1.96+ · Tokio 1.40 · llama-cpp-2 (desktop + mobile default; mistral.rs optional) · **SurrealDB 3.2** · flutter_rust_bridge 2.12 · Tauri 2.x
 
 ## Workspace layout (layered — compile-cache friendly)
 
@@ -15,7 +15,7 @@ rust/
   gen_ui_types/        # shared traits + newtypes + enums (FROZEN seam — c001)
   gen_ui_protocol/     # A2UI / AG-UI adapters, ProtocolPipeline
   gen_ui_client/       # Anthropic HTTP/2 + SSE client
-  gen_ui_inference/    # InferenceProvider impls: mistral.rs desktop / llama-cpp-2 mobile (CPU-bound → spawn_blocking)
+  gen_ui_inference/    # InferenceProvider impls: llama-cpp-2 default / mistral.rs optional (CPU-bound → spawn_blocking)
   gen_ui_mcp/          # McpClient + McpRegistry (SSE / stdio transports)
   gen_ui_db/           # SurrealDB 3.2 (MemoryStore, EntityGraph) — ISOLATED for caching
   gen_ui_agent/        # PMPO loop (UAR embedded)
@@ -55,11 +55,11 @@ reqwest        = { version = "0.12",  features = ["json", "stream", "rustls-tls"
 reqwest-eventsource = "0.6"
 serde          = { version = "1.0",   features = ["derive"] }
 serde_json     = "1.0"
-# Inference engines are per-lane (versions.toml [inference]): mistral.rs on
-# desktop (Metal), llama-cpp-2 on mobile — both consumed ONLY by gen_ui_inference
+# Inference engines are per-lane (versions.toml [inference]): pinned llama-cpp-2
+# on desktop/mobile, with mistral.rs optional — consumed ONLY by gen_ui_inference
 # behind gen_ui_types::inference::InferenceProvider. Pin by git SHA per Rule 22.
-# mistral-rs   = { git = "...", rev = "<sha>" }         # desktop lane
-# llama-cpp-2  = "<version>"                            # mobile lane
+# mistral-rs   = { git = "...", rev = "<sha>" }         # optional desktop experiment
+# llama-cpp-2  = "<version>"                            # desktop/mobile default
 hf-hub         = { version = "0.3",   features = ["tokio"] }
 tokenizers     = { version = "0.20",  features = ["http"] }
 # SurrealDB 3.2 — native uses kv-rocksdb; wasm32 uses kv-indxdb (set per-crate/target).
@@ -200,7 +200,6 @@ pub enum UarMode {
 
 pub struct AppConfig {
     pub uar_mode: UarMode,
-    pub anthropic_api_key: String,
     pub data_dir: std::path::PathBuf,
     pub db_path: Option<std::path::PathBuf>,
 }
@@ -209,7 +208,6 @@ impl Default for AppConfig {
     fn default() -> Self {
         Self {
             uar_mode: UarMode::Embedded, // default: embedded
-            anthropic_api_key: std::env::var("ANTHROPIC_API_KEY").unwrap_or_default(),
             data_dir: dirs::data_dir().unwrap_or_default().join("gen_ui"),
             db_path: None,
         }

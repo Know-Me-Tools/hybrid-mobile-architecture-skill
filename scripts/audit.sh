@@ -242,10 +242,14 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
     # Pass $PKG to every grep — a single stdin redirect on the `if` would let the
     # first grep drain it and starve the rest (they'd all read EOF and "fail").
     grep -q '"zustand"'                "$PKG" && pass "zustand present" || fail "zustand MISSING — required"
-    grep -q '"@tanstack/react-query"'  "$PKG" && pass "@tanstack/react-query present" || fail "@tanstack/react-query MISSING"
+    grep -q '"@prometheus-ags/prometheus-entity-management"' "$PKG" && pass "Prometheus Entity Management present" || fail "@prometheus-ags/prometheus-entity-management MISSING — required 3.x server/entity state layer"
+    grep -q '"@prometheus-ags/prometheus-entity-management"[[:space:]]*:[[:space:]]*"[~^]*3\.' "$PKG" && pass "Prometheus Entity Management is on 3.x" || fail "Prometheus Entity Management must use version 3.x"
+    grep -q '"@tanstack/react-query"' "$PKG" && fail "@tanstack/react-query found — use Prometheus Entity Management 3.x" || pass "TanStack Query not present ✓"
     grep -q '"@tanstack/react-router"' "$PKG" && pass "@tanstack/react-router present" || fail "@tanstack/react-router MISSING"
     grep -q '"@tanstack/react-table"'  "$PKG" && pass "@tanstack/react-table present" || warn "@tanstack/react-table not found"
     grep -q '"@tauri-apps/api"'        "$PKG" && pass "@tauri-apps/api present" || fail "@tauri-apps/api MISSING"
+    grep -q '"@assistant-ui/react"'    "$PKG" && pass "Assistant UI present" || fail "@assistant-ui/react MISSING — required chat runtime"
+    grep -q '"@electric-sql/pglite"'   "$PKG" && pass "PGlite present" || fail "PGlite MISSING — browser conversation persistence required"
     grep -q '"immer"'                  "$PKG" && pass "immer present" || warn "immer not found — recommended for Zustand"
     grep -qE '"(redux|@reduxjs)'       "$PKG" && fail "Redux found — use Zustand" || pass "Redux not present ✓"
     grep -qE '"(jotai|recoil)'         "$PKG" && fail "jotai/recoil found — use Zustand" || pass "jotai/recoil not present ✓"
@@ -267,13 +271,48 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
         continue
       fi
       [[ -d "$feature/api" ]]        && pass "  $fname/api/" || warn "  $fname/api/ missing"
-      [[ -d "$feature/stores" ]]     && pass "  $fname/stores/" || fail "  $fname/stores/ MISSING"
-      [[ -d "$feature/queries" ]]    && pass "  $fname/queries/" || warn "  $fname/queries/ missing (server-side state)"
+      [[ -d "$feature/stores" ]]     && pass "  $fname/stores/" || warn "  $fname/stores/ absent (valid for read-only view-model features)"
+      [[ -d "$feature/entities" ]]   && pass "  $fname/entities/" || warn "  $fname/entities/ missing (normalized server/entity state)"
       [[ -d "$feature/hooks" ]]      && pass "  $fname/hooks/" || fail "  $fname/hooks/ MISSING — required for layer contract"
-      [[ -d "$feature/components" ]] && pass "  $fname/components/" || fail "  $fname/components/ MISSING"
+      if [[ -d "$feature/components" || -d "$feature/screens" ]]; then
+        pass "  $fname/ visual surface present"
+      else
+        fail "  $fname/components/ or screens/ MISSING"
+      fi
     done
   else
     fail "features/ directory MISSING"
+  fi
+
+  echo ""
+  echo -e "${CYAN}[02b] Product UI contract${NC}"
+  [[ -f "$ROOT/components.json" && -d "$SRC/components/ui" ]] && pass "shadcn/ui registry and primitives present" || fail "shadcn/ui is not initialized"
+  if grep -r "AssistantRuntimeProvider\|useExternalStoreRuntime" "$SRC/features/chat" 2>/dev/null | grep -q . \
+    && grep -r "@/components/assistant-ui/thread" "$SRC/features/chat" 2>/dev/null | grep -q .; then
+    pass "Assistant UI runtime and thread are mounted"
+  else
+    fail "Assistant UI is installed but not mounted at the chat boundary"
+  fi
+  if grep -r "chat_conversations\|ConversationRecord" "$SRC/features" 2>/dev/null | grep -q . \
+    && grep -r "useGraphStore\|useEntity" "$SRC/features/entities" 2>/dev/null | grep -q .; then
+    pass "durable conversation entities use PEM + PGlite path"
+  else
+    fail "conversation persistence/PEM integration is incomplete"
+  fi
+  if grep -qi '"name"[[:space:]]*:[[:space:]]*"knowme-poc"' "$PKG" \
+    || [[ -f "$ROOT/../docs/KnowMe.dc.html" ]]; then
+    for destination in Home Chat Hands Memory Models Settings; do
+      grep -r "['\"]$destination['\"]" "$SRC/app" 2>/dev/null | grep -q . \
+        && pass "destination: $destination" || fail "destination $destination MISSING from KnowMe app shell"
+    done
+  else
+    pass "KnowMe-specific six-destination check not applicable to generic scaffold"
+  fi
+  if rg -n -P '(?<![\\w-])border(?:-[trblxyse])?(?=\\s|\")|(?<![\\w-])shadow-(?!none)' \
+      "$SRC/app" "$SRC/features" "$SRC/shared" --glob '*.tsx' --glob '*.css' 2>/dev/null | grep -q .; then
+    fail "visible border/shadow utility found in product UI — Flat 2.0 requires background-only separation"
+  else
+    pass "Flat 2.0 product surfaces contain no visible border/shadow utilities"
   fi
 
   echo ""
@@ -289,11 +328,11 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
   fi
 
   # invoke()/listen() are allowed ONLY in stores — never components, hooks, or
-  # queries. Strip the grep path:line: prefix and drop // comments so the words
+  # entity modules. Strip the grep path:line: prefix and drop // comments so the words
   # "invoke"/"listen" in prose (e.g. "no invoke() here") don't false-positive.
   ts_ipc_leak() {
     grep -rn "invoke(\|listen(" "$SRC/features" 2>/dev/null \
-      | grep -E "(components|hooks|queries)/[^:]*\.(ts|tsx):" \
+      | grep -E "/features/[^/]+/(components|hooks|entities)/[^:]*\.(ts|tsx):" \
       | sed -E 's/^([^:]+:[0-9]+):/\1@@/' \
       | grep -vE '@@[[:space:]]*//' \
       | sed -E 's/@@/: /'
@@ -314,22 +353,21 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
 
   # No raw graph/SQL query strings outside stores — the intent surface (memory_search,
   # graph_expand) lives in Rust; the browser only runs its own local pglite in stores.
-  if grep -rn "RELATE \|DEFINE INDEX\|DEFINE TABLE" "$SRC/features" 2>/dev/null | grep -E "(components|hooks|queries)/" | grep -q .; then
+  if grep -rn "RELATE \|DEFINE INDEX\|DEFINE TABLE" "$SRC/features" 2>/dev/null | grep -E "(components|hooks|entities)/" | grep -q .; then
     fail "raw SurrealQL found outside stores — graph logic lives in Rust, not the UI"
   else
     pass "No raw SurrealQL outside stores ✓"
   fi
 
   echo ""
-  echo -e "${CYAN}[04] TanStack Query usage${NC}"
-  if grep -r "useQuery\|useMutation" "$SRC/features" 2>/dev/null | grep -q "useQuery\|useMutation"; then
-    pass "TanStack Query hooks in use"
-    # Verify in queries/ not components
-    if grep -r "useQuery\|useMutation" "$SRC/features" 2>/dev/null | grep -E "components/.*\.tsx:" | grep -q "useQuery"; then
-      warn "useQuery/useMutation in component files — prefer composing via feature hooks"
+  echo -e "${CYAN}[04] Prometheus Entity Management usage${NC}"
+  if grep -r "useEntities\|useEntityQuery\|useEntityMutation\|registerEntityTransport" "$SRC/features" 2>/dev/null | grep -q .; then
+    pass "Prometheus Entity Management hooks/transports in use"
+    if grep -r "useEntities\|useEntityQuery\|useEntityMutation" "$SRC/features" 2>/dev/null | grep -E "components/.*\.tsx:" | grep -q .; then
+      fail "Entity-management hooks found in component files — compose them through feature hooks"
     fi
   else
-    warn "No TanStack Query hooks found — ensure server-side state uses useQuery"
+    warn "No Prometheus Entity Management hooks found — required for server/async/entity state"
   fi
 
   echo ""
@@ -339,7 +377,7 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
   else
     warn "bridge/a2ui/types.ts not found — required for A2UI streaming"
   fi
-  if grep -r "listen(" "$SRC" 2>/dev/null | grep -v "node_modules" | grep -q "a2ui_event"; then
+  if grep -r "listen(\|onChatEvent" "$SRC" 2>/dev/null | grep -v "node_modules" | grep -q "a2ui_event\|onChatEvent"; then
     pass "a2ui_event listener wired"
   else
     warn "a2ui_event listener not found — wire in store init"
@@ -457,8 +495,8 @@ elif [[ "$PLATFORM" == "doc-consistency" ]]; then
 
     echo ""
     echo -e "${CYAN}[03] Inference-engine authority${NC}"
-    # Per-lane engines (versions.toml [inference]): desktop=mistral.rs,
-    # mobile=llama-cpp-2, web=WebLLM. 'candle' as a current-engine claim is stale.
+    # Per-lane engines (versions.toml [inference]): desktop/mobile=llama-cpp-2,
+    # web=WebLLM, mistral.rs optional. 'candle' as a current-engine claim is stale.
     hits=$(grep -lE 'candle' "${AUTHORITY_DOCS[@]}" 2>/dev/null || true)
     if [[ -n "$hits" ]]; then
       fail "Stale 'candle' engine references — in: $(echo "$hits" | xargs -n1 basename | tr '\n' ' ')"

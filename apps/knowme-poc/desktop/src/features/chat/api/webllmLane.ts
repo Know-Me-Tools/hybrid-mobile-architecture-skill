@@ -1,7 +1,7 @@
 // TJ-ARCH-MOB-001 compliant — api layer (called only from stores)
 //
 // Web local-inference lane: WebLLM (WebGPU), the browser counterpart to the
-// desktop mistral.rs lane in gen_ui_inference.
+// desktop/mobile llama.cpp lane in gen_ui_inference.
 //
 // DOCUMENTED EXCEPTION to the "all inference lives in gen_ui_core" invariant
 // (see CLAUDE.md, and the C-105 design doc). WASM cannot drive Metal/CUDA, and
@@ -12,10 +12,10 @@
 // stay lane-agnostic. The exception is confined to transport, not semantics.
 import type { CoreA2uiEvent } from '@/bridge/a2ui/driver'
 
-// Verified present in @mlc-ai/web-llm@0.2.84's prebuilt catalog. Same model
-// family as the desktop lane's GGUF (Qwen2.5-1.5B-Instruct), so answers are
-// comparable across surfaces.
-const WEB_MODEL_ID = 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC'
+// Verified present in @mlc-ai/web-llm@0.2.84's prebuilt catalog. The 0.5B Q4
+// build is the reliable zero-configuration default: materially fewer first-run
+// shards than the 1.5B build while retaining the same Qwen 2.5 chat template.
+const WEB_MODEL_ID = 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC'
 
 export interface WebLlmProgress {
   /** 0..1 */

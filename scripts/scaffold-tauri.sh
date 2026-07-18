@@ -51,7 +51,7 @@ cat > package.json << PKGEOF
     "@tauri-apps/plugin-os":  "^2.0.0",
     "zustand":                "^5.0.0",
     "immer":                  "^10.0.0",
-    "@tanstack/react-query":  "^5.0.0",
+    "loro-crdt":              "^1.13.6",
     "@tanstack/react-router": "^1.0.0",
     "@tanstack/react-table":  "^8.0.0",
     "@tanstack/react-virtual": "^3.0.0",
@@ -61,17 +61,25 @@ cat > package.json << PKGEOF
     "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
     "@prometheus-ags/tauri-plugin-gen-ui": "file:../rust/crates/tauri-plugin-gen-ui/guest-js",
     "tailwindcss":            "^4.0.0",
+    "tw-animate-css":         "^1.4.0",
     "@tailwindcss/vite":      "^4.0.0",
     "lucide-react":           "^0.400.0",
     "class-variance-authority": "^0.7.0",
     "clsx":                   "^2.1.0",
     "tailwind-merge":         "^2.0.0",
     "react-markdown":         "^9.0.0",
+    "@assistant-ui/react-markdown": "^0.14.6",
     "@codemirror/view":       "^6.0.0",
     "@codemirror/lang-javascript": "^6.0.0",
     "@codesandbox/sandpack-react": "^2.20.0",
     "framer-motion":          "^11.0.0",
-    "@assistant-ui/react":    "^0.8.0"
+    "@assistant-ui/react":    "^0.14.27",
+    "@base-ui/react":         "^1.6.0",
+    "@mlc-ai/web-llm":        "0.2.84",
+    "remark-gfm":             "^4.0.1",
+    "mermaid":                "^11.16.0",
+    "dompurify":              "^3.4.0",
+    "shadcn":                 "^4.13.0"
   },
   "devDependencies": {
     "@tauri-apps/cli":        "^2.10.3",
@@ -104,6 +112,20 @@ allowBuilds:
   esbuild: true
 EOF
 ok "pnpm-workspace.yaml (approved build scripts)"
+
+cat > components.json << 'EOF'
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-nova",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": { "config": "", "css": "src/index.css", "baseColor": "neutral", "cssVariables": true, "prefix": "" },
+  "iconLibrary": "lucide",
+  "aliases": { "components": "@/components", "utils": "@/lib/utils", "ui": "@/components/ui", "lib": "@/lib", "hooks": "@/hooks" },
+  "registries": { "@assistant-ui": "https://r.assistant-ui.com/{name}.json" }
+}
+EOF
+ok "components.json (Shadcn + Assistant UI registries)"
 
 cat > index.html << EOF
 <!doctype html>
@@ -181,29 +203,29 @@ ok "vite.config.ts"
 
 # ── Feature-based src structure ────────────────────────────────────────────
 step "Creating feature-based clean architecture"
-mkdir -p src/{app,core/{types,errors,utils,theme},shared/{components/ui,hooks,stores},bridge/{a2ui,agui},features/{chat/{api,stores,queries,hooks,components},entities/{api,stores,queries,hooks,components},memory/{api,stores,queries,hooks,components},settings/{stores,components}}}
+mkdir -p src/{app,core/{types,errors,utils,theme},shared/{components/ui,hooks,stores},bridge/{a2ui,agui},features/{chat/{api,stores,entities,hooks,components},entities/{api,stores,entities,hooks,components},memory/{api,stores,entities,hooks,components},settings/{stores,components}}}
 ok "src/ directory structure"
+
+mkdir -p src/lib
+cat > src/lib/utils.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+EOF
+ok "src/lib/utils.ts (Shadcn class composition)"
 
 # ── App providers ──────────────────────────────────────────────────────────
 cat > src/app/providers.tsx << 'EOF'
 // TJ-ARCH-MOB-001 compliant
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from '@tanstack/react-router'
 import { router } from './router'
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { staleTime: 30_000, retry: 1 },
-    mutations: { retry: 0 },
-  },
-})
-
 export function AppProviders() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} context={{ queryClient }} />
-    </QueryClientProvider>
-  )
+  return <RouterProvider router={router} />
 }
 EOF
 ok "src/app/providers.tsx"
@@ -211,18 +233,15 @@ ok "src/app/providers.tsx"
 # ── Router stub ────────────────────────────────────────────────────────────
 cat > src/app/router.tsx << 'EOF'
 // TJ-ARCH-MOB-001 compliant
-import { createRouter, createRootRouteWithContext } from '@tanstack/react-router'
-import type { QueryClient } from '@tanstack/react-query'
+import { createRouter, createRootRoute } from '@tanstack/react-router'
+import { ChatScreen } from '@/features/chat/components/ChatScreen'
 
-interface RouterContext { queryClient: QueryClient }
-
-const rootRoute = createRootRouteWithContext<RouterContext>()({
-  component: () => <div className="h-screen bg-background">outlet placeholder</div>,
+const rootRoute = createRootRoute({
+  component: ChatScreen,
 })
 
 export const router = createRouter({
   routeTree: rootRoute,
-  context: { queryClient: undefined! },
 })
 
 declare module '@tanstack/react-router' {
@@ -237,8 +256,7 @@ cat > src/features/chat/stores/chatStore.ts << 'EOF'
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { listen } from '@tauri-apps/api/event'
-import { invoke } from '@tauri-apps/api/core'
+import { chatSend, onChatEvent } from '@prometheus-ags/tauri-plugin-gen-ui'
 import type { ContentBlock, Message, MessageUsage } from '@/bridge/a2ui/types'
 import { applyA2uiEvent } from '@/bridge/a2ui/driver'
 
@@ -257,7 +275,7 @@ interface ChatActions {
 
 export const useChatStore = create<ChatState & ChatActions>()(
   subscribeWithSelector(
-    immer((set, get) => ({
+    immer((set) => ({
       messages: [],
       isStreaming: false,
       activeRunId: null,
@@ -285,18 +303,15 @@ export const useChatStore = create<ChatState & ChatActions>()(
         const assistantId = crypto.randomUUID()
         const assistantMsg: Message = { id: assistantId, role: 'assistant', content: [], timestamp: new Date().toISOString(), isStreaming: true }
         set((s) => { s.messages.push(userMsg, assistantMsg); s.isStreaming = true })
-        // Store calls invoke() — never component or hook
-        await invoke('stream_agent_a2ui', {
-          userMessage: text,
-          messages: get().messages.slice(0, -1).flatMap((m) => [m.role, m.content.find(b => b.type === 'text')?.text ?? '']),
-        }).catch(console.error)
+        // Typed guest binding owns invoke(); components and hooks never do.
+        await chatSend('default', text).catch(console.error)
       },
 
       initListeners: () => {
         // Wire A2UI events from Rust to store
-        const unlistenPromise = listen('a2ui_event', (event: { payload: unknown }) => {
+        const unlistenPromise = onChatEvent((payload: unknown) => {
           const store = useChatStore.getState()
-          applyA2uiEvent(event.payload as never, store.streamBlock, store.finalizeMessage)
+          applyA2uiEvent(payload as never, store.streamBlock, store.finalizeMessage)
         })
         return () => { unlistenPromise.then((fn) => fn()) }
       },
@@ -354,6 +369,14 @@ CREATE TABLE IF NOT EXISTS notes (
   body text NOT NULL,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS chat_conversations (
+  id uuid PRIMARY KEY,
+  tenant_id text NOT NULL,
+  title text NOT NULL,
+  messages jsonb NOT NULL DEFAULT '[]'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
 EOF
 
 cat > src/features/entities/stores/entityRuntime.ts << 'EOF'
@@ -365,6 +388,7 @@ import {
   registerEntityFromSql,
   registerEntityTransport,
   startLocalFirstGraph,
+  useGraphStore,
   type EntityTransport,
 } from '@prometheus-ags/prometheus-entity-management'
 import schemaSql from '../schema.sql?raw'
@@ -379,6 +403,7 @@ interface EntityRuntimeSession {
 let session: EntityRuntimeSession | null = null
 let sessionInflight: Promise<EntityRuntimeSession> | null = null
 let consumers = 0
+let browserDb: PGlite | null = null
 
 function tauriTransport(entityType: string): EntityTransport<EntityRow> {
   return {
@@ -410,22 +435,26 @@ function pgliteTransport(db: PGlite, table: string, tenantId: string): EntityTra
 }
 
 async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSession> {
-  const [projectsDdl, notesDdl] = schemaSql.split(';').filter((sql) => sql.includes('CREATE TABLE'))
-  if (!projectsDdl || !notesDdl) throw new Error('shared entity DDL is incomplete')
+  const [projectsDdl, notesDdl, conversationsDdl] = schemaSql.split(';').filter((sql) => sql.includes('CREATE TABLE'))
+  if (!projectsDdl || !notesDdl || !conversationsDdl) throw new Error('shared entity DDL is incomplete')
   registerEntityFromSql({ entityType: 'Project', createTableSql: projectsDdl })
   registerEntityFromSql({ entityType: 'Note', createTableSql: notesDdl })
+  registerEntityFromSql({ entityType: 'Conversation', createTableSql: conversationsDdl })
 
   if (isTauri()) {
     registerEntityTransport('Project', tauriTransport('projects'))
     registerEntityTransport('Note', tauriTransport('notes'))
+    registerEntityTransport('Conversation', tauriTransport('conversations'))
     await invoke<void>('entity_runtime_start', { tenantId })
     return { tenantId, dispose: () => { void invoke<void>('entity_runtime_stop') } }
   }
 
   const db = await PGlite.create('idb://gen-ui', { relaxedDurability: true })
+  browserDb = db
   await db.exec(schemaSql)
   registerEntityTransport('Project', pgliteTransport(db, 'projects', tenantId))
   registerEntityTransport('Note', pgliteTransport(db, 'notes', tenantId))
+  registerEntityTransport('Conversation', pgliteTransport(db, 'chat_conversations', tenantId))
   const graph = startLocalFirstGraph({
     storage: await createPGlitePersistenceAdapter(db),
     key: `tenant:${tenantId}`,
@@ -435,9 +464,50 @@ async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSessi
     tenantId,
     dispose: () => {
       graph.dispose()
+      browserDb = null
       void db.close()
     },
   }
+}
+
+export interface ConversationRecord extends Record<string, unknown> {
+  id: string
+  tenant_id: string
+  title: string
+  messages: unknown[]
+  created_at: string
+  updated_at: string
+}
+
+const CONVERSATION_TYPE = 'Conversation'
+
+function normalizeConversation(row: ConversationRecord): void {
+  useGraphStore.getState().upsertEntity(CONVERSATION_TYPE, row.id, row)
+}
+
+export async function listConversationRecords(tenantId: string): Promise<ConversationRecord[]> {
+  const rows = isTauri()
+    ? await invoke<ConversationRecord[]>('entity_list', { view: { entityType: 'conversations', filters: [], sorts: [] } })
+    : (await browserDb!.query<ConversationRecord>(
+        'SELECT * FROM chat_conversations WHERE tenant_id = $1 ORDER BY updated_at DESC', [tenantId],
+      )).rows
+  rows.forEach(normalizeConversation)
+  return rows
+}
+
+export async function saveConversationRecord(row: ConversationRecord): Promise<void> {
+  normalizeConversation(row)
+  if (isTauri()) {
+    await invoke('entity_upsert', { record: { id: row.id, entityType: 'conversations', dataJson: JSON.stringify(row) } })
+    return
+  }
+  if (!browserDb) throw new Error('PGlite conversation store is not ready')
+  await browserDb.query(
+    `INSERT INTO chat_conversations (id, tenant_id, title, messages, created_at, updated_at)
+     VALUES ($1, $2, $3, $4::jsonb, $5, $6)
+     ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, messages = EXCLUDED.messages, updated_at = EXCLUDED.updated_at`,
+    [row.id, row.tenant_id, row.title, JSON.stringify(row.messages), row.created_at, row.updated_at],
+  )
 }
 
 export async function startEntityRuntime(tenantId: string): Promise<() => void> {
@@ -777,6 +847,80 @@ export function ChatTranscript() {
 }
 EOF
 
+cat > src/features/chat/hooks/useAssistantChatRuntime.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — Assistant UI adapter; no IPC in hooks.
+import { useExternalStoreRuntime, type ThreadMessageLike } from '@assistant-ui/react'
+import type { ContentBlock, Message } from '@/bridge/a2ui/types'
+import { useChat } from './useChat'
+
+type AssistantPart = Exclude<ThreadMessageLike['content'], string>[number]
+
+function toPart(block: ContentBlock): AssistantPart {
+  switch (block.type) {
+    case 'text': return { type: 'text', text: block.text }
+    case 'thinking': return { type: 'reasoning', text: block.text }
+    case 'code': return { type: 'text', text: `\`\`\`${block.language}\n${block.code}\n\`\`\`` }
+    case 'citation': return { type: 'data', name: 'citation', data: block }
+    case 'memory': return { type: 'data', name: 'memory', data: block }
+    case 'toolUse': return { type: 'tool-call', toolCallId: block.id, toolName: block.name, argsText: block.inputJson }
+    case 'toolResult': return { type: 'tool-call', toolCallId: block.toolUseId, toolName: 'tool result', args: {}, result: block.outputJson, isError: block.isError }
+    case 'skill': return { type: 'data', name: 'skill', data: block }
+    case 'artifact': return { type: 'data', name: 'artifact', data: block }
+    case 'image': return { type: 'image', image: block.url ?? `data:${block.mime};base64,${block.dataBase64 ?? ''}` }
+    case 'divider': return { type: 'text', text: '\n\n' }
+  }
+}
+
+function convertMessage(message: Message): ThreadMessageLike {
+  return {
+    id: message.id,
+    role: message.role,
+    createdAt: new Date(message.timestamp),
+    content: message.content.map(toPart),
+    ...(message.role === 'assistant' ? { status: message.isStreaming
+      ? { type: 'running' as const }
+      : { type: 'complete' as const, reason: 'stop' as const } } : {}),
+  }
+}
+
+export function useAssistantChatRuntime() {
+  const { messages, isStreaming, sendMessage } = useChat()
+  return useExternalStoreRuntime({
+    messages,
+    isRunning: isStreaming,
+    convertMessage,
+    suggestions: [{ prompt: 'Help me connect the important details.' }],
+    onNew: async (message) => {
+      const text = message.content.filter((part) => part.type === 'text').map((part) => part.text).join('\n').trim()
+      if (text) await sendMessage(text)
+    },
+  })
+}
+EOF
+
+cat > src/features/chat/components/ChatScreen.tsx << 'EOF'
+// TJ-ARCH-MOB-001 compliant — Shadcn shell + Assistant UI chat primitives.
+import { AssistantRuntimeProvider } from '@assistant-ui/react'
+import { Thread } from '@/components/assistant-ui/thread'
+import { ThreadList } from '@/components/assistant-ui/thread-list'
+import { useAssistantChatRuntime } from '../hooks/useAssistantChatRuntime'
+
+export function ChatScreen() {
+  const runtime = useAssistantChatRuntime()
+  return (
+    <AssistantRuntimeProvider runtime={runtime}>
+      <main className="flex h-dvh overflow-hidden bg-background">
+        <aside className="hidden w-72 shrink-0 bg-secondary p-4 lg:block">
+          <p className="mb-4 text-sm font-semibold">Conversations</p>
+          <ThreadList />
+        </aside>
+        <section className="min-w-0 flex-1 bg-background"><Thread /></section>
+      </main>
+    </AssistantRuntimeProvider>
+  )
+}
+EOF
+
 # ── vite-env.d.ts (declares .css / ?raw / import.meta.env types for tsc) ────
 cat > src/vite-env.d.ts << 'EOF'
 /// <reference types="vite/client" />
@@ -815,10 +959,12 @@ ok "src/main.tsx"
 # ── index.css (Tailwind 4) ─────────────────────────────────────────────────
 cat > src/index.css << 'EOF'
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @theme {
-  --color-background: #0D0D18;
-  --color-surface: #121220;
+  --color-background: #0B0F14;
+  --color-surface: #161D29;
   --color-ember: #FF6A3D;
   --color-violet: #8B78FF;
   --color-text-primary: #F2F2FF;
@@ -830,6 +976,7 @@ cat > src/index.css << 'EOF'
 
 :root { color-scheme: dark; }
 body { background: var(--color-background); color: var(--color-text-primary); font-family: var(--font-sans); }
+* { border-color: transparent !important; box-shadow: none !important; }
 EOF
 ok "src/index.css"
 
@@ -1232,9 +1379,14 @@ else
   ok "npm install"
 fi
 
-step "Initializing shadcn/ui"
-echo "Run after install: npx shadcn@latest init (select: Tailwind v4, CSS variables, dark)"
-ok "shadcn/ui init instruction noted"
+step "Installing Shadcn UI and Assistant UI source components"
+if [[ "${SKIP_INSTALL:-0}" == "1" ]]; then
+  ok "registry component installation skipped with dependencies"
+else
+  pnpm exec shadcn add button sheet sidebar toggle-group switch card -y
+  pnpm dlx assistant-ui@latest add thread thread-list markdown-text --use-pnpm -y
+  ok "Shadcn primitives + Assistant UI thread/composer/thread-list"
+fi
 
 echo ""
 echo -e "${GREEN}✅ Tauri app scaffolded in ${OUT}/${NC}"
@@ -1242,5 +1394,5 @@ echo ""
 echo "  Next steps:"
 echo "  1. cd $OUT && pnpm tauri dev"
 echo "  2. Wire gen_ui_core: uncomment path dep in src-tauri/Cargo.toml"
-echo "  3. npx shadcn@latest init"
+echo "  3. Customize the generated Shadcn/Assistant UI sources with product tokens"
 echo "  4. Add auth: bash scripts/add-auth.sh supabase|kratos"

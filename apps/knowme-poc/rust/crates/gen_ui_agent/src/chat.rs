@@ -22,17 +22,28 @@ const LANE_CLOUD: &str = "cloud";
 /// model id in `model_id` and no `provider_id` (there is no remote provider).
 const LANE_LOCAL: &str = "local";
 
-/// Which lane a chat turn should run on. Read from the `active_lane` app
-/// setting, defaulting to cloud — an install that has never touched the toggle
-/// keeps its existing behaviour.
+/// Which lane a chat turn should run on. An unconfigured install prefers the
+/// bundled local engine; cloud is BYOK and therefore cannot be the zero-config
+/// default. Builds without a local engine still fall back to cloud visibly.
 const SETTING_ACTIVE_LANE: &str = "active_lane";
+const DEFAULT_LOCAL_MODEL: &str = "qwen2.5-0.5b-instruct-q4";
 
 /// Sampling defaults for the local lane, used when a model_pref's `params`
 /// object omits them. Mirrors the middle-of-the-road values the cloud providers
 /// apply server-side, so switching lanes doesn't silently change answer style.
 const DEFAULT_TEMPERATURE: f32 = 0.7;
 const DEFAULT_TOP_P: f32 = 0.95;
-const DEFAULT_MAX_TOKENS: u32 = 2048;
+const DEFAULT_MAX_TOKENS: u32 = 128;
+
+/// Request-scoped cloud credentials for anonymous hosted-web BYOK. The Axum
+/// leaf owns the lifetime: this value is never persisted or placed in global
+/// agent state, and is dropped as soon as the provider client is constructed.
+pub struct EphemeralCloudConfig {
+    pub provider: String,
+    pub base_url: Option<String>,
+    pub api_key: String,
+    pub model: String,
+}
 
 /// Start a chat turn. Returns the run_id whose events are published on the
 /// shared A2uiEvent broadcast (see `state::subscribe`); the actual generation
@@ -41,13 +52,13 @@ const DEFAULT_MAX_TOKENS: u32 = 2048;
 pub async fn send(user_message: String, history: Vec<String>) -> Result<String, AgentError> {
     let run_id = uuid::Uuid::new_v4().to_string();
 
-    // Which lane? Unset → cloud, so an install that never touches the toggle
-    // behaves exactly as before.
+    // Which lane? Unset → local when this surface ships an engine. This makes
+    // first-run chat functional without a provider account or API key.
     let lane = state::config()?
         .get_setting(SETTING_ACTIVE_LANE)
         .await?
         .and_then(|v| v.as_str().map(str::to_owned))
-        .unwrap_or_else(|| LANE_CLOUD.to_string());
+        .unwrap_or_else(default_lane);
 
     if lane == LANE_LOCAL {
         return send_local(user_message, history, run_id).await;
@@ -70,46 +81,84 @@ pub async fn send(user_message: String, history: Vec<String>) -> Result<String, 
         None => return Err(AgentError::NoProvider),
     };
 
-    let mut builder = ClientBuilder::new()
-        .api_key(api_key)
-        .provider(provider.kind.clone());
-    if let Some(base_url) = &provider.base_url {
-        builder = builder.base_url(base_url.clone());
+    start_cloud_run(
+        user_message,
+        history,
+        run_id,
+        provider.kind,
+        provider.base_url,
+        api_key,
+        pref.model_id,
+    )
+}
+
+/// Start a cloud run from request-scoped hosted-web credentials. This is the
+/// anonymous BYOK path: unlike `send`, it never reads or writes the keychain or
+/// config DB and therefore cannot retain a browser user's secret server-side.
+pub fn send_cloud_ephemeral(
+    user_message: String,
+    history: Vec<String>,
+    config: EphemeralCloudConfig,
+) -> Result<String, AgentError> {
+    let run_id = uuid::Uuid::new_v4().to_string();
+    start_cloud_run(
+        user_message,
+        history,
+        run_id,
+        config.provider,
+        config.base_url,
+        config.api_key,
+        config.model,
+    )
+}
+
+fn start_cloud_run(
+    user_message: String,
+    history: Vec<String>,
+    run_id: String,
+    provider: String,
+    base_url: Option<String>,
+    api_key: String,
+    model: String,
+) -> Result<String, AgentError> {
+    let mut builder = ClientBuilder::new().api_key(api_key).provider(provider);
+    if let Some(base_url) = base_url {
+        builder = builder.base_url(base_url);
     }
     let client = builder
         .build()
         .map_err(|e| AgentError::Client(e.to_string()))?;
-
     let messages = build_messages(&history, &user_message);
-    // Offer the model whatever MCP tools are registered (C-108). Empty registry → None,
-    // not an empty vec: some providers reject `tools: []`, and "no tools" should send the
-    // exact request shape that existed before tools did.
     let tools = crate::tools::tool_definitions(state::mcp()?);
     let tools = (!tools.is_empty()).then_some(tools);
-
     let request = ChatCompletionRequest {
-        model: pref.model_id.clone(),
+        model,
         messages,
         tools,
         ..Default::default()
     };
-
-    let run_id_for_task = run_id.clone();
+    let task_run_id = run_id.clone();
     gen_ui_runtime::spawn(async move {
-        run_stream(client, request, run_id_for_task).await;
+        run_stream(client, request, task_run_id).await;
     });
-
     Ok(run_id)
 }
 
-/// Which lane chat turns currently run on: `"cloud"` or `"local"`. Defaults to
-/// cloud when unset.
+/// Which lane chat turns currently run on: `"cloud"` or `"local"`.
 pub async fn active_lane() -> Result<String, AgentError> {
     Ok(state::config()?
         .get_setting(SETTING_ACTIVE_LANE)
         .await?
         .and_then(|v| v.as_str().map(str::to_owned))
-        .unwrap_or_else(|| LANE_CLOUD.to_string()))
+        .unwrap_or_else(default_lane))
+}
+
+fn default_lane() -> String {
+    if has_local_engine() {
+        LANE_LOCAL.to_string()
+    } else {
+        LANE_CLOUD.to_string()
+    }
 }
 
 /// Switch lanes. Rejects unknown values rather than persisting a string that
@@ -154,22 +203,29 @@ async fn send_local(
 ) -> Result<String, AgentError> {
     let engine = state::inference()?;
 
-    // A `local` pref carries the model id; provider_id is None (no remote
-    // provider). Absent → NoProvider, same as an unconfigured cloud lane.
+    // A local preference is optional. The built-in catalog model is the
+    // zero-configuration path; a stored preference overrides it.
     let pref = state::config()?
         .get_model_pref(SURFACE_CHAT, LANE_LOCAL)
-        .await?
-        .ok_or(AgentError::NoProvider)?;
+        .await?;
+    let default_params = serde_json::Value::Null;
+    let json_params = pref
+        .as_ref()
+        .map(|value| &value.params)
+        .unwrap_or(&default_params);
+    let model_id = pref
+        .as_ref()
+        .map(|value| value.model_id.as_str())
+        .unwrap_or(DEFAULT_LOCAL_MODEL);
 
     let params = SampleParams {
-        temperature: param_f32(&pref.params, "temperature", DEFAULT_TEMPERATURE),
-        top_p: param_f32(&pref.params, "top_p", DEFAULT_TOP_P),
-        max_tokens: param_u32(&pref.params, "max_tokens", DEFAULT_MAX_TOKENS),
+        temperature: param_f32(json_params, "temperature", DEFAULT_TEMPERATURE),
+        top_p: param_f32(json_params, "top_p", DEFAULT_TOP_P),
+        max_tokens: param_u32(json_params, "max_tokens", DEFAULT_MAX_TOKENS),
     };
     let spec = LocalModelSpec {
-        model: pref.model_id.clone(),
-        context_len: pref
-            .params
+        model: model_id.to_string(),
+        context_len: json_params
             .get("context_len")
             .and_then(|v| v.as_u64())
             .map(|v| v as u32),

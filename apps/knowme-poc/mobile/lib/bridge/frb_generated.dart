@@ -6,7 +6,6 @@
 import 'api/boot.dart';
 import 'api/chat.dart';
 import 'api/entity.dart';
-import 'api/scribe.dart';
 import 'api/streams.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -80,7 +79,7 @@ class GenUiCore
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 226348985;
+  int get rustContentHash => -364862252;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -136,7 +135,9 @@ abstract class GenUiCoreApi extends BaseApi {
   Stream<String> crateApiStreamsChatEvents({required String runId});
 
   Future<String> crateApiChatChatSend(
-      {required String threadId, required String message});
+      {required String threadId,
+      required String message,
+      required List<String> messages});
 
   Stream<String> crateApiStreamsEntityChanges();
 
@@ -167,10 +168,6 @@ abstract class GenUiCoreApi extends BaseApi {
       {required String query, required int k});
 
   Future<void> crateApiBootRunMigrations({required String dataDir});
-
-  Future<void> crateApiScribeScribeStart();
-
-  Future<String> crateApiScribeScribeStop();
 
   Future<SearchMode> genUiDbGraphSearchModeDefault();
 
@@ -241,64 +238,60 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       required String id,
       required String entityType,
       required String label}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-              that, serializer);
-          sse_encode_String(id, serializer);
-          sse_encode_String(entityType, serializer);
-          sse_encode_String(label, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 1, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
-        ),
-        constMeta: kGenUiDbGraphGraphStoreCreateEntityConstMeta,
-        argValues: [that, id, entityType, label],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+            that, serializer);
+        sse_encode_String(id, serializer);
+        sse_encode_String(entityType, serializer);
+        sse_encode_String(label, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 1, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
       ),
-    );
+      constMeta: kGenUiDbGraphGraphStoreCreateEntityConstMeta,
+      argValues: [that, id, entityType, label],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphGraphStoreCreateEntityConstMeta =>
       const TaskConstMeta(
-        debugName: 'GraphStore_create_entity',
-        argNames: ['that', 'id', 'entityType', 'label'],
+        debugName: "GraphStore_create_entity",
+        argNames: ["that", "id", "entityType", "label"],
       );
 
   @override
   Future<List<(String, String)>> genUiDbGraphGraphStoreEdgeEndpointsForTest(
       {required GraphStore that}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-              that, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 2, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_record_string_string,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
-        ),
-        constMeta: kGenUiDbGraphGraphStoreEdgeEndpointsForTestConstMeta,
-        argValues: [that],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+            that, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 2, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_list_record_string_string,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
       ),
-    );
+      constMeta: kGenUiDbGraphGraphStoreEdgeEndpointsForTestConstMeta,
+      argValues: [that],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphGraphStoreEdgeEndpointsForTestConstMeta =>
       const TaskConstMeta(
-        debugName: 'GraphStore_edge_endpoints_for_test',
-        argNames: ['that'],
+        debugName: "GraphStore_edge_endpoints_for_test",
+        argNames: ["that"],
       );
 
   @override
@@ -306,96 +299,90 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       {required GraphStore that,
       required String entityId,
       required int depth}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-              that, serializer);
-          sse_encode_String(entityId, serializer);
-          sse_encode_u_8(depth, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 3, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_related_entity,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
-        ),
-        constMeta: kGenUiDbGraphGraphStoreGraphExpandConstMeta,
-        argValues: [that, entityId, depth],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+            that, serializer);
+        sse_encode_String(entityId, serializer);
+        sse_encode_u_8(depth, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 3, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_list_related_entity,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
       ),
-    );
+      constMeta: kGenUiDbGraphGraphStoreGraphExpandConstMeta,
+      argValues: [that, entityId, depth],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphGraphStoreGraphExpandConstMeta =>
       const TaskConstMeta(
-        debugName: 'GraphStore_graph_expand',
-        argNames: ['that', 'entityId', 'depth'],
+        debugName: "GraphStore_graph_expand",
+        argNames: ["that", "entityId", "depth"],
       );
 
   @override
   Future<String> genUiDbGraphGraphStoreMemoryIngest(
       {required GraphStore that, required MemoryRecord record}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-              that, serializer);
-          sse_encode_box_autoadd_memory_record(record, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 4, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
-        ),
-        constMeta: kGenUiDbGraphGraphStoreMemoryIngestConstMeta,
-        argValues: [that, record],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+            that, serializer);
+        sse_encode_box_autoadd_memory_record(record, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 4, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
       ),
-    );
+      constMeta: kGenUiDbGraphGraphStoreMemoryIngestConstMeta,
+      argValues: [that, record],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphGraphStoreMemoryIngestConstMeta =>
       const TaskConstMeta(
-        debugName: 'GraphStore_memory_ingest',
-        argNames: ['that', 'record'],
+        debugName: "GraphStore_memory_ingest",
+        argNames: ["that", "record"],
       );
 
   @override
   Future<List<MemoryHit>> genUiDbGraphGraphStoreMemorySearch(
       {required GraphStore that, required String query, required BigInt k}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-              that, serializer);
-          sse_encode_String(query, serializer);
-          sse_encode_usize(k, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 5, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_memory_hit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
-        ),
-        constMeta: kGenUiDbGraphGraphStoreMemorySearchConstMeta,
-        argValues: [that, query, k],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+            that, serializer);
+        sse_encode_String(query, serializer);
+        sse_encode_usize(k, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 5, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_list_memory_hit,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
       ),
-    );
+      constMeta: kGenUiDbGraphGraphStoreMemorySearchConstMeta,
+      argValues: [that, query, k],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphGraphStoreMemorySearchConstMeta =>
       const TaskConstMeta(
-        debugName: 'GraphStore_memory_search',
-        argNames: ['that', 'query', 'k'],
+        debugName: "GraphStore_memory_search",
+        argNames: ["that", "query", "k"],
       );
 
   @override
@@ -404,64 +391,60 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       required String query,
       required BigInt k,
       required SearchMode mode}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-              that, serializer);
-          sse_encode_String(query, serializer);
-          sse_encode_usize(k, serializer);
-          sse_encode_search_mode(mode, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 6, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_memory_hit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
-        ),
-        constMeta: kGenUiDbGraphGraphStoreMemorySearchWithConstMeta,
-        argValues: [that, query, k, mode],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+            that, serializer);
+        sse_encode_String(query, serializer);
+        sse_encode_usize(k, serializer);
+        sse_encode_search_mode(mode, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 6, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_list_memory_hit,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
       ),
-    );
+      constMeta: kGenUiDbGraphGraphStoreMemorySearchWithConstMeta,
+      argValues: [that, query, k, mode],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphGraphStoreMemorySearchWithConstMeta =>
       const TaskConstMeta(
-        debugName: 'GraphStore_memory_search_with',
-        argNames: ['that', 'query', 'k', 'mode'],
+        debugName: "GraphStore_memory_search_with",
+        argNames: ["that", "query", "k", "mode"],
       );
 
   @override
   Future<GraphStore> genUiDbGraphGraphStoreOpen(
       {required GraphStoreConfig cfg}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
-              cfg, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 7, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
-        ),
-        constMeta: kGenUiDbGraphGraphStoreOpenConstMeta,
-        argValues: [cfg],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStoreConfig(
+            cfg, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 7, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
       ),
-    );
+      constMeta: kGenUiDbGraphGraphStoreOpenConstMeta,
+      argValues: [cfg],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphGraphStoreOpenConstMeta => const TaskConstMeta(
-        debugName: 'GraphStore_open',
-        argNames: ['cfg'],
+        debugName: "GraphStore_open",
+        argNames: ["cfg"],
       );
 
   @override
@@ -470,34 +453,32 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       required String from,
       required String to,
       required String rel}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-              that, serializer);
-          sse_encode_String(from, serializer);
-          sse_encode_String(to, serializer);
-          sse_encode_String(rel, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 8, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
-        ),
-        constMeta: kGenUiDbGraphGraphStoreRelateConstMeta,
-        argValues: [that, from, to, rel],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+            that, serializer);
+        sse_encode_String(from, serializer);
+        sse_encode_String(to, serializer);
+        sse_encode_String(rel, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 8, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
       ),
-    );
+      constMeta: kGenUiDbGraphGraphStoreRelateConstMeta,
+      argValues: [that, from, to, rel],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphGraphStoreRelateConstMeta =>
       const TaskConstMeta(
-        debugName: 'GraphStore_relate',
-        argNames: ['that', 'from', 'to', 'rel'],
+        debugName: "GraphStore_relate",
+        argNames: ["that", "from", "to", "rel"],
       );
 
   @override
@@ -506,565 +487,474 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       required String fromTable,
       required String from,
       required String to}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
-              that, serializer);
-          sse_encode_String(fromTable, serializer);
-          sse_encode_String(from, serializer);
-          sse_encode_String(to, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 9, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
-        ),
-        constMeta: kGenUiDbGraphGraphStoreRelateRawForTestConstMeta,
-        argValues: [that, fromTable, from, to],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphStore(
+            that, serializer);
+        sse_encode_String(fromTable, serializer);
+        sse_encode_String(from, serializer);
+        sse_encode_String(to, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 9, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGraphError,
       ),
-    );
+      constMeta: kGenUiDbGraphGraphStoreRelateRawForTestConstMeta,
+      argValues: [that, fromTable, from, to],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphGraphStoreRelateRawForTestConstMeta =>
       const TaskConstMeta(
-        debugName: 'GraphStore_relate_raw_for_test',
-        argNames: ['that', 'fromTable', 'from', 'to'],
+        debugName: "GraphStore_relate_raw_for_test",
+        argNames: ["that", "fromTable", "from", "to"],
       );
 
   @override
   Future<void> crateApiBootAttachSyncShapes() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 11, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiBootAttachSyncShapesConstMeta,
-        argValues: [],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 11, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiBootAttachSyncShapesConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiBootAttachSyncShapesConstMeta =>
       const TaskConstMeta(
-        debugName: 'attach_sync_shapes',
+        debugName: "attach_sync_shapes",
         argNames: [],
       );
 
   @override
   Stream<String> crateApiStreamsChatEvents({required String runId}) {
     final sink = RustStreamSink<String>();
-    unawaited(
-      handler.executeNormal(
-        NormalTask(
-          callFfi: (port_) {
-            final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_String(runId, serializer);
-            sse_encode_StreamSink_String_Sse(sink, serializer);
-            pdeCallFfi(generalizedFrbRustBinding, serializer,
-                funcId: 12, port: port_);
-          },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_unit,
-            decodeErrorData: null,
-          ),
-          constMeta: kCrateApiStreamsChatEventsConstMeta,
-          argValues: [runId, sink],
-          apiImpl: this,
-        ),
+    unawaited(handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(runId, serializer);
+        sse_encode_StreamSink_String_Sse(sink, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 12, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiStreamsChatEventsConstMeta,
+      argValues: [runId, sink],
+      apiImpl: this,
+    )));
     return sink.stream;
   }
 
   TaskConstMeta get kCrateApiStreamsChatEventsConstMeta => const TaskConstMeta(
-        debugName: 'chat_events',
-        argNames: ['runId', 'sink'],
+        debugName: "chat_events",
+        argNames: ["runId", "sink"],
       );
 
   @override
   Future<String> crateApiChatChatSend(
-      {required String threadId, required String message}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(threadId, serializer);
-          sse_encode_String(message, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 13, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiChatChatSendConstMeta,
-        argValues: [threadId, message],
-        apiImpl: this,
+      {required String threadId,
+      required String message,
+      required List<String> messages}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(threadId, serializer);
+        sse_encode_String(message, serializer);
+        sse_encode_list_String(messages, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 13, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiChatChatSendConstMeta,
+      argValues: [threadId, message, messages],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiChatChatSendConstMeta => const TaskConstMeta(
-        debugName: 'chat_send',
-        argNames: ['threadId', 'message'],
+        debugName: "chat_send",
+        argNames: ["threadId", "message", "messages"],
       );
 
   @override
   Stream<String> crateApiStreamsEntityChanges() {
     final sink = RustStreamSink<String>();
-    unawaited(
-      handler.executeNormal(
-        NormalTask(
-          callFfi: (port_) {
-            final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_StreamSink_String_Sse(sink, serializer);
-            pdeCallFfi(generalizedFrbRustBinding, serializer,
-                funcId: 14, port: port_);
-          },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_unit,
-            decodeErrorData: null,
-          ),
-          constMeta: kCrateApiStreamsEntityChangesConstMeta,
-          argValues: [sink],
-          apiImpl: this,
-        ),
+    unawaited(handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_StreamSink_String_Sse(sink, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 14, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiStreamsEntityChangesConstMeta,
+      argValues: [sink],
+      apiImpl: this,
+    )));
     return sink.stream;
   }
 
   TaskConstMeta get kCrateApiStreamsEntityChangesConstMeta =>
       const TaskConstMeta(
-        debugName: 'entity_changes',
-        argNames: ['sink'],
+        debugName: "entity_changes",
+        argNames: ["sink"],
       );
 
   @override
   Future<EntityRecord> crateApiEntityEntityCreate(
       {required EntityRecord record}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_box_autoadd_entity_record(record, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 15, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_entity_record,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiEntityEntityCreateConstMeta,
-        argValues: [record],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_entity_record(record, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 15, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_entity_record,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiEntityEntityCreateConstMeta,
+      argValues: [record],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiEntityEntityCreateConstMeta => const TaskConstMeta(
-        debugName: 'entity_create',
-        argNames: ['record'],
+        debugName: "entity_create",
+        argNames: ["record"],
       );
 
   @override
   Future<void> crateApiEntityEntityDelete(
       {required String entityType, required String id}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(entityType, serializer);
-          sse_encode_String(id, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 16, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiEntityEntityDeleteConstMeta,
-        argValues: [entityType, id],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(entityType, serializer);
+        sse_encode_String(id, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 16, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiEntityEntityDeleteConstMeta,
+      argValues: [entityType, id],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiEntityEntityDeleteConstMeta => const TaskConstMeta(
-        debugName: 'entity_delete',
-        argNames: ['entityType', 'id'],
+        debugName: "entity_delete",
+        argNames: ["entityType", "id"],
       );
 
   @override
   Future<EntityRecord?> crateApiEntityEntityGet(
       {required String entityType, required String id}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(entityType, serializer);
-          sse_encode_String(id, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 17, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_opt_box_autoadd_entity_record,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiEntityEntityGetConstMeta,
-        argValues: [entityType, id],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(entityType, serializer);
+        sse_encode_String(id, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 17, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_opt_box_autoadd_entity_record,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiEntityEntityGetConstMeta,
+      argValues: [entityType, id],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiEntityEntityGetConstMeta => const TaskConstMeta(
-        debugName: 'entity_get',
-        argNames: ['entityType', 'id'],
+        debugName: "entity_get",
+        argNames: ["entityType", "id"],
       );
 
   @override
   Future<ListResult> crateApiEntityEntityList({required ViewDescriptor view}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_box_autoadd_view_descriptor(view, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 18, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_result,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiEntityEntityListConstMeta,
-        argValues: [view],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_view_descriptor(view, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 18, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_list_result,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiEntityEntityListConstMeta,
+      argValues: [view],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiEntityEntityListConstMeta => const TaskConstMeta(
-        debugName: 'entity_list',
-        argNames: ['view'],
+        debugName: "entity_list",
+        argNames: ["view"],
       );
 
   @override
   Future<EntityRecord> crateApiEntityEntityUpdate(
       {required EntityRecord record}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_box_autoadd_entity_record(record, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 19, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_entity_record,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiEntityEntityUpdateConstMeta,
-        argValues: [record],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_entity_record(record, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 19, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_entity_record,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiEntityEntityUpdateConstMeta,
+      argValues: [record],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiEntityEntityUpdateConstMeta => const TaskConstMeta(
-        debugName: 'entity_update',
-        argNames: ['record'],
+        debugName: "entity_update",
+        argNames: ["record"],
       );
 
   @override
   Future<List<RelatedEntity>> crateApiChatGraphExpand(
       {required String entityId, required int depth}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(entityId, serializer);
-          sse_encode_u_32(depth, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 20, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_related_entity,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiChatGraphExpandConstMeta,
-        argValues: [entityId, depth],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(entityId, serializer);
+        sse_encode_u_32(depth, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 20, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_list_related_entity,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiChatGraphExpandConstMeta,
+      argValues: [entityId, depth],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiChatGraphExpandConstMeta => const TaskConstMeta(
-        debugName: 'graph_expand',
-        argNames: ['entityId', 'depth'],
+        debugName: "graph_expand",
+        argNames: ["entityId", "depth"],
       );
 
   @override
   Future<void> crateApiInitCore({BigInt? workerThreads}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_opt_box_autoadd_usize(workerThreads, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 21, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiInitCoreConstMeta,
-        argValues: [workerThreads],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_opt_box_autoadd_usize(workerThreads, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 21, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiInitCoreConstMeta,
+      argValues: [workerThreads],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiInitCoreConstMeta => const TaskConstMeta(
-        debugName: 'init_core',
-        argNames: ['workerThreads'],
+        debugName: "init_core",
+        argNames: ["workerThreads"],
       );
 
   @override
   Future<int> crateApiBootLoadSeeds() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 22, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_u_32,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiBootLoadSeedsConstMeta,
-        argValues: [],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 22, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_u_32,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiBootLoadSeedsConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiBootLoadSeedsConstMeta => const TaskConstMeta(
-        debugName: 'load_seeds',
+        debugName: "load_seeds",
         argNames: [],
       );
 
   @override
   Future<String> crateApiChatMemoryIngest({required String text}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(text, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 23, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiChatMemoryIngestConstMeta,
-        argValues: [text],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(text, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 23, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiChatMemoryIngestConstMeta,
+      argValues: [text],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiChatMemoryIngestConstMeta => const TaskConstMeta(
-        debugName: 'memory_ingest',
-        argNames: ['text'],
+        debugName: "memory_ingest",
+        argNames: ["text"],
       );
 
   @override
   Future<List<MemoryHit>> crateApiChatMemorySearch(
       {required String query, required int k}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(query, serializer);
-          sse_encode_u_32(k, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 24, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_memory_hit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiChatMemorySearchConstMeta,
-        argValues: [query, k],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(query, serializer);
+        sse_encode_u_32(k, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 24, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_list_memory_hit,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiChatMemorySearchConstMeta,
+      argValues: [query, k],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiChatMemorySearchConstMeta => const TaskConstMeta(
-        debugName: 'memory_search',
-        argNames: ['query', 'k'],
+        debugName: "memory_search",
+        argNames: ["query", "k"],
       );
 
   @override
   Future<void> crateApiBootRunMigrations({required String dataDir}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(dataDir, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 25, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiBootRunMigrationsConstMeta,
-        argValues: [dataDir],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(dataDir, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 25, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
       ),
-    );
+      constMeta: kCrateApiBootRunMigrationsConstMeta,
+      argValues: [dataDir],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kCrateApiBootRunMigrationsConstMeta => const TaskConstMeta(
-        debugName: 'run_migrations',
-        argNames: ['dataDir'],
-      );
-
-  @override
-  Future<void> crateApiScribeScribeStart() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 26, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiScribeScribeStartConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiScribeScribeStartConstMeta => const TaskConstMeta(
-        debugName: 'scribe_start',
-        argNames: [],
-      );
-
-  @override
-  Future<String> crateApiScribeScribeStop() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 27, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerCoreError,
-        ),
-        constMeta: kCrateApiScribeScribeStopConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiScribeScribeStopConstMeta => const TaskConstMeta(
-        debugName: 'scribe_stop',
-        argNames: [],
+        debugName: "run_migrations",
+        argNames: ["dataDir"],
       );
 
   @override
   Future<SearchMode> genUiDbGraphSearchModeDefault() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(generalizedFrbRustBinding, serializer,
-              funcId: 28, port: port_);
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_search_mode,
-          decodeErrorData: null,
-        ),
-        constMeta: kGenUiDbGraphSearchModeDefaultConstMeta,
-        argValues: [],
-        apiImpl: this,
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 26, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_search_mode,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kGenUiDbGraphSearchModeDefaultConstMeta,
+      argValues: [],
+      apiImpl: this,
+    ));
   }
 
   TaskConstMeta get kGenUiDbGraphSearchModeDefaultConstMeta =>
       const TaskConstMeta(
-        debugName: 'search_mode_default',
+        debugName: "search_mode_default",
         argNames: [],
       );
 
   @override
   Stream<String> crateApiStreamsSyncStatus() {
     final sink = RustStreamSink<String>();
-    unawaited(
-      handler.executeNormal(
-        NormalTask(
-          callFfi: (port_) {
-            final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_StreamSink_String_Sse(sink, serializer);
-            pdeCallFfi(generalizedFrbRustBinding, serializer,
-                funcId: 29, port: port_);
-          },
-          codec: SseCodec(
-            decodeSuccessData: sse_decode_unit,
-            decodeErrorData: null,
-          ),
-          constMeta: kCrateApiStreamsSyncStatusConstMeta,
-          argValues: [sink],
-          apiImpl: this,
-        ),
+    unawaited(handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_StreamSink_String_Sse(sink, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 27, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: null,
       ),
-    );
+      constMeta: kCrateApiStreamsSyncStatusConstMeta,
+      argValues: [sink],
+      apiImpl: this,
+    )));
     return sink.stream;
   }
 
   TaskConstMeta get kCrateApiStreamsSyncStatusConstMeta => const TaskConstMeta(
-        debugName: 'sync_status',
-        argNames: ['sink'],
+        debugName: "sync_status",
+        argNames: ["sink"],
       );
 
   RustArcIncrementStrongCountFnType
@@ -1321,6 +1211,12 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   int dco_decode_i_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
+  }
+
+  @protected
+  List<String> dco_decode_list_String(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_String).toList();
   }
 
   @protected
@@ -1729,6 +1625,18 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   }
 
   @protected
+  List<String> sse_decode_list_String(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <String>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_String(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   List<EntityRecord> sse_decode_list_entity_record(
       SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -2093,14 +2001,12 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
       RustStreamSink<String> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(
-      self.setupAndSerialize(
-        codec: SseCodec(
+        self.setupAndSerialize(
+            codec: SseCodec(
           decodeSuccessData: sse_decode_String,
           decodeErrorData: sse_decode_AnyhowException,
-        ),
-      ),
-      serializer,
-    );
+        )),
+        serializer);
   }
 
   @protected
@@ -2180,6 +2086,15 @@ class GenUiCoreApiImpl extends GenUiCoreApiImplPlatform
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
+  }
+
+  @protected
+  void sse_encode_list_String(List<String> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_String(item, serializer);
+    }
   }
 
   @protected

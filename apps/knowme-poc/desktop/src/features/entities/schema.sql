@@ -14,3 +14,11 @@ CREATE TABLE IF NOT EXISTS notes (
   body text NOT NULL,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS chat_conversations (
+  id uuid PRIMARY KEY,
+  tenant_id text NOT NULL,
+  title text NOT NULL,
+  messages jsonb NOT NULL DEFAULT '[]'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);

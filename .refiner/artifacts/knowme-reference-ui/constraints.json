@@ -1,0 +1,137 @@
+{
+  "artifact_type": "ui",
+  "constraints": [
+    {
+      "id": "ui-reference-coverage",
+      "description": "Implement every destination and meaningful state shown by KnowMe Standalone and the approved screenshot set; no placeholder or missing routes.",
+      "severity": "blocking",
+      "type": "structural",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "route/state inventory plus screenshot matrix"
+      }
+    },
+    {
+      "id": "flat-2-backgrounds",
+      "description": "Use no visible lines, borders, divider rules, or layout shadows; distinguish adjacent regions only with background-color changes.",
+      "severity": "blocking",
+      "type": "visual",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "source audit plus rendered screenshot inspection"
+      }
+    },
+    {
+      "id": "knowme-brand",
+      "description": "Match the KnowMe palette, monogram/wordmark, typography hierarchy, density, and restrained ember/cyan semantics in light and dark themes.",
+      "severity": "blocking",
+      "type": "brand",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "token audit and side-by-side screenshot review"
+      }
+    },
+    {
+      "id": "responsive-shell",
+      "description": "Provide the accepted desktop rail, phone bottom navigation, adaptive conversation library, branded titlebar, and safe-area behavior.",
+      "severity": "blocking",
+      "type": "structural",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "320/768/1024/1440 screenshot and interaction matrix"
+      }
+    },
+    {
+      "id": "assistant-shadcn",
+      "description": "Mount Shadcn UI for general primitives and Assistant UI for the real thread/composer/thread-list boundary; do not use raw replacement controls.",
+      "severity": "blocking",
+      "type": "technical",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "dependency/import/runtime component-boundary audit"
+      }
+    },
+    {
+      "id": "durable-conversations",
+      "description": "Use Prometheus Entity Management 3.x for conversation entities, Zustand for transient state, PGlite on web, and pglite-oxide through Rust on Tauri; support multiple threads, search, drafts, archive, and replay.",
+      "severity": "blocking",
+      "type": "technical",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "refresh/relaunch persistence and public entity workflow"
+      }
+    },
+    {
+      "id": "rich-event-ui",
+      "description": "Render the exhaustive ContentBlock/AG-UI stream including thinking, citations, memory, tools, skills, artifacts, Markdown, Mermaid, sanitized SVG, images, and media with safe fallbacks.",
+      "severity": "blocking",
+      "type": "semantic",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "typed exhaustiveness and representative live/snapshot states"
+      }
+    },
+    {
+      "id": "local-first-inference",
+      "description": "A first-run user can chat without cloud credentials using a supported local model on Tauri, web, and Flutter; cloud Liter-LLM BYOK remains optional.",
+      "severity": "blocking",
+      "type": "technical",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "real prompt and streamed response on each claimed surface"
+      }
+    },
+    {
+      "id": "local-rag-memory",
+      "description": "Provide local relational/vector persistence through PGlite/pgvector equivalents and embedded SurrealDB graph memory, with ranked search and visible citation provenance.",
+      "severity": "blocking",
+      "type": "technical",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "seeded ranked-memory search and citation workflow"
+      }
+    },
+    {
+      "id": "flutter-parity",
+      "description": "Flutter uses the same semantic tokens, Flat 2.0 treatment, responsive information architecture, rich blocks, and local-first runtime through Rust FFI.",
+      "severity": "blocking",
+      "type": "visual",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "goldens, analyze/test, simulator launch, and Rust-ready proof"
+      }
+    },
+    {
+      "id": "cross-harness-reproduction",
+      "description": "The same binding fidelity/runtime skills and activation guidance are installed for Claude, Codex, OpenCode, Kimi, .agents-compatible, and generated projects.",
+      "severity": "blocking",
+      "type": "structural",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "six-directory parity/hash audit plus scratch scaffold"
+      }
+    },
+    {
+      "id": "wcag-22-aa",
+      "description": "Meet WCAG 2.2 AA in both themes with keyboard, focus, live-region, screen-reader, reduced-motion, target-size, and text-scaling behavior.",
+      "severity": "blocking",
+      "type": "accessibility",
+      "validation": {
+        "requires_code_execution": true,
+        "validation_method": "axe, keyboard walk, contrast checks, and Flutter semantics inspection"
+      }
+    }
+  ],
+  "global_rules": [
+    "The accepted standalone design is the visual and interaction acceptance oracle.",
+    "The newer KnowMe Flat 2.0 standard supersedes borders and shadows in older mood-board mechanics.",
+    "A successful build or launch is not proof of a working product workflow.",
+    "Repair the responsible skill, template, scaffold, or audit whenever the reference app exposes a generated defect."
+  ],
+  "termination_conditions": [
+    "All blocking constraints are satisfied with current evidence.",
+    "Every claimed surface has clean-checkout production build, real launch, persistence, and public-workflow proof.",
+    "The complete screenshot matrix has no unresolved blocking fidelity differences.",
+    "A newly scaffolded hybrid application inherits the corrected skills, architecture, and verification gates."
+  ]
+}

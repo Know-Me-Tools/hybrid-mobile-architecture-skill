@@ -1980,7 +1980,8 @@ _driver = A2uiContentDriver(
 
 <span class="cm">// 3. In lib/main.dart</span>
 <span class="kw">await</span> initRustBridge(dataDir: appDir.path);
-<span class="kw">await</span> setApiKey(<span class="kw">const</span> String.fromEnvironment(<span class="st">'ANTHROPIC_API_KEY'</span>));</code></pre>
+<span class="cm">// Local chat is ready without credentials. Optional cloud providers are
+// configured through the Rust provider-admin API and platform secure storage.</span></code></pre>
 
   <div class="callout callout-info">
     <div class="callout-label">Integration Checklist</div>

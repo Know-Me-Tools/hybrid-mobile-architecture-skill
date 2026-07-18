@@ -9,7 +9,6 @@
 import 'api/boot.dart';
 import 'api/chat.dart';
 import 'api/entity.dart';
-import 'api/scribe.dart';
 import 'api/streams.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -158,6 +157,9 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   int dco_decode_i_32(dynamic raw);
+
+  @protected
+  List<String> dco_decode_list_String(dynamic raw);
 
   @protected
   List<EntityRecord> dco_decode_list_entity_record(dynamic raw);
@@ -338,6 +340,9 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   int sse_decode_i_32(SseDeserializer deserializer);
+
+  @protected
+  List<String> sse_decode_list_String(SseDeserializer deserializer);
 
   @protected
   List<EntityRecord> sse_decode_list_entity_record(
@@ -524,6 +529,9 @@ abstract class GenUiCoreApiImplPlatform extends BaseApiImpl<GenUiCoreWire> {
 
   @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_String(List<String> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_entity_record(

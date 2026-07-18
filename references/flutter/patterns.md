@@ -278,7 +278,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize Rust runtime before runApp
   await initRustBridge(dataDir: (await getApplicationDocumentsDirectory()).path);
-  await setApiKey(const String.fromEnvironment('ANTHROPIC_API_KEY'));
+  // The bundled local model requires no credential. Optional cloud providers
+  // are configured later through the Rust provider-admin intent surface, which
+  // stores secret material in platform secure storage.
   runApp(const ProviderScope(child: App()));
 }
 ```

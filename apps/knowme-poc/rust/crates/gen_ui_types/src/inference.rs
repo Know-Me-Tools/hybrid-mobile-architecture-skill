@@ -1,14 +1,13 @@
 // TJ-ARCH-MOB-001 compliant
 //! InferenceProvider — the local-inference engine seam. One trait, per-lane
 //! implementations selected at build time in gen_ui_inference (see
-//! `versions.toml` `[inference]`): mistral.rs on desktop (Metal), llama.cpp
-//! (`llama-cpp-2`) on mobile, WebLLM on web (host-side JS, bridged). UI layers
+//! `versions.toml` `[inference]`): pinned llama.cpp (`llama-cpp-2`) on desktop
+//! and mobile, WebLLM on web, and optional mistral.rs. UI layers
 //! and gen_ui_agent depend on this trait only — never on an engine crate —
 //! so swapping or adding an engine never ripples past gen_ui_inference.
 //!
-//! Rationale for the per-lane split (assessment 2026-07-16 §3.3): no
-//! documented mobile deployment path exists for mistral.rs/candle; the shipped
-//! mobile-LLM ecosystem runs on llama.cpp.
+//! The default is deliberately shared across native surfaces: the reference app
+//! must have one reproducible, checksummed local model path that works first run.
 use crate::error::CoreResult;
 use crate::events::StreamEvent;
 use async_trait::async_trait;

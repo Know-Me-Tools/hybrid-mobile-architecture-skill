@@ -13,6 +13,7 @@ license.workspace = true
 # llama-cpp-2 on mobile, WebLLM on web.
 default = []
 local-mistral = ["dep:mistralrs"]
+local-llama = ["dep:llama-cpp-2", "dep:reqwest", "dep:sha2", "dep:encoding_rs"]
 
 [dependencies]
 gen_ui_types   = { path = "../gen_ui_types" }
@@ -23,10 +24,14 @@ futures.workspace = true
 tracing.workspace = true
 # `sync` for the RwLock guarding the loaded model + the mpsc channel that carries
 # generated tokens out of the spawned generation task.
-tokio = { workspace = true, features = ["sync"] }
+tokio = { workspace = true, features = ["sync", "fs", "io-util"] }
 # UnboundedReceiverStream — adapts that channel's receiver into the futures::Stream
 # the InferenceProvider trait returns.
 tokio-stream.workspace = true
+llama-cpp-2 = { workspace = true, optional = true }
+reqwest = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
+encoding_rs = { workspace = true, optional = true }
 
 # mistral.rs is desktop-only: no documented mobile deployment path
 # (gen_ui_types::inference §rationale) and it does not build for wasm32.

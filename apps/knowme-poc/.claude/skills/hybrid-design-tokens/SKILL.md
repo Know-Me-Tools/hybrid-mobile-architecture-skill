@@ -18,25 +18,26 @@ Flutter theme and the Tailwind theme drift.
 ## Token source → outputs
 
 ```
-tokens (single source: design/tokens.json or theme-factory export)
+tokens (single source: design/tokens.json)
    ├── web/desktop  → Tailwind 4 @theme + shadcn CSS custom properties (:root / .dark)
    └── mobile       → shadcn_flutter ThemeData (light + dark ColorScheme)
 ```
 
-Use the `theme-factory` skill (Anthropic) to author/regenerate tokens: it emits BOTH a
-Tailwind/shadcn CSS token block and a Flutter theme from one definition. Regenerate — do
-not hand-edit — the derived theme files.
+Use the project token compiler (`pnpm tokens:build`) to regenerate BOTH the Tailwind/shadcn
+CSS token block and Flutter theme from `design/tokens.json`. Regenerate—do not hand-edit—the
+derived theme files. `theme-factory` may help explore a palette, but it is not a cross-platform
+token compiler and must never be cited as parity proof.
 
 ## Token categories (define once, reference everywhere)
 
-- **Color** — semantic, not decorative: `surface`, `text`, `muted`, `accent`, `destructive`,
-  `border`, `ring`. Provide a full light AND dark scale. Prefer `oklch()` on web.
+- **Color** — semantic, not decorative: `canvas`, `chrome`, `surface`, `raised`, `hover`,
+  `text`, `muted`, `accent`, `destructive`, `focus`. Provide a full light AND dark scale.
 - **Spacing** — a scale (`space-1…space-section`), not per-component padding. Use fluid
   `clamp()` for section-level rhythm on web.
 - **Typography** — at most two families with a deliberate pairing; fluid `clamp()` sizes
   (`text-base`, `text-hero`); `font-display: swap`; preload only the critical weight.
-- **Radius / elevation / motion** — `radius`, shadow tiers, `duration-*`, `ease-*`. Keep
-  them consistent, not uniform-flat across every component.
+- **Radius / motion** — `radius`, `duration-*`, `ease-*`. KnowMe is strict Flat 2.0: no
+  visible borders/divider lines and no layout shadows. Adjacent areas differ by background.
 
 ## Rules
 
@@ -60,6 +61,6 @@ not hand-edit — the derived theme files.
 
 ## Related skills
 
-- `theme-factory` (external) — the generator; run it, don't reproduce its output by hand
+- `theme-factory` (external) — optional palette ideation only; not a compiler or parity proof
 - [[content-block-ui]] — consumes these tokens for every variant
 - [[a11y-gate]] — token contrast gate

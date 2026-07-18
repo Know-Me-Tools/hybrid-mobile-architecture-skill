@@ -1,6 +1,10 @@
 # KnowMe PoC — Architecture, Functional Specification & Implementation Plan
 
-> Status: living document · Last revised 2026-07-15 (inference architecture revision: liter-llm gateway, mistral.rs local engine, WebLLM web lane, config DB — supersedes the Anthropic-SSE/candle-direct design)
+> The post-consolidation web hosting, world-class chat, Flint deployment, BYOK, and
+> continuous-learning work is governed by
+> [KnowMe Reference App and Agentic Deployment Plan](knowme-agentic-deployment-plan.md).
+
+> Status: living document · Last revised 2026-07-18 (zero-config inference revision: pinned llama.cpp/Qwen on desktop + mobile, WebLLM web lane, mistral.rs optional)
 > Companion documents: [knowme-functional-specification-architecture.html](knowme-functional-specification-architecture.html) (product spec), [knowme-moodboard-user-journeys.html](knowme-moodboard-user-journeys.html) (brand + journeys)
 > Authority: [AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md) (all 40 rules) · [TJ-ARCH-MOB-001](../tj-arch-mob-001.html)
 > KBD phase: `phase-codegen-and-ci-verification` · Plan of record: `.kbd-orchestrator/phases/phase-codegen-and-ci-verification/plan.md`
@@ -40,7 +44,7 @@ one-workflow-at-scale; Jan/LM Studio's download→load→chat loop). The demo na
 | M1 | **Chat** with streamed responses from **any of 142+ providers** via liter-llm — text/thinking/code/citation blocks rendered live; provider/model selected from the config DB | The ContentBlock spine: liter-llm gateway → gen_ui_client → ProtocolPipeline → frb stream / Tauri events → exhaustive UI switch |
 | M2 | **Memory**: ingest → hybrid search → cited answer + related-graph panel, with a pre-baked seed corpus | SurrealDB HNSW + BM25 + graph traversal, fastembed 384-dim — the architecture's biggest differentiator |
 | M3 | **Local-first sync** of one entity type (memories/notes): offline edit on mobile → appears on desktop | PEM + **our own write-path sync engine** (first-class custom code) with Electric as the read cache; the airplane-mode demo moment |
-| M4 | **Local model, minimal**: download one model (Qwen2.5-1.5B-Instruct Q4_K_M class) via mistral.rs, cloud↔local switch, local chat on macOS Metal + **in-browser via WebLLM (WebGPU)**, tok/s display | mistral.rs inference engine made tangible on native; WebLLM proves the same UX on web; spawn_blocking discipline |
+| M4 | **Local model, minimal**: download the pinned/checksummed Qwen2.5-0.5B-Instruct Q4_K_M via llama.cpp, cloud↔local switch, native chat on desktop/mobile + **in-browser via WebLLM (WebGPU)**, tok/s display | One verified native engine path works without configuration; WebLLM proves the same UX on web; blocking inference never occupies async workers |
 | M5 | **Provider/settings config DB**: pglite-oxide (Tauri/mobile Rust layer) + PGlite (web) storing provider credentials, model prefs, and app settings, administered from a Settings surface | The prometheus-db backend-selection pattern (real Postgres semantics on every target) carrying real app state |
 
 ### SHOULD
@@ -70,8 +74,8 @@ one-workflow-at-scale; Jan/LM Studio's download→load→chat loop). The demo na
 Coverage check: MUST+SHOULD exercises every headline crate except vision — all 11
 ContentBlock variants reachable, streamed inference from any of 142+ providers
 (liter-llm), protocol pipeline, PEM graph, SurrealDB graph-RAG, config DB
-(pglite-oxide/PGlite), Electric sync, Flint, mistral.rs (Metal desktop) + llama.cpp
-(mobile, via `llama-cpp-2`), WebLLM (WebGPU web), whisper, MCP, PMPO.
+(pglite-oxide/PGlite), Electric sync, Flint, llama.cpp (desktop/mobile via
+`llama-cpp-2`), WebLLM (WebGPU web), optional mistral.rs, whisper, MCP, PMPO.
 
 ---
 
@@ -84,7 +88,7 @@ ContentBlock variants reachable, streamed inference from any of 142+ providers
 │  SURFACES (thin, presentation-only)                                │
 │                                                                    │
 │  Flutter mobile (iOS/Android)      Tauri desktop + web (React 19)  │
-│  Riverpod 3.3.2 · gen_ui_widgets   Zustand 5 · TanStack · Vite 8   │
+│  Riverpod 3.3.2 · gen_ui_widgets   Zustand 5 · PEM 3.x · Vite 8   │
 │  Widget → @riverpod → Repo → FFI   Component → Hook → Store →      │
 │                                    invoke()/listen() (stores ONLY) │
 └───────────────┬────────────────────────────────┬───────────────────┘
@@ -98,7 +102,7 @@ ContentBlock variants reachable, streamed inference from any of 142+ providers
 │      (liter-llm gateway: 142+ providers) · gen_ui_mcp · gen_ui_db  │
 │      (+ config DB: pglite-oxide native / PGlite web) ·             │
 │      gen_ui_db_graph (SurrealDB 3.2: HNSW/BM25/graph) ·            │
-│      gen_ui_inference (mistral.rs)                                 │
+│      gen_ui_inference (llama.cpp default; mistral.rs optional)     │
 │        → gen_ui_agent (PMPO)                                       │
 │          → LEAVES: gen_ui_ffi (frb) · tauri-plugin-gen-ui ·        │
 │                    gen_ui_wasm · workspace-hack                    │
@@ -132,14 +136,15 @@ Sync shapes fail on unknown columns, so ordering is enforced, not hoped for.
 
 ### 3.5 Inference architecture (three lanes)
 
-> Revised 2026-07-15 (user-directed): generic Anthropic SSE replaced by the
-> liter-llm gateway; candle-direct replaced by mistral.rs; web local lane added.
+> Revised 2026-07-18: generic Anthropic SSE uses the liter-llm gateway; pinned
+> llama.cpp/Qwen is the reproducible native default; WebLLM is the web lane;
+> mistral.rs remains available only as an optional desktop experiment.
 
 | Lane | Engine | Targets | Notes |
 |------|--------|---------|-------|
 | **Cloud (any provider)** | [liter-llm](https://github.com/GQAdonis/liter-llm) (GQAdonis fork) wrapped by `gen_ui_client` | desktop, mobile, web | Universal LLM client — **142+ providers**, streaming, tool calling. `native-http` feature (reqwest/rustls) on native; **`liter-llm-wasm`** (fetch-based, no tokio multithread) on web — one Rust dependency serves all three targets. Provider choice, credentials, and model prefs come from the config DB, not env vars; graceful degrade to local-only when no provider is configured. |
-| **Local — desktop** | [mistral.rs](https://github.com/GQAdonis/mistral.rs) (GQAdonis fork) via `gen_ui_inference` | desktop (Metal) | The `mistralrs` library crate (candle-based) provides model download (HF hub), GGUF/ISQ loading, and streaming generation behind the `InferenceProvider` trait (gen_ui_types). Covers M4 desktop (Qwen2.5-1.5B Q4_K_M on Metal). Replaces direct candle wiring; `spawn_blocking` discipline unchanged. Fork extras (mistralrs-audio/vision/mcp) available but not in PoC scope. |
-| **Local — mobile** | llama.cpp via [`llama-cpp-2`](https://crates.io/crates/llama-cpp-2) bindings, via `gen_ui_inference` | mobile (iOS/Android CPU) | S4 "sovereign mode" (Qwen-0.5B Q4 CPU). Lane changed from mistral.rs per the 2026-07-16 assessment §3.3: mistral.rs documents no iOS/Android deployment path anywhere, while the shipped mobile-LLM ecosystem (LLMFarm, LLM.swift, Sherpa) runs on llama.cpp. Same `InferenceProvider` trait — the seam absorbs the engine difference; revisit if mistral.rs publishes a mobile story. Gate: C-105 on-device tok/s benchmark. |
+| **Local — desktop** | llama.cpp via [`llama-cpp-2`](https://crates.io/crates/llama-cpp-2), via `gen_ui_inference` | desktop | The same revision-pinned, SHA-256-gated Qwen2.5-0.5B Q4_K_M catalog model as mobile. First chat downloads atomically into app data; later runs reuse it. This is the reference default because it built with Tauri and completed the real mobile UI-to-model path; mistral.rs remains optional behind `InferenceProvider`. |
+| **Local — mobile** | llama.cpp via [`llama-cpp-2`](https://crates.io/crates/llama-cpp-2), via `gen_ui_inference` | mobile (iOS/Android CPU) | Qwen2.5-0.5B Q4_K_M “sovereign mode.” The iOS integration test verified download, checksum, GGUF load, streamed A2UI output, and an assistant bubble through Flutter → Riverpod → FRB → Rust. |
 | **Local — web** | [WebLLM](https://webllm.mlc.ai/) (MLC), WebGPU | web only | Researched 2026-07 (firecrawl): WebLLM is the consensus in-browser chat engine — WebGPU-accelerated, OpenAI-compatible streaming API, curated quantized models including **Qwen2.5-1.5B-Instruct-q4f16_1-MLC** (same family as the native lane), models cached in browser storage. Feature-gated on WebGPU availability; degrade to the liter-llm cloud lane when absent (wllama/WASM rejected as primary: CPU-only speeds don't demo well; transformers.js reserved as the web option for embeddings/whisper-class tasks, not chat). |
 
 **Documented exception to the Rust-core invariant:** WebLLM is a TypeScript
@@ -228,13 +233,13 @@ WAVE 2 (finish):   C-108 mcp+agent ─► C-109 settings + mobile model → refl
 |----|-------|--------|
 | C-101 | Four-pillar bootstrap (`check-env.sh` rewrite): Rust 1.95+/wasm32 + Prometheus Skill System, OpenSpec ≥1.6 (`@fission-ai/openspec`), Flutter **beta** + Dart MCP server, Node 24+/bun/pnpm/TS 7.x; ran live on this box | ✅ **merged** |
 | C-102 | Scaffold `apps/knowme-poc`, run the full codegen pipeline for the first time ever, fix everything in the **scaffold scripts**, verify build+run on desktop (Tauri) and web | ✅ **merged** (see §5 for the ~25 defects fixed) |
-| C-103 | M1+M5 foundation — chat live e2e through the **liter-llm gateway** (142+ providers; native-http on desktop/mobile, liter-llm-wasm on web) + **config DB v1** (pglite-oxide native / PGlite web: providers, model_prefs, app_settings schemas + migrations); graceful degrade when no provider configured; ProtocolPipeline → ContentBlock stream over frb + Tauri events; first iOS-simulator run | ⬜ pending (revised) |
+| C-103 | M1+M5 foundation — chat live e2e through the **liter-llm gateway** (142+ providers; native-http on desktop/mobile, liter-llm-wasm on web) + **config DB v1** (pglite-oxide native / PGlite web: providers, model_prefs, app_settings schemas + migrations); graceful degrade when no provider configured; ProtocolPipeline → ContentBlock stream over frb + Tauri events; first iOS-simulator run | 🟨 in progress — shared stream/config foundation and desktop + hosted BYOK are implemented; final live-provider/mobile proof remains |
 | C-104 | M2 memory graph-RAG: intent APIs wired to gen_ui_db_graph + fastembed, seeded corpus, cited answers, related-graph panel | ⬜ pending |
-| C-105 | M4 local model, desktop + web: **mistral.rs** library — model download (HF hub) + GGUF load + Metal streaming on desktop; **WebLLM (WebGPU)** adapter on web behind the same intent seam, feature-gated on WebGPU with cloud-lane degrade; cloud↔local switch, tok/s | ⬜ pending (revised) |
+| C-105 | M4 local model: pinned/checksummed **llama.cpp** Qwen on desktop/mobile; **WebLLM (WebGPU)** on web behind the same intent seam; cloud↔local switch, first-run download, streaming, tok/s | ✅ native engine and web lane implemented; iOS UI-to-model runtime proof passed; Tauri release link passed |
 | C-106 | M3 sync local-first: our write-path sync engine (gen_ui_db::sync) + Electric read cache via docker-compose Postgres+Electric, one entity synced desktop↔mobile-sim, airplane-mode demo | ⬜ pending |
 | C-107 | S1 whisper scribe (whisper-rs, feature-gated), all 3 native platforms; evaluate fork's mistralrs-audio as alternative; web scribe (transformers.js whisper) as stretch | ⬜ pending (parallel lane) |
 | C-108 | S2+S3: one MCP SSE server + one canned Hands agent with live step-stream | ⬜ pending |
-| C-109 | C3+S4: Settings surface grows the **provider/model admin UI over the config DB** (add/edit/disable providers, pick per-lane models, keychain-backed secrets) + Qwen-0.5B mobile "sovereign mode" via **llama.cpp (`llama-cpp-2`) CPU** behind `InferenceProvider` (lane changed from mistral.rs — see §3.5 Local—mobile row) | ⬜ pending (revised) |
+| C-109 | C3+S4: Settings provider/model admin over the config DB, keychain/session-only BYOK, plus Qwen-0.5B sovereign mode through **llama.cpp (`llama-cpp-2`)** behind `InferenceProvider` | ✅ provider UI/keychain/session-only web BYOK wired; iOS build/download/generation proof passed; desktop uses the same native engine |
 | C-110 | CI: clippy -D warnings, audit.sh all, boundary tests, Vitest, dart analyze, macOS PoC build job | ⬜ pending (parallel lane) |
 
 ### Benchmark gates (added 2026-07-16 per independent assessment)

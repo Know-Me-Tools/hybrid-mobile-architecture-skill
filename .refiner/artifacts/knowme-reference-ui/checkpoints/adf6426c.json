@@ -1,0 +1,59 @@
+{
+  "refinement_id": "54a9b6bb-31db-4f03-a64f-2edaec5c1603",
+  "artifact_name": "knowme-reference-ui",
+  "artifact_type": "ui",
+  "content_type": "direct:react",
+  "started_at": "2026-07-17T19:14:21Z",
+  "updated_at": "2026-07-17T20:46:00Z",
+  "current_iteration": 1,
+  "max_iterations": 5,
+  "goals": [],
+  "constraints": [],
+  "phases_completed": [
+    "specify",
+    "plan",
+    "execute",
+    "reflect",
+    "persist"
+  ],
+  "convergence_status": "continue",
+  "iteration_history": [
+    {
+      "iteration": 1,
+      "timestamp": "2026-07-17T20:44:47Z",
+      "blocking_satisfied": 5,
+      "blocking_partially_satisfied": 6,
+      "blocking_violated": 1,
+      "decision": "continue",
+      "next_focus": "Resolve the explicitly blocked local-inference toolchain and complete live/screenshot/accessibility evidence."
+    }
+  ],
+  "workflow_triggers": [],
+  "checkpoints": [
+    {
+      "checkpoint_id": "a8709eb4",
+      "phase": "specify",
+      "iteration": 0,
+      "timestamp": "2026-07-17T19:19:12Z"
+    },
+    {
+      "checkpoint_id": "3b49e5d9",
+      "phase": "plan",
+      "iteration": 0,
+      "timestamp": "2026-07-17T19:19:13Z"
+    },
+    {
+      "checkpoint_id": "51fbebfc",
+      "phase": "execute",
+      "iteration": 1,
+      "timestamp": "2026-07-17T20:45:59Z"
+    },
+    {
+      "checkpoint_id": "8add2045",
+      "phase": "reflect",
+      "iteration": 1,
+      "timestamp": "2026-07-17T20:46:00Z"
+    }
+  ],
+  "prior_cycle_id": null
+}

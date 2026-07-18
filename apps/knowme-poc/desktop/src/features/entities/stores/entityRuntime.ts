@@ -3,6 +3,9 @@ import { isTauri } from '@tauri-apps/api/core'
 import {
   entityGet,
   entityList,
+  entityCreate,
+  entityUpdate,
+  entityDelete,
   entityRuntimeStart,
   entityRuntimeStop,
   type EntityRecord as PluginEntityRecord,
@@ -13,6 +16,7 @@ import {
   registerEntityFromSql,
   registerEntityTransport,
   startLocalFirstGraph,
+  useGraphStore,
   type EntityTransport,
 } from '@prometheus-ags/prometheus-entity-management'
 import schemaSql from '../schema.sql?raw'
@@ -27,6 +31,7 @@ interface EntityRuntimeSession {
 let session: EntityRuntimeSession | null = null
 let sessionInflight: Promise<EntityRuntimeSession> | null = null
 let consumers = 0
+let browserDb: PGlite | null = null
 
 // The plugin's wire shape ({id, entityType, dataJson}) is schema-agnostic —
 // dataJson is the entity payload as a JSON string (see gen_ui_types::transport
@@ -77,22 +82,31 @@ function pgliteTransport(db: PGlite, table: string, tenantId: string): EntityTra
 }
 
 async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSession> {
-  const [projectsDdl, notesDdl] = schemaSql.split(';').filter((sql) => sql.includes('CREATE TABLE'))
-  if (!projectsDdl || !notesDdl) throw new Error('shared entity DDL is incomplete')
+  const [projectsDdl, notesDdl, conversationsDdl] = schemaSql.split(';').filter((sql) => sql.includes('CREATE TABLE'))
+  if (!projectsDdl || !notesDdl || !conversationsDdl) throw new Error('shared entity DDL is incomplete')
   registerEntityFromSql({ entityType: 'Project', createTableSql: projectsDdl })
   registerEntityFromSql({ entityType: 'Note', createTableSql: notesDdl })
+  registerEntityFromSql({ entityType: 'Conversation', createTableSql: conversationsDdl })
 
   if (isTauri()) {
     registerEntityTransport('Project', tauriTransport('projects', tenantId))
     registerEntityTransport('Note', tauriTransport('notes', tenantId))
+    registerEntityTransport('Conversation', tauriTransport('conversations', tenantId))
     await entityRuntimeStart(tenantId)
     return { tenantId, dispose: () => { void entityRuntimeStop() } }
   }
 
-  const db = await PGlite.create('idb://gen-ui', { relaxedDurability: true })
+  // Normal browsers persist PGlite in IndexedDB. Some embedded/restricted web
+  // shells omit IndexedDB entirely; selecting the memory filesystem up front
+  // keeps the app usable there without letting Emscripten fall through a noisy
+  // filesystem error. The full browser deployment remains durable by default.
+  const dataDir = typeof indexedDB === 'undefined' ? 'memory://' : 'idb://gen-ui'
+  const db = await PGlite.create(dataDir, { relaxedDurability: true })
+  browserDb = db
   await db.exec(schemaSql)
   registerEntityTransport('Project', pgliteTransport(db, 'projects', tenantId))
   registerEntityTransport('Note', pgliteTransport(db, 'notes', tenantId))
+  registerEntityTransport('Conversation', pgliteTransport(db, 'chat_conversations', tenantId))
   const graph = startLocalFirstGraph({
     storage: await createPGlitePersistenceAdapter(db),
     key: `tenant:${tenantId}`,
@@ -102,9 +116,69 @@ async function createEntityRuntime(tenantId: string): Promise<EntityRuntimeSessi
     tenantId,
     dispose: () => {
       graph.dispose()
+      browserDb = null
       void db.close()
     },
   }
+}
+
+export interface ConversationRecord extends Record<string, unknown> {
+  id: string
+  tenant_id: string
+  title: string
+  messages: unknown[]
+  created_at: string
+  updated_at: string
+}
+
+const CONVERSATION_TYPE = 'Conversation'
+
+function graphConversation(row: ConversationRecord): void {
+  useGraphStore.getState().upsertEntity(CONVERSATION_TYPE, row.id, row)
+}
+
+export async function listConversationRecords(tenantId: string): Promise<ConversationRecord[]> {
+  let rows: ConversationRecord[]
+  if (isTauri()) {
+    const result = await entityList({ entityType: 'conversations', filters: [], sorts: [], limit: null, cursor: null })
+    rows = result.items.map((record) => toEntityRow(record, tenantId) as unknown as ConversationRecord)
+  } else {
+    if (!browserDb) throw new Error('PGlite conversation store is not ready')
+    const result = await browserDb.query<ConversationRecord>(
+      'SELECT * FROM chat_conversations WHERE tenant_id = $1 ORDER BY updated_at DESC', [tenantId],
+    )
+    rows = result.rows
+  }
+  rows.forEach(graphConversation)
+  return rows
+}
+
+export async function saveConversationRecord(row: ConversationRecord): Promise<void> {
+  graphConversation(row)
+  if (isTauri()) {
+    const record = { id: row.id, entityType: 'conversations', dataJson: JSON.stringify(row) }
+    const existing = await entityGet('conversations', row.id)
+    await (existing ? entityUpdate(record) : entityCreate(record))
+    return
+  }
+  if (!browserDb) throw new Error('PGlite conversation store is not ready')
+  await browserDb.query(
+    `INSERT INTO chat_conversations (id, tenant_id, title, messages, created_at, updated_at)
+     VALUES ($1, $2, $3, $4::jsonb, $5, $6)
+     ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, messages = EXCLUDED.messages,
+       updated_at = EXCLUDED.updated_at`,
+    [row.id, row.tenant_id, row.title, JSON.stringify(row.messages), row.created_at, row.updated_at],
+  )
+}
+
+export async function deleteConversationRecord(id: string): Promise<void> {
+  useGraphStore.getState().removeEntity(CONVERSATION_TYPE, id)
+  if (isTauri()) {
+    await entityDelete('conversations', id)
+    return
+  }
+  if (!browserDb) throw new Error('PGlite conversation store is not ready')
+  await browserDb.query('DELETE FROM chat_conversations WHERE id = $1', [id])
 }
 
 // React StrictMode mounts, releases, then remounts effects in development. Share

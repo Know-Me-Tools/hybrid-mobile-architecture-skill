@@ -13,10 +13,10 @@
 pub mod chat;
 pub mod entity;
 pub mod streams;
-// gen_ui_audio (whisper-rs) is off on Android — see gen_ui_ffi/Cargo.toml's
-// target-gated dependency comment for why.
+// gen_ui_audio (whisper-rs) is an explicit mobile feature because whisper.cpp
+// and llama.cpp cannot safely share one force-loaded iOS static archive.
 pub mod boot;
-#[cfg(not(target_os = "android"))]
+#[cfg(all(feature = "mobile-scribe", not(target_os = "android")))]
 pub mod scribe;
 
 use flutter_rust_bridge::frb;

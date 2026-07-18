@@ -168,7 +168,7 @@ EOF
 elif [[ "$PLATFORM" == "tauri" ]]; then
   FEAT_DIR="$ROOT/src/features/$SNAKE"
   step "Creating Tauri/React feature: $FEAT_DIR"
-  mkdir -p "$FEAT_DIR"/{api,stores,queries,hooks,components}
+  mkdir -p "$FEAT_DIR"/{api,stores,entities,hooks,components}
 
   # Types
   cat > "$FEAT_DIR/types.ts" << EOF
@@ -246,64 +246,63 @@ export const use${PASCAL}Store = create<${PASCAL}State & ${PASCAL}Actions>()(
 EOF
   ok "stores/${SNAKE}Store.ts (Zustand)"
 
-  # TanStack Query hooks (server-side state)
-  cat > "$FEAT_DIR/queries/${SNAKE}Queries.ts" << EOF
-// TJ-ARCH-MOB-001 compliant — TanStack Query (server-side state)
+  # Prometheus Entity Management hooks (normalized server/async/entity state)
+  mkdir -p "$FEAT_DIR/entities"
+  cat > "$FEAT_DIR/entities/${SNAKE}Entities.ts" << EOF
+// TJ-ARCH-MOB-001 compliant — Prometheus Entity Management 3.x
 // Used by feature hooks — not directly by components
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { registerEntityTransport, useEntities, useEntityMutation } from '@prometheus-ags/prometheus-entity-management';
 import { ${SNAKE}Api } from '../api/${SNAKE}Api';
-import type { ${PASCAL}CreateInput } from '../types';
+import type { ${PASCAL}Entity, ${PASCAL}CreateInput } from '../types';
 
-export const ${SNAKE}Keys = {
-  all:    ['${SNAKE}'] as const,
-  lists:  () => [...${SNAKE}Keys.all, 'list'] as const,
-  detail: (id: string) => [...${SNAKE}Keys.all, 'detail', id] as const,
-};
+const ENTITY_TYPE = '${PASCAL}';
+
+registerEntityTransport(ENTITY_TYPE, {
+  identify: (row: ${PASCAL}Entity) => row.id,
+  authoritative: false,
+  staleTime: 30_000,
+  list: async ({ signal }) => {
+    signal?.throwIfAborted();
+    const rows = await ${SNAKE}Api.getAll();
+    signal?.throwIfAborted();
+    return { rows, total: rows.length, nextCursor: null };
+  },
+  get: (id) => ${SNAKE}Api.getById(id),
+});
 
 export function use${PASCAL}List() {
-  return useQuery({
-    queryKey: ${SNAKE}Keys.lists(),
-    queryFn:  ${SNAKE}Api.getAll,
-    staleTime: 30_000,
-  });
-}
-
-export function use${PASCAL}Detail(id: string) {
-  return useQuery({
-    queryKey: ${SNAKE}Keys.detail(id),
-    queryFn:  () => ${SNAKE}Api.getById(id),
-    enabled:  !!id,
-  });
+  return useEntities<${PASCAL}Entity>(ENTITY_TYPE);
 }
 
 export function useCreate${PASCAL}() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: ${PASCAL}CreateInput) => ${SNAKE}Api.create(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ${SNAKE}Keys.lists() }),
+  return useEntityMutation<${PASCAL}CreateInput, ${PASCAL}Entity, ${PASCAL}Entity>({
+    type: ENTITY_TYPE,
+    mutate: ${SNAKE}Api.create,
+    normalize: (row) => ({ id: row.id, data: row }),
+    invalidateLists: [ENTITY_TYPE],
   });
 }
 
 export function useDelete${PASCAL}() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => ${SNAKE}Api.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ${SNAKE}Keys.lists() }),
+  return useEntityMutation<string, void, ${PASCAL}Entity>({
+    type: ENTITY_TYPE,
+    mutate: ${SNAKE}Api.delete,
+    invalidateLists: [ENTITY_TYPE],
   });
 }
 EOF
-  ok "queries/${SNAKE}Queries.ts (TanStack Query)"
+  ok "entities/${SNAKE}Entities.ts (Prometheus Entity Management 3.x)"
 
   # Feature hook (what components actually use)
   cat > "$FEAT_DIR/hooks/use${PASCAL}.ts" << EOF
 // TJ-ARCH-MOB-001 compliant — Feature hook
 // This is the ONLY thing components import from this feature for state/actions
 import { use${PASCAL}Store } from '../stores/${SNAKE}Store';
-import { use${PASCAL}List, useCreate${PASCAL}, useDelete${PASCAL} } from '../queries/${SNAKE}Queries';
+import { use${PASCAL}List, useCreate${PASCAL}, useDelete${PASCAL} } from '../entities/${SNAKE}Entities';
 
 export function use${PASCAL}() {
-  const { data: items = [], isLoading, error } = use${PASCAL}List();
-  const { mutate: create, isPending: isCreating } = useCreate${PASCAL}();
+  const { items, isLoading, error } = use${PASCAL}List();
+  const { mutate: create, state: createState } = useCreate${PASCAL}();
   const { mutate: deleteFn } = useDelete${PASCAL}();
 
   // Client-side state from Zustand (via store)
@@ -320,7 +319,7 @@ export function use${PASCAL}() {
     items: filteredItems,
     isLoading,
     error,
-    isCreating,
+    isCreating: createState.isPending,
     selectedId,
     filter,
     setFilter,
@@ -383,7 +382,7 @@ EOF
   ok "Tauri/React feature '$FEATURE' scaffolded in $FEAT_DIR"
   echo ""
   echo "  Architecture enforced:"
-  echo "    Component → Hook → Store + TanStack Query → API (Rust invoke)"
+  echo "    Component → Hook → Store + Prometheus Entity Management → API (Rust invoke)"
   echo "  Add Rust commands in src-tauri/src/commands.rs"
 
 else

@@ -9,16 +9,19 @@ target/
 
 # Dependency lockfiles ARE committed — this is an application workspace, not a
 # library, so builds must be reproducible across machines and CI. This matters
-# concretely here: mistral.rs (desktop inference lane) depends on
-# GQAdonis/turboquant-rs by floating `branch = "main"`, and Cargo.lock is the ONLY
-# thing pinning it to a reviewed SHA. It also holds the regex 1.12.4 resolution
-# that lets the mistral.rs and liter-llm lanes coexist. Without these committed,
-# CI silently re-resolves and the build breaks.
+# concretely here: native llama.cpp dependencies and optional Mistral/Liter-LLM
+# providers must remain on reviewed revisions. Without these committed, CI can
+# silently re-resolve and the build can break.
 !rust/Cargo.lock
 !desktop/src-tauri/Cargo.lock
 !mobile/pubspec.lock
 !mobile/ios/Podfile.lock
 !flutter_packages/*/pubspec.lock
+
+# Local application data and browser-verification output
+.knowme-data/
+.playwright-mcp/
+**/__pycache__/
 
 # Flutter
 mobile/.dart_tool/

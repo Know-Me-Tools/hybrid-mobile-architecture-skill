@@ -1,11 +1,9 @@
 // TJ-ARCH-MOB-001 compliant — component imports the hook only (no store, no invoke).
 import { useState } from 'react'
 import { useMemory } from '../hooks/useMemory'
-
-const FIELD =
-  'w-full rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-3 py-2 text-sm text-[color:var(--color-fg)] focus-visible:outline-2 focus-visible:outline-[color:var(--color-ember)]'
-const ACTION =
-  'shrink-0 rounded-md bg-[color:var(--color-ember)] px-4 py-2 text-sm font-medium text-white disabled:opacity-50'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 export function MemoryPanel() {
   const { hits, query, isIngesting, isSearching, error, mode, ingest, search, setMode } = useMemory()
@@ -28,16 +26,16 @@ export function MemoryPanel() {
           Ingest
         </label>
         <div className="flex gap-2">
-          <input
+          <Input
             id="mem-ingest"
             value={ingestText}
             onChange={(e) => setIngestText(e.target.value)}
             placeholder="Add a memory…"
-            className={FIELD}
+            className="border-0 bg-[color:var(--color-surface)]"
           />
-          <button type="submit" disabled={isIngesting || !ingestText.trim()} className={ACTION}>
+          <Button type="submit" disabled={isIngesting || !ingestText.trim()} className="shrink-0 bg-[color:var(--color-ember)] text-white">
             {isIngesting ? 'Ingesting…' : 'Ingest'}
-          </button>
+          </Button>
         </div>
       </form>
 
@@ -55,47 +53,48 @@ export function MemoryPanel() {
           {/* Dev toggle: proves what RRF fusion buys instead of asserting it. Run the
               same query both ways — a rare exact term that vector recall smooths away
               comes back ranked first under hybrid. */}
-          <div role="radiogroup" aria-label="Retrieval mode" className="flex gap-1">
+          <ToggleGroup
+            aria-label="Retrieval mode"
+            value={[mode]}
+            disabled={isSearching}
+            onValueChange={(values) => {
+              const next = values.at(-1)
+              if (next === 'hybrid' || next === 'vector') void setMode(next)
+            }}
+            className="rounded-xl bg-[color:var(--color-surface)] p-1"
+          >
             {(['hybrid', 'vector'] as const).map((m) => (
-              <button
+              <ToggleGroupItem
                 key={m}
-                type="button"
-                role="radio"
-                aria-checked={mode === m}
-                disabled={isSearching}
-                onClick={() => void setMode(m)}
+                value={m}
                 title={
                   m === 'hybrid'
                     ? 'Vector + BM25, RRF-fused — the real retrieval path'
                     : 'Vector recall only, no lexical lane — diagnostic'
                 }
-                className={
-                  mode === m
-                    ? 'rounded-md bg-[color:var(--color-ember)] px-2 py-1 text-xs font-medium text-white disabled:opacity-50'
-                    : 'rounded-md border border-[color:var(--color-border)] px-2 py-1 text-xs text-[color:var(--color-fg)] disabled:opacity-50'
-                }
+                className="h-7 rounded-lg px-2 text-xs text-[color:var(--color-fg-sub)] data-pressed:bg-[color:var(--color-ember)] data-pressed:text-white"
               >
                 {m === 'hybrid' ? 'Hybrid' : 'Vector only'}
-              </button>
+              </ToggleGroupItem>
             ))}
-          </div>
+          </ToggleGroup>
         </div>
         <div className="flex gap-2">
-          <input
+          <Input
             id="mem-search"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             placeholder="Hybrid graph-RAG search…"
-            className={FIELD}
+            className="border-0 bg-[color:var(--color-surface)]"
           />
-          <button type="submit" disabled={isSearching || !searchText.trim()} className={ACTION}>
+          <Button type="submit" disabled={isSearching || !searchText.trim()} className="shrink-0 bg-[color:var(--color-ember)] text-white">
             {isSearching ? 'Searching…' : 'Search'}
-          </button>
+          </Button>
         </div>
       </form>
 
       {error ? (
-        <p role="alert" className="rounded-md border border-[color:var(--color-ember)] px-3 py-2 text-sm text-[color:var(--color-ember)]">
+        <p role="alert" className="rounded-xl bg-[color:var(--color-ember-soft)] px-3 py-2 text-sm text-[color:var(--color-ember)]">
           {error}
         </p>
       ) : null}
@@ -106,7 +105,7 @@ export function MemoryPanel() {
         {hits.map((hit) => (
           <li
             key={hit.id}
-            className="rounded-md border border-[color:var(--color-border)] bg-[color:var(--color-card)] p-3"
+            className="rounded-xl bg-[color:var(--color-card)] p-4"
           >
             <div className="flex items-baseline justify-between gap-2">
               {/* `kind` is the hit's category (note/entity/…); `text` is the body.

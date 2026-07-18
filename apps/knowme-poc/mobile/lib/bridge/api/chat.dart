@@ -9,11 +9,14 @@ import '../third_party/gen_ui_types/error.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Start a chat turn; returns the run_id whose events arrive on chat_events(run_id).
-/// `thread_id` is reserved for multi-thread history (not yet used — the agent
-/// layer takes the full turn history via `message` for now).
-Future<String> chatSend({required String threadId, required String message}) =>
-    GenUiCore.instance.api
-        .crateApiChatChatSend(threadId: threadId, message: message);
+/// `messages` is the selected conversation's role/text history. The thread id
+/// remains transport metadata; persistence is owned by the entity repository.
+Future<String> chatSend(
+        {required String threadId,
+        required String message,
+        required List<String> messages}) =>
+    GenUiCore.instance.api.crateApiChatChatSend(
+        threadId: threadId, message: message, messages: messages);
 
 /// Ingest a note into memory (embeds on-device via fastembed, upserts into
 /// SurrealDB). Returns the assigned record id.

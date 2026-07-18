@@ -13,7 +13,7 @@
 #   L2  gen_ui_client     Flint gate(auth)/forge(Quarry+MCP+AG-UI)/frf(spine, feat)
 #   L2  gen_ui_mcp        MCP client registry (JSON-RPC 2.0 + HTTP/SSE; forge a2ui seam)
 #   L2  gen_ui_db         relational (pg/pglite) + graph (surreal) + sync
-#   L2  gen_ui_inference  candle GGUF (native accel; wasm feature-gated off)
+#   L2  gen_ui_inference  pinned llama.cpp desktop/mobile default
 #   L3  gen_ui_agent      PMPO loop over L0-L2 abstractions
 #   LEAF gen_ui_ffi              flutter_rust_bridge surface
 #   LEAF tauri-plugin-gen-ui     Tauri 2 plugin
@@ -21,6 +21,8 @@
 #   ---  workspace-hack          cargo-hakari feature unification pin
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_DIR="$(cd "$SCRIPT_DIR/../assets/templates" && pwd)"
 OUT="${1:-rust}"
 UAR_MODE="${2:-embedded}"
 
@@ -81,6 +83,9 @@ chrono            = { version = "0.4",  features = ["serde"] }
 tokio             = { version = "1.40", default-features = false }
 tokio-stream      = { version = "0.1",  features = ["sync"] }
 reqwest           = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+sha2              = "0.10"
+encoding_rs       = "0.8"
+llama-cpp-2       = { version = "0.1.151", default-features = false }
 reqwest-eventsource = "0.6"
 # --- Flint platform SDK (FRF realtime spine). Nothing is published to crates.io —
 #     all FRF inter-crate deps are PATH deps in-repo, and the repo is private, so a
@@ -116,6 +121,12 @@ once_cell         = "1.20"
 # Regenerate with: cargo hakari generate
 [workspace.dependencies.workspace-hack]
 path = "crates/workspace-hack"
+
+# llama-cpp-2 0.1.151 does not forward `default-features = false` to its sys
+# dependency, so iOS incorrectly builds HTTP tooling and fails on unresolved
+# httplib symbols. The source-preserving patch is copied below by this scaffold.
+[patch.crates-io]
+llama-cpp-2 = { path = "vendor/llama-cpp-2" }
 
 # ─────────────────────────── Compile profiles ───────────────────────────────
 # Development: fast iteration on host. Deps compiled well once (opt-2) then cached;
@@ -296,9 +307,45 @@ pub mod transport;
 pub mod sync;
 pub mod config;
 pub mod error;
+pub mod inference;
 
 pub use content_block::ContentBlock;
 pub use error::{CoreError, CoreResult};
+EOF
+
+cat > "$OUT/crates/gen_ui_types/src/inference.rs" << EOF
+$MARK
+//! Target-independent local-inference seam. Engines stay in gen_ui_inference;
+//! UI and agent crates depend on this trait only.
+use crate::error::CoreResult;
+use crate::events::StreamEvent;
+use async_trait::async_trait;
+use futures::stream::BoxStream;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct LocalModelSpec {
+    pub model: String,
+    pub context_len: Option<u32>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct SampleParams {
+    pub temperature: f32,
+    pub top_p: f32,
+    pub max_tokens: u32,
+}
+
+#[async_trait]
+pub trait InferenceProvider: Send + Sync {
+    async fn load(&self, spec: &LocalModelSpec) -> CoreResult<()>;
+    async fn generate(
+        &self,
+        prompt: &str,
+        params: &SampleParams,
+    ) -> CoreResult<BoxStream<'static, StreamEvent>>;
+    async fn unload(&self) -> CoreResult<()>;
+}
 EOF
 
 # ContentBlock — the cross-platform UI contract (11 variants).
@@ -3794,8 +3841,11 @@ EOF
 
 emit_crate gen_ui_db ""
 emit_gen_ui_db
-emit_crate gen_ui_inference ""
-emit_l2_stub gen_ui_inference "candle GGUF engine (native accel; wasm feature-gated off)." "future inference lane"
+mkdir -p "$OUT/crates/gen_ui_inference"
+cp -R "$TEMPLATE_DIR/rust/gen_ui_inference/." "$OUT/crates/gen_ui_inference/"
+mkdir -p "$OUT/vendor"
+cp -R "$TEMPLATE_DIR/rust/vendor/llama-cpp-2" "$OUT/vendor/llama-cpp-2"
+ok "gen_ui_inference: pinned llama.cpp mobile lane + reproducible sys-feature patch"
 
 # ── gen_ui_db_graph (C-004): SurrealDB 3.2 embedded hybrid graph-RAG ──────────
 # Own crate (not a gen_ui_db submodule) on purpose: surrealdb-core's build.rs
@@ -3832,6 +3882,7 @@ gen_ui_types    = { path = "../gen_ui_types" }
 gen_ui_runtime  = { path = "../gen_ui_runtime" }
 gen_ui_protocol = { path = "../gen_ui_protocol" }
 gen_ui_agent    = { path = "../gen_ui_agent" }
+gen_ui_inference = { path = "../gen_ui_inference", features = ["local-llama"] }
 flutter_rust_bridge.workspace = true
 anyhow.workspace = true
 log = "0.4"

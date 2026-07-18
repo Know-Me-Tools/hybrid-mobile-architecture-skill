@@ -3,7 +3,7 @@
 // Which inference lane chat runs on, and the throughput of the last local run.
 //
 // Three surfaces, one toggle:
-//   - Tauri desktop → the Rust local lane (mistral.rs), via the plugin.
+//   - Tauri desktop → the pinned Rust llama.cpp lane, via the plugin.
 //   - Plain web     → the WebLLM lane (webllmLane.ts), driven in-browser.
 //   - Neither       → cloud only; the toggle is hidden rather than shown broken.
 import { create } from 'zustand'
@@ -41,13 +41,14 @@ interface LaneState {
 interface LaneActions {
   init: () => Promise<void>
   switchLane: (lane: ChatLane) => Promise<void>
+  prepareLocal: () => Promise<boolean>
   recordThroughput: (tokens: number, seconds: number) => void
   clearThroughput: () => void
 }
 
 export const useLaneStore = create<LaneState & LaneActions>()(
-  immer((set) => ({
-    lane: 'cloud',
+  immer((set, get) => ({
+    lane: 'local',
     localAvailable: false,
     loadProgress: null,
     throughput: null,
@@ -63,40 +64,51 @@ export const useLaneStore = create<LaneState & LaneActions>()(
         set((s) => { s.localAvailable = available; s.lane = lane })
         return
       }
-      // Plain web: WebGPU decides. Lane choice isn't persisted here — the Rust
-      // config DB isn't reachable from the browser bundle — so the web lane
-      // starts on cloud each session.
-      set((s) => { s.localAvailable = isWebGpuAvailable() })
+      // Plain web: use the keyless local WebLLM lane whenever WebGPU exists.
+      // Cloud remains an explicit BYOK choice, never the broken first-run path.
+      const available = isWebGpuAvailable()
+      set((s) => { s.localAvailable = available; s.lane = available ? 'local' : 'cloud' })
+    },
+
+    prepareLocal: async () => {
+      set((s) => { s.error = null })
+      try {
+        if (isTauri()) {
+          return await hasLocalEngine()
+        }
+        await loadWebLlm((p) => set((s) => { s.loadProgress = p }))
+        set((s) => {
+          s.loadProgress = null
+        })
+        return true
+      } catch (e: unknown) {
+        set((s) => {
+          s.error = e instanceof Error ? e.message : 'failed to prepare local inference'
+          s.loadProgress = null
+        })
+        return false
+      }
     },
 
     switchLane: async (lane) => {
       set((s) => { s.error = null })
+      if (lane === 'local') {
+        const ready = await get().prepareLocal()
+        if (!ready) return
+      } else if (!isTauri()) {
+        await unloadWebLlm()
+      }
       try {
-        if (isTauri()) {
-          await setActiveLane(lane)
-          set((s) => { s.lane = lane; if (lane === 'cloud') s.throughput = null })
-          return
-        }
-        if (lane === 'local') {
-          // Warm the engine at switch time, not at first message: a ~1GB download
-          // is not something to discover mid-conversation.
-          await loadWebLlm((p) => set((s) => { s.loadProgress = p }))
-        } else {
-          await unloadWebLlm()
-        }
+        if (isTauri()) await setActiveLane(lane)
         set((s) => {
           s.lane = lane
-          s.loadProgress = null
           if (lane === 'cloud') s.throughput = null
         })
       } catch (e: unknown) {
         // Stay on the current lane and say why. Never silently fall back to
         // cloud — a user who asked for on-device inference must not be quietly
         // switched to a network provider.
-        set((s) => {
-          s.error = e instanceof Error ? e.message : 'failed to switch lane'
-          s.loadProgress = null
-        })
+        set((s) => { s.error = e instanceof Error ? e.message : 'failed to switch lane' })
       }
     },
 

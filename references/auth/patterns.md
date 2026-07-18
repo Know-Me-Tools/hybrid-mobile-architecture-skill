@@ -189,8 +189,15 @@ class SupabaseAuthNotifier extends _$SupabaseAuthNotifier {
 ```typescript
 // features/auth/stores/supabaseStore.ts
 import { createClient } from '@supabase/supabase-js';
+import {
+  makeRestTransport,
+  registerEntityTransport,
+  useEntities,
+} from '@prometheus-ags/prometheus-entity-management';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+registerEntityTransport('UserProfile', makeRestTransport({ supabase, table: 'profiles' }));
 
 export const useAuthStore = create<AuthState & AuthActions>()((set) => ({
   user: null,
@@ -215,18 +222,13 @@ export const useAuthStore = create<AuthState & AuthActions>()((set) => ({
   },
 }));
 
-// TanStack Query for Supabase data (server-side state)
+// Prometheus Entity Management 3.x for normalized Supabase entity state.
+// Register the Supabase transport once during app startup.
 export function useUserProfile(userId: string) {
-  return useQuery({
-    queryKey: ['profile', userId],
-    queryFn: () => supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-      .then(({ data, error }) => { if (error) throw error; return data; }),
+  const profiles = useEntities<UserProfile>('UserProfile', {
     enabled: !!userId,
-  });
+  })
+  return { ...profiles, data: profiles.items.find((profile) => profile.id === userId) ?? null }
 }
 ```
 

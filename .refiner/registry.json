@@ -1,0 +1,10 @@
+{
+  "artifacts": {
+    "knowme-reference-ui": {
+      "path": ".refiner/artifacts/knowme-reference-ui",
+      "artifact_type": "ui",
+      "content_type": "direct:react",
+      "updated_at": "2026-07-17T19:14:21Z"
+    }
+  }
+}

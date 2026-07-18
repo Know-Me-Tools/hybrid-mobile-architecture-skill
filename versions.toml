@@ -37,6 +37,7 @@ pglite_oxide = "0.5.1"          # desktop config-DB only (macOS arm64 / Win x64 
 # (assessment 2026-07-16 §3.3: no documented mobile path for mistral.rs/candle;
 # the shipped mobile-LLM ecosystem runs on llama.cpp).
 [inference]
-desktop = "mistral.rs"          # Metal; GQAdonis fork, SHA-pinned in workspace Cargo.toml
-mobile = "llama-cpp-2"          # llama.cpp Rust bindings, behind the InferenceProvider trait
-web = "WebLLM"                  # MLC WebGPU lane; feature-gated, post-C-106 stretch
+desktop = "llama-cpp-2"         # pinned/checksummed Qwen GGUF; zero-config reference default
+mobile = "llama-cpp-2"          # same engine and catalog model behind InferenceProvider
+web = "WebLLM"                  # MLC WebGPU lane; zero-key browser default
+mistral_optional = "mistral.rs" # experimental desktop alternative behind InferenceProvider

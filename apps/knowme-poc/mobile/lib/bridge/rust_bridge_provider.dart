@@ -26,8 +26,12 @@ Future<void> initRustBridge({String? dataDir}) async {
 /// chat_send(thread_id, message) -> run_id. FFI call; terminal on Rust error
 /// (thrown as a Dart exception — see gen_ui_ffi/src/api/chat.rs's doc comment
 /// on why CoreError, not CoreResult, is the literal return-type spelling).
-Future<String> chatSend(String threadId, String message) =>
-    ffi.chatSend(threadId: threadId, message: message);
+Future<String> chatSend(
+  String threadId,
+  String message,
+  List<String> messages,
+) =>
+    ffi.chatSend(threadId: threadId, message: message, messages: messages);
 
 /// chat_events(run_id) -> Stream<A2uiEvent>. Fold into ContentBlocks.
 /// The FFI stream carries JSON (see gen_ui_ffi::api::streams's doc comment on

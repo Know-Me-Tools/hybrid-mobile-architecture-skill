@@ -84,6 +84,63 @@ pub enum ConfigBackend {
 }
 
 impl ConfigBackend {
+    pub async fn list_providers(&self) -> Result<Vec<Provider>, AgentError> {
+        match self {
+            ConfigBackend::Postgres(store) => Ok(store
+                .list_providers()
+                .await
+                .map_err(|e| AgentError::Config(e.to_string()))?
+                .into_iter()
+                .map(Provider::from)
+                .collect()),
+            ConfigBackend::Surreal(store) => Ok(store
+                .list_providers()
+                .await
+                .map_err(|e| AgentError::Config(e.to_string()))?
+                .into_iter()
+                .map(Provider::from)
+                .collect()),
+        }
+    }
+
+    pub async fn upsert_provider(&self, provider: &Provider) -> Result<(), AgentError> {
+        match self {
+            ConfigBackend::Postgres(store) => store
+                .upsert_provider(&PgProvider {
+                    id: provider.id.clone(),
+                    kind: provider.kind.clone(),
+                    base_url: provider.base_url.clone(),
+                    api_key_ref: provider.api_key_ref.clone(),
+                    enabled: provider.enabled,
+                })
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
+            ConfigBackend::Surreal(store) => store
+                .upsert_provider(&SurrealProvider {
+                    id: provider.id.clone(),
+                    kind: provider.kind.clone(),
+                    base_url: provider.base_url.clone(),
+                    api_key_ref: provider.api_key_ref.clone(),
+                    enabled: provider.enabled,
+                })
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
+        }
+    }
+
+    pub async fn delete_provider(&self, id: &str) -> Result<(), AgentError> {
+        match self {
+            ConfigBackend::Postgres(store) => store
+                .delete_provider(id)
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
+            ConfigBackend::Surreal(store) => store
+                .delete_provider(id)
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
+        }
+    }
+
     pub async fn get_model_pref(
         &self,
         surface: &str,
@@ -100,6 +157,36 @@ impl ConfigBackend {
                 .await
                 .map_err(|e| AgentError::Config(e.to_string()))?
                 .map(ModelPref::from)),
+        }
+    }
+
+    pub async fn upsert_model_pref(
+        &self,
+        surface: &str,
+        lane: &str,
+        pref: &ModelPref,
+    ) -> Result<(), AgentError> {
+        match self {
+            ConfigBackend::Postgres(store) => store
+                .upsert_model_pref(&PgModelPref {
+                    surface: surface.to_owned(),
+                    lane: lane.to_owned(),
+                    provider_id: pref.provider_id.clone(),
+                    model_id: pref.model_id.clone(),
+                    params: pref.params.clone(),
+                })
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
+            ConfigBackend::Surreal(store) => store
+                .upsert_model_pref(&SurrealModelPref {
+                    surface: surface.to_owned(),
+                    lane: lane.to_owned(),
+                    provider_id: pref.provider_id.clone(),
+                    model_id: pref.model_id.clone(),
+                    params: pref.params.clone(),
+                })
+                .await
+                .map_err(|e| AgentError::Config(e.to_string())),
         }
     }
 

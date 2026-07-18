@@ -2,7 +2,7 @@
   "name": "hybrid-mobile-architecture",
   "displayName": "Hybrid Mobile Architecture",
   "version": "1.0.0",
-  "description": "Scaffold, extend, and maintain applications built on the Prometheus AGS hybrid mobile architecture: Flutter + Rust FFI for iOS/Android, Tauri + React 19 for desktop, sharing a single gen_ui_core Rust crate. Covers environment setup, feature-based clean architecture, Riverpod/Zustand+TanStack state management, Ory Kratos/Supabase auth, A2UI/AG-UI protocols, local inference, MCP tool use, SurrealDB integration, and UAR embedding.",
+  "description": "Scaffold, extend, and maintain applications built on the Prometheus AGS hybrid mobile architecture: Flutter + Rust FFI for iOS/Android, Tauri + React 19 for desktop, sharing a single gen_ui_core Rust crate. Covers environment setup, feature-based clean architecture, Riverpod and Zustand + Prometheus Entity Management 3.x state management, TanStack Router/Table, Ory Kratos/Supabase auth, A2UI/AG-UI protocols, local inference, MCP tool use, SurrealDB integration, and UAR embedding.",
   "author": {
     "name": "Travis James",
     "email": "travis@prometheusags.ai",

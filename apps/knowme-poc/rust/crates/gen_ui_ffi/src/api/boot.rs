@@ -25,6 +25,10 @@ pub async fn run_migrations(data_dir: String) -> Result<(), CoreError> {
     }
 
     tracing::info!(%data_dir, "mobile migrations starting");
+    crate::api::entity::init_store(
+        std::path::PathBuf::from(&data_dir).join("entity-records.sqlite3"),
+    )
+    .await?;
     let db_path = format!("{data_dir}/knowme-poc.db");
     let embed_cache = std::path::PathBuf::from(&data_dir).join("model-cache/fastembed");
     std::fs::create_dir_all(&embed_cache).map_err(|e| boot_fail("model cache create", e))?;
@@ -43,7 +47,40 @@ pub async fn run_migrations(data_dir: String) -> Result<(), CoreError> {
     .map_err(|e| boot_fail("graph store open", e))?;
     let store = Arc::new(store);
 
-    gen_ui_agent::state::init(ConfigBackend::Surreal(store.clone()), store);
+    // The mobile engine ships the smaller Qwen catalog entry. Persist an
+    // explicit preference so the agent never guesses the desktop model id.
+    if store
+        .get_model_pref("chat", "local")
+        .await
+        .map_err(|e| boot_fail("local model preference read", e))?
+        .is_none()
+    {
+        store
+            .upsert_model_pref(&gen_ui_db_graph::ModelPref {
+                surface: "chat".to_string(),
+                lane: "local".to_string(),
+                provider_id: None,
+                model_id: "qwen2.5-0.5b-instruct-q4".to_string(),
+                params: serde_json::json!({
+                    "context_len": 2048,
+                    "max_tokens": 128,
+                    "temperature": 0.7,
+                    "top_p": 0.95
+                }),
+            })
+            .await
+            .map_err(|e| boot_fail("local model preference write", e))?;
+    }
+
+    let inference: Arc<dyn gen_ui_types::inference::InferenceProvider> =
+        Arc::new(gen_ui_inference::LlamaCppEngine::new(
+            std::path::PathBuf::from(&data_dir).join("model-cache/llama"),
+        ));
+    gen_ui_agent::state::init_with_inference(
+        ConfigBackend::Surreal(store.clone()),
+        store,
+        Some(inference),
+    );
     tracing::info!("mobile migrations ready");
     Ok(())
 }

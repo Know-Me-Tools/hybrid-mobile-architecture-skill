@@ -32,7 +32,7 @@ mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/hooks"
 # ── Skills ──────────────────────────────────────────────────────────────────
 for harness in "${HARNESS_DIRS[@]}"; do
   mkdir -p "$ROOT/$harness/skills"
-  for skill in content-block-ui hybrid-design-tokens tauri-ui-review tauri-custom-titlebar mobile-navigation flutter-golden-ui a11y-gate hybrid-runtime-verification; do
+  for skill in reference-ui-fidelity content-block-ui hybrid-design-tokens tauri-ui-review tauri-custom-titlebar mobile-navigation flutter-golden-ui a11y-gate hybrid-runtime-verification deploy-hybrid-agentic-stack karpathy-progress-memory; do
     if [[ -d "$SRC/$skill" ]]; then
       mkdir -p "$ROOT/$harness/skills/$skill"
       cp -R "$SRC/$skill/." "$ROOT/$harness/skills/$skill/"
@@ -62,8 +62,8 @@ elif command -v jq >/dev/null 2>&1; then
     | $cur
     | .hooks = ((.hooks // {}) as $h
         | $h
-        | .UserPromptSubmit = (($h.UserPromptSubmit // []) + $add.hooks.UserPromptSubmit)
-        | .PostToolUse      = (($h.PostToolUse // [])      + $add.hooks.PostToolUse))
+        | .UserPromptSubmit = ((($h.UserPromptSubmit // []) + $add.hooks.UserPromptSubmit) | unique_by(tostring))
+        | .PostToolUse      = ((($h.PostToolUse // [])      + $add.hooks.PostToolUse)      | unique_by(tostring)))
   ' "$SETTINGS" "$HOOKS_JSON" > "$tmp" && mv "$tmp" "$SETTINGS"
   ok "merged activation hooks into existing .claude/settings.json (jq)"
 else
@@ -73,5 +73,5 @@ fi
 
 echo ""
 echo -e "${GREEN}  ✅ Project-local skills installed${NC}"
-echo "     8 skills × 6 harnesses · 2 activation hooks · runtime and WCAG 2.2 AA gates"
+echo "     11 skills × 6 harnesses · 2 activation hooks · fidelity, runtime, deployment, memory, and WCAG 2.2 AA gates"
 echo "     See references/ui-skills.md for the external skill stack."
