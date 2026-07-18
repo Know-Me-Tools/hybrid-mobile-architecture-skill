@@ -53,6 +53,9 @@ an external Certbot DNS-01 workflow. Certificate and DNS credentials never enter
 
 ## KnowMe documentation site
 
+- GitHub Pages is enabled with `build_type: workflow`, HTTPS enforcement is active, and
+  the successful publication run served the public project site at
+  `https://know-me-tools.github.io/hybrid-mobile-architecture-skill/`.
 - A frozen install and production Docusaurus 3.10.1 build passed.
 - Public-content sanitization passed before every build.
 - The only high-severity npm advisory was removed with a narrow

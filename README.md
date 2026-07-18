@@ -5,6 +5,9 @@ An [agentskills.io](https://agentskills.io) skill for building, scaffolding, and
 applications on the Prometheus AGS hybrid mobile architecture: **one Rust core, every
 platform** — Flutter iOS/Android, Tauri macOS/Windows/Linux, and web via WASM.
 
+**Public documentation:**
+[KnowMe Builder documentation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/)
+
 ---
 
 ## What this skill does
