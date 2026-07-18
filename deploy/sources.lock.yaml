@@ -3,7 +3,7 @@ verified_at: "2026-07-18"
 sources:
   knowme:
     repository: https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill.git
-    commit: 81ad5a5c8de1639cf8bd695808c6d8927b725d3b
+    commit: 6fddffdac56075737f6f114adeddbed56208699b
     owner: Know-Me-Tools
     dockerfile: apps/knowme-poc/Dockerfile
     context: apps/knowme-poc
@@ -11,7 +11,7 @@ sources:
     license: MIT
   knowme-docs:
     repository: https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill.git
-    commit: 81ad5a5c8de1639cf8bd695808c6d8927b725d3b
+    commit: 6fddffdac56075737f6f114adeddbed56208699b
     owner: Know-Me-Tools
     dockerfile: site/Dockerfile
     context: site

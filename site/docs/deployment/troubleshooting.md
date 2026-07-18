@@ -14,3 +14,9 @@ title: Troubleshooting
 
 Never resolve a deployment failure by changing requirements, bypassing the shared
 Rust service, embedding a secret, or directly mutating production outside GitOps.
+
+## Native AMD64 image handoff
+
+The native AMD64 image gate is currently deferred to an Intel/AMD Linux builder. Use the
+source repository's `docs/deployment/intel-amd64-build-handoff.md` for the completed-image
+inventory, exact remaining targets, PostgreSQL verification, and protected-release steps.

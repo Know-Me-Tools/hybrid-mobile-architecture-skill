@@ -20,6 +20,11 @@ release published, signed, mirrored, or promoted an image. Those registry facts 
 | CI policy | `actionlint` passes; workflows contain no direct cluster deployment | Verified |
 | Registry release | Protected release must publish, attest, sign, scan, mirror, and promote the resulting digests | Pending release |
 
+Native AMD64 completion is intentionally deferred to the Intel/AMD Linux builder. The exact
+remaining targets and resume commands are recorded in
+[`intel-amd64-build-handoff.md`](intel-amd64-build-handoff.md). This handoff does not weaken
+the release gate or convert local development-image digests into release evidence.
+
 The validation entry points are:
 
 ```bash

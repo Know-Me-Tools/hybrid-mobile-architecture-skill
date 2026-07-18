@@ -27,14 +27,14 @@ target "release" {
 
 target "knowme-web" {
   inherits = ["release"]
-  context = "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill.git?ref=81ad5a5c8de1639cf8bd695808c6d8927b725d3b&checksum=81ad5a5c8de1639cf8bd695808c6d8927b725d3b&subdir=apps/knowme-poc"
+  context = "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill.git?ref=6fddffdac56075737f6f114adeddbed56208699b&checksum=6fddffdac56075737f6f114adeddbed56208699b&subdir=apps/knowme-poc"
   dockerfile = "Dockerfile"
   tags = ["${REGISTRY}/knowme-web:${TAG}"]
 }
 
 target "knowme-docs" {
   inherits = ["release"]
-  context = "site"
+  context = "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill.git?ref=6fddffdac56075737f6f114adeddbed56208699b&checksum=6fddffdac56075737f6f114adeddbed56208699b&subdir=site"
   dockerfile = "Dockerfile"
   tags = ["${REGISTRY}/knowme-docs:${TAG}"]
 }
