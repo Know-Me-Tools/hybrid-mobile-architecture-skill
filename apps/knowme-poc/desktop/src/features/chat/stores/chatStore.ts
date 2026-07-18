@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { isTauri } from '@tauri-apps/api/core'
-import { onChatEvent, streamAgentA2ui } from '@prometheus-ags/tauri-plugin-gen-ui'
+import { onChatEvent, ragRetrieve, streamAgentA2ui, type RagRetrieveResult } from '@prometheus-ags/tauri-plugin-gen-ui'
 import type { ContentBlock, Message, MessageUsage } from '@/bridge/a2ui/types'
 import { applyA2uiEvent, createA2uiWireAdapter, type A2uiWireEvent } from '@/bridge/a2ui/driver'
 import { streamWebLlm } from '../api/webllmLane'
@@ -119,6 +119,9 @@ interface ChatActions {
   switchConversation: (id: string) => void
   renameConversation: (id: string, title: string) => void
   deleteConversation: (id: string) => Promise<void>
+  /** C-129: client-RAG recall for the active conversation. The ONLY invoke()
+   * point for retrieval — hooks/components never call ragRetrieve directly. */
+  retrieveContext: (query: string) => Promise<RagRetrieveResult[]>
 }
 
 export const useChatStore = create<ChatState & ChatActions>()(
@@ -302,6 +305,12 @@ export const useChatStore = create<ChatState & ChatActions>()(
             s.messages = s.conversations[0]!.messages
           }
         })
+      },
+
+      retrieveContext: async (query) => {
+        if (!isTauri()) return []
+        const { activeConversationId } = get()
+        return ragRetrieve({ query, scope: 'this_conversation', conversationId: activeConversationId })
       },
 
       initListeners: () => {

@@ -1,7 +1,7 @@
 # 2026-07-15-c011-react-surface
 
 > Phase: scaffold-full-hybrid-project · Wave: see plan.md · Status: proposed
-> Assigned harness/model: codex / gpt-5.6
+> Assigned harness/model: codex / gpt-5.6-sol
 > Depends on: c005, c006, c007
 
 ## Why

@@ -9,6 +9,8 @@
 use super::config::SyncConfig;
 use super::seam::{PendingWrite, WriteOutcome, WriteSink};
 use super::status::SyncStatusHandle;
+use gen_ui_types::error::{CoreError, CoreResult};
+use gen_ui_types::sync::{PrivacyClass, PrivacyRegistry};
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
@@ -31,6 +33,7 @@ pub(crate) struct WriteQueue {
     status: SyncStatusHandle,
     max_attempts: u32,
     batch: usize,
+    privacy: PrivacyRegistry,
     // tokio::Mutex: guard is held across the sink `.await`, so a std/parking_lot
     // mutex would be !Send here. Contention is low (one drain task + enqueues).
     pending: Mutex<VecDeque<PendingWrite>>,
@@ -48,6 +51,7 @@ impl WriteQueue {
             status,
             max_attempts: cfg.max_write_attempts,
             batch: cfg.write_batch,
+            privacy: cfg.privacy.clone(),
             pending: Mutex::new(VecDeque::new()),
             poison: Mutex::new(Vec::new()),
         }
@@ -55,13 +59,25 @@ impl WriteQueue {
 
     /// Enqueue a local mutation for replay. Idempotency-keyed so retries dedupe
     /// server-side. Updates the pending-writes count that drives the UI chip.
-    pub(crate) async fn enqueue(&self, write: PendingWrite) {
+    ///
+    /// C-124 structural privacy gate (LFS-INV-4): `local`-class tables — and any
+    /// UNDECLARED table, which classifies `Local` by default — are refused here,
+    /// before anything durable happens. Vault/secret data can therefore never
+    /// reach a server sync path by construction.
+    pub(crate) async fn enqueue(&self, write: PendingWrite) -> CoreResult<()> {
+        if self.privacy.classify(&write.table) == PrivacyClass::Local {
+            return Err(CoreError::Terminal(format!(
+                "table {:?} is local-class (or undeclared): never enqueued for server sync",
+                write.table
+            )));
+        }
         let len = {
             let mut q = self.pending.lock().await;
             q.push_back(write);
             q.len() as u32
         };
         self.status.set_pending(len);
+        Ok(())
     }
 
     /// Drain up to `batch` writes, replaying each through the sink. Transient
@@ -162,6 +178,7 @@ mod tests {
             shapes: Vec::new(),
             write_batch: 8,
             max_write_attempts: max_attempts,
+            privacy: PrivacyRegistry::default().declare("notes", PrivacyClass::Trusted),
         };
         WriteQueue::new(&cfg, sink, SyncStatusHandle::new())
     }
@@ -186,7 +203,9 @@ mod tests {
     async fn a_write_that_fails_offline_replays_when_the_server_returns() {
         let sink = ScriptedSink::new(vec![WriteOutcome::Retry, WriteOutcome::Applied]);
         let q = queue(sink.clone(), 5);
-        q.enqueue(write("k1")).await;
+        q.enqueue(write("k1"))
+            .await
+            .expect("declared table enqueues");
 
         assert_eq!(q.drain().await, 0, "the write must land, not be dropped");
         assert_eq!(sink.calls(), 2, "it should have been retried exactly once");
@@ -202,7 +221,9 @@ mod tests {
     async fn a_transient_write_is_quarantined_once_attempts_run_out() {
         let sink = ScriptedSink::new(vec![WriteOutcome::Retry]);
         let q = queue(sink.clone(), 3);
-        q.enqueue(write("k1")).await;
+        q.enqueue(write("k1"))
+            .await
+            .expect("declared table enqueues");
 
         // Drain until it gives up. Each pass burns one attempt.
         for _ in 0..3 {
@@ -222,7 +243,9 @@ mod tests {
             reason: "400".into(),
         }]);
         let q = queue(sink.clone(), 5);
-        q.enqueue(write("k1")).await;
+        q.enqueue(write("k1"))
+            .await
+            .expect("declared table enqueues");
 
         assert_eq!(q.drain().await, 0);
         assert_eq!(sink.calls(), 1, "must not retry a terminal rejection");
@@ -253,7 +276,9 @@ mod tests {
             seen: Mutex::new(Vec::new()),
         });
         let q = queue(spy.clone(), 5);
-        q.enqueue(write("stable-key")).await;
+        q.enqueue(write("stable-key"))
+            .await
+            .expect("declared table enqueues");
 
         for _ in 0..3 {
             q.drain().await;
@@ -290,8 +315,12 @@ mod tests {
             seen: Mutex::new(Vec::new()),
         });
         let q = queue(spy.clone(), 5);
-        q.enqueue(write("first")).await;
-        q.enqueue(write("second")).await;
+        q.enqueue(write("first"))
+            .await
+            .expect("declared table enqueues");
+        q.enqueue(write("second"))
+            .await
+            .expect("declared table enqueues");
 
         q.drain().await;
         q.drain().await;
@@ -314,5 +343,20 @@ mod tests {
         assert_eq!(backoff_for(2), BACKOFF_BASE * 4);
         assert_eq!(backoff_for(1000), BACKOFF_MAX);
         assert!(backoff_for(50) <= BACKOFF_MAX);
+    }
+
+    // C-124 structural privacy gate: an UNDECLARED table classifies Local and is
+    // refused at enqueue — vault/secret data cannot reach the server sync path.
+    #[tokio::test]
+    async fn refuses_local_class_and_undeclared_tables() {
+        let sink = ScriptedSink::new(vec![WriteOutcome::Applied]);
+        let q = queue(sink, 3);
+        let vault_write = PendingWrite {
+            idempotency_key: "v1".into(),
+            table: "_vault_state".into(),
+            change_json: "{}".into(),
+            attempts: 0,
+        };
+        assert!(q.enqueue(vault_write).await.is_err());
     }
 }

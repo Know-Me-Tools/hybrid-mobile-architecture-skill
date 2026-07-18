@@ -1,0 +1,9 @@
+{
+  "stage": "analyze",
+  "completedAt": "2026-07-18T13:39:24Z",
+  "outputs": [],
+  "nextStage": "spec",
+  "summaryForNext": "skipped: Assessment inspected the PEM dist surface, FFI/Tauri command lists, and mobile bridge directly; all candidate libraries were selected in the previous phase's ADRs (Loro, pgvector, sqlite-vec, ed25519-dalek already in the lock).",
+  "skipped": true,
+  "skipReason": "Assessment inspected the PEM dist surface, FFI/Tauri command lists, and mobile bridge directly; all candidate libraries were selected in the previous phase's ADRs (Loro, pgvector, sqlite-vec, ed25519-dalek already in the lock)."
+}

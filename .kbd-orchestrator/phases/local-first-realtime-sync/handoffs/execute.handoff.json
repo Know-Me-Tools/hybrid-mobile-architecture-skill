@@ -1,0 +1,12 @@
+{
+  "stage": "execute",
+  "completedAt": "2026-07-18T09:39:38Z",
+  "outputs": [
+    "execution.md",
+    "progress.json"
+  ],
+  "nextStage": "reflect",
+  "summaryForNext": "Backend: openspec self-executed via /kbd-apply, all six changes dispatched to Claude Code (c120 frontier first; c121-c124 Round 2; c125 last). First pending change: c120-sync-doctrine-refs. Verification: clippy -D warnings / tsc / flutter analyze per surface.",
+  "skipped": false,
+  "skipReason": null
+}

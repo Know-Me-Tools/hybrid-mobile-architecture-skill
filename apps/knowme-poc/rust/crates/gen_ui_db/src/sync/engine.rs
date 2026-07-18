@@ -114,7 +114,7 @@ impl SyncTransport for SyncEngine {
                 change_json: change_json.to_string(),
                 attempts: 0,
             })
-            .await;
+            .await?;
         Ok(())
     }
 

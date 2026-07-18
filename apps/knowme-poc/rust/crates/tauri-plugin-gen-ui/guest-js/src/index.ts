@@ -191,6 +191,33 @@ export function memorySearch(query: string, k: number, mode?: SearchMode): Promi
 export function graphExpand(entityId: string, depth: number): Promise<RelatedEntity[]> {
   return invoke<RelatedEntity[]>(cmd("graph_expand"), { entityId, depth });
 }
+
+// C-129: client-RAG retrieval over the chat/agent-memory vector surface
+// (pgvector via pglite-oxide). `scope`: "this_conversation" requires
+// `conversationId`; "all_conversations" and "agent_memory" ignore it. Vault
+// is deliberately not selectable here — it has no server-facing invoke path
+// (LFS-INV-4).
+export type RagRetrievalScope = "this_conversation" | "all_conversations" | "agent_memory";
+
+export interface RagRetrieveRequest {
+  query: string;
+  scope: RagRetrievalScope;
+  conversationId?: string;
+  k?: number;
+  tokenBudget?: number;
+}
+
+export interface RagRetrieveResult {
+  sourceId: string;
+  text: string;
+  score: number;
+  table: string;
+  updatedAt: string;
+}
+
+export function ragRetrieve(request: RagRetrieveRequest): Promise<RagRetrieveResult[]> {
+  return invoke<RagRetrieveResult[]>(cmd("rag_retrieve"), { request });
+}
 /** Start a Scribe microphone recording. Errors if one is already in progress. */
 export function scribeStart(): Promise<void> {
   return invoke<void>(cmd("scribe_start"));

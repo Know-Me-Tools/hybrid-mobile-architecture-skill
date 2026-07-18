@@ -1,0 +1,11 @@
+{
+  "stage": "plan",
+  "completedAt": "2026-07-18T09:37:10Z",
+  "outputs": [
+    "plan.md"
+  ],
+  "nextStage": "execute",
+  "summaryForNext": "Six changes c120–c125: doctrine refs first (c120, everything cites it), then four parallel deliverables (skills c121 + three knowme-poc slices c122 partial-replication / c123 client-RAG / c124 peer-profile-vault), then scaffold/audit propagation c125. All slices sit behind frozen seams (FRF lane per c106 pivot; dev loopback transport; PES drops in later). First change to apply: c120-sync-doctrine-refs.",
+  "skipped": false,
+  "skipReason": null
+}

@@ -13,5 +13,6 @@
 //! depending on their crates — and a future prometheus-entity-sync (PES / PSyncV1)
 //! client can replace the whole engine behind the same `SyncTransport` seam.
 
+pub mod rag;
 pub mod relational;
 pub mod sync;

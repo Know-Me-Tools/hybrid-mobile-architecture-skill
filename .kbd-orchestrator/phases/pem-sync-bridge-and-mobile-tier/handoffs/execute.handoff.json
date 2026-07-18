@@ -1,0 +1,12 @@
+{
+  "stage": "execute",
+  "completedAt": "2026-07-18T13:46:01Z",
+  "outputs": [
+    "execution.md",
+    "progress.json"
+  ],
+  "nextStage": "reflect",
+  "summaryForNext": "Backend openspec, self-executed via /kbd-apply. Round 1: c126 (PEM bridge) + c127 (mobile SQLite). Round 2: c128 (sqlite-vec, depends c127) + c129 (RAG IPC). Round 3: c130 (vault auth). First: c126.",
+  "skipped": false,
+  "skipReason": null
+}

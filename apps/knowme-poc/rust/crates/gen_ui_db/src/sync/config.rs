@@ -3,6 +3,7 @@
 //! `SyncEngine`. The FRF path uses `FrfSyncConfig` (frf_transport.rs). `SyncConfig` is
 //! still read by `WriteQueue` for its batch/attempt limits, so it is not dead yet.
 //! Sync engine configuration. Pure data; no IO.
+use gen_ui_types::sync::{PrivacyClass, PrivacyRegistry};
 
 /// One Electric shape to consume. Kept minimal — the shape `where`/`columns`
 /// filters that enforce tenant RLS at the shape factory are added when C-006 wires
@@ -43,6 +44,10 @@ pub struct SyncConfig {
     pub write_batch: usize,
     /// After this many failed replays a write is quarantined (poison handler).
     pub max_write_attempts: u32,
+    /// Table → privacy-class declarations (C-124). Every server-syncable table
+    /// must be declared; undeclared tables classify `Local` and the write queue
+    /// refuses them at enqueue (fail closed, LFS-INV-4).
+    pub privacy: PrivacyRegistry,
 }
 
 impl SyncConfig {
@@ -52,7 +57,16 @@ impl SyncConfig {
             shapes: Vec::new(),
             write_batch: 64,
             max_write_attempts: 8,
+            privacy: PrivacyRegistry::default(),
         }
+    }
+
+    /// Declare a table's privacy class (server-syncable tables must be
+    /// `Public` or `Trusted`; everything else stays device-local).
+    #[must_use]
+    pub fn with_table_class(mut self, table: impl Into<String>, class: PrivacyClass) -> Self {
+        self.privacy = self.privacy.declare(table, class);
+        self
     }
 
     #[must_use]
