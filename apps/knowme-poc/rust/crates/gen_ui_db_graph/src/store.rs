@@ -119,6 +119,13 @@ impl GraphStore {
             .cloned()
     }
 
+    /// The embedder this store was opened with. C-129's `rag_retrieve` reuses
+    /// the SAME instance for `GraphRagEmbedder` rather than constructing a
+    /// second one (a second `FastEmbedder::new` would reload the ONNX model).
+    pub fn embedder(&self) -> Arc<dyn Embedder> {
+        Arc::clone(&self.embedder)
+    }
+
     async fn init(&self) -> Result<(), GraphError> {
         let mut res = self.db.query(SCHEMA_DDL).await?;
         check_statements(&mut res, "schema")

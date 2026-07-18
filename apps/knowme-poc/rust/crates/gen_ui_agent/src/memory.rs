@@ -3,7 +3,13 @@
 //! (mobile, via frb) and tauri-plugin-gen-ui (desktop, via Tauri IPC) — both
 //! platforms share the SAME embedded SurrealDB GraphStore instance shape (see
 //! `state::init`'s doc comment on why this is not tied to `ConfigBackend`).
-use gen_ui_db_graph::{MemoryHit, MemoryRecord, RelatedEntity, SearchMode};
+use std::sync::Arc;
+
+use gen_ui_db::rag::{RagEngine, RetrievalQuery, RetrievalScope, RetrievedChunk};
+use gen_ui_db_graph::{
+    GraphRagEmbedder, GraphVectorStore, MemoryHit, MemoryRecord, RelatedEntity, SearchMode,
+};
+use tokio::sync::OnceCell;
 
 use crate::error::AgentError;
 use crate::state;
@@ -61,6 +67,49 @@ pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<RelatedEn
     let depth = depth.clamp(1, u8::MAX as u32) as u8;
     store
         .graph_expand(&entity_id, depth)
+        .await
+        .map_err(|e| AgentError::Config(e.to_string()))
+}
+
+/// C-129: mobile's client-RAG entry point. `RagEngine` built once per process
+/// over `GraphVectorStore`/`GraphRagEmbedder` (c128's adapters over the SAME
+/// SurrealDB store `search`/`ingest` above already use — no second vector
+/// engine, no second embedder instance).
+static RAG_ENGINE: OnceCell<Arc<RagEngine>> = OnceCell::const_new();
+
+async fn rag_engine() -> Result<Arc<RagEngine>, AgentError> {
+    RAG_ENGINE
+        .get_or_try_init(|| async {
+            let store = state::memory()?.clone();
+            let embedder: Arc<dyn gen_ui_db::rag::Embedder> =
+                Arc::new(GraphRagEmbedder::new(store.embedder()));
+            let vector_store: Arc<dyn gen_ui_db::rag::VectorStore> =
+                Arc::new(GraphVectorStore::new(store));
+            Ok::<_, AgentError>(Arc::new(RagEngine::new(embedder, vector_store)))
+        })
+        .await
+        .cloned()
+}
+
+/// Retrieve context for `query` within `scope`, never exceeding `token_budget`
+/// tokens of chunk text. Mirrors desktop's `rag_retrieve` Tauri command, which
+/// runs the same `RagEngine` shape over pgvector instead of this SurrealDB
+/// adapter (two different vector surfaces, one shared engine contract).
+pub async fn retrieve(
+    query: String,
+    scope: RetrievalScope,
+    k: usize,
+    token_budget: usize,
+) -> Result<Vec<RetrievedChunk>, AgentError> {
+    let engine = rag_engine().await?;
+    let request = RetrievalQuery {
+        text: query,
+        scope,
+        k,
+        min_score: gen_ui_db::rag::DEFAULT_MIN_SCORE,
+    };
+    engine
+        .retrieve(request, token_budget)
         .await
         .map_err(|e| AgentError::Config(e.to_string()))
 }

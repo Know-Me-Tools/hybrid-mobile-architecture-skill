@@ -1,1 +1,1 @@
-{"totalRuns":37,"failedRuns":0,"lastRun":{"ts":"2026-07-18T15:13:46Z","kind":"task","edge":"after","name":"c128-sqlite-vec-vector-store:4","hookId":"legacy-change-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}
+{"totalRuns":42,"failedRuns":0,"lastRun":{"ts":"2026-07-18T15:32:57Z","kind":"task","edge":"after","name":"c129-rag-ipc-and-chat-wiring:4","hookId":"legacy-change-complete","layer":"builtin","mode":"augment","status":0},"lastFailure":null}

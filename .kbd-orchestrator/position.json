@@ -1,22 +1,22 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T15:13:45Z",
+  "updatedAt": "2026-07-18T15:32:56Z",
   "cursor": [
     "pem-sync-bridge-and-mobile-tier",
-    "c128-sqlite-vec-vector-store"
+    "c129-rag-ipc-and-chat-wiring"
   ],
   "root": {
     "type": "phase",
     "id": "pem-sync-bridge-and-mobile-tier",
     "status": "executing",
     "progress": {
-      "done": 2,
+      "done": 3,
       "total": 5
     },
     "children": [
       {
         "type": "change",
-        "id": "c128-sqlite-vec-vector-store",
+        "id": "c129-rag-ipc-and-chat-wiring",
         "status": "PENDING",
         "progress": {
           "done": 0,

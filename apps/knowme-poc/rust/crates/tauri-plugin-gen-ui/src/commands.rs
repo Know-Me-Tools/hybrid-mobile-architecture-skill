@@ -516,6 +516,122 @@ pub async fn graph_expand(entity_id: String, depth: u32) -> Result<Vec<RelatedEn
         .map_err(Into::into)
 }
 
+// C-129: client-RAG retrieval over the desktop chat/agent-memory vector
+// surface (pgvector via pglite-oxide, c123). One typed request/response;
+// this is the ONLY place retrieval SQL runs — chatStore.ts calls this and
+// nothing else touches gen_ui_db::rag directly.
+#[derive(serde::Deserialize)]
+pub struct RagRetrieveRequest {
+    pub query: String,
+    /// "this_conversation" | "all_conversations" | "agent_memory". Vault is
+    /// deliberately not selectable from the wire — it has no server-facing
+    /// invoke path (LFS-INV-4).
+    pub scope: String,
+    #[serde(default)]
+    pub conversation_id: Option<String>,
+    #[serde(default = "default_k")]
+    pub k: usize,
+    #[serde(default = "default_token_budget")]
+    pub token_budget: usize,
+}
+
+fn default_k() -> usize {
+    gen_ui_db::rag::DEFAULT_K
+}
+fn default_token_budget() -> usize {
+    2048
+}
+
+#[derive(serde::Serialize)]
+pub struct RagRetrieveResult {
+    pub source_id: String,
+    pub text: String,
+    pub score: f32,
+    pub table: String,
+    pub updated_at: String,
+}
+
+static RAG_ENGINE: OnceCell<Arc<gen_ui_db::rag::RagEngine>> = OnceCell::new();
+
+async fn rag_engine<R: Runtime>(
+    app: &tauri::AppHandle<R>,
+) -> Result<Arc<gen_ui_db::rag::RagEngine>> {
+    if let Some(engine) = RAG_ENGINE.get() {
+        return Ok(Arc::clone(engine));
+    }
+    let data_dir = app_data_dir(app)?;
+    let store = gen_ui_db::relational::PgliteStore::open(data_dir.join("config-db"))
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+    let pool = store.store().pool().clone();
+    sqlx::raw_sql(gen_ui_db::rag::MESSAGES_EMBEDDING_DDL)
+        .execute(&pool)
+        .await
+        .map_err(|e| gen_ui_types::CoreError::Transient(e.to_string()))?;
+
+    let embed_cache = data_dir.join("model-cache/fastembed");
+    std::fs::create_dir_all(&embed_cache)
+        .map_err(|e| gen_ui_types::CoreError::Terminal(format!("rag embed cache dir: {e}")))?;
+    let fast_embedder =
+        gen_ui_runtime::spawn_blocking(move || gen_ui_db_graph::FastEmbedder::new(embed_cache))
+            .await
+            .map_err(|e| gen_ui_types::CoreError::Terminal(format!("embedder task join: {e}")))?
+            .map_err(|e| gen_ui_types::CoreError::Terminal(format!("embedder load: {e}")))?;
+
+    let embedder: Arc<dyn gen_ui_db::rag::Embedder> = Arc::new(
+        gen_ui_db_graph::GraphRagEmbedder::new(Arc::new(fast_embedder)),
+    );
+    let vector_store: Arc<dyn gen_ui_db::rag::VectorStore> =
+        Arc::new(gen_ui_db::rag::PgVectorStore::new(pool));
+    let engine = Arc::new(gen_ui_db::rag::RagEngine::new(embedder, vector_store));
+    Ok(Arc::clone(RAG_ENGINE.get_or_init(|| engine)))
+}
+
+#[tauri::command]
+pub async fn rag_retrieve<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    request: RagRetrieveRequest,
+) -> Result<Vec<RagRetrieveResult>> {
+    let scope = match request.scope.as_str() {
+        "this_conversation" => {
+            let id = request.conversation_id.ok_or_else(|| {
+                gen_ui_types::CoreError::Terminal(
+                    "this_conversation scope requires conversation_id".into(),
+                )
+            })?;
+            gen_ui_db::rag::RetrievalScope::ThisConversation {
+                conversation_id: id,
+            }
+        }
+        "all_conversations" => gen_ui_db::rag::RetrievalScope::AllConversations,
+        "agent_memory" => gen_ui_db::rag::RetrievalScope::AgentMemory,
+        other => {
+            return Err(gen_ui_types::CoreError::Terminal(format!(
+                "rag_retrieve: unknown scope {other:?}"
+            ))
+            .into())
+        }
+    };
+    let query = gen_ui_db::rag::RetrievalQuery {
+        text: request.query,
+        scope,
+        k: request.k,
+        min_score: gen_ui_db::rag::DEFAULT_MIN_SCORE,
+    };
+    let engine = rag_engine(&app).await?;
+    let chunks = engine.retrieve(query, request.token_budget).await?;
+    Ok(chunks
+        .into_iter()
+        .map(|c| RagRetrieveResult {
+            source_id: c.source_id,
+            text: c.text,
+            score: c.score,
+            table: c.provenance.table,
+            updated_at: c.provenance.updated_at,
+        })
+        .collect())
+}
+
 // Scribe (voice-to-memory): delegates entirely to gen_ui_audio, the SAME crate
 // gen_ui_ffi's mobile scribe_start/scribe_stop call — no duplicated business
 // logic. One recording in flight per process, mirroring gen_ui_agent's

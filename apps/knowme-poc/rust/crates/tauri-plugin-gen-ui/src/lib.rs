@@ -52,6 +52,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             commands::entity_delete,
             commands::memory_search,
             commands::graph_expand,
+            commands::rag_retrieve,
             commands::scribe_start,
             commands::scribe_stop,
         ])
