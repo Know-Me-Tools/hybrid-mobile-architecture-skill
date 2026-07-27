@@ -319,45 +319,13 @@ mkdir -p test/features/chat test/features/notes test/features/memory test/featur
 # ═══════════════════════════════════════════════════════════════════════════
 # core/theme — design tokens
 # ═══════════════════════════════════════════════════════════════════════════
-cat > lib/core/theme/tokens.dart << 'EOF'
-// TJ-ARCH-MOB-001 compliant
-// Design tokens — travisjames.ai brand system.
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-abstract final class T {
-  // Backgrounds
-  static const bgPrimary  = Color(0xFF0D0D18);
-  static const bgSurface  = Color(0xFF121220);
-  static const bgElevated = Color(0xFF181828);
-  static const bgOverlay  = Color(0xFF1E1E35);
-
-  // Accents. PLACEHOLDER values — replace with the product palette. Tokens are
-  // named for their ROLE, never for a brand colour, so re-theming changes values
-  // and not every call site.
-  static const accent    = Color(0xFF3D7DFF);
-  static const accentAlt = Color(0xFF8B78FF);
-  // Light-mode accent: the same role, darkened to hold contrast on a light
-  // canvas. Both themes must satisfy WCAG 2.2 AA — see the a11y-gate skill.
-  static const accentOnLight = Color(0xFF1F5FD9);
-  static const cyan    = Color(0xFF22D3EE);
-  static const amber   = Color(0xFFF5A623);
-  static const green   = Color(0xFF34D399);
-  static const red     = Color(0xFFF87171);
-
-  // Text
-  static const textPrimary   = Color(0xFFF2F2FF);
-  static const textSecondary = Color(0xFF9898C0);
-  static const textTertiary  = Color(0xFF5E5E88);
-  static const textDisabled  = Color(0xFF3A3A60);
-
-  // Typography
-  static TextStyle get displayLg => GoogleFonts.spaceGrotesk(fontSize: 32, fontWeight: FontWeight.w700, letterSpacing: -0.03, color: textPrimary);
-  static TextStyle get uiMd      => GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: textSecondary);
-  static TextStyle get prose     => GoogleFonts.roboto(fontSize: 15, fontWeight: FontWeight.w400, color: textPrimary, height: 1.75);
-  static TextStyle get mono      => GoogleFonts.jetBrainsMono(fontSize: 12.5, fontWeight: FontWeight.w400, color: textPrimary, height: 1.55);
-}
-EOF
+# Design tokens are GENERATED from one source for both surfaces — see
+# assets/templates/design-tokens/tokens.toml. The hybrid-design-tokens skill has
+# always said "one token source feeds both"; before this it was aspirational and
+# the two files had already diverged on the same role. Never hand-edit the output.
+mkdir -p lib/core/theme
+bash "$SCRIPT_DIR/gen-design-tokens.sh" ".." >/dev/null
+ok "design tokens generated from tokens.toml (shared with the React surface)"
 ok "lib/core/theme/tokens.dart"
 
 # ═══════════════════════════════════════════════════════════════════════════

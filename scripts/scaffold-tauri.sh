@@ -1430,30 +1430,27 @@ EOF
 ok "src/main.tsx"
 
 # ── index.css (Tailwind 4) ─────────────────────────────────────────────────
+# theme.css is GENERATED from assets/templates/design-tokens/tokens.toml, the
+# SAME file that produces the Flutter token class. It used to be hand-written
+# here and hand-mirrored in Dart, and the two had already drifted apart on the
+# same role (#0B0F14 vs #0D0D18 for the app background) with nothing to catch it.
 cat > src/index.css << 'EOF'
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-
-@theme {
-  --color-background: #0B0F14;
-  --color-surface: #161D29;
-  /* Semantic accent roles. These are PLACEHOLDER values — replace them with the
-     product palette. Never name a token after a brand ("ember"); name it after
-     the job it does, so re-theming is a value change, not a rename. */
-  --color-accent: #3D7DFF;
-  --color-accent-alt: #8B78FF;
-  --color-text-primary: #F2F2FF;
-  --color-text-secondary: #9898C0;
-  --font-sans: 'Inter', sans-serif;
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-}
+/* Design tokens — generated. Edit assets/templates/design-tokens/tokens.toml
+   and re-run scripts/gen-design-tokens.sh; never edit theme.css by hand. */
+@import "./theme.css";
 
 :root { color-scheme: dark; }
-body { background: var(--color-background); color: var(--color-text-primary); font-family: var(--font-sans); }
+body { background: var(--color-bgCanvas); color: var(--color-textPrimary); font-family: var(--font-sans); }
+/* Flat 2.0: regions differ by background fill only. */
 * { border-color: transparent !important; box-shadow: none !important; }
 EOF
+
+mkdir -p src
+bash "$SCRIPT_DIR/gen-design-tokens.sh" ".." >/dev/null 2>&1 || true
+ok "design tokens generated from tokens.toml (shared with the Flutter surface)"
 ok "src/index.css"
 
 # ── Vitest config + boundary tests ─────────────────────────────────────────

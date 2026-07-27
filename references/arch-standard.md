@@ -24,7 +24,7 @@
 - Anthropic API client (reqwest HTTP/2 + rustls, SSE streaming, prompt caching)
 - A2UI protocol adapter (StreamEvent → A2uiEvent, 27 variants)
 - AG-UI protocol adapter (A2uiEvent → AguiEvent, bidirectional)
-- Local inference engines behind the `InferenceProvider` trait (pinned llama-cpp-2/Qwen on desktop + mobile / WebLLM web; mistral.rs optional — versions.toml [inference])
+- Local inference engines behind the `InferenceProvider` trait, chosen per **device**, not per "mobile/desktop": llama-cpp-2 desktop · LiteRT-LM Android · MLX-Swift iOS · MLX-C macOS · WebLLM web; mistral.rs optional (versions.toml [inference], `references/rust/inference-lanes.md`)
 - SurrealDB embedded (RocksDB, MemoryStore + ToolCache + EntityGraph)
 - MCP client registry (SSE + stdio transports, JSON-RPC 2.0)
 - Universal Agent Runtime (PMPO loop, max_turns guard, tool routing)

@@ -233,7 +233,10 @@ When adding a new ContentBlock type, always do all 7 steps in `references/rust/n
 | `references/tauri/auth.md` | React Kratos/Supabase — full store + Prometheus Entity Management + component |
 | `references/tauri/eslint-config.md` | ESLint 9 flat config, tsconfig strict, Prettier, Vitest setup |
 | `references/tauri/testing.md` | Vitest, React Testing Library, layer contract enforcement tests |
-| `references/rust/patterns.md` | gen_ui_core module structure, FFI rules, Tauri commands, UAR modes |
+| `references/rust/patterns.md` | layered crate structure, FFI rules, Tauri commands, UAR modes |
+| `references/rust/inference-lanes.md` | per-device engines, the three lanes, native bridges, model acquisition |
+| `references/rust/wasm-plugin-sandbox.md` | Wasmtime limits for third-party plugin components |
+| `references/generator-placeholders.md` | porting contract: `__APP_*__` / `@VERSION@` substitution |
 | `references/rust/new-block-type.md` | 7-step full-stack guide for new ContentBlock variants |
 | `references/rust/testing.md` | cargo test, tokio::test, wiremock, SurrealDB integration tests |
 | `references/auth/patterns.md` | Auth strategy selection — when Kratos vs Supabase vs combined |
