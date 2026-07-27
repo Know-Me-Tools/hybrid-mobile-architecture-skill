@@ -23,6 +23,7 @@
     "./",
     "./templates/project-skills/a11y-gate",
     "./templates/project-skills/build-branded-docusaurus",
+    "./templates/project-skills/client-rag",
     "./templates/project-skills/content-block-ui",
     "./templates/project-skills/deploy-hybrid-agentic-stack",
     "./templates/project-skills/flutter-golden-ui",
@@ -31,7 +32,10 @@
     "./templates/project-skills/karpathy-progress-memory",
     "./templates/project-skills/mobile-navigation",
     "./templates/project-skills/orchestrate-prometheus-application",
+    "./templates/project-skills/peer-profile-sync",
+    "./templates/project-skills/pem-local-first",
     "./templates/project-skills/reference-ui-fidelity",
+    "./templates/project-skills/sync-doctrine",
     "./templates/project-skills/tauri-custom-titlebar",
     "./templates/project-skills/tauri-ui-review"
   ],

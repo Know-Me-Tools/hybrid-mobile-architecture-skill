@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # scripts/scaffold-flutter.sh — v2 (C-010)
-# Scaffold a Flutter + Rust FFI mobile app: Riverpod 3.3.2, clean architecture,
+# Scaffold a Flutter + Rust FFI mobile app: Riverpod 3, clean architecture,
 # shadcn_flutter, wired to the three pub.dev packages (gen_ui_flutter FFI plugin,
 # gen_ui_widgets ContentBlock set, prometheus_entity_management).
+#
+# All version pins are read from versions.toml via lib-versions.sh.
 #
 # Usage: bash scripts/scaffold-flutter.sh <output-dir> <app-name>
 #
@@ -20,6 +22,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Version pins come from versions.toml — never inline a literal here. See
+# scripts/lib-versions.sh for why (hardcoded copies are invisible to the
+# doc-consistency audit and are how this pack drifted from its own output).
+source "$SCRIPT_DIR/lib-versions.sh"
 
 OUT="${1:-mobile}"
 APP_NAME="${2:-my_app}"
@@ -67,13 +74,62 @@ if [[ -f ios/Podfile ]]; then
   ' ios/Podfile
 fi
 
+# ── Platform baselines (versions.toml [platform]) ────────────────────────────
+# `flutter create` emits whatever minimums the installed SDK defaults to, which
+# is always LOWER than what the native lanes need: the MLX/Metal iOS lane needs
+# iOS ${IOS_DEPLOYMENT_TARGET}, and the LiteRT-LM Android lane needs API
+# ${ANDROID_MIN_SDK} + JVM ${JVM_TARGET}. Left at the defaults, a generated
+# project compiles and then fails on-device at model load. Raise them here.
+step "Setting platform baselines (Android ${ANDROID_MIN_SDK} / iOS ${IOS_DEPLOYMENT_TARGET})"
+
+# iOS: Podfile platform line + every Xcode build configuration.
+if [[ -f ios/Podfile ]]; then
+  # The stock Podfile ships the platform line commented out.
+  if grep -qE "^# *platform :ios" ios/Podfile; then
+    sed -i.bak "s|^# *platform :ios.*|platform :ios, '${IOS_DEPLOYMENT_TARGET}'|" ios/Podfile
+  elif grep -qE "^platform :ios" ios/Podfile; then
+    sed -i.bak "s|^platform :ios.*|platform :ios, '${IOS_DEPLOYMENT_TARGET}'|" ios/Podfile
+  else
+    sed -i.bak "1i\\
+platform :ios, '${IOS_DEPLOYMENT_TARGET}'
+" ios/Podfile
+  fi
+  rm -f ios/Podfile.bak
+fi
+if [[ -f ios/Runner.xcodeproj/project.pbxproj ]]; then
+  sed -i.bak "s|IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;|IPHONEOS_DEPLOYMENT_TARGET = ${IOS_DEPLOYMENT_TARGET};|g" \
+    ios/Runner.xcodeproj/project.pbxproj
+  rm -f ios/Runner.xcodeproj/project.pbxproj.bak
+fi
+
+# macOS: the MLX-C lane runs in-process on Apple silicon.
+if [[ -f macos/Podfile ]]; then
+  sed -i.bak "s|^platform :osx.*|platform :osx, '${MACOS_DEPLOYMENT_TARGET}'|" macos/Podfile
+  rm -f macos/Podfile.bak
+fi
+
+# Android: minSdk + JVM target. compileSdk/targetSdk stay on the Flutter-managed
+# values so the SDK bump and the app move together.
+ANDROID_GRADLE="android/app/build.gradle.kts"
+[[ -f "$ANDROID_GRADLE" ]] || ANDROID_GRADLE="android/app/build.gradle"
+if [[ -f "$ANDROID_GRADLE" ]]; then
+  sed -i.bak \
+    -e "s|minSdk = flutter.minSdkVersion|minSdk = ${ANDROID_MIN_SDK}|" \
+    -e "s|minSdkVersion flutter.minSdkVersion|minSdkVersion ${ANDROID_MIN_SDK}|" \
+    -e "s|JavaVersion.VERSION_[0-9_]*|JavaVersion.VERSION_${JVM_TARGET}|g" \
+    -e "s|jvmTarget = JvmTarget.JVM_[0-9_]*|jvmTarget = JvmTarget.JVM_${JVM_TARGET}|" \
+    "$ANDROID_GRADLE"
+  rm -f "$ANDROID_GRADLE.bak"
+fi
+ok "Android minSdk ${ANDROID_MIN_SDK} / JVM ${JVM_TARGET}, iOS ${IOS_DEPLOYMENT_TARGET}, macOS ${MACOS_DEPLOYMENT_TARGET}"
+
 # flutter create's default counter-app smoke test references MyApp/main.dart from the
 # stock template — this scaffold writes its own real boundary tests, so remove the
 # stale default rather than leaving broken/misleading cruft in test/.
 rm -f test/widget_test.dart
 
-# ── pubspec.yaml — Riverpod 3.3.2, frb 2.12, path-dep the three packages ─────
-step "Writing pubspec.yaml (Riverpod 3.3.2 / frb 2.12)"
+# ── pubspec.yaml — Riverpod 3, frb, path-dep the three packages ──────────────
+step "Writing pubspec.yaml (Riverpod ${RIVERPOD_VERSION} / frb ${FRB_VERSION})"
 # Flutter/Dart tooling can watch pubspec.yaml while `flutter create` exits.
 # Replace it atomically so no watcher can observe a transient empty document.
 cat > pubspec.yaml.generated << PUBEOF
@@ -83,8 +139,10 @@ publish_to: none
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.4.0 <4.0.0"
-  flutter: ">=3.29.0"
+  # Flutter ${FLUTTER_VERSION} ships Dart ${DART_VERSION}. Include the prerelease
+  # floor while keeping 3.13 as the supported minimum line.
+  sdk: ">=${DART_MIN} <4.0.0"
+  flutter: ">=${FLUTTER_VERSION}"
 
 dependencies:
   flutter:
@@ -99,58 +157,78 @@ dependencies:
     path: ../flutter_packages/prometheus_entity_management
 
   # ── State management (Riverpod 3) ────────────────────────────────────────
-  flutter_riverpod: ^3.3.2
-  riverpod_annotation: ^4.0.3
-  riverpod_sqflite: ^0.4.3     # offline provider-cache persistence (Riverpod 3)
+  # EXACT pins, not carets. This set is the latest combination that resolves
+  # against Freezed's analyzer line (see dev_dependencies below); a caret here
+  # silently upgrades into the conflict on the next `pub get`.
+  flutter_riverpod: ${RIVERPOD_VERSION}
+  riverpod_annotation: 4.0.2
+  riverpod_sqflite: 0.4.2      # offline provider-cache persistence (Riverpod 3)
 
   # ── Models ───────────────────────────────────────────────────────────────
   freezed_annotation: ^3.1.0
-  json_annotation: ^4.9.0
+  # 4.12.0 requires json_serializable 6.14 / analyzer >=10; see the dev
+  # dependency note below.
+  json_annotation: 4.11.0
 
   # ── FFI bridge ───────────────────────────────────────────────────────────
-  flutter_rust_bridge: ^2.12.0
+  # Must equal the frb CRATE version in rust/Cargo.toml. Mismatched crate and
+  # package versions produce codegen that compiles but fails at the boundary.
+  flutter_rust_bridge: ${FRB_VERSION}
 
   # ── UI components (shadcn/ui equivalent) ─────────────────────────────────
   shadcn_flutter: ^0.0.53
 
   # ── Navigation ───────────────────────────────────────────────────────────
-  go_router: ^15.0.0
+  go_router: ^17.3.0
 
   # ── Markdown + code highlighting ─────────────────────────────────────────
-  markdown_widget: ^2.3.2+6
+  markdown_widget: ^2.3.2+8
   flutter_highlight: ^0.7.0
   highlight: ^0.7.0
 
   # ── Typography / motion ──────────────────────────────────────────────────
-  google_fonts: ^6.2.1
-  flutter_animate: ^4.5.0
+  google_fonts: ^8.2.0
+  flutter_animate: ^4.5.2
 
   # ── Storage / auth ───────────────────────────────────────────────────────
-  flutter_secure_storage: ^9.2.2
-  supabase_flutter: ^2.8.0
+  flutter_secure_storage: ^10.3.1
+  supabase_flutter: ^2.16.0
 
   # ── Utilities ────────────────────────────────────────────────────────────
   gap: ^3.0.1
-  uuid: ^4.5.1
-  intl: ^0.20.2
-  path_provider: ^2.1.4
-  collection: ^1.19.0
+  uuid: ^4.6.0
+  intl: ^0.20.3
+  path_provider: ^2.1.6
+  collection: ^1.19.1
+  # Latest beta API; use the static FilePicker.pickFiles entrypoint.
+  file_picker: ^12.0.0-beta.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
-  build_runner: ^2.4.13
-  freezed: ^3.2.5
-  json_serializable: ^6.8.0
-  riverpod_generator: ^4.0.4
+  flutter_lints: ^6.0.0
+  # 2.15.2 requires analyzer >=13.3; the current Riverpod generator stack is
+  # still on analyzer 12.
+  build_runner: ^2.15.1
+  # Freezed 4.0.0-dev.x requires analyzer 13, while the latest Riverpod codegen
+  # line that compiles this app is still below that. Freezed 3.2.6-dev.1 emits
+  # invalid \`final\` constructor parameters with Flutter's Dart 3.13 beta, so
+  # 3.2.5 is the latest validated compatible generator.
+  freezed: 3.2.5
+  # 6.13.2+ requires analyzer >=10; Riverpod generator 4.0.3 and Freezed 3.2.5
+  # require analyzer 9. Keep this on the latest validated analyzer-9 line.
+  json_serializable: 6.13.0
+  # 4.0.4 requires analyzer 12 and forces Freezed onto the invalid 3.2.6-dev.1
+  # generator; 4.0.3 is the latest Riverpod generator that resolves with
+  # Freezed 3.2.5.
+  riverpod_generator: 4.0.3
   # custom_lint + riverpod_lint intentionally OMITTED: as of 2026-07, their latest
   # versions have an unresolvable transitive conflict (riverpod_lint requires
   # analyzer_plugin ^0.14/analyzer ^12, custom_lint requires ^0.13/^8 respectively) —
   # a live ecosystem incompatibility, not a version we can pin around. Neither is
   # needed to build/run/build_runner; they're IDE-only lint plugins. Re-add once the
   # ecosystem resolves; verify with: flutter pub add custom_lint riverpod_lint --dry-run.
-  alchemist: ^0.12.0           # deterministic golden tests (VGV workflow) — no mocks
+  alchemist: ^0.14.0           # deterministic golden tests (VGV workflow) — no mocks
 
 flutter:
   uses-material-design: true

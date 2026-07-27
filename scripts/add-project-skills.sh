@@ -30,15 +30,28 @@ step "Installing project-local skills into all supported harnesses"
 mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/hooks"
 
 # ── Skills ──────────────────────────────────────────────────────────────────
+# DISCOVER the skill set; never hardcode it. This list used to be a literal 13
+# names, so the four skills authored after it was written (client-rag,
+# peer-profile-sync, pem-local-first, sync-doctrine) were shipped to nobody —
+# they existed in templates/, were absent from every generated project, and
+# nothing failed to make that visible. Any directory here with a SKILL.md ships.
+SKILLS=()
+while IFS= read -r skill_md; do
+  SKILLS+=("$(basename "$(dirname "$skill_md")")")
+done < <(find "$SRC" -maxdepth 2 -name 'SKILL.md' -print | sort)
+
+if [[ ${#SKILLS[@]} -eq 0 ]]; then
+  echo "FATAL: no skills found under $SRC — expected directories containing SKILL.md" >&2
+  exit 1
+fi
+
 for harness in "${HARNESS_DIRS[@]}"; do
   mkdir -p "$ROOT/$harness/skills"
-  for skill in reference-ui-fidelity content-block-ui hybrid-design-tokens tauri-ui-review tauri-custom-titlebar mobile-navigation flutter-golden-ui a11y-gate hybrid-runtime-verification deploy-hybrid-agentic-stack karpathy-progress-memory build-branded-docusaurus orchestrate-prometheus-application; do
-    if [[ -d "$SRC/$skill" ]]; then
-      mkdir -p "$ROOT/$harness/skills/$skill"
-      cp -R "$SRC/$skill/." "$ROOT/$harness/skills/$skill/"
-    fi
+  for skill in "${SKILLS[@]}"; do
+    mkdir -p "$ROOT/$harness/skills/$skill"
+    cp -R "$SRC/$skill/." "$ROOT/$harness/skills/$skill/"
   done
-  ok "skills: $harness"
+  ok "skills: $harness (${#SKILLS[@]})"
 done
 
 # ── Hooks ───────────────────────────────────────────────────────────────────

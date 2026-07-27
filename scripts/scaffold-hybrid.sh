@@ -12,6 +12,10 @@ set -euo pipefail
 # call look for scripts inside the freshly-scaffolded project instead of this repo).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Version pins and platform baselines come from versions.toml — never inline a
+# literal here. Sourced before the first `cd` so the relative path still resolves.
+source "$SCRIPT_DIR/lib-versions.sh"
+
 PROJECT="${1:-my-hybrid-app}"
 ORG="${2:---org}"; ORG="${3:-ai.prometheusags}"
 UAR_MODE="${5:-embedded}"
@@ -104,10 +108,99 @@ React:   Component → Hook → Store → invoke()/API (stores are the ONLY invo
 - Always use `@prometheus-ags/prometheus-entity-management` 3.x for normalized server, async, and entity state. Do not add TanStack Query.
 - Prefer shadcn/ui components over raw HTML controls for consistent behavior and branding.
 - Flutter uses the corresponding shared tokens and shadcn_flutter components.
+- Assistant UI owns the React chat thread, composer, thread list, streaming lifecycle, attachments, and message actions.
+- Persist conversations as Prometheus Entity Management 3.x entities: PGlite on web and pglite-oxide through typed Rust commands on Tauri. Keep only transient interaction state in Zustand.
+- Flat 2.0 is mandatory: no visible borders, divider lines, decorative outlines, or layout shadows. Regions differ only by background color in light and dark themes.
+
+## Local inference is per-device
+
+There is no single "mobile" engine. Every lane sits behind the same
+`InferenceProvider` seam, so surface code is identical — only the backend differs:
+
+| Surface | Engine |
+|---------|--------|
+| Desktop | @INFERENCE_DESKTOP@ |
+| Android | @INFERENCE_ANDROID@ |
+| iOS     | @INFERENCE_IOS@ |
+| Web     | @INFERENCE_WEB@ |
+
+Agent runs select one of three lanes: `cloud`, `local`, or `uar`. Never add a
+fourth lane string without updating the Rust validator and both surfaces.
+
+## Platform support policy
+
+- Optimize for current-generation phones and high-impact capabilities. Legacy-device
+  compatibility is not a product constraint. Raise the minimum supported Dart, Flutter,
+  Android, and iOS versions whenever a modern dependency, security improvement, native
+  capability, or materially better UX requires it; document each increase and verify the
+  resulting production build on a current physical device.
+- Current baselines live in `versions.toml` `[platform]` and `docs/platform-support.md`.
+  Changing one means changing all of: the manifests, both files, and a fresh
+  physical-device verification record.
 RULESEOF
-  cp CLAUDE.md AGENTS.md
+
+  # The heredoc above is QUOTED so backticks and markdown survive verbatim;
+  # substitute the per-device engine names afterwards.
+  sed -i.bak \
+    -e "s|@INFERENCE_DESKTOP@|${INFERENCE_DESKTOP}|" \
+    -e "s|@INFERENCE_ANDROID@|${INFERENCE_ANDROID}|" \
+    -e "s|@INFERENCE_IOS@|${INFERENCE_IOS}|" \
+    -e "s|@INFERENCE_WEB@|${INFERENCE_WEB}|" \
+    CLAUDE.md && rm -f CLAUDE.md.bak
+
+  # AGENTS.md is the cross-harness twin of CLAUDE.md, NOT a byte-copy of it:
+  # a literal `cp` leaves the "# CLAUDE.md" heading in place, so every non-Claude
+  # harness opens a file that announces itself as another tool's config.
+  {
+    echo "# AGENTS.md"
+    echo ""
+    echo "Cross-harness agent instructions (Codex, OpenCode, Kimi, Gemini, Roo, Cline)."
+    echo "Claude Code reads the identical rules from CLAUDE.md."
+    echo ""
+    sed '1{/^# CLAUDE\.md$/d;}' CLAUDE.md | sed '1{/^$/d;}'
+  } > AGENTS.md
   ok "AGENT_BASE_RULES.md + CLAUDE.md/AGENTS.md (rules declared binding)"
 fi
+
+# ── Platform support policy doc ───────────────────────────────────────────
+# The policy needs a home that survives independently of CLAUDE.md, because a
+# baseline bump must be auditable: which versions, verified on which device, when.
+step "Writing docs/platform-support.md"
+cat > docs/platform-support.md << PLATEOF
+# Platform support policy
+
+This project prioritizes high-impact native capabilities on current-generation
+phones over legacy device coverage. Minimum toolchain and OS versions may be
+raised whenever a current stable dependency, security control, accessibility
+feature, media capability, or materially better UX requires it.
+
+Current baseline (source of truth: \`versions.toml\`):
+
+- Dart: ${DART_MIN} or newer
+- Flutter: ${FLUTTER_VERSION} or newer
+- Rust: ${RUST_VERSION}
+- Android: API ${ANDROID_MIN_SDK} (Android 10) or newer
+- Android native ABI: ${ANDROID_ABI}
+- iOS: ${IOS_DEPLOYMENT_TARGET} or newer
+- macOS: ${MACOS_DEPLOYMENT_TARGET} or newer
+
+Every baseline change must update the manifests, lockfiles, \`versions.toml\`,
+project guidance, and this note. Before release, verify analysis/tests and
+install the application on a current physical device; record the Flutter/Dart
+versions, Android API level, device model, and verification date below.
+
+## Latest physical-device verification
+
+- Date: _(not yet verified — record the first device run here)_
+- Device: _(model, Android API level or iOS version, ABI)_
+- Toolchain: Flutter ${FLUTTER_VERSION}, Dart ${DART_MIN}
+- Result: _(what was built, installed, launched, and visually confirmed)_
+
+> A generated project starts UNVERIFIED on purpose. Compiling is not evidence
+> that the local-inference lanes work: those fail at model load on-device, long
+> after every desktop check has passed.
+PLATEOF
+ok "docs/platform-support.md (baseline + device-verification record)"
 
 # ── Root README ───────────────────────────────────────────────────────────
 step "Writing root README"

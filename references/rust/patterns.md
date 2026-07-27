@@ -1,5 +1,5 @@
 # Rust Core Patterns Reference
-> gen_ui_core · Rust 1.96+ · Tokio 1.40 · llama-cpp-2 (desktop + mobile default; mistral.rs optional) · **SurrealDB 3.2** · flutter_rust_bridge 2.12 · Tauri 2.x
+> gen_ui_core · Rust 1.97.1 · Tokio 1.40 · per-device inference (desktop llama-cpp-2 · Android LiteRT-LM · iOS MLX-Swift · web WebLLM; mistral.rs optional) · **SurrealDB 3.2.1** · flutter_rust_bridge 2.12.0 · Tauri 2.11.4
 
 ## Workspace layout (layered — compile-cache friendly)
 

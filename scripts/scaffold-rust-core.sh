@@ -23,6 +23,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_DIR="$(cd "$SCRIPT_DIR/../assets/templates" && pwd)"
+
+# Version pins come from versions.toml. The manifest heredocs below are QUOTED
+# (so Rust's own `${...}` and backticks survive verbatim), so pins are written
+# as @NAME@ placeholders and substituted in one pass at the end — see
+# `substitute_version_placeholders` below.
+source "$SCRIPT_DIR/lib-versions.sh"
 OUT="${1:-rust}"
 UAR_MODE="${2:-embedded}"
 
@@ -63,9 +69,8 @@ edition = "2021"
 # edition2024 Cargo feature, unparseable before Cargo 1.85. 1.93 is the realistic
 # mid-2026 floor. 1.93 can no longer build the SurrealDB 3.2 graph crate (C-004):
 # its transitive fastnum ≥0.7.5 requires rustc 1.94+, and wasm32 builds require
-# 1.96 in this workspace. Keep in sync with rust-toolchain.toml
-# and CLAUDE.md tool versions.
-rust-version = "1.96"
+# 1.96 in this workspace. The current pin comes from versions.toml [toolchain].
+rust-version = "@RUST_VERSION@"
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
@@ -102,16 +107,16 @@ reqwest-eventsource = "0.6"
 # JWT decode (inspect exp/role/tenant_id from gate-minted tokens; no local verify —
 # gate/forge own verification via JWKS). validation disabled for pure claim reads.
 jsonwebtoken      = { version = "9", default-features = false }
-surrealdb         = { version = "3.2",  default-features = false }
+surrealdb         = { version = "@SURREALDB_VERSION@",  default-features = false }
 sqlx              = { version = "0.8",  default-features = false, features = ["runtime-tokio-rustls", "macros", "migrate"] }
-pglite-oxide       = { version = "0.5.1", default-features = false }
+pglite-oxide       = { version = "@PGLITE_OXIDE_VERSION@", default-features = false }
 refinery           = { version = "0.8", default-features = false }
 virtual-net        = "=0.702.0-alpha.3"
 candle-core       = "0.7"
 candle-nn         = "0.7"
 candle-transformers = "0.7"
 fastembed         = "5"
-flutter_rust_bridge = { version = "2.12", features = ["anyhow"] }
+flutter_rust_bridge = { version = "@FRB_VERSION@", features = ["anyhow"] }
 dashmap           = "6.1"
 parking_lot       = "0.12"
 once_cell         = "1.20"
@@ -211,8 +216,8 @@ ok ".cargo/config.toml"
 # ── rust-toolchain.toml ──────────────────────────────────────────────────────
 cat > "$OUT/rust-toolchain.toml" << 'EOF'
 [toolchain]
-# Rust 1.96 is the native/wasm floor for this workspace.
-channel = "1.96"
+# Pinned from versions.toml [toolchain] — the native/wasm floor for this workspace.
+channel = "@RUST_VERSION@"
 components = ["rustfmt", "clippy", "rust-src"]
 targets = [
     "aarch64-apple-ios",
@@ -5367,6 +5372,32 @@ else
   echo "  (cargo not found — install Rust to verify)"
 fi
 
+# ── Version placeholder substitution ────────────────────────────────────────
+# Every @NAME@ token emitted above resolves here from versions.toml. Done as a
+# final pass rather than inline because the manifest heredocs must stay quoted.
+# Fails loudly on any leftover token: a surviving @FOO@ in a Cargo.toml is a
+# manifest that cannot parse, and it is far cheaper to catch it here than in a
+# user's first `cargo check`.
+step "Substituting version pins from versions.toml"
+while IFS= read -r -d '' f; do
+  sed -i.bak \
+    -e "s|@RUST_VERSION@|${RUST_VERSION}|g" \
+    -e "s|@FRB_VERSION@|${FRB_VERSION}|g" \
+    -e "s|@SURREALDB_VERSION@|${SURREALDB_VERSION}|g" \
+    -e "s|@PGLITE_OXIDE_VERSION@|${PGLITE_OXIDE_VERSION}|g" \
+    -e "s|@EMBEDDING_DIM@|${EMBEDDING_DIM}|g" \
+    "$f" && rm -f "$f.bak"
+done < <(find "$OUT" -type f \( -name '*.toml' -o -name '*.rs' -o -name '*.yaml' \) -print0)
+
+LEFTOVER="$(grep -rlE '@[A-Z_]+@' "$OUT" 2>/dev/null || true)"
+if [[ -n "$LEFTOVER" ]]; then
+  echo "FATAL: unsubstituted version placeholders remain in:" >&2
+  echo "$LEFTOVER" >&2
+  echo "Add the missing mapping to lib-versions.sh and the sed pass above." >&2
+  exit 1
+fi
+ok "version pins substituted (rust ${RUST_VERSION}, frb ${FRB_VERSION}, surrealdb ${SURREALDB_VERSION})"
+
 echo ""
 echo -e "${GREEN}✅ Layered gen_ui workspace scaffolded in $OUT${NC}"
 echo ""
@@ -5374,7 +5405,7 @@ echo "  Layers: types → runtime/protocol → client/mcp/db/inference → agent
 echo "  Inner loop:   cd $OUT && bacon        (clippy driver)"
 echo "  Cross-target: bacon check-wasm | check-ios"
 echo "  C-006: gen_ui_client/flint (gate+forge+frf) + gen_ui_mcp (JSON-RPC/SSE)"
-echo "  Leaves:       gen_ui_ffi (frb 2.12) · tauri-plugin-gen-ui · gen_ui_wasm (wasm-pack)"
+echo "  Leaves:       gen_ui_ffi (frb ${FRB_VERSION}) · tauri-plugin-gen-ui · gen_ui_wasm (wasm-pack)"
 echo "  frb codegen:  flutter_rust_bridge_codegen generate --config-file $OUT/flutter_rust_bridge.yaml"
 echo "  wasm build:   bash $OUT/crates/gen_ui_wasm/build-wasm.sh"
 echo ""

@@ -54,9 +54,9 @@ Before any scaffolding or transformation, verify the environment. Run
 
 | Tool | Minimum Version | Install command |
 |------|----------------|-----------------|
-| Rust + Cargo | 1.96+ | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
+| Rust + Cargo | 1.97.1 | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
 | Flutter SDK | beta channel, latest | See `scripts/install-flutter.sh` |
-| Node.js | 24+ (Active LTS — pin, not `--lts`) | `curl -fsSL https://fnm.vercel.app/install \| bash && fnm install 24` |
+| Node.js | 26.5.0 (current release — pin, not `--lts`) | `curl -fsSL https://fnm.vercel.app/install \| bash && fnm install 26` |
 | Tauri CLI | 2.10+ | `cargo install tauri-cli --version "^2"` |
 | flutter_rust_bridge_codegen | 2.12+ | `cargo install flutter_rust_bridge_codegen` |
 | cargo-ndk | latest | `cargo install cargo-ndk` (Android only) |

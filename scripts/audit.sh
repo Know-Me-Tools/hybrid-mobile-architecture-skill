@@ -500,15 +500,22 @@ elif [[ "$PLATFORM" == "doc-consistency" ]]; then
     echo -e "${CYAN}[02] Stale version strings${NC}"
     # pattern|human label — each is a value versions.toml has superseded.
     STALE_CHECKS=(
-      '1\.80\+|Rust 1.80+ (now 1.96+)'
-      '1\.95\+|Rust 1.95+ (now 1.96+)'
-      'Node\.js[^0-9]*22|Node 22 (now 24+)'
-      '22\+ LTS|Node 22+ LTS (now 24+)'
-      'Riverpod 2\.[x6]|Riverpod 2.x/2.6 (now 3.3)'
-      '2\.3\+.*flutter_rust_bridge|flutter_rust_bridge_codegen.*2\.3\+|frb 2.3+ (now 2.12+)'
-      'Vite 7|Vite 7 (now 8)'
-      '"vite": "\^7|vite ^7 dep pin (now ^8)'
-      'Flutter (SDK \| )?3\.29\+|Flutter 3.29+ (now beta channel)'
+      '1\.80\+|Rust 1.80+ (now 1.97.1)'
+      '1\.95\+|Rust 1.95+ (now 1.97.1)'
+      '1\.96\+|Rust 1.96+ floor (now exact 1.97.1)'
+      'Node\.js[^0-9]*22|Node 22 (now 26.5.0)'
+      '22\+ LTS|Node 22+ LTS (now 26.5.0)'
+      'Node\.js[^0-9]*24\+|Node 24+ floor (now exact 26.5.0)'
+      'Riverpod 2\.[x6]|Riverpod 2.x/2.6 (now 3.3.1)'
+      '2\.3\+.*flutter_rust_bridge|flutter_rust_bridge_codegen.*2\.3\+|frb 2.3+ (now 2.12.0)'
+      'frb 2\.12\+|frb 2.12+ floor (now exact 2.12.0)'
+      'Vite 7|Vite 7 (now 8.1.5)'
+      '"vite": "\^7|vite ^7 dep pin (now ^8.1.5)'
+      'Flutter (SDK \| )?3\.29\+|Flutter 3.29+ (now 3.47.0-0.1.pre)'
+      'Tauri CLI 2\.10\+|Tauri CLI 2.10+ (now 2.11.4)'
+      # A single "mobile" inference lane is the superseded model: Android and
+      # iOS use different engines (LiteRT-LM vs MLX-Swift).
+      'mobile.*=.*llama-cpp-2|single "mobile" inference lane (now per-device android/ios)'
     )
     for entry in "${STALE_CHECKS[@]}"; do
       pattern="${entry%|*}"; label="${entry##*|}"
@@ -522,14 +529,68 @@ elif [[ "$PLATFORM" == "doc-consistency" ]]; then
 
     echo ""
     echo -e "${CYAN}[03] Inference-engine authority${NC}"
-    # Per-lane engines (versions.toml [inference]): desktop/mobile=llama-cpp-2,
-    # web=WebLLM, mistral.rs optional. 'candle' as a current-engine claim is stale.
-    hits=$(grep -lE 'candle' "${AUTHORITY_DOCS[@]}" 2>/dev/null || true)
+    # Per-device engines (versions.toml [inference]): desktop=llama-cpp-2,
+    # android=LiteRT-LM, ios=MLX-Swift, macos=MLX-C, web=WebLLM; mistral.rs
+    # optional. 'candle' as a TEXT-GENERATION engine claim is stale — but
+    # fastembed legitimately uses candle for EMBEDDINGS, so match only the
+    # generation claim, not every mention of the word.
+    hits=$(grep -lE 'candle[^)]*\b(inference|generation|LLM|chat)|\b(inference|generation) (engine )?(via|using|with) candle' "${AUTHORITY_DOCS[@]}" 2>/dev/null || true)
     if [[ -n "$hits" ]]; then
-      fail "Stale 'candle' engine references — in: $(echo "$hits" | xargs -n1 basename | tr '\n' ' ')"
+      fail "Stale 'candle' generation-engine references — in: $(echo "$hits" | xargs -n1 basename | tr '\n' ' ')"
     else
-      pass "No stale candle engine references"
+      pass "No stale candle generation-engine references"
     fi
+
+    echo ""
+    echo -e "${CYAN}[04] Skill distribution parity${NC}"
+    # Three lists must agree, or a skill is authored and shipped to nobody:
+    #   templates/project-skills/*/SKILL.md  — what exists
+    #   .claude-plugin/plugin.json "skills"  — what the plugin distributes
+    #   scripts/add-project-skills.sh        — what generated projects receive
+    # This drifted once already (4 skills authored, 0 shipped), silently,
+    # because nothing compared them.
+    TEMPLATE_SKILLS="$(find "$PACK_ROOT/templates/project-skills" -maxdepth 2 -name 'SKILL.md' 2>/dev/null \
+      | xargs -n1 dirname 2>/dev/null | xargs -n1 basename 2>/dev/null | sort)"
+    MANIFEST_SKILLS="$(python3 -c "
+import json,sys
+try:
+    d = json.load(open('$PACK_ROOT/.claude-plugin/plugin.json'))
+    for s in sorted(x.split('/')[-1] for x in d.get('skills', []) if x != './'):
+        print(s)
+except Exception:
+    sys.exit(0)
+" 2>/dev/null)"
+
+    if [[ -z "$TEMPLATE_SKILLS" ]]; then
+      warn "No template skills found — skipping distribution parity"
+    elif [[ "$TEMPLATE_SKILLS" == "$MANIFEST_SKILLS" ]]; then
+      pass "plugin.json distributes all $(echo "$TEMPLATE_SKILLS" | wc -l | tr -d ' ') template skills"
+    else
+      missing="$(comm -23 <(echo "$TEMPLATE_SKILLS") <(echo "$MANIFEST_SKILLS") | tr '\n' ' ')"
+      extra="$(comm -13 <(echo "$TEMPLATE_SKILLS") <(echo "$MANIFEST_SKILLS") | tr '\n' ' ')"
+      [[ -n "$missing" ]] && fail "Skills authored but NOT distributed by plugin.json: $missing"
+      [[ -n "$extra" ]] && fail "plugin.json lists skills with no template: $extra"
+    fi
+
+    # The installer must DISCOVER skills, not carry a literal list that goes
+    # stale the moment someone adds a skill without editing this script.
+    if grep -qE 'for skill in [a-z-]+ [a-z-]+ [a-z-]+' "$PACK_ROOT/scripts/add-project-skills.sh" 2>/dev/null; then
+      fail "add-project-skills.sh hardcodes a skill list — must discover via find"
+    else
+      pass "add-project-skills.sh discovers skills dynamically"
+    fi
+
+    echo ""
+    echo -e "${CYAN}[05] Per-device inference coverage${NC}"
+    # The per-device lane split is the core platform-support learning. Authority
+    # docs must name the Android and Apple engines, not a single "mobile" lane.
+    for engine in 'LiteRT-LM' 'MLX'; do
+      if grep -qlE "$engine" "${AUTHORITY_DOCS[@]}" 2>/dev/null; then
+        pass "Authority docs reference the $engine lane"
+      else
+        fail "No authority doc documents the $engine lane — per-device inference undocumented"
+      fi
+    done
   fi
 fi
 
