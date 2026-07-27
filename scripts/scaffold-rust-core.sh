@@ -719,7 +719,7 @@ $MARK
 //! gen_ui_protocol (L1) — A2UI/AG-UI adapters. Pure transformation over the L0
 //! event enums; wasm-safe (no IO, no runtime dependency).
 //!
-//! Every A2uiEvent carries \\`run_id\\`: a UI receiving two concurrent runs must be
+//! Every A2uiEvent carries \`run_id\`: a UI receiving two concurrent runs must be
 //! able to route each block to the right thread, and a variant without it makes
 //! that impossible to add later without breaking the wire format.
 use gen_ui_types::content_block::ContentBlock;

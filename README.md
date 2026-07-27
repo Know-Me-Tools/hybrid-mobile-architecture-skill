@@ -17,7 +17,7 @@ and
 
 ## What this skill does
 
-- **Scaffolds** complete hybrid projects: Flutter mobile + Tauri desktop + web/WASM sharing a layered 13-crate Rust workspace
+- **Scaffolds** complete hybrid projects: Flutter mobile + Tauri desktop + web/WASM sharing a layered 14-crate Rust workspace
 - **Bootstraps** the full toolchain (Rust 1.97.1 w/ WASM target, Flutter 3.47 beta + Dart MCP server, Node 26.5.0 + bun + pnpm + TypeScript 7.0.2, OpenSpec, Prometheus Skill System)
 - **Enforces** the 40 Prometheus Base Rules ([AGENT_BASE_RULES.md](AGENT_BASE_RULES.md)), feature-based clean architecture, strict layering, and component contracts — for humans, coding agents, and generated projects alike
 - **Generates** feature modules, ContentBlock variants, authentication flows, MCP integrations, publishable packages (crates.io / pub.dev / npm), and project-local UI/UX skills with activation hooks
@@ -33,7 +33,7 @@ Flutter + Riverpod 3       Tauri 2 + React 19 + Zustand    WASM (wasm-bindgen)
 flutter_rust_bridge 2.12   Tauri IPC (invoke/emit)         @prometheus-ags/gen-ui-wasm
         ↓                            ↓                          ↓
    ╔═══════════════════════════════════════════════════════════════╗
-   ║              gen_ui layered Rust workspace (13 crates)         ║
+   ║             gen_ui layered Rust workspace (14 crates)          ║
    ║                                                                ║
    ║  gen_ui_types      frozen trait seams · ContentBlock contract  ║
    ║  gen_ui_runtime    one Tokio runtime (native) / wasm futures   ║
@@ -42,7 +42,8 @@ flutter_rust_bridge 2.12   Tauri IPC (invoke/emit)         @prometheus-ags/gen-u
    ║  gen_ui_mcp        MCP registry (JSON-RPC 2.0 + SSE)           ║
    ║  gen_ui_db         relational (pg/sqlite) + sync + startup     ║
    ║  gen_ui_db_graph   SurrealDB 3.2 hybrid graph-RAG (HNSW+BM25)  ║
-   ║  gen_ui_inference  InferenceProvider (mistral.rs / llama.cpp)  ║
+   ║  gen_ui_inference  InferenceProvider — per-device engines      ║
+   ║  gen_ui_context    engine-neutral context assembly             ║
    ║  gen_ui_agent      Universal Agent Runtime (PMPO loop)         ║
    ║  leaves: gen_ui_ffi · tauri-plugin-gen-ui · gen_ui_wasm        ║
    ╚═══════════════════════════════════════════════════════════════╝
@@ -70,14 +71,17 @@ Kimi.
    verifies-or-installs on any box: Rust + WASM + a full
    [Prometheus Skill System](https://github.com/Prometheus-AGS/prometheus-skill-system)
    instance (self-improving loops included); OpenSpec (latest, `@fission-ai/openspec`);
-   Flutter/Dart **beta channel** (ships the Dart MCP server); Node 24 LTS + bun + pnpm +
-   TypeScript 7.
-2. **Proof-of-concept app** — `apps/knowme-poc`, built from the KnowMe reference docs
-   (`docs/reference-app/`), showcasing the broadest practical capability range as one
-   continuous demo narrative: streamed ContentBlock chat → voice note → on-device
-   whisper transcription → graph-RAG memory ingest → cited answers → offline edit →
-   cross-device sync → local GGUF inference (Metal). First real end-to-end run of
-   frb codegen, build_runner, and on-target builds.
+   Flutter/Dart **beta channel** (ships the Dart MCP server); Node + bun + pnpm +
+   TypeScript — exact versions in `versions.toml`.
+2. **Verified scaffold output** — `bash scripts/verify-scaffold.sh` generates a
+   throwaway project and structurally diffs it against `ci/expected-tree.txt`, then
+   proves placeholders substituted, the JNI class path matches its Kotlin bridge, and
+   every emitted manifest parses. CI runs it on every push.
+
+   This replaced a committed 40k-LOC example app. That app *read* like generator
+   output but was a snapshot of a real product, so when the generator fell behind,
+   nothing failed — which is exactly how the drift went unnoticed. A generated
+   fixture cannot go stale without CI saying so.
 3. **CI** — clippy + `audit.sh all` + boundary test suites on every push.
 
 ---
@@ -191,7 +195,7 @@ hybrid-mobile-architecture/
   templates/project-skills/         # content-block-ui · hybrid-design-tokens ·
                                     #   tauri-ui-review · tauri-custom-titlebar ·
                                     #   mobile-navigation · flutter-golden-ui · a11y-gate
-  apps/                             # Proof-of-concept applications (knowme-poc upcoming)
+  ci/expected-tree.txt              # structural manifest of the scaffold output
   openspec/                         # OpenSpec change management (active + archive)
 ```
 

@@ -2,10 +2,10 @@ name: Deployment catalog CI
 
 on:
   pull_request:
-    paths: ["deploy/**", ".github/workflows/deployment-*.yml", "apps/knowme-poc/Dockerfile"]
+    paths: ["deploy/**", ".github/workflows/deployment-*.yml"]
   push:
     branches: [main]
-    paths: ["deploy/**", ".github/workflows/deployment-*.yml", "apps/knowme-poc/Dockerfile"]
+    paths: ["deploy/**", ".github/workflows/deployment-*.yml"]
 
 permissions: {contents: read}
 
