@@ -2,7 +2,7 @@ variable "REGISTRY" { default = "ghcr.io/prometheus-ags" }
 variable "TAG" { default = "dev" }
 
 group "default" {
-  targets = ["knowme-web", "knowme-docs", "flint-forge-gateway", "flint-realtime-fabric", "flint-gate"]
+  targets = ["knowme-docs", "flint-forge-gateway", "flint-realtime-fabric", "flint-gate"]
 }
 
 group "extensions" {
@@ -10,11 +10,11 @@ group "extensions" {
 }
 
 group "validate" {
-  targets = ["knowme-web", "knowme-docs", "flint-forge-gateway", "flint-realtime-fabric", "flint-gate", "prometheus-postgres18"]
+  targets = ["knowme-docs", "flint-forge-gateway", "flint-realtime-fabric", "flint-gate", "prometheus-postgres18"]
 }
 
 group "publish" {
-  targets = ["knowme-web", "knowme-docs", "flint-forge-gateway", "flint-realtime-fabric", "flint-gate", "prometheus-postgres18", "flint-llm", "flint-vault", "flint-meta", "flint-auth", "flint-hooks", "pg-net", "pg-cron", "pgvector"]
+  targets = ["knowme-docs", "flint-forge-gateway", "flint-realtime-fabric", "flint-gate", "prometheus-postgres18", "flint-llm", "flint-vault", "flint-meta", "flint-auth", "flint-hooks", "pg-net", "pg-cron", "pgvector"]
 }
 
 target "release" {
@@ -23,13 +23,6 @@ target "release" {
   attest = ["type=provenance,mode=max", "type=sbom"]
   cache-from = ["type=gha"]
   cache-to = ["type=gha,mode=max"]
-}
-
-target "knowme-web" {
-  inherits = ["release"]
-  context = "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill.git?ref=6fddffdac56075737f6f114adeddbed56208699b&checksum=6fddffdac56075737f6f114adeddbed56208699b&subdir=apps/knowme-poc"
-  dockerfile = "Dockerfile"
-  tags = ["${REGISTRY}/knowme-web:${TAG}"]
 }
 
 target "knowme-docs" {
