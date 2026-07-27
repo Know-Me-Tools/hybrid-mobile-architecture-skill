@@ -18,9 +18,10 @@ if [[ ! -f "$OUT/../packages/gen-ui-react/package.json" ]]; then
   bash "$SCRIPT_DIR/scaffold-packages.sh" "$OUT/.."
 fi
 
-GREEN='\033[0;32m'; CYAN='\033[0;36m'; NC='\033[0m'
+GREEN='\033[0;32m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
 step() { echo -e "\n${CYAN}── $1${NC}"; }
 ok()   { echo -e "${GREEN}  ✓${NC} $1"; }
+warn() { echo -e "${YELLOW}  !${NC} $1"; }
 
 step "Creating Tauri + React 19 app: $APP_NAME"
 mkdir -p "$OUT"
@@ -1988,10 +1989,19 @@ fi
 step "Installing Shadcn UI and Assistant UI source components"
 if [[ "${SKIP_INSTALL:-0}" == "1" ]]; then
   ok "registry component installation skipped with dependencies"
-else
+elif command -v pnpm &>/dev/null; then
   pnpm exec shadcn add button sheet sidebar toggle-group switch card -y
   pnpm dlx assistant-ui@latest add thread thread-list markdown-text --use-pnpm -y
   ok "Shadcn primitives + Assistant UI thread/composer/thread-list"
+else
+  # The dependency install above already falls back to npm, but this step used
+  # to call pnpm UNCONDITIONALLY — so on any machine without pnpm the whole
+  # scaffold died here, after having written every file. Guard it the same way
+  # and tell the user exactly how to finish, rather than failing the run.
+  warn "pnpm not found — skipping registry components"
+  echo "     Install pnpm and run inside ${OUT}/:"
+  echo "       pnpm exec shadcn add button sheet sidebar toggle-group switch card -y"
+  echo "       pnpm dlx assistant-ui@latest add thread thread-list markdown-text --use-pnpm -y"
 fi
 
 echo ""
