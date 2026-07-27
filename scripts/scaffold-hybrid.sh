@@ -42,7 +42,7 @@ cd "$PROJECT"
 # config. Do NOT inline a workspace manifest here; that duplicated the source of
 # truth and drifted (old single-crate layout, surrealdb 2.0, panic=abort bug).
 step "Scaffolding layered gen_ui workspace"
-bash "$SCRIPT_DIR/scaffold-rust-core.sh" "rust" "$UAR_MODE"
+bash "$SCRIPT_DIR/scaffold-rust-core.sh" "rust" "$UAR_MODE" "$APP_NAME" "$ORG"
 ok "gen_ui workspace scaffolded (12 crates, layered)"
 
 # ── Scaffold publishable packages (C-007) ──────────────────────────────────
@@ -54,7 +54,7 @@ ok "Package skeletons scaffolded (npm + pub.dev)"
 
 # ── Scaffold Flutter app ───────────────────────────────────────────────────
 step "Scaffolding Flutter mobile app"
-bash "$SCRIPT_DIR/scaffold-flutter.sh" "mobile" "$APP_NAME"
+bash "$SCRIPT_DIR/scaffold-flutter.sh" "mobile" "$APP_NAME" "$ORG"
 ok "Flutter app scaffolded in mobile/"
 
 # ── Scaffold Tauri app ─────────────────────────────────────────────────────

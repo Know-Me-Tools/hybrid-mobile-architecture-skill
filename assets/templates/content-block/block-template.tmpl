@@ -124,11 +124,11 @@ class __BLOCK_NAME__BlockWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: T.s12),
-      decoration: T.blockDecoration(bg: T.bgSurface, accent: T.violet),
+      decoration: T.blockDecoration(bg: T.bgSurface, accent: T.accentAlt),
       child: Padding(
         padding: const EdgeInsets.all(T.s12),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('__BLOCK_NAME__', style: T.uiXs.copyWith(color: T.violet)),
+          Text('__BLOCK_NAME__', style: T.uiXs.copyWith(color: T.accentAlt)),
           const SizedBox(height: T.s8),
           Text(content, style: T.prose),
         ]),

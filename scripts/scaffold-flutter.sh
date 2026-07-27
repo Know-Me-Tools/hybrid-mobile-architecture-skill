@@ -30,6 +30,9 @@ source "$SCRIPT_DIR/lib-versions.sh"
 
 OUT="${1:-mobile}"
 APP_NAME="${2:-my_app}"
+# Org must match what scaffold-rust-core.sh used to build __APP_ID__: the Rust
+# JNI lookup and the Kotlin package declaration have to agree exactly.
+APP_ORG="${3:-ai.prometheusags}"
 SNAKE_NAME="$(echo "$APP_NAME" | tr '-' '_' | tr '[:upper:]' '[:lower:]')"
 
 GREEN='\033[0;32m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
@@ -41,7 +44,7 @@ MARK="// TJ-ARCH-MOB-001 compliant"
 
 step "Creating Flutter app: $APP_NAME"
 flutter create \
-  --org ai.prometheusags \
+  --org "$APP_ORG" \
   --template app \
   --platforms ios,android,macos \
   --no-pub \
@@ -122,6 +125,53 @@ if [[ -f "$ANDROID_GRADLE" ]]; then
   rm -f "$ANDROID_GRADLE.bak"
 fi
 ok "Android minSdk ${ANDROID_MIN_SDK} / JVM ${JVM_TARGET}, iOS ${IOS_DEPLOYMENT_TARGET}, macOS ${MACOS_DEPLOYMENT_TARGET}"
+
+# ── Native inference bridges ────────────────────────────────────────────────
+# scaffold-rust-core.sh emitted these into rust/native/ with app identity already
+# substituted. Install them where each platform's build expects them, and add the
+# LiteRT-LM Gradle dependency the Kotlin bridge compiles against.
+#
+# Both lanes are half Rust, half native, and the halves agree by SYMBOL NAME —
+# the JNI class path and the @_silgen_name FFI symbol. Installing one without the
+# other yields a build that succeeds and a lane that cannot find its bridge.
+APP_CLASS="$(echo "$SNAKE_NAME" | awk -F_ '{for(i=1;i<=NF;i++) printf toupper(substr($i,1,1)) substr($i,2)}')"
+NATIVE_SRC="../rust/native"
+if [[ -d "$NATIVE_SRC" ]]; then
+  step "Installing native inference bridges"
+
+  # Android: the Kotlin bridge must live under the applicationId's package path,
+  # because the Rust side looks the class up by fully-qualified name.
+  ANDROID_PKG_DIR="android/app/src/main/kotlin/$(echo "${APP_ORG}.${SNAKE_NAME}" | tr '.' '/')"
+  if [[ -f "$NATIVE_SRC/android/${APP_CLASS}LiteRtLmBridge.kt" ]]; then
+    mkdir -p "$ANDROID_PKG_DIR"
+    cp "$NATIVE_SRC/android/${APP_CLASS}LiteRtLmBridge.kt" "$ANDROID_PKG_DIR/"
+    ok "Android: ${APP_CLASS}LiteRtLmBridge.kt -> $ANDROID_PKG_DIR"
+  fi
+
+  # iOS: the Swift bridge sits beside AppDelegate in Runner/. It still has to be
+  # added to the Xcode target — a file on disk that is not in project.pbxproj is
+  # not compiled, and the failure is a silent missing symbol at link time.
+  if [[ -f "$NATIVE_SRC/ios/${APP_CLASS}MlxBridge.swift" ]]; then
+    cp "$NATIVE_SRC/ios/${APP_CLASS}MlxBridge.swift" "ios/Runner/"
+    ok "iOS: ${APP_CLASS}MlxBridge.swift -> ios/Runner/ (add to the Xcode target)"
+  fi
+fi
+
+# LiteRT-LM Android dependency — the Kotlin bridge imports com.google.ai.edge.litertlm.
+if [[ -f "$ANDROID_GRADLE" ]] && ! grep -q 'litertlm-android' "$ANDROID_GRADLE"; then
+  python3 - "$ANDROID_GRADLE" "$LITERT_LM_VERSION" <<'PYEOF'
+import re, sys
+path, version = sys.argv[1], sys.argv[2]
+text = open(path).read()
+dep = f'    implementation("com.google.ai.edge.litertlm:litertlm-android:{version}")\n'
+if re.search(r'^dependencies\s*\{', text, re.M):
+    text = re.sub(r'^(dependencies\s*\{\s*\n)', r'\1' + dep, text, count=1, flags=re.M)
+else:
+    text += f'\ndependencies {{\n{dep}}}\n'
+open(path, 'w').write(text)
+PYEOF
+  ok "Android: LiteRT-LM ${LITERT_LM_VERSION} dependency added"
+fi
 
 # flutter create's default counter-app smoke test references MyApp/main.dart from the
 # stock template — this scaffold writes its own real boundary tests, so remove the

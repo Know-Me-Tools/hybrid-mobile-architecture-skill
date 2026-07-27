@@ -31,6 +31,19 @@ TEMPLATE_DIR="$(cd "$SCRIPT_DIR/../assets/templates" && pwd)"
 source "$SCRIPT_DIR/lib-versions.sh"
 OUT="${1:-rust}"
 UAR_MODE="${2:-embedded}"
+# App identity. Product-derived template files carry __APP_*__ placeholders (see
+# references/generator-placeholders.md); all four forms derive from one name so a
+# user never has to keep them consistent by hand.
+APP_NAME_RAW="${3:-gen_ui_app}"
+APP_ORG="${4:-ai.prometheusags}"
+APP_NAME="$(echo "$APP_NAME_RAW" | tr '-' '_' | tr '[:upper:]' '[:lower:]')"      # snake_case
+APP_CLASS="$(echo "$APP_NAME" | awk -F_ '{for(i=1;i<=NF;i++) printf toupper(substr($i,1,1)) substr($i,2)}')" # PascalCase
+# reverse-DNS. Uses the SNAKE form, not the raw name: __APP_ID__ is also the JNI
+# package path for the Android bridge, and hyphens are illegal in Java/Kotlin
+# package names — `com.example.aurora-notes` compiles in Rust as a string and
+# then fails to resolve the class on device.
+APP_ID="${APP_ORG}.${APP_NAME}"
+ENV_PREFIX="$(echo "$APP_NAME" | tr '[:lower:]' '[:upper:]')"                    # SCREAMING_SNAKE
 
 GREEN='\033[0;32m'; CYAN='\033[0;36m'; NC='\033[0m'
 step() { echo -e "\n${CYAN}── $1${NC}"; }
@@ -54,6 +67,7 @@ members = [
     "crates/gen_ui_db",
     "crates/gen_ui_db_graph",
     "crates/gen_ui_inference",
+    "crates/gen_ui_context",
     "crates/gen_ui_agent",
     "crates/gen_ui_ffi",
     "crates/tauri-plugin-gen-ui",
@@ -90,6 +104,9 @@ tokio-stream      = { version = "0.1",  features = ["sync"] }
 reqwest           = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
 sha2              = "0.10"
 encoding_rs       = "0.8"
+# JNI bridge for the Android LiteRT-LM lane. Target-gated in gen_ui_inference so
+# it resolves only on android builds.
+jni               = "0.22"
 llama-cpp-2       = { version = "0.1.151", default-features = false }
 reqwest-eventsource = "0.6"
 # --- Flint platform SDK (FRF realtime spine). Nothing is published to crates.io —
@@ -313,45 +330,18 @@ pub mod sync;
 pub mod config;
 pub mod error;
 pub mod inference;
+pub mod lifecycle;
 
 pub use content_block::ContentBlock;
 pub use error::{CoreError, CoreResult};
 EOF
 
-cat > "$OUT/crates/gen_ui_types/src/inference.rs" << EOF
-$MARK
-//! Target-independent local-inference seam. Engines stay in gen_ui_inference;
-//! UI and agent crates depend on this trait only.
-use crate::error::CoreResult;
-use crate::events::StreamEvent;
-use async_trait::async_trait;
-use futures::stream::BoxStream;
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct LocalModelSpec {
-    pub model: String,
-    pub context_len: Option<u32>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct SampleParams {
-    pub temperature: f32,
-    pub top_p: f32,
-    pub max_tokens: u32,
-}
-
-#[async_trait]
-pub trait InferenceProvider: Send + Sync {
-    async fn load(&self, spec: &LocalModelSpec) -> CoreResult<()>;
-    async fn generate(
-        &self,
-        prompt: &str,
-        params: &SampleParams,
-    ) -> CoreResult<BoxStream<'static, StreamEvent>>;
-    async fn unload(&self) -> CoreResult<()>;
-}
-EOF
+# inference.rs + lifecycle.rs are COPIED, not heredoc'd: they are the contract
+# every per-device engine implements (llama.cpp, LiteRT-LM, MLX-Swift, MLX-C),
+# and a hand-trimmed stub here silently breaks every ported lane at compile time.
+# Keep them in assets/templates so they diff as ordinary Rust.
+cp "$TEMPLATE_DIR/rust/gen_ui_types/src/inference.rs" "$OUT/crates/gen_ui_types/src/inference.rs"
+cp "$TEMPLATE_DIR/rust/gen_ui_types/src/lifecycle.rs" "$OUT/crates/gen_ui_types/src/lifecycle.rs"
 
 # ContentBlock — the cross-platform UI contract (11 variants).
 cat > "$OUT/crates/gen_ui_types/src/content_block.rs" << EOF
@@ -378,46 +368,11 @@ pub enum ContentBlock {
 EOF
 
 # Events — StreamEvent + A2UI/AG-UI enums (pure data; adapters live in protocol).
-cat > "$OUT/crates/gen_ui_types/src/events.rs" << EOF
-$MARK
-//! Raw stream + protocol event enums. Pure data — transformation logic is in
-//! gen_ui_protocol (which depends on this crate).
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum StreamEvent {
-    MessageStart,
-    TextDelta { index: u32, delta: String },
-    ThinkingDelta { index: u32, delta: String },
-    ToolCallStarted { id: String, name: String },
-    ToolCallDelta { id: String, delta: String },
-    ToolCallComplete { id: String },
-    Error { message: String },
-    Done,
-}
-
-/// A2UI event surface (subset shown; full 27-variant set filled in gen_ui_protocol
-/// consumers). Kept as an open enum contract here.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum A2uiEvent {
-    RunStarted { run_id: String },
-    Block { block: crate::content_block::ContentBlock },
-    RunFinished { run_id: String },
-    RunError { message: String },
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(tag = "type", rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum AguiEvent {
-    RunStarted { thread_id: String, run_id: String },
-    TextMessageContent { delta: String },
-    ToolCallStart { id: String, name: String },
-    StateSnapshot { snapshot_json: String },
-    RunFinished { run_id: String },
-}
-EOF
+# events.rs is COPIED, not heredoc'd. The inline version was a self-described
+# "subset" of StreamEvent, and every ported inference lane emits variants it
+# lacked (Custom for tool-schema fallbacks, Cancelled for user stops). A stubbed
+# event enum compiles fine on its own and breaks every engine that uses it.
+cp "$TEMPLATE_DIR/rust/gen_ui_types/src/events.rs" "$OUT/crates/gen_ui_types/src/events.rs"
 
 # View — ViewDescriptor / FilterSpec / SortSpec (mirrored to Dart/TS).
 cat > "$OUT/crates/gen_ui_types/src/view.rs" << EOF
@@ -670,6 +625,12 @@ pub enum CoreError {
     Serde(String),
     #[error("io: {0}")]
     Io(String),
+    /// A user-initiated stop, NOT a failure. Distinct from Terminal on purpose:
+    /// a cancelled generation must not surface as an error banner, must not be
+    /// retried, and must leave the partial output already streamed to the UI in
+    /// place. Every engine that supports cancellation returns this.
+    #[error("cancelled: {0}")]
+    Cancelled(String),
 }
 EOF
 ok "gen_ui_types: ContentBlock, events, view, EntityTransport, SyncTransport (FROZEN seams)"
@@ -757,21 +718,48 @@ cat > "$OUT/crates/gen_ui_protocol/src/lib.rs" << EOF
 $MARK
 //! gen_ui_protocol (L1) — A2UI/AG-UI adapters. Pure transformation over the L0
 //! event enums; wasm-safe (no IO, no runtime dependency).
-use gen_ui_types::events::{A2uiEvent, AguiEvent, StreamEvent};
+//!
+//! Every A2uiEvent carries \\`run_id\\`: a UI receiving two concurrent runs must be
+//! able to route each block to the right thread, and a variant without it makes
+//! that impossible to add later without breaking the wire format.
 use gen_ui_types::content_block::ContentBlock;
+use gen_ui_types::events::{A2uiEvent, AguiEvent, StreamEvent};
+use gen_ui_types::lifecycle::{RunError, RunPhase};
 
-/// StreamEvent -> A2uiEvent(s). Feature-complete adapter to be filled per the
-/// ContentBlock contract; C-001 lands the seam + a working text path.
+/// StreamEvent -> A2uiEvent(s). Lands the seam plus the text, cancellation, and
+/// error paths; extend per the ContentBlock contract as lanes need it.
 pub struct A2uiAdapter { run_id: String }
 impl A2uiAdapter {
     pub fn new(run_id: impl Into<String>) -> Self { Self { run_id: run_id.into() } }
     pub fn ingest(&mut self, ev: &StreamEvent) -> Vec<A2uiEvent> {
         match ev {
             StreamEvent::MessageStart => vec![A2uiEvent::RunStarted { run_id: self.run_id.clone() }],
-            StreamEvent::TextDelta { delta, .. } =>
-                vec![A2uiEvent::Block { block: ContentBlock::Text { text: delta.clone() } }],
+            StreamEvent::TextDelta { delta, .. } => vec![A2uiEvent::Block {
+                run_id: self.run_id.clone(),
+                block: ContentBlock::Text { text: delta.clone() },
+            }],
+            StreamEvent::ThinkingDelta { delta, .. } => vec![A2uiEvent::Block {
+                run_id: self.run_id.clone(),
+                block: ContentBlock::Thinking { text: delta.clone() },
+            }],
             StreamEvent::Done => vec![A2uiEvent::RunFinished { run_id: self.run_id.clone() }],
-            StreamEvent::Error { message } => vec![A2uiEvent::RunError { message: message.clone() }],
+            // A user stop is NOT an error: it must not raise an error banner and
+            // must leave already-streamed output in place.
+            StreamEvent::Cancelled { message } => vec![A2uiEvent::RunCancelled {
+                run_id: self.run_id.clone(),
+                phase: RunPhase::Generation,
+                message: message.clone(),
+            }],
+            StreamEvent::Error { message } => vec![A2uiEvent::RunError {
+                run_id: self.run_id.clone(),
+                error: RunError {
+                    code: "stream_error".to_string(),
+                    phase: RunPhase::Generation,
+                    message: message.clone(),
+                    retryable: false,
+                    diagnostics: None,
+                },
+            }],
             _ => vec![],
         }
     }
@@ -780,7 +768,7 @@ impl A2uiAdapter {
 /// A2uiEvent -> AguiEvent(s), bidirectional-capable.
 pub struct AguiAdapter {
     thread_id: String,
-    /// Retained for the bidirectional path (client→agent) filled in a later lane.
+    /// Retained for the bidirectional path (client->agent) filled in a later lane.
     #[allow(dead_code)]
     run_id: String,
 }
@@ -792,9 +780,11 @@ impl AguiAdapter {
         match ev {
             A2uiEvent::RunStarted { run_id } =>
                 vec![AguiEvent::RunStarted { thread_id: self.thread_id.clone(), run_id: run_id.clone() }],
-            A2uiEvent::Block { block: ContentBlock::Text { text } } =>
+            A2uiEvent::Block { block: ContentBlock::Text { text }, .. } =>
                 vec![AguiEvent::TextMessageContent { delta: text.clone() }],
             A2uiEvent::RunFinished { run_id } => vec![AguiEvent::RunFinished { run_id: run_id.clone() }],
+            A2uiEvent::RunCancelled { run_id, message, .. } =>
+                vec![AguiEvent::RunCancelled { run_id: run_id.clone(), message: message.clone() }],
             _ => vec![],
         }
     }
@@ -1425,6 +1415,7 @@ use crate::flint::token::AuthState;
 use gen_ui_mcp::{McpRegistry, McpServerHandle, SseTransport};
 use gen_ui_types::content_block::ContentBlock;
 use gen_ui_types::events::A2uiEvent;
+use gen_ui_types::lifecycle::{RunError, RunPhase};
 use gen_ui_types::transport::{EntityRecord, EntityTransport, ListResult};
 use gen_ui_types::view::{FilterOp, ViewDescriptor};
 use gen_ui_types::{CoreError, CoreResult};
@@ -1631,26 +1622,40 @@ pub enum AgUiEvent {
 /// Map a forge AG-UI event to zero or more of our A2UI events. Unhandled variants
 /// (state deltas, custom surfaces) yield nothing here and are handled by the A2UI
 /// surface layer directly — this path only feeds the streaming ContentBlock fold.
-pub fn agui_to_a2ui(ev: &AgUiEvent) -> Vec<A2uiEvent> {
+/// `run_id` is threaded in because AG-UI carries it only on the run-lifecycle
+/// frames, while every A2uiEvent needs one: a UI receiving two concurrent runs
+/// routes blocks by run_id, so a Block without it is unroutable.
+pub fn agui_to_a2ui(run_id: &str, ev: &AgUiEvent) -> Vec<A2uiEvent> {
     match ev {
         AgUiEvent::RunStarted { run_id } => vec![A2uiEvent::RunStarted { run_id: run_id.clone() }],
-        AgUiEvent::TextMessageContent { delta } => {
-            vec![A2uiEvent::Block { block: ContentBlock::Text { text: delta.clone() } }]
-        }
+        AgUiEvent::TextMessageContent { delta } => vec![A2uiEvent::Block {
+            run_id: run_id.to_string(),
+            block: ContentBlock::Text { text: delta.clone() },
+        }],
         AgUiEvent::ToolCallStart { tool_call_id, tool_name } => vec![A2uiEvent::Block {
+            run_id: run_id.to_string(),
             block: ContentBlock::ToolUse { id: tool_call_id.clone(), name: tool_name.clone(), input_json: "{}".into() },
         }],
         AgUiEvent::RunFinished { run_id } => vec![A2uiEvent::RunFinished { run_id: run_id.clone() }],
-        AgUiEvent::RunError { message } => vec![A2uiEvent::RunError { message: message.clone() }],
+        AgUiEvent::RunError { message } => vec![A2uiEvent::RunError {
+            run_id: run_id.to_string(),
+            error: RunError {
+                code: "forge_run_error".to_string(),
+                phase: RunPhase::Generation,
+                message: message.clone(),
+                retryable: false,
+                diagnostics: None,
+            },
+        }],
         AgUiEvent::Other => vec![],
     }
 }
 
 /// Parse one SSE `data:` payload (a JSON AgUiEvent) into A2UI events. Returns an empty
 /// vec for keep-alives / unparseable frames rather than erroring the whole stream.
-pub fn parse_agui_frame(data: &str) -> Vec<A2uiEvent> {
+pub fn parse_agui_frame(run_id: &str, data: &str) -> Vec<A2uiEvent> {
     match serde_json::from_str::<AgUiEvent>(data) {
-        Ok(ev) => agui_to_a2ui(&ev),
+        Ok(ev) => agui_to_a2ui(run_id, &ev),
         Err(_) => vec![],
     }
 }
@@ -1912,10 +1917,10 @@ fn auth_state_machine_tracks_bearer_and_refresh() {
 #[test]
 fn agui_text_delta_folds_to_content_block_text() {
     let frame = r#"{"type":"TextMessageContent","delta":"hello"}"#;
-    let events = parse_agui_frame(frame);
+    let events = parse_agui_frame("r1", frame);
     assert_eq!(events.len(), 1);
     match &events[0] {
-        A2uiEvent::Block { block: ContentBlock::Text { text } } => assert_eq!(text, "hello"),
+        A2uiEvent::Block { block: ContentBlock::Text { text }, .. } => assert_eq!(text, "hello"),
         other => panic!("expected Text block, got {other:?}"),
     }
 }
@@ -1923,13 +1928,13 @@ fn agui_text_delta_folds_to_content_block_text() {
 #[test]
 fn agui_run_lifecycle_and_toolcall_map_to_a2ui() {
     // RunStarted → A2uiEvent::RunStarted.
-    let started = agui_to_a2ui(&AgUiEvent::RunStarted { run_id: "r1".into() });
+    let started = agui_to_a2ui("r1", &AgUiEvent::RunStarted { run_id: "r1".into() });
     assert!(matches!(started.as_slice(), [A2uiEvent::RunStarted { run_id }] if run_id == "r1"));
 
     // ToolCallStart → a ToolUse ContentBlock (name + id preserved).
-    let tool = parse_agui_frame(r#"{"type":"ToolCallStart","tool_call_id":"t9","tool_name":"search"}"#);
+    let tool = parse_agui_frame("r1", r#"{"type":"ToolCallStart","tool_call_id":"t9","tool_name":"search"}"#);
     match tool.as_slice() {
-        [A2uiEvent::Block { block: ContentBlock::ToolUse { id, name, .. } }] => {
+        [A2uiEvent::Block { block: ContentBlock::ToolUse { id, name, .. }, .. }] => {
             assert_eq!(id, "t9");
             assert_eq!(name, "search");
         }
@@ -1937,8 +1942,8 @@ fn agui_run_lifecycle_and_toolcall_map_to_a2ui() {
     }
 
     // Unknown/keepalive frames yield nothing rather than erroring the stream.
-    assert!(parse_agui_frame(":keep-alive").is_empty());
-    assert!(parse_agui_frame(r#"{"type":"StateDelta","delta":[]}"#).is_empty());
+    assert!(parse_agui_frame("r1", ":keep-alive").is_empty());
+    assert!(parse_agui_frame("r1", r#"{"type":"StateDelta","delta":[]}"#).is_empty());
 }
 RUST
   ok "flint tests: token lifecycle · AuthState machine · AG-UI→ContentBlock folding"
@@ -4793,7 +4798,48 @@ mkdir -p "$OUT/crates/gen_ui_inference"
 cp -R "$TEMPLATE_DIR/rust/gen_ui_inference/." "$OUT/crates/gen_ui_inference/"
 mkdir -p "$OUT/vendor"
 cp -R "$TEMPLATE_DIR/rust/vendor/llama-cpp-2" "$OUT/vendor/llama-cpp-2"
-ok "gen_ui_inference: pinned llama.cpp mobile lane + reproducible sys-feature patch"
+ok "gen_ui_inference: per-device lanes (llama.cpp · LiteRT-LM · MLX) + vendored sys-feature patch"
+
+# ── gen_ui_context (L2): deterministic, engine-neutral context assembly ──────
+# Owns capability resolution, token budgets, placement, and history strategy.
+# Engine-neutral on purpose: platform crates supply history/retrieval/tool
+# adapters, so swapping an inference lane never changes how context is built.
+mkdir -p "$OUT/crates/gen_ui_context"
+cp -R "$TEMPLATE_DIR/rust/gen_ui_context/." "$OUT/crates/gen_ui_context/"
+ok "gen_ui_context: capability resolution, budgets, placement, history strategy"
+
+# ── Native inference bridges ────────────────────────────────────────────────
+# The Android and iOS lanes are half Rust, half native: Rust owns catalog,
+# download, verification, and memory preflight; a Kotlin/Swift bridge binds the
+# vendor SDK's generation call. The two halves agree by SYMBOL NAME, so both
+# come from the same placeholder substitution — rename one without the other and
+# the lane compiles, ships, and fails to find its bridge on device.
+#
+# They land under rust/native/ rather than inside the Flutter app because
+# scaffold-flutter.sh runs later and installs them into ios/Runner and
+# android/app; keeping them here means a rust-only scaffold still carries them.
+if [[ -d "$TEMPLATE_DIR/native" ]]; then
+  mkdir -p "$OUT/native"
+  cp -R "$TEMPLATE_DIR/native/." "$OUT/native/"
+  # Placeholder-named FILES need renaming too, not just their contents.
+  while IFS= read -r -d '' f; do
+    d="$(dirname "$f")"; b="$(basename "$f")"
+    nb="${b//__APP_CLASS__/$APP_CLASS}"; nb="${nb//__APP_NAME__/$APP_NAME}"
+    [[ "$nb" != "$b" ]] && mv "$f" "$d/$nb"
+  done < <(find "$OUT/native" -type f -name '*__*' -print0)
+  ok "native bridges: ${APP_CLASS}LiteRtLmBridge.kt (Android) · ${APP_CLASS}MlxBridge.swift (iOS)"
+fi
+
+# ── Native build + device gates ─────────────────────────────────────────────
+# The local-inference lanes cannot be certified on a host: they compile and then
+# fail at model load on-device. These gates are the on-device half of the proof
+# (arm64-only APK, required native libs present, no JNI/dlopen failure in logcat).
+if [[ -d "$TEMPLATE_DIR/scripts" ]]; then
+  mkdir -p "$OUT/../scripts"
+  cp -R "$TEMPLATE_DIR/scripts/." "$OUT/../scripts/"
+  chmod +x "$OUT"/../scripts/android/*.sh "$OUT"/../scripts/ios/*.sh 2>/dev/null || true
+  ok "device gates: scripts/android (build + runtime gates) · scripts/ios (xcframework)"
+fi
 
 # ── gen_ui_db_graph (C-004): SurrealDB 3.2 embedded hybrid graph-RAG ──────────
 # Own crate (not a gen_ui_db submodule) on purpose: surrealdb-core's build.rs
@@ -4815,9 +4861,112 @@ EOF
 cat > "$OUT/crates/gen_ui_agent/src/lib.rs" << EOF
 $MARK
 //! gen_ui_agent (L3) — PMPO loop (UAR embedded/external) over L0-L2 abstractions.
-//! Seam stub for C-001; implemented later.
+
+pub mod lane;
+pub use lane::{Lane, LaneError, LANE_CLOUD, LANE_LOCAL, LANE_UAR};
 EOF
-ok "gen_ui_agent: PMPO loop seam"
+
+# The lane model is THREE lanes, not two, and not "local vs remote". Each has a
+# different failure mode, so collapsing any pair produces an agent that cannot
+# report why a turn did not run.
+cat > "$OUT/crates/gen_ui_agent/src/lane.rs" << 'EOF'
+// TJ-ARCH-MOB-001 compliant
+//! Execution lane for a chat turn.
+//!
+//! Three lanes, deliberately not two:
+//!
+//! - `cloud` — BYOK remote provider. Cannot be the zero-config default: an
+//!   unconfigured install has no key.
+//! - `local` — on-device inference through `InferenceProvider`. The engine is a
+//!   per-DEVICE choice (llama.cpp desktop, LiteRT-LM Android, MLX on Apple), but
+//!   the lane is one thing to the agent.
+//! - `uar` — Universal Agent Runtime. HTTP/SSE on desktop and web; mobile must
+//!   use embedded-library mode, never a local sidecar.
+//!
+//! A lane row for `local` carries the model id in `model_id` and NO
+//! `provider_id` — there is no remote provider to name.
+
+use std::fmt;
+use std::str::FromStr;
+
+pub const LANE_CLOUD: &str = "cloud";
+pub const LANE_LOCAL: &str = "local";
+pub const LANE_UAR: &str = "uar";
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Lane {
+    Cloud,
+    Local,
+    Uar,
+}
+
+impl Lane {
+    pub const ALL: [Lane; 3] = [Lane::Cloud, Lane::Local, Lane::Uar];
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Lane::Cloud => LANE_CLOUD,
+            Lane::Local => LANE_LOCAL,
+            Lane::Uar => LANE_UAR,
+        }
+    }
+}
+
+impl fmt::Display for Lane {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LaneError(pub String);
+
+impl fmt::Display for LaneError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl std::error::Error for LaneError {}
+
+impl FromStr for Lane {
+    type Err = LaneError;
+
+    /// Reject unknown lanes loudly. A silent fallback to a default lane is the
+    /// worst outcome here: the turn runs somewhere the user did not choose, and
+    /// on the cloud lane that can mean sending data off-device unintentionally.
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            LANE_CLOUD => Ok(Lane::Cloud),
+            LANE_LOCAL => Ok(Lane::Local),
+            LANE_UAR => Ok(Lane::Uar),
+            other => Err(LaneError(format!(
+                "unknown lane '{other}' — expected '{LANE_CLOUD}', '{LANE_LOCAL}', or '{LANE_UAR}'"
+            ))),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_every_known_lane() {
+        for lane in Lane::ALL {
+            assert_eq!(lane.as_str().parse::<Lane>().unwrap(), lane);
+        }
+    }
+
+    #[test]
+    fn rejects_unknown_lane_and_names_the_alternatives() {
+        let err = "sidecar".parse::<Lane>().unwrap_err();
+        assert!(err.to_string().contains("unknown lane 'sidecar'"));
+        assert!(err.to_string().contains(LANE_UAR));
+    }
+}
+EOF
+ok "gen_ui_agent: PMPO loop seam + three-lane model (cloud · local · uar)"
 
 # ── LEAF crates ──────────────────────────────────────────────────────────────
 # C-007 fleshes out the three leaves. Leaves are THIN: they re-export intent-level
@@ -5372,13 +5521,19 @@ else
   echo "  (cargo not found — install Rust to verify)"
 fi
 
-# ── Version placeholder substitution ────────────────────────────────────────
-# Every @NAME@ token emitted above resolves here from versions.toml. Done as a
-# final pass rather than inline because the manifest heredocs must stay quoted.
-# Fails loudly on any leftover token: a surviving @FOO@ in a Cargo.toml is a
-# manifest that cannot parse, and it is far cheaper to catch it here than in a
-# user's first `cargo check`.
-step "Substituting version pins from versions.toml"
+# ── Placeholder substitution ────────────────────────────────────────────────
+# Two token families resolve here, as a final pass rather than inline because the
+# manifest heredocs must stay quoted (Rust's own ${...} and backticks have to
+# survive verbatim):
+#   @NAME@     version pins, from versions.toml via lib-versions.sh
+#   __NAME__   app identity, in files copied out of assets/templates/
+# See references/generator-placeholders.md for the contract.
+#
+# Fails loudly on any leftover token. A surviving @FOO@ in a Cargo.toml is a
+# manifest that cannot parse, and a surviving __APP_ID__ in a JNI class lookup is
+# a lane that compiles and then fails to find its bridge at runtime — far cheaper
+# to catch here than on a device.
+step "Substituting version pins and app identity"
 while IFS= read -r -d '' f; do
   sed -i.bak \
     -e "s|@RUST_VERSION@|${RUST_VERSION}|g" \
@@ -5386,17 +5541,22 @@ while IFS= read -r -d '' f; do
     -e "s|@SURREALDB_VERSION@|${SURREALDB_VERSION}|g" \
     -e "s|@PGLITE_OXIDE_VERSION@|${PGLITE_OXIDE_VERSION}|g" \
     -e "s|@EMBEDDING_DIM@|${EMBEDDING_DIM}|g" \
+    -e "s|__APP_CLASS__|${APP_CLASS}|g" \
+    -e "s|__APP_ID__|${APP_ID}|g" \
+    -e "s|__ENV_PREFIX__|${ENV_PREFIX}|g" \
+    -e "s|__APP_NAME__|${APP_NAME}|g" \
     "$f" && rm -f "$f.bak"
-done < <(find "$OUT" -type f \( -name '*.toml' -o -name '*.rs' -o -name '*.yaml' \) -print0)
+done < <(find "$OUT" "$OUT/../scripts" -type f \( -name '*.toml' -o -name '*.rs' -o -name '*.yaml' \
+  -o -name '*.kt' -o -name '*.swift' -o -name '*.sh' \) -print0 2>/dev/null)
 
-LEFTOVER="$(grep -rlE '@[A-Z_]+@' "$OUT" 2>/dev/null || true)"
+LEFTOVER="$(grep -rlE '@[A-Z_]+@|__[A-Z_]+__' "$OUT" "$OUT/../scripts" 2>/dev/null || true)"
 if [[ -n "$LEFTOVER" ]]; then
-  echo "FATAL: unsubstituted version placeholders remain in:" >&2
+  echo "FATAL: unsubstituted placeholders remain in:" >&2
   echo "$LEFTOVER" >&2
-  echo "Add the missing mapping to lib-versions.sh and the sed pass above." >&2
+  echo "Add the missing mapping to the sed pass above (and lib-versions.sh for @ tokens)." >&2
   exit 1
 fi
-ok "version pins substituted (rust ${RUST_VERSION}, frb ${FRB_VERSION}, surrealdb ${SURREALDB_VERSION})"
+ok "substituted: rust ${RUST_VERSION}, frb ${FRB_VERSION}, app ${APP_NAME} (${APP_ID})"
 
 echo ""
 echo -e "${GREEN}✅ Layered gen_ui workspace scaffolded in $OUT${NC}"
