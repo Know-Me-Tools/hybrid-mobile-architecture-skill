@@ -15,6 +15,18 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      # validate-gitops.sh calls `kustomize` and `rg`; ubuntu-24.04 ships
+      # neither. Without these the job exits 127 on the first call — which is
+      # why this workflow had never passed on any run, including on main.
+      - name: Install validator tools
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" \
+            | bash -s -- 5.7.1 /usr/local/bin
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ripgrep
+          kustomize version
+          rg --version | head -1
       - run: bash deploy/scripts/validate-catalog.sh
       - run: bash deploy/scripts/validate-gitops.sh
 
