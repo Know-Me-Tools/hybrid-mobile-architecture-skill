@@ -9,15 +9,19 @@ OUT="${1:-desktop}"
 APP_NAME="${2:-my-desktop-app}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Version pins come from versions.toml — never inline a literal here.
+source "$SCRIPT_DIR/lib-versions.sh"
+
 # A standalone Tauri scaffold still needs the shared ContentBlock package. In a
 # full hybrid scaffold C-007 already emitted it before this script runs.
 if [[ ! -f "$OUT/../packages/gen-ui-react/package.json" ]]; then
   bash "$SCRIPT_DIR/scaffold-packages.sh" "$OUT/.."
 fi
 
-GREEN='\033[0;32m'; CYAN='\033[0;36m'; NC='\033[0m'
+GREEN='\033[0;32m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
 step() { echo -e "\n${CYAN}── $1${NC}"; }
 ok()   { echo -e "${GREEN}  ✓${NC} $1"; }
+warn() { echo -e "${YELLOW}  !${NC} $1"; }
 
 step "Creating Tauri + React 19 app: $APP_NAME"
 mkdir -p "$OUT"
@@ -43,60 +47,66 @@ cat > package.json << PKGEOF
     "test:watch":  "vitest"
   },
   "dependencies": {
-    "react":                  "^19.0.0",
-    "react-dom":              "^19.0.0",
-    "@tauri-apps/api":        "^2.0.0",
-    "@tauri-apps/plugin-shell": "^2.0.0",
-    "@tauri-apps/plugin-store": "^2.0.0",
-    "@tauri-apps/plugin-os":  "^2.0.0",
-    "zustand":                "^5.0.0",
-    "immer":                  "^10.0.0",
-    "loro-crdt":              "^1.13.6",
-    "@tanstack/react-router": "^1.0.0",
-    "@tanstack/react-table":  "^8.0.0",
-    "@tanstack/react-virtual": "^3.0.0",
-    "@electric-sql/pglite":   "0.5.4",
-    "@electric-sql/pglite-pgvector": "0.0.5",
+    "react":                  "^${REACT_VERSION}",
+    "react-dom":              "^${REACT_VERSION}",
+    "@tauri-apps/api":        "^2.11.1",
+    "@tauri-apps/plugin-shell": "^2.3.5",
+    "@tauri-apps/plugin-store": "^2.4.4",
+    "@tauri-apps/plugin-os":  "^2.3.2",
+    "zustand":                "^${ZUSTAND_VERSION}",
+    "immer":                  "^11.1.15",
+    "loro-crdt":              "^1.13.7",
+    "@tanstack/react-router": "^1.170.18",
+    "@tanstack/react-table":  "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.6",
+    "@electric-sql/pglite":   "${PGLITE_VERSION}",
+    "@electric-sql/pglite-sync": "^0.6.5",
+    "@electric-sql/pglite-pgvector": "${PGLITE_PGVECTOR_VERSION}",
     "@prometheus-ags/prometheus-entity-management": "3.0.0-alpha.0",
     "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
     "@prometheus-ags/tauri-plugin-gen-ui": "file:../rust/crates/tauri-plugin-gen-ui/guest-js",
-    "tailwindcss":            "^4.0.0",
+    "tailwindcss":            "^4.3.3",
     "tw-animate-css":         "^1.4.0",
-    "@tailwindcss/vite":      "^4.0.0",
-    "lucide-react":           "^0.400.0",
-    "class-variance-authority": "^0.7.0",
-    "clsx":                   "^2.1.0",
-    "tailwind-merge":         "^2.0.0",
-    "react-markdown":         "^9.0.0",
+    "@tailwindcss/vite":      "^4.3.3",
+    "lucide-react":           "^1.25.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx":                   "^2.1.1",
+    "tailwind-merge":         "^3.6.0",
+    "react-markdown":         "^10.1.0",
     "@assistant-ui/react-markdown": "^0.14.6",
-    "@codemirror/view":       "^6.0.0",
-    "@codemirror/lang-javascript": "^6.0.0",
+    "@codemirror/view":       "^6.43.6",
+    "@codemirror/lang-javascript": "^6.2.5",
     "@codesandbox/sandpack-react": "^2.20.0",
-    "framer-motion":          "^11.0.0",
+    "framer-motion":          "^12.42.2",
     "@assistant-ui/react":    "^0.14.27",
     "@base-ui/react":         "^1.6.0",
     "@mlc-ai/web-llm":        "0.2.84",
     "remark-gfm":             "^4.0.1",
     "mermaid":                "^11.16.0",
     "dompurify":              "^3.4.0",
-    "shadcn":                 "^4.13.0"
+    "recharts":               "3.9.2",
+    "cmdk":                   "^1.1.1",
+    "sonner":                 "^2.0.7",
+    "next-themes":            "^0.4.6",
+    "zod":                    "^4.4.3",
+    "shadcn":                 "^4.13.1"
   },
   "devDependencies": {
-    "@tauri-apps/cli":        "^2.10.3",
-    "vite":                   "^8.0.0",
-    "@vitejs/plugin-react":   "^6.0.0",
-    "typescript":             "^7.0.0",
-    "@types/react":           "^19.0.0",
-    "@types/react-dom":       "^19.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "eslint":                 "^9.0.0",
-    "eslint-plugin-react-hooks": "^5.0.0",
-    "prettier":               "^3.0.0",
-    "vitest":                 "^3.0.0",
-    "@testing-library/react": "^16.0.0",
-    "@testing-library/user-event": "^14.0.0",
-    "jsdom":                  "^25.0.0"
+    "@tauri-apps/cli":        "^${TAURI_CLI_VERSION}",
+    "vite":                   "^${VITE_VERSION}",
+    "@vitejs/plugin-react":   "^6.0.3",
+    "typescript":             "^${TYPESCRIPT_VERSION}",
+    "@types/react":           "^19.2.17",
+    "@types/react-dom":       "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.64.0",
+    "@typescript-eslint/parser": "^8.64.0",
+    "eslint":                 "^10.7.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier":               "^3.9.5",
+    "vitest":                 "^4.1.10",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "jsdom":                  "^29.1.1"
   }
 }
 PKGEOF
@@ -1048,6 +1058,130 @@ export async function acceptOfferSession(
 EOF
 ok "src/features/vault/sync/webrtcDuplex.ts"
 
+# ── vault: hook + view ──────────────────────────────────────────────────────
+# Rule 16 applies to the vault like every other feature: components import
+# HOOKS, never a repository or a peer session. Without this seam a component
+# would reach VaultRepository directly, and the pairing lifecycle (which owns a
+# live WebRTC session) would end up duplicated across every view that shows it.
+mkdir -p src/features/vault/hooks src/features/vault/components
+cat > src/features/vault/hooks/useVault.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — hooks compose stores/repositories; no invoke() here.
+import { useCallback, useEffect, useState } from 'react'
+import type { PGlite } from '@electric-sql/pglite'
+import { openVault, type VaultFact, type VaultRepository } from '../stores/vaultStore'
+
+export type VaultStatus = 'closed' | 'opening' | 'ready' | 'error'
+
+/**
+ * The vault seam for React.
+ *
+ * The vault is a Loro CRDT document synced device-to-device only — it is
+ * structurally excluded from every server sync path (see the peer-profile-sync
+ * skill). This hook therefore exposes local facts and no "push to server"
+ * affordance: there is nowhere to push.
+ *
+ * The PGlite handle is passed IN rather than reached for: the vault must open
+ * against the same database the rest of the app uses, and a module-level
+ * singleton here would silently create a second one.
+ */
+export function useVault(db: PGlite | null) {
+  const [repo, setRepo] = useState<VaultRepository | null>(null)
+  const [facts, setFacts] = useState<VaultFact[]>([])
+  const [status, setStatus] = useState<VaultStatus>('closed')
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!db) return
+    let cancelled = false
+    setStatus('opening')
+    openVault(db)
+      .then((opened) => {
+        if (cancelled) return
+        setRepo(opened)
+        setFacts(opened.agentFacts())
+        setStatus('ready')
+      })
+      .catch((cause: unknown) => {
+        if (cancelled) return
+        setError(cause instanceof Error ? cause.message : String(cause))
+        setStatus('error')
+      })
+    // Cancellation matters: openVault touches persistent storage, and a
+    // component unmounted mid-open must not set state on a dead tree.
+    return () => {
+      cancelled = true
+    }
+  }, [db])
+
+  const remember = useCallback(
+    (fact: VaultFact) => {
+      if (!repo) return
+      repo.addAgentFact(fact)
+      setFacts(repo.agentFacts())
+    },
+    [repo],
+  )
+
+  return { facts, status, error, remember, isReady: status === 'ready' }
+}
+EOF
+ok "src/features/vault/hooks/useVault.ts"
+
+cat > src/features/vault/components/VaultPanel.tsx << 'EOF'
+// TJ-ARCH-MOB-001 compliant — imports the hook only; never a store or repository.
+import type { PGlite } from '@electric-sql/pglite'
+import { useVault } from '../hooks/useVault'
+
+export interface VaultPanelProps {
+  db: PGlite | null
+}
+
+/**
+ * Agent-learned facts, device-local. Flat 2.0: regions are separated by
+ * background fill only — no borders, dividers, or layout shadows.
+ */
+export function VaultPanel({ db }: VaultPanelProps) {
+  const { facts, status, error, isReady } = useVault(db)
+
+  if (status === 'error') {
+    return (
+      <section aria-label="Profile vault" className="rounded-lg bg-bgSurface p-4">
+        <p role="alert" className="text-danger">
+          Vault unavailable: {error}
+        </p>
+      </section>
+    )
+  }
+
+  return (
+    <section aria-label="Profile vault" aria-busy={!isReady} className="rounded-lg bg-bgSurface p-4">
+      <h2 className="text-textPrimary">Profile vault</h2>
+      <p className="text-textSecondary">
+        Synced between your own devices only — never to a server.
+      </p>
+      {!isReady ? (
+        <p className="text-textTertiary">Opening…</p>
+      ) : facts.length === 0 ? (
+        <p className="text-textTertiary">Nothing learned yet.</p>
+      ) : (
+        <ul>
+          {facts.map((fact) => (
+            <li key={fact.key} className="flex items-center justify-between bg-bgElevated p-2">
+              <span className="text-textSecondary">{fact.key}</span>
+              <span className="text-textPrimary">{fact.value}</span>
+              <time className="text-textTertiary" dateTime={fact.learnedAt}>
+                {fact.learnedAt}
+              </time>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+EOF
+ok "src/features/vault/components/VaultPanel.tsx"
+
 # ═══════════════════════════════════════════════════════════════════════════
 # features/memory — memory / graph-RAG panel. Store is the ONLY IPC layer
 # (invoke on desktop; the Rust core owns the graph store, never the browser).
@@ -1422,27 +1556,27 @@ EOF
 ok "src/main.tsx"
 
 # ── index.css (Tailwind 4) ─────────────────────────────────────────────────
+# theme.css is GENERATED from assets/templates/design-tokens/tokens.toml, the
+# SAME file that produces the Flutter token class. It used to be hand-written
+# here and hand-mirrored in Dart, and the two had already drifted apart on the
+# same role (#0B0F14 vs #0D0D18 for the app background) with nothing to catch it.
 cat > src/index.css << 'EOF'
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-
-@theme {
-  --color-background: #0B0F14;
-  --color-surface: #161D29;
-  --color-ember: #FF6A3D;
-  --color-violet: #8B78FF;
-  --color-text-primary: #F2F2FF;
-  --color-text-secondary: #9898C0;
-  --font-sans: 'Inter', sans-serif;
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-}
+/* Design tokens — generated. Edit assets/templates/design-tokens/tokens.toml
+   and re-run scripts/gen-design-tokens.sh; never edit theme.css by hand. */
+@import "./theme.css";
 
 :root { color-scheme: dark; }
-body { background: var(--color-background); color: var(--color-text-primary); font-family: var(--font-sans); }
+body { background: var(--color-bgCanvas); color: var(--color-textPrimary); font-family: var(--font-sans); }
+/* Flat 2.0: regions differ by background fill only. */
 * { border-color: transparent !important; box-shadow: none !important; }
 EOF
+
+mkdir -p src
+bash "$SCRIPT_DIR/gen-design-tokens.sh" ".." >/dev/null 2>&1 || true
+ok "design tokens generated from tokens.toml (shared with the Flutter surface)"
 ok "src/index.css"
 
 # ── Vitest config + boundary tests ─────────────────────────────────────────
@@ -1602,24 +1736,32 @@ cat > src-tauri/Cargo.toml << EOF
 name = "${APP_NAME}"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.96"
+rust-version = "${RUST_VERSION}"
 
 [lib]
 name = "${APP_NAME//-/_}"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "2.5.1", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["devtools"] }
-tauri-plugin-shell = "2"
-tauri-plugin-store = "2"
-tauri-plugin-os = "2"
+# Exact minors, not bare "2": a bare major silently resolves to whatever
+# published most recently, so two developers scaffolding a week apart get
+# different Tauri versions and only one of them reproduces a given bug.
+tauri = { version = "2.11.5", features = ["devtools"] }
+tauri-plugin-shell = "2.3.5"
+tauri-plugin-store = "2.4.4"
+tauri-plugin-os = "2.3.2"
+tauri-plugin-single-instance = "2.4.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-# Add path to shared gen_ui_core:
-# gen_ui_core = { path = "../../rust/gen_ui_core" }
+directories = "6"
+# The Rust core reaches this shell through the generated Tauri plugin, which is
+# already a path dependency of the workspace. gen_ui_core is a CONCEPT (all
+# networking/LLM/persistence in Rust), not a single crate — it is realised as
+# the layered gen_ui_* family under ../../rust/crates.
+tauri-plugin-gen-ui = { path = "../../rust/crates/tauri-plugin-gen-ui" }
 EOF
 
 cat > src-tauri/tauri.conf.json << EOF
@@ -1801,8 +1943,23 @@ PYEOF
 # The local npm CLI is installed later. The environment gate already requires
 # cargo-tauri, so use that deterministic bootstrap instead of an ambiguous
 # `npx tauri` registry lookup.
-cargo tauri icon app-icon.png > /dev/null
-ok "src-tauri/icons/ (placeholder — replace app-icon.png + rerun \`tauri icon\` with real branding)"
+# Guarded like the pnpm registry step below: cargo-tauri is an OPTIONAL tool, and
+# a missing optional tool must not destroy a scaffold that has already written
+# every file. Without this the run died here with a bare
+# "no such command: `tauri`" after emitting the entire project.
+if cargo tauri --version &>/dev/null; then
+  cargo tauri icon app-icon.png > /dev/null
+  ok "src-tauri/icons/ (placeholder — replace app-icon.png + rerun \`tauri icon\` with real branding)"
+else
+  # tauri::generate_context! reads the icon set at COMPILE time, so an empty
+  # icons/ directory is not a cosmetic gap — `cargo check` on src-tauri fails
+  # until these exist. Say so, rather than letting it surface later as a
+  # confusing build error.
+  warn "cargo-tauri not found — icons not generated"
+  echo "     src-tauri won't compile until they exist. Install and run inside ${OUT}/:"
+  echo "       cargo install tauri-cli --version '^2' --locked"
+  echo "       cargo tauri icon app-icon.png"
+fi
 
 # ── Capabilities (Tauri v2 ACL) ──────────────────────────────────────────────
 # Tauri v2's permission system denies every IPC/event call by default; without an
@@ -1847,10 +2004,19 @@ fi
 step "Installing Shadcn UI and Assistant UI source components"
 if [[ "${SKIP_INSTALL:-0}" == "1" ]]; then
   ok "registry component installation skipped with dependencies"
-else
+elif command -v pnpm &>/dev/null; then
   pnpm exec shadcn add button sheet sidebar toggle-group switch card -y
   pnpm dlx assistant-ui@latest add thread thread-list markdown-text --use-pnpm -y
   ok "Shadcn primitives + Assistant UI thread/composer/thread-list"
+else
+  # The dependency install above already falls back to npm, but this step used
+  # to call pnpm UNCONDITIONALLY — so on any machine without pnpm the whole
+  # scaffold died here, after having written every file. Guard it the same way
+  # and tell the user exactly how to finish, rather than failing the run.
+  warn "pnpm not found — skipping registry components"
+  echo "     Install pnpm and run inside ${OUT}/:"
+  echo "       pnpm exec shadcn add button sheet sidebar toggle-group switch card -y"
+  echo "       pnpm dlx assistant-ui@latest add thread thread-list markdown-text --use-pnpm -y"
 fi
 
 echo ""

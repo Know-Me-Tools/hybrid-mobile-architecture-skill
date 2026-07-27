@@ -121,11 +121,11 @@ Run the `a11y-gate` skill over the result like any other UI.
 
 ## Reference implementation
 
-`apps/knowme-poc/desktop/src/shared/components/Titlebar.tsx` is the worked example in
-this repository: `isTauri()`-gated window resolution, macOS/Windows control variants,
-explicit `startDragging()`, aria-labeled controls, brand lockup centered via flex
-spacers that are draggable because of the explicit call. Read it before writing a new
-one — and prefer adapting it over starting from scratch (Rule 2, Rule 3).
+The scaffolded `desktop/src/shared/components/Titlebar.tsx` is the worked example:
+`isTauri()`-gated window resolution, macOS/Windows control variants, explicit
+`startDragging()`, aria-labeled controls, brand lockup centered via flex spacers
+that are draggable because of the explicit call. Read it before writing a new one —
+and prefer adapting it over starting from scratch (Rule 2, Rule 3).
 
 ## Checklist
 

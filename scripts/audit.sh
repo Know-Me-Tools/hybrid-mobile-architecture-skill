@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 # scripts/audit.sh
 # Audit a codebase for TJ-ARCH-MOB-001 architectural compliance.
-# Usage: bash scripts/audit.sh <platform: flutter|tauri|rust|doc-consistency|all> [project-root]
+# Usage: bash scripts/audit.sh <platform: flutter|tauri|rust|doc-consistency|generator-purity|all> [project-root]
 #
 # `doc-consistency` audits the PACK's own authority docs (SKILL.md, CLAUDE.md,
 # AGENTS.md, README.md, references/*.md) against versions.toml — the pack's
 # instructions to agents must not contradict themselves.
 #
+# `generator-purity` audits the GENERATOR (scripts/ + assets/templates/) for
+# leaked product vocabulary. This pack generates apps for anyone; every KnowMe
+# name, brand value, or spec reference that reaches a template is shipped to
+# every user of the pack. Run it before and after porting anything out of a
+# real product codebase.
+#
 # `all` audits every surface of a hybrid project from its root, auto-detecting
 # mobile/ (Flutter), desktop/ (Tauri), and rust/gen_ui_core — and verifies the
-# KnowMe-slice layer contracts on each present surface in one pass.
+# vertical-slice layer contracts on each present surface in one pass.
 
 set -euo pipefail
 
@@ -62,6 +68,15 @@ if [[ "$PLATFORM" == "all" ]]; then
   echo -e "\033[0;36m########## Doc consistency (pack authority docs) ##########\033[0m"
   bash "$SELF" "doc-consistency" || RC=1
   ran_any=1
+
+  # Generator purity is also pack-global: it audits the SCAFFOLDERS, not the
+  # scaffolded project. Skipped when scripts/ isn't present (i.e. we are being
+  # run from inside a generated app rather than from the pack).
+  if [[ -d "$(dirname "$SELF")/../assets/templates" ]]; then
+    echo ""
+    echo -e "\033[0;36m########## Generator purity (no product vocabulary) ##########\033[0m"
+    bash "$SELF" "generator-purity" || RC=1
+  fi
 
   if [[ "$ran_any" == "0" ]]; then
     echo "Error: no surfaces found under $HYBRID_ROOT (expected mobile/, desktop/, or rust/gen_ui_core)"
@@ -500,15 +515,22 @@ elif [[ "$PLATFORM" == "doc-consistency" ]]; then
     echo -e "${CYAN}[02] Stale version strings${NC}"
     # pattern|human label — each is a value versions.toml has superseded.
     STALE_CHECKS=(
-      '1\.80\+|Rust 1.80+ (now 1.96+)'
-      '1\.95\+|Rust 1.95+ (now 1.96+)'
-      'Node\.js[^0-9]*22|Node 22 (now 24+)'
-      '22\+ LTS|Node 22+ LTS (now 24+)'
-      'Riverpod 2\.[x6]|Riverpod 2.x/2.6 (now 3.3)'
-      '2\.3\+.*flutter_rust_bridge|flutter_rust_bridge_codegen.*2\.3\+|frb 2.3+ (now 2.12+)'
-      'Vite 7|Vite 7 (now 8)'
-      '"vite": "\^7|vite ^7 dep pin (now ^8)'
-      'Flutter (SDK \| )?3\.29\+|Flutter 3.29+ (now beta channel)'
+      '1\.80\+|Rust 1.80+ (now 1.97.1)'
+      '1\.95\+|Rust 1.95+ (now 1.97.1)'
+      '1\.96\+|Rust 1.96+ floor (now exact 1.97.1)'
+      'Node\.js[^0-9]*22|Node 22 (now 26.5.0)'
+      '22\+ LTS|Node 22+ LTS (now 26.5.0)'
+      'Node\.js[^0-9]*24\+|Node 24+ floor (now exact 26.5.0)'
+      'Riverpod 2\.[x6]|Riverpod 2.x/2.6 (now 3.3.1)'
+      '2\.3\+.*flutter_rust_bridge|flutter_rust_bridge_codegen.*2\.3\+|frb 2.3+ (now 2.12.0)'
+      'frb 2\.12\+|frb 2.12+ floor (now exact 2.12.0)'
+      'Vite 7|Vite 7 (now 8.1.5)'
+      '"vite": "\^7|vite ^7 dep pin (now ^8.1.5)'
+      'Flutter (SDK \| )?3\.29\+|Flutter 3.29+ (now 3.47.0-0.1.pre)'
+      'Tauri CLI 2\.10\+|Tauri CLI 2.10+ (now 2.11.4)'
+      # A single "mobile" inference lane is the superseded model: Android and
+      # iOS use different engines (LiteRT-LM vs MLX-Swift).
+      'mobile.*=.*llama-cpp-2|single "mobile" inference lane (now per-device android/ios)'
     )
     for entry in "${STALE_CHECKS[@]}"; do
       pattern="${entry%|*}"; label="${entry##*|}"
@@ -522,13 +544,167 @@ elif [[ "$PLATFORM" == "doc-consistency" ]]; then
 
     echo ""
     echo -e "${CYAN}[03] Inference-engine authority${NC}"
-    # Per-lane engines (versions.toml [inference]): desktop/mobile=llama-cpp-2,
-    # web=WebLLM, mistral.rs optional. 'candle' as a current-engine claim is stale.
-    hits=$(grep -lE 'candle' "${AUTHORITY_DOCS[@]}" 2>/dev/null || true)
+    # Per-device engines (versions.toml [inference]): desktop=llama-cpp-2,
+    # android=LiteRT-LM, ios=MLX-Swift, macos=MLX-C, web=WebLLM; mistral.rs
+    # optional. 'candle' as a TEXT-GENERATION engine claim is stale — but
+    # fastembed legitimately uses candle for EMBEDDINGS, so match only the
+    # generation claim, not every mention of the word.
+    hits=$(grep -lE 'candle[^)]*\b(inference|generation|LLM|chat)|\b(inference|generation) (engine )?(via|using|with) candle' "${AUTHORITY_DOCS[@]}" 2>/dev/null || true)
     if [[ -n "$hits" ]]; then
-      fail "Stale 'candle' engine references — in: $(echo "$hits" | xargs -n1 basename | tr '\n' ' ')"
+      fail "Stale 'candle' generation-engine references — in: $(echo "$hits" | xargs -n1 basename | tr '\n' ' ')"
     else
-      pass "No stale candle engine references"
+      pass "No stale candle generation-engine references"
+    fi
+
+    echo ""
+    echo -e "${CYAN}[04] Skill distribution parity${NC}"
+    # Three lists must agree, or a skill is authored and shipped to nobody:
+    #   templates/project-skills/*/SKILL.md  — what exists
+    #   .claude-plugin/plugin.json "skills"  — what the plugin distributes
+    #   scripts/add-project-skills.sh        — what generated projects receive
+    # This drifted once already (4 skills authored, 0 shipped), silently,
+    # because nothing compared them.
+    TEMPLATE_SKILLS="$(find "$PACK_ROOT/templates/project-skills" -maxdepth 2 -name 'SKILL.md' 2>/dev/null \
+      | xargs -n1 dirname 2>/dev/null | xargs -n1 basename 2>/dev/null | sort)"
+    MANIFEST_SKILLS="$(python3 -c "
+import json,sys
+try:
+    d = json.load(open('$PACK_ROOT/.claude-plugin/plugin.json'))
+    for s in sorted(x.split('/')[-1] for x in d.get('skills', []) if x != './'):
+        print(s)
+except Exception:
+    sys.exit(0)
+" 2>/dev/null)"
+
+    if [[ -z "$TEMPLATE_SKILLS" ]]; then
+      warn "No template skills found — skipping distribution parity"
+    elif [[ "$TEMPLATE_SKILLS" == "$MANIFEST_SKILLS" ]]; then
+      pass "plugin.json distributes all $(echo "$TEMPLATE_SKILLS" | wc -l | tr -d ' ') template skills"
+    else
+      missing="$(comm -23 <(echo "$TEMPLATE_SKILLS") <(echo "$MANIFEST_SKILLS") | tr '\n' ' ')"
+      extra="$(comm -13 <(echo "$TEMPLATE_SKILLS") <(echo "$MANIFEST_SKILLS") | tr '\n' ' ')"
+      [[ -n "$missing" ]] && fail "Skills authored but NOT distributed by plugin.json: $missing"
+      [[ -n "$extra" ]] && fail "plugin.json lists skills with no template: $extra"
+    fi
+
+    # The installer must DISCOVER skills, not carry a literal list that goes
+    # stale the moment someone adds a skill without editing this script.
+    if grep -qE 'for skill in [a-z-]+ [a-z-]+ [a-z-]+' "$PACK_ROOT/scripts/add-project-skills.sh" 2>/dev/null; then
+      fail "add-project-skills.sh hardcodes a skill list — must discover via find"
+    else
+      pass "add-project-skills.sh discovers skills dynamically"
+    fi
+
+    # The six harness trees are COPIES of templates/project-skills. A copy edited
+    # in place diverges silently, and each harness then teaches a different rule
+    # for the same situation.
+    if [[ -x "$PACK_ROOT/scripts/sync-harness-skills.sh" ]]; then
+      if bash "$PACK_ROOT/scripts/sync-harness-skills.sh" --check >/dev/null 2>&1; then
+        pass "harness skill trees match templates/project-skills"
+      else
+        fail "harness skill trees drifted — run: bash scripts/sync-harness-skills.sh"
+      fi
+    fi
+
+    echo ""
+    echo -e "${CYAN}[05] Per-device inference coverage${NC}"
+    # The per-device lane split is the core platform-support learning. Authority
+    # docs must name the Android and Apple engines, not a single "mobile" lane.
+    for engine in 'LiteRT-LM' 'MLX'; do
+      if grep -qlE "$engine" "${AUTHORITY_DOCS[@]}" 2>/dev/null; then
+        pass "Authority docs reference the $engine lane"
+      else
+        fail "No authority doc documents the $engine lane — per-device inference undocumented"
+      fi
+    done
+  fi
+
+# ── generator-purity: keep product vocabulary out of the generator ───────────
+# This pack scaffolds applications for anyone. Anything KnowMe-specific that
+# reaches scripts/ or assets/templates/ is emitted into every generated project:
+# another company's product name in their source tree, another company's brand
+# colour in their theme, a spec reference (FUNC-SPEC §07) to a document they
+# cannot read.
+#
+# The risk is highest when porting learnings out of the product codebase, which
+# is exactly what this pack does — 46 of 133 production Rust files mention
+# KnowMe. Porting without this gate leaks silently: the code compiles, the tests
+# pass, and the branding ships.
+#
+# Product-specific values belong in PLACEHOLDERS (see references/generator-placeholders.md),
+# substituted at scaffold time. Legitimate exceptions go in the allowlist below
+# with a reason — never by loosening a pattern.
+elif [[ "$PLATFORM" == "generator-purity" ]]; then
+  PACK_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+  # Surfaces that become user code. references/ and docs/ are EXCLUDED: they are
+  # agent-facing prose where citing the reference product as a case study is the
+  # point, not a leak.
+  PURITY_PATHS=()
+  [[ -d "$PACK_ROOT/scripts" ]]          && PURITY_PATHS+=("$PACK_ROOT/scripts")
+  [[ -d "$PACK_ROOT/assets/templates" ]] && PURITY_PATHS+=("$PACK_ROOT/assets/templates")
+  [[ -d "$PACK_ROOT/templates" ]]        && PURITY_PATHS+=("$PACK_ROOT/templates")
+
+  echo -e "${CYAN}[01] Generator surfaces${NC}"
+  if [[ ${#PURITY_PATHS[@]} -eq 0 ]]; then
+    fail "No generator surfaces found (scripts/, assets/templates/, templates/)"
+  else
+    pass "Auditing: $(for p in "${PURITY_PATHS[@]}"; do basename "$p"; done | tr '\n' ' ')"
+  fi
+
+  # Allowlist: file-path substrings exempt from the scan, each with a reason.
+  #   - vendor/          third-party source vendored verbatim; patching it to
+  #                      strip strings would defeat the point of pinning it.
+  #   - audit.sh         this file names the patterns it searches for.
+  PURITY_ALLOW=(
+    'assets/templates/rust/vendor/'
+    'scripts/audit.sh'
+    # Maintenance utilities for THIS repo's own wiki/worktree/editor config.
+    # They never emit a line of user code, so product names in them ship nowhere.
+    'scripts/consolidate-prometheus-wikis.py'
+    'scripts/worktree-consolidation-inventory.py'
+    'scripts/merge-zed-context-servers.mjs'
+  )
+  is_allowed() {
+    local f="$1"
+    for a in "${PURITY_ALLOW[@]}"; do [[ "$f" == *"$a"* ]] && return 0; done
+    return 1
+  }
+
+  if [[ ${#PURITY_PATHS[@]} -gt 0 ]]; then
+    echo ""
+    echo -e "${CYAN}[02] Product vocabulary${NC}"
+    # pattern|label — each would ship into a stranger's codebase.
+    PURITY_CHECKS=(
+      'KnowMe|knowme|KNOWME|product name "KnowMe"'
+      'FUNC-SPEC|spec reference "FUNC-SPEC" (unreadable outside the product repo)'
+      'tools\.knowme|Android applicationId "tools.knowme"'
+      'know-me\.tools|product domain "know-me.tools"'
+      'FF6A3D|ff6a3d|brand accent colour #FF6A3D'
+    )
+    for entry in "${PURITY_CHECKS[@]}"; do
+      pattern="${entry%|*}"; label="${entry##*|}"
+      offenders=""
+      while IFS= read -r f; do
+        is_allowed "$f" && continue
+        offenders+="${f#"$PACK_ROOT"/} "
+      done < <(grep -rlE "$pattern" "${PURITY_PATHS[@]}" 2>/dev/null || true)
+
+      if [[ -n "$offenders" ]]; then
+        fail "Leaked $label — in: $offenders"
+      else
+        pass "No leaked $label"
+      fi
+    done
+
+    echo ""
+    echo -e "${CYAN}[03] Placeholder hygiene${NC}"
+    # A placeholder that survives into generated output is worse than a leak:
+    # __APP_NAME__ in a Cargo.toml is a manifest that will not parse.
+    if grep -rlE '__[A-Z_]+__|@[A-Z_]+@' "${PURITY_PATHS[@]}" 2>/dev/null | grep -q .; then
+      pass "Placeholder tokens present (substituted at scaffold time)"
+    else
+      warn "No placeholder tokens found — expected once product-derived files are templated"
     fi
   fi
 fi

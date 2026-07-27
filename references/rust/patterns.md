@@ -1,5 +1,5 @@
 # Rust Core Patterns Reference
-> gen_ui_core · Rust 1.96+ · Tokio 1.40 · llama-cpp-2 (desktop + mobile default; mistral.rs optional) · **SurrealDB 3.2** · flutter_rust_bridge 2.12 · Tauri 2.x
+> gen_ui_core · Rust 1.97.1 · Tokio 1.40 · per-device inference (desktop llama-cpp-2 · Android LiteRT-LM · iOS MLX-Swift · web WebLLM; mistral.rs optional) · **SurrealDB 3.2.1** · flutter_rust_bridge 2.12.0 · Tauri 2.11.4
 
 ## Workspace layout (layered — compile-cache friendly)
 
@@ -11,40 +11,65 @@ isolated in its own crate specifically because `surrealdb-core`'s `build.rs` re-
 (#6954) causes long recompiles otherwise.
 
 ```
-rust/
-  gen_ui_types/        # shared traits + newtypes + enums (FROZEN seam — c001)
-  gen_ui_protocol/     # A2UI / AG-UI adapters, ProtocolPipeline
-  gen_ui_client/       # Anthropic HTTP/2 + SSE client
-  gen_ui_inference/    # InferenceProvider impls: llama-cpp-2 default / mistral.rs optional (CPU-bound → spawn_blocking)
-  gen_ui_mcp/          # McpClient + McpRegistry (SSE / stdio transports)
-  gen_ui_db/           # SurrealDB 3.2 (MemoryStore, EntityGraph) — ISOLATED for caching
-  gen_ui_agent/        # PMPO loop (UAR embedded)
-  gen_ui_core/         # composition crate: runtime, config, re-exports for leaves
-  gen_ui_ffi/          # flutter_rust_bridge surface (leaf)
-  tauri-plugin-gen-ui/ # Tauri commands/events/permissions (leaf)
-  gen_ui_wasm/         # wasm-bindgen surface (leaf)
+rust/crates/
+  gen_ui_types/        # L0  shared traits + newtypes + enums (FROZEN seam — c001)
+                       #     inference.rs · events.rs · lifecycle.rs · content_block.rs
+  gen_ui_runtime/      # L1  runtime abstraction (native / web split)
+  gen_ui_protocol/     # L1  A2UI / AG-UI adapters, ProtocolPipeline
+  gen_ui_client/       # L2  Flint client (gate · forge · frf) + HTTP/SSE
+  gen_ui_mcp/          # L2  McpClient + McpRegistry (SSE / stdio transports)
+  gen_ui_db/           # L2  relational + sync
+  gen_ui_db_graph/     # L2  SurrealDB embedded hybrid graph-RAG — ISOLATED for caching
+  gen_ui_inference/    # L2  InferenceProvider impls, per-DEVICE (CPU-bound → spawn_blocking)
+  gen_ui_context/      # L2  deterministic, engine-neutral context assembly
+  gen_ui_agent/        # L3  PMPO loop (UAR embedded) + lane routing
+  gen_ui_ffi/          # LEAF flutter_rust_bridge surface
+  tauri-plugin-gen-ui/ # LEAF Tauri commands/events/permissions
+  gen_ui_wasm/         # LEAF wasm-bindgen surface
+  workspace-hack/      # cargo-hakari feature unification
 ```
 
+**There is no `gen_ui_core` crate.** "gen_ui_core" names an *invariant* — all
+networking, LLM interaction, inference, and persistence live in Rust — realised as
+the layered `gen_ui_*` family above. Treat any reference to a single `gen_ui_core`
+crate as shorthand for that family, not a path.
+
 Core crates (`gen_ui_types` … `gen_ui_agent`) compile to **native AND wasm32**. Leaves are
-platform-specific. Isolating `gen_ui_db` keeps SurrealDB's slow build out of the app-code
-inner loop.
+platform-specific. Isolating `gen_ui_db_graph` keeps SurrealDB's slow build out of the
+app-code inner loop.
+
+## Per-device inference and lanes
+
+`gen_ui_inference` holds one engine per **device**, not one per "mobile/desktop":
+llama.cpp on desktop, LiteRT-LM on Android, MLX-Swift on iOS, MLX-C on macOS,
+WebLLM on web. All sit behind `gen_ui_types::inference::InferenceProvider`, so no
+caller branches on engine. Values live in `versions.toml` `[inference]`.
+
+Independently, a chat turn runs on one of three **lanes** — `cloud`, `local`,
+`uar` (`gen_ui_agent::lane`). Engine ≠ lane: the `local` lane picks whichever
+engine that device uses. Parse lanes through the `Lane` enum and reject unknown
+values loudly; a silent default can route a turn off-device.
+
+See `references/rust/inference-lanes.md`.
 
 ## Cargo.toml (workspace — current July 2026)
 
 ```toml
 [workspace]
 members = [
-  "rust/gen_ui_types", "rust/gen_ui_protocol", "rust/gen_ui_client",
-  "rust/gen_ui_inference", "rust/gen_ui_mcp", "rust/gen_ui_db",
-  "rust/gen_ui_agent", "rust/gen_ui_core", "rust/gen_ui_ffi",
-  "rust/tauri-plugin-gen-ui", "rust/gen_ui_wasm",
+  "crates/gen_ui_types", "crates/gen_ui_runtime", "crates/gen_ui_protocol",
+  "crates/gen_ui_client", "crates/gen_ui_mcp", "crates/gen_ui_db",
+  "crates/gen_ui_db_graph", "crates/gen_ui_inference", "crates/gen_ui_context",
+  "crates/gen_ui_agent", "crates/gen_ui_ffi", "crates/tauri-plugin-gen-ui",
+  "crates/gen_ui_wasm", "crates/workspace-hack",
 ]
 resolver = "2"
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.96"
+# From versions.toml [toolchain]; keep in sync with rust-toolchain.toml.
+rust-version = "1.97.1"
 
 [workspace.dependencies]
 tokio          = { version = "1.40",  features = ["full"] }

@@ -58,10 +58,10 @@ One global Tokio runtime per process. CPU-bound work (GGUF loading, inference fo
 
 | Tool | Required (four-pillar bootstrap — `bash scripts/check-env.sh --install`) |
 |---|---|
-| Rust + Cargo | 1.96+ (+ wasm32-unknown-unknown target) — SurrealDB 3.2's `fastnum` transitive dependency requires rustc ≥1.94; the wasm32 target only compiled cleanly on 1.96 (see `references/rust/wasm-targets.md`) |
+| Rust + Cargo | 1.97.1 (+ wasm32-unknown-unknown target) — SurrealDB 3.2's `fastnum` transitive dependency requires rustc ≥1.94; the wasm32 target first compiled cleanly on 1.96 (see `references/rust/wasm-targets.md`) |
 | Flutter SDK | **beta channel**, latest (ships the Dart MCP server) |
 | Dart | latest beta (tracks Flutter beta) |
-| Node.js | 24+ (Active LTS — pin, do not use `--lts`) |
+| Node.js | 26.5.0 (current release — pin, do not use `--lts`) |
 | bun | latest |
 | pnpm | latest |
 | TypeScript | latest (7.x, Go-native compiler — no version pin) |

@@ -1,14 +1,6 @@
 schema_version: 1
 verified_at: "2026-07-18"
 sources:
-  knowme:
-    repository: https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill.git
-    commit: 6fddffdac56075737f6f114adeddbed56208699b
-    owner: Know-Me-Tools
-    dockerfile: apps/knowme-poc/Dockerfile
-    context: apps/knowme-poc
-    platforms: [linux/amd64, linux/arm64]
-    license: MIT
   knowme-docs:
     repository: https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill.git
     commit: 6fddffdac56075737f6f114adeddbed56208699b

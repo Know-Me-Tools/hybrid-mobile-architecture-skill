@@ -16,7 +16,7 @@ npx --yes create-docusaurus@3.10.1 "$site_dir" classic --javascript --package-ma
 mkdir -p "$site_dir/scripts"
 rm -f "$site_dir/docusaurus.config.js"
 install -m 0644 "$skill_root/assets/docusaurus.config.mjs" "$site_dir/docusaurus.config.mjs"
-install -m 0644 "$skill_root/assets/knowme-flat2.css" "$site_dir/src/css/custom.css"
+install -m 0644 "$skill_root/assets/flat2.css" "$site_dir/src/css/custom.css"
 install -m 0644 "$skill_root/assets/index.jsx" "$site_dir/src/pages/index.js"
 install -m 0644 "$skill_root/assets/content-sources.yaml" "$site_dir/content-sources.yaml"
 install -m 0644 "$skill_root/assets/sanitize.mjs" "$site_dir/scripts/sanitize.mjs"

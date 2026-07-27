@@ -54,9 +54,9 @@ Before any scaffolding or transformation, verify the environment. Run
 
 | Tool | Minimum Version | Install command |
 |------|----------------|-----------------|
-| Rust + Cargo | 1.96+ | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
+| Rust + Cargo | 1.97.1 | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
 | Flutter SDK | beta channel, latest | See `scripts/install-flutter.sh` |
-| Node.js | 24+ (Active LTS — pin, not `--lts`) | `curl -fsSL https://fnm.vercel.app/install \| bash && fnm install 24` |
+| Node.js | 26.5.0 (current release — pin, not `--lts`) | `curl -fsSL https://fnm.vercel.app/install \| bash && fnm install 26` |
 | Tauri CLI | 2.10+ | `cargo install tauri-cli --version "^2"` |
 | flutter_rust_bridge_codegen | 2.12+ | `cargo install flutter_rust_bridge_codegen` |
 | cargo-ndk | latest | `cargo install cargo-ndk` (Android only) |
@@ -233,7 +233,10 @@ When adding a new ContentBlock type, always do all 7 steps in `references/rust/n
 | `references/tauri/auth.md` | React Kratos/Supabase — full store + Prometheus Entity Management + component |
 | `references/tauri/eslint-config.md` | ESLint 9 flat config, tsconfig strict, Prettier, Vitest setup |
 | `references/tauri/testing.md` | Vitest, React Testing Library, layer contract enforcement tests |
-| `references/rust/patterns.md` | gen_ui_core module structure, FFI rules, Tauri commands, UAR modes |
+| `references/rust/patterns.md` | layered crate structure, FFI rules, Tauri commands, UAR modes |
+| `references/rust/inference-lanes.md` | per-device engines, the three lanes, native bridges, model acquisition |
+| `references/rust/wasm-plugin-sandbox.md` | Wasmtime limits for third-party plugin components |
+| `references/generator-placeholders.md` | porting contract: `__APP_*__` / `@VERSION@` substitution |
 | `references/rust/new-block-type.md` | 7-step full-stack guide for new ContentBlock variants |
 | `references/rust/testing.md` | cargo test, tokio::test, wiremock, SurrealDB integration tests |
 | `references/auth/patterns.md` | Auth strategy selection — when Kratos vs Supabase vs combined |

@@ -1,9 +1,4 @@
 services:
-  knowme-web:
-    build:
-      context: ..
-      dockerfile: apps/knowme-poc/Dockerfile
-    image: knowme-web:dev
   postgres:
     build:
       context: ..

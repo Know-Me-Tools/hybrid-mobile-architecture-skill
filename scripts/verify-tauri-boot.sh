@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # TJ-ARCH-MOB-001 compliant
-# Launch a built KnowMe Tauri binary with isolated app data and prove that its
+# Launch a built Tauri binary with isolated app data and prove that its
 # frontend completed the real migrations -> seeds -> local-sync startup path.
 
 set -euo pipefail

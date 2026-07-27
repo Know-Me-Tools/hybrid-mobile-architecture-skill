@@ -2,10 +2,10 @@ name: Deployment catalog CI
 
 on:
   pull_request:
-    paths: ["deploy/**", ".github/workflows/deployment-*.yml", "apps/knowme-poc/Dockerfile"]
+    paths: ["deploy/**", ".github/workflows/deployment-*.yml"]
   push:
     branches: [main]
-    paths: ["deploy/**", ".github/workflows/deployment-*.yml", "apps/knowme-poc/Dockerfile"]
+    paths: ["deploy/**", ".github/workflows/deployment-*.yml"]
 
 permissions: {contents: read}
 
@@ -15,6 +15,30 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      # validate-gitops.sh calls `kustomize` and `rg`; ubuntu-24.04 ships
+      # neither. Without these the job exits 127 on the first call — which is
+      # why this workflow had never passed on any run, including on main.
+      #
+      # ripgrep comes from apt. kustomize does NOT: it is not packaged in Ubuntu
+      # (packages.ubuntu.com serves a soft-404 for it, which is easy to mistake
+      # for availability), so it comes from a pinned release tarball fetched by
+      # direct URL. Deliberately NOT the upstream install_kustomize.sh, which
+      # copies into its target unprivileged — breaking on /usr/local/bin — and
+      # resolves the version through an unauthenticated api.github.com call that
+      # is rate-limited on shared runners.
+      - name: Install validator tools
+        env:
+          KUSTOMIZE_VERSION: "5.7.1"
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ripgrep
+          curl -fsSL -o /tmp/kustomize.tar.gz \
+            "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
+          tar -xzf /tmp/kustomize.tar.gz -C /tmp kustomize
+          sudo install -m 0755 /tmp/kustomize /usr/local/bin/kustomize
+          kustomize version
+          rg --version | head -1
       - run: bash deploy/scripts/validate-catalog.sh
       - run: bash deploy/scripts/validate-gitops.sh
 

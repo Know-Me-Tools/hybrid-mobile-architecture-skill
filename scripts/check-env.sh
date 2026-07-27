@@ -11,9 +11,14 @@
 #   1. Rust toolchain + wasm32 target + Prometheus Skill System (full instance)
 #   2. OpenSpec (latest, scoped npm name)
 #   3. Flutter/Dart BETA channel (ships the Dart MCP server)
-#   4. Node 24 LTS + bun + pnpm + TypeScript (latest)
+#   4. Node + bun + pnpm + TypeScript (pins from versions.toml)
 
 set -euo pipefail
+
+# Required toolchain versions come from versions.toml. Hardcoding them here
+# lets this gate pass a toolchain the scaffolders then emit manifests against.
+CHECK_ENV_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$CHECK_ENV_DIR/lib-versions.sh"
 
 INSTALL_MODE=false
 FULL_MODE=false
@@ -57,10 +62,10 @@ pillar 1 "Rust toolchain + WASM + Prometheus Skill System"
 
 if command -v rustc &>/dev/null; then
   RUST_VER=$(rustc --version | awk '{print $2}' | cut -d- -f1)
-  if version_ge "$RUST_VER" "1.96"; then
+  if version_ge "$RUST_VER" "$RUST_VERSION"; then
     ok "rustc $RUST_VER"
   else
-    warn "rustc $RUST_VER — requires 1.96+ (SurrealDB 3.2 plus wasm target). Run: rustup toolchain install 1.96"
+    warn "rustc $RUST_VER — requires $RUST_VERSION (SurrealDB $SURREALDB_VERSION plus wasm target). Run: rustup toolchain install $RUST_VERSION"
     MISSING+=("rust-update")
   fi
 else
@@ -251,36 +256,37 @@ fi
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Pillar 4 — Node 24 LTS + bun + pnpm + TypeScript (latest)
+# Pillar 4 — Node + bun + pnpm + TypeScript (versions.toml)
 # ═══════════════════════════════════════════════════════════════════════════
-pillar 4 "Node 24 LTS + bun + pnpm + TypeScript"
+pillar 4 "Node ${NODE_VERSION} + bun + pnpm + TypeScript ${TYPESCRIPT_VERSION}"
 
+NODE_REQUIRED_MAJOR="${NODE_VERSION%%.*}"
 if command -v node &>/dev/null; then
   NODE_VER=$(node --version)
   NODE_MAJOR=$(echo "$NODE_VER" | sed 's/v//' | cut -d. -f1)
-  if [[ $NODE_MAJOR -ge 24 ]]; then
+  if [[ $NODE_MAJOR -ge $NODE_REQUIRED_MAJOR ]]; then
     ok "node $NODE_VER"
     ok "npm $(npm --version)"
   else
-    warn "node $NODE_VER — requires 24+ (Active LTS through Apr 2028)"
+    warn "node $NODE_VER — requires ${NODE_VERSION} (pin the major; 'lts' drifts)"
     MISSING+=("node-update")
     if $INSTALL_MODE; then
-      info "Installing fnm and Node 24 (pinned — 'lts' becomes Node 26 after Oct 2026)..."
+      info "Installing fnm and Node ${NODE_REQUIRED_MAJOR} (pinned — never '--lts')..."
       command -v fnm &>/dev/null || curl -fsSL https://fnm.vercel.app/install | bash
       export PATH="$HOME/.fnm:$PATH"; eval "$(fnm env)" 2>/dev/null || true
-      fnm install 24 && fnm default 24 && fnm use 24
-      ok "Node 24 installed"
+      fnm install "$NODE_REQUIRED_MAJOR" && fnm default "$NODE_REQUIRED_MAJOR" && fnm use "$NODE_REQUIRED_MAJOR"
+      ok "Node ${NODE_REQUIRED_MAJOR} installed"
     fi
   fi
 else
   fail "Node.js not found"
   MISSING+=("node")
   if $INSTALL_MODE; then
-    info "Installing fnm and Node 24..."
+    info "Installing fnm and Node ${NODE_REQUIRED_MAJOR}..."
     curl -fsSL https://fnm.vercel.app/install | bash
     export PATH="$HOME/.fnm:$PATH"; eval "$(fnm env)" 2>/dev/null || true
-    fnm install 24 && fnm default 24 && fnm use 24
-    ok "Node 24 installed"
+    fnm install "$NODE_REQUIRED_MAJOR" && fnm default "$NODE_REQUIRED_MAJOR" && fnm use "$NODE_REQUIRED_MAJOR"
+    ok "Node ${NODE_REQUIRED_MAJOR} installed"
   fi
 fi
 

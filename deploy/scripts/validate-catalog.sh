@@ -75,7 +75,7 @@ bad_bases="$(awk '
     if (image != "scratch" && !(image in stages) && image !~ /@sha256:[0-9a-f]{64}$/) print FILENAME ":" FNR ":" image
     if (toupper($3) == "AS") stages[$4]=1
   }
-' deploy/docker/*.Dockerfile site/Dockerfile apps/knowme-poc/Dockerfile)"
+' deploy/docker/*.Dockerfile site/Dockerfile)"
 test -z "$bad_bases" || { echo "unpinned Docker base image found: $bad_bases" >&2; exit 1; }
 
 docker buildx bake -f deploy/docker-bake.hcl --print >/dev/null

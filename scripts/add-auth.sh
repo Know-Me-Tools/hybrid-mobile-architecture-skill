@@ -491,7 +491,7 @@ export function LoginForm() {
         className="px-3 py-2 rounded-md border border-border bg-surface text-sm"
       />
       <button type="submit" disabled={isLoading}
-        className="px-4 py-2 rounded-md bg-ember text-white text-sm font-medium disabled:opacity-50">
+        className="px-4 py-2 rounded-md bg-accent text-white text-sm font-medium disabled:opacity-50">
         {isLoading ? 'Signing in...' : 'Sign in'}
       </button>
     </form>

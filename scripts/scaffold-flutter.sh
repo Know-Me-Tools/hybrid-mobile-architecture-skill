@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # scripts/scaffold-flutter.sh — v2 (C-010)
-# Scaffold a Flutter + Rust FFI mobile app: Riverpod 3.3.2, clean architecture,
+# Scaffold a Flutter + Rust FFI mobile app: Riverpod 3, clean architecture,
 # shadcn_flutter, wired to the three pub.dev packages (gen_ui_flutter FFI plugin,
 # gen_ui_widgets ContentBlock set, prometheus_entity_management).
+#
+# All version pins are read from versions.toml via lib-versions.sh.
 #
 # Usage: bash scripts/scaffold-flutter.sh <output-dir> <app-name>
 #
@@ -21,8 +23,16 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Version pins come from versions.toml — never inline a literal here. See
+# scripts/lib-versions.sh for why (hardcoded copies are invisible to the
+# doc-consistency audit and are how this pack drifted from its own output).
+source "$SCRIPT_DIR/lib-versions.sh"
+
 OUT="${1:-mobile}"
 APP_NAME="${2:-my_app}"
+# Org must match what scaffold-rust-core.sh used to build __APP_ID__: the Rust
+# JNI lookup and the Kotlin package declaration have to agree exactly.
+APP_ORG="${3:-ai.prometheusags}"
 SNAKE_NAME="$(echo "$APP_NAME" | tr '-' '_' | tr '[:upper:]' '[:lower:]')"
 
 GREEN='\033[0;32m'; CYAN='\033[0;36m'; YELLOW='\033[0;33m'; NC='\033[0m'
@@ -34,7 +44,7 @@ MARK="// TJ-ARCH-MOB-001 compliant"
 
 step "Creating Flutter app: $APP_NAME"
 flutter create \
-  --org ai.prometheusags \
+  --org "$APP_ORG" \
   --template app \
   --platforms ios,android,macos \
   --no-pub \
@@ -67,13 +77,109 @@ if [[ -f ios/Podfile ]]; then
   ' ios/Podfile
 fi
 
+# ── Platform baselines (versions.toml [platform]) ────────────────────────────
+# `flutter create` emits whatever minimums the installed SDK defaults to, which
+# is always LOWER than what the native lanes need: the MLX/Metal iOS lane needs
+# iOS ${IOS_DEPLOYMENT_TARGET}, and the LiteRT-LM Android lane needs API
+# ${ANDROID_MIN_SDK} + JVM ${JVM_TARGET}. Left at the defaults, a generated
+# project compiles and then fails on-device at model load. Raise them here.
+step "Setting platform baselines (Android ${ANDROID_MIN_SDK} / iOS ${IOS_DEPLOYMENT_TARGET})"
+
+# iOS: Podfile platform line + every Xcode build configuration.
+if [[ -f ios/Podfile ]]; then
+  # The stock Podfile ships the platform line commented out.
+  if grep -qE "^# *platform :ios" ios/Podfile; then
+    sed -i.bak "s|^# *platform :ios.*|platform :ios, '${IOS_DEPLOYMENT_TARGET}'|" ios/Podfile
+  elif grep -qE "^platform :ios" ios/Podfile; then
+    sed -i.bak "s|^platform :ios.*|platform :ios, '${IOS_DEPLOYMENT_TARGET}'|" ios/Podfile
+  else
+    sed -i.bak "1i\\
+platform :ios, '${IOS_DEPLOYMENT_TARGET}'
+" ios/Podfile
+  fi
+  rm -f ios/Podfile.bak
+fi
+if [[ -f ios/Runner.xcodeproj/project.pbxproj ]]; then
+  sed -i.bak "s|IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*;|IPHONEOS_DEPLOYMENT_TARGET = ${IOS_DEPLOYMENT_TARGET};|g" \
+    ios/Runner.xcodeproj/project.pbxproj
+  rm -f ios/Runner.xcodeproj/project.pbxproj.bak
+fi
+
+# macOS: the MLX-C lane runs in-process on Apple silicon.
+if [[ -f macos/Podfile ]]; then
+  sed -i.bak "s|^platform :osx.*|platform :osx, '${MACOS_DEPLOYMENT_TARGET}'|" macos/Podfile
+  rm -f macos/Podfile.bak
+fi
+
+# Android: minSdk + JVM target. compileSdk/targetSdk stay on the Flutter-managed
+# values so the SDK bump and the app move together.
+ANDROID_GRADLE="android/app/build.gradle.kts"
+[[ -f "$ANDROID_GRADLE" ]] || ANDROID_GRADLE="android/app/build.gradle"
+if [[ -f "$ANDROID_GRADLE" ]]; then
+  sed -i.bak \
+    -e "s|minSdk = flutter.minSdkVersion|minSdk = ${ANDROID_MIN_SDK}|" \
+    -e "s|minSdkVersion flutter.minSdkVersion|minSdkVersion ${ANDROID_MIN_SDK}|" \
+    -e "s|JavaVersion.VERSION_[0-9_]*|JavaVersion.VERSION_${JVM_TARGET}|g" \
+    -e "s|jvmTarget = JvmTarget.JVM_[0-9_]*|jvmTarget = JvmTarget.JVM_${JVM_TARGET}|" \
+    "$ANDROID_GRADLE"
+  rm -f "$ANDROID_GRADLE.bak"
+fi
+ok "Android minSdk ${ANDROID_MIN_SDK} / JVM ${JVM_TARGET}, iOS ${IOS_DEPLOYMENT_TARGET}, macOS ${MACOS_DEPLOYMENT_TARGET}"
+
+# ── Native inference bridges ────────────────────────────────────────────────
+# scaffold-rust-core.sh emitted these into rust/native/ with app identity already
+# substituted. Install them where each platform's build expects them, and add the
+# LiteRT-LM Gradle dependency the Kotlin bridge compiles against.
+#
+# Both lanes are half Rust, half native, and the halves agree by SYMBOL NAME —
+# the JNI class path and the @_silgen_name FFI symbol. Installing one without the
+# other yields a build that succeeds and a lane that cannot find its bridge.
+APP_CLASS="$(echo "$SNAKE_NAME" | awk -F_ '{for(i=1;i<=NF;i++) printf toupper(substr($i,1,1)) substr($i,2)}')"
+NATIVE_SRC="../rust/native"
+if [[ -d "$NATIVE_SRC" ]]; then
+  step "Installing native inference bridges"
+
+  # Android: the Kotlin bridge must live under the applicationId's package path,
+  # because the Rust side looks the class up by fully-qualified name.
+  ANDROID_PKG_DIR="android/app/src/main/kotlin/$(echo "${APP_ORG}.${SNAKE_NAME}" | tr '.' '/')"
+  if [[ -f "$NATIVE_SRC/android/${APP_CLASS}LiteRtLmBridge.kt" ]]; then
+    mkdir -p "$ANDROID_PKG_DIR"
+    cp "$NATIVE_SRC/android/${APP_CLASS}LiteRtLmBridge.kt" "$ANDROID_PKG_DIR/"
+    ok "Android: ${APP_CLASS}LiteRtLmBridge.kt -> $ANDROID_PKG_DIR"
+  fi
+
+  # iOS: the Swift bridge sits beside AppDelegate in Runner/. It still has to be
+  # added to the Xcode target — a file on disk that is not in project.pbxproj is
+  # not compiled, and the failure is a silent missing symbol at link time.
+  if [[ -f "$NATIVE_SRC/ios/${APP_CLASS}MlxBridge.swift" ]]; then
+    cp "$NATIVE_SRC/ios/${APP_CLASS}MlxBridge.swift" "ios/Runner/"
+    ok "iOS: ${APP_CLASS}MlxBridge.swift -> ios/Runner/ (add to the Xcode target)"
+  fi
+fi
+
+# LiteRT-LM Android dependency — the Kotlin bridge imports com.google.ai.edge.litertlm.
+if [[ -f "$ANDROID_GRADLE" ]] && ! grep -q 'litertlm-android' "$ANDROID_GRADLE"; then
+  python3 - "$ANDROID_GRADLE" "$LITERT_LM_VERSION" <<'PYEOF'
+import re, sys
+path, version = sys.argv[1], sys.argv[2]
+text = open(path).read()
+dep = f'    implementation("com.google.ai.edge.litertlm:litertlm-android:{version}")\n'
+if re.search(r'^dependencies\s*\{', text, re.M):
+    text = re.sub(r'^(dependencies\s*\{\s*\n)', r'\1' + dep, text, count=1, flags=re.M)
+else:
+    text += f'\ndependencies {{\n{dep}}}\n'
+open(path, 'w').write(text)
+PYEOF
+  ok "Android: LiteRT-LM ${LITERT_LM_VERSION} dependency added"
+fi
+
 # flutter create's default counter-app smoke test references MyApp/main.dart from the
 # stock template — this scaffold writes its own real boundary tests, so remove the
 # stale default rather than leaving broken/misleading cruft in test/.
 rm -f test/widget_test.dart
 
-# ── pubspec.yaml — Riverpod 3.3.2, frb 2.12, path-dep the three packages ─────
-step "Writing pubspec.yaml (Riverpod 3.3.2 / frb 2.12)"
+# ── pubspec.yaml — Riverpod 3, frb, path-dep the three packages ──────────────
+step "Writing pubspec.yaml (Riverpod ${RIVERPOD_VERSION} / frb ${FRB_VERSION})"
 # Flutter/Dart tooling can watch pubspec.yaml while `flutter create` exits.
 # Replace it atomically so no watcher can observe a transient empty document.
 cat > pubspec.yaml.generated << PUBEOF
@@ -83,8 +189,10 @@ publish_to: none
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.4.0 <4.0.0"
-  flutter: ">=3.29.0"
+  # Flutter ${FLUTTER_VERSION} ships Dart ${DART_VERSION}. Include the prerelease
+  # floor while keeping 3.13 as the supported minimum line.
+  sdk: ">=${DART_MIN} <4.0.0"
+  flutter: ">=${FLUTTER_VERSION}"
 
 dependencies:
   flutter:
@@ -99,58 +207,78 @@ dependencies:
     path: ../flutter_packages/prometheus_entity_management
 
   # ── State management (Riverpod 3) ────────────────────────────────────────
-  flutter_riverpod: ^3.3.2
-  riverpod_annotation: ^4.0.3
-  riverpod_sqflite: ^0.4.3     # offline provider-cache persistence (Riverpod 3)
+  # EXACT pins, not carets. This set is the latest combination that resolves
+  # against Freezed's analyzer line (see dev_dependencies below); a caret here
+  # silently upgrades into the conflict on the next `pub get`.
+  flutter_riverpod: ${RIVERPOD_VERSION}
+  riverpod_annotation: 4.0.2
+  riverpod_sqflite: 0.4.2      # offline provider-cache persistence (Riverpod 3)
 
   # ── Models ───────────────────────────────────────────────────────────────
   freezed_annotation: ^3.1.0
-  json_annotation: ^4.9.0
+  # 4.12.0 requires json_serializable 6.14 / analyzer >=10; see the dev
+  # dependency note below.
+  json_annotation: 4.11.0
 
   # ── FFI bridge ───────────────────────────────────────────────────────────
-  flutter_rust_bridge: ^2.12.0
+  # Must equal the frb CRATE version in rust/Cargo.toml. Mismatched crate and
+  # package versions produce codegen that compiles but fails at the boundary.
+  flutter_rust_bridge: ${FRB_VERSION}
 
   # ── UI components (shadcn/ui equivalent) ─────────────────────────────────
   shadcn_flutter: ^0.0.53
 
   # ── Navigation ───────────────────────────────────────────────────────────
-  go_router: ^15.0.0
+  go_router: ^17.3.0
 
   # ── Markdown + code highlighting ─────────────────────────────────────────
-  markdown_widget: ^2.3.2+6
+  markdown_widget: ^2.3.2+8
   flutter_highlight: ^0.7.0
   highlight: ^0.7.0
 
   # ── Typography / motion ──────────────────────────────────────────────────
-  google_fonts: ^6.2.1
-  flutter_animate: ^4.5.0
+  google_fonts: ^8.2.0
+  flutter_animate: ^4.5.2
 
   # ── Storage / auth ───────────────────────────────────────────────────────
-  flutter_secure_storage: ^9.2.2
-  supabase_flutter: ^2.8.0
+  flutter_secure_storage: ^10.3.1
+  supabase_flutter: ^2.16.0
 
   # ── Utilities ────────────────────────────────────────────────────────────
   gap: ^3.0.1
-  uuid: ^4.5.1
-  intl: ^0.20.2
-  path_provider: ^2.1.4
-  collection: ^1.19.0
+  uuid: ^4.6.0
+  intl: ^0.20.3
+  path_provider: ^2.1.6
+  collection: ^1.19.1
+  # Latest beta API; use the static FilePicker.pickFiles entrypoint.
+  file_picker: ^12.0.0-beta.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
-  build_runner: ^2.4.13
-  freezed: ^3.2.5
-  json_serializable: ^6.8.0
-  riverpod_generator: ^4.0.4
+  flutter_lints: ^6.0.0
+  # 2.15.2 requires analyzer >=13.3; the current Riverpod generator stack is
+  # still on analyzer 12.
+  build_runner: ^2.15.1
+  # Freezed 4.0.0-dev.x requires analyzer 13, while the latest Riverpod codegen
+  # line that compiles this app is still below that. Freezed 3.2.6-dev.1 emits
+  # invalid \`final\` constructor parameters with Flutter's Dart 3.13 beta, so
+  # 3.2.5 is the latest validated compatible generator.
+  freezed: 3.2.5
+  # 6.13.2+ requires analyzer >=10; Riverpod generator 4.0.3 and Freezed 3.2.5
+  # require analyzer 9. Keep this on the latest validated analyzer-9 line.
+  json_serializable: 6.13.0
+  # 4.0.4 requires analyzer 12 and forces Freezed onto the invalid 3.2.6-dev.1
+  # generator; 4.0.3 is the latest Riverpod generator that resolves with
+  # Freezed 3.2.5.
+  riverpod_generator: 4.0.3
   # custom_lint + riverpod_lint intentionally OMITTED: as of 2026-07, their latest
   # versions have an unresolvable transitive conflict (riverpod_lint requires
   # analyzer_plugin ^0.14/analyzer ^12, custom_lint requires ^0.13/^8 respectively) —
   # a live ecosystem incompatibility, not a version we can pin around. Neither is
   # needed to build/run/build_runner; they're IDE-only lint plugins. Re-add once the
   # ecosystem resolves; verify with: flutter pub add custom_lint riverpod_lint --dry-run.
-  alchemist: ^0.12.0           # deterministic golden tests (VGV workflow) — no mocks
+  alchemist: ^0.14.0           # deterministic golden tests (VGV workflow) — no mocks
 
 flutter:
   uses-material-design: true
@@ -191,40 +319,13 @@ mkdir -p test/features/chat test/features/notes test/features/memory test/featur
 # ═══════════════════════════════════════════════════════════════════════════
 # core/theme — design tokens
 # ═══════════════════════════════════════════════════════════════════════════
-cat > lib/core/theme/tokens.dart << 'EOF'
-// TJ-ARCH-MOB-001 compliant
-// Design tokens — travisjames.ai brand system.
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-abstract final class T {
-  // Backgrounds
-  static const bgPrimary  = Color(0xFF0D0D18);
-  static const bgSurface  = Color(0xFF121220);
-  static const bgElevated = Color(0xFF181828);
-  static const bgOverlay  = Color(0xFF1E1E35);
-
-  // Accents
-  static const ember   = Color(0xFFFF6A3D);
-  static const violet  = Color(0xFF8B78FF);
-  static const cyan    = Color(0xFF22D3EE);
-  static const amber   = Color(0xFFF5A623);
-  static const green   = Color(0xFF34D399);
-  static const red     = Color(0xFFF87171);
-
-  // Text
-  static const textPrimary   = Color(0xFFF2F2FF);
-  static const textSecondary = Color(0xFF9898C0);
-  static const textTertiary  = Color(0xFF5E5E88);
-  static const textDisabled  = Color(0xFF3A3A60);
-
-  // Typography
-  static TextStyle get displayLg => GoogleFonts.spaceGrotesk(fontSize: 32, fontWeight: FontWeight.w700, letterSpacing: -0.03, color: textPrimary);
-  static TextStyle get uiMd      => GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: textSecondary);
-  static TextStyle get prose     => GoogleFonts.roboto(fontSize: 15, fontWeight: FontWeight.w400, color: textPrimary, height: 1.75);
-  static TextStyle get mono      => GoogleFonts.jetBrainsMono(fontSize: 12.5, fontWeight: FontWeight.w400, color: textPrimary, height: 1.55);
-}
-EOF
+# Design tokens are GENERATED from one source for both surfaces — see
+# assets/templates/design-tokens/tokens.toml. The hybrid-design-tokens skill has
+# always said "one token source feeds both"; before this it was aspirational and
+# the two files had already diverged on the same role. Never hand-edit the output.
+mkdir -p lib/core/theme
+bash "$SCRIPT_DIR/gen-design-tokens.sh" ".." >/dev/null
+ok "design tokens generated from tokens.toml (shared with the React surface)"
 ok "lib/core/theme/tokens.dart"
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1347,7 +1448,7 @@ import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/notes/presentation/screens/notes_screen.dart';
 import '../features/memory/presentation/screens/memory_screen.dart';
 
-/// The four KnowMe-slice tabs, in shell order. Adding a destination here is the
+/// The four vertical-slice tabs, in shell order. Adding a destination here is the
 /// only edit needed to surface a feature — labels/icons/paths stay in lockstep.
 const _tabs = <(String, IconData, String)>[
   ('/chat', Icons.chat_bubble_outline, 'Chat'),
@@ -1411,6 +1512,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart' as shad;
 import 'app/router.dart';
 // ignore: unused_import
 import 'bridge/rust_bridge_provider.dart';
+import 'core/theme/tokens.dart';
 import 'features/startup/presentation/screens/startup_gate.dart';
 import 'shared/providers/entity_transport.dart';
 
@@ -1448,7 +1550,7 @@ class AppRoot extends StatelessWidget {
       background: () => const Color(0xFF0B0F14),
       foreground: () => const Color(0xFFE8EDF3),
       card: () => const Color(0xFF1C2535),
-      primary: () => const Color(0xFFFF6A3D),
+      primary: () => T.accent,
       secondary: () => const Color(0xFF161D29),
       muted: () => const Color(0xFF253044),
       border: () => const Color(0x00000000),
@@ -1458,7 +1560,7 @@ class AppRoot extends StatelessWidget {
       background: () => const Color(0xFFF7F7F8),
       foreground: () => const Color(0xFF0B0F14),
       card: () => const Color(0xFFFFFFFF),
-      primary: () => const Color(0xFFE04E28),
+      primary: () => T.accentOnLight,
       secondary: () => const Color(0xFFFAFBFC),
       muted: () => const Color(0xFFF2F4F7),
       border: () => const Color(0x00000000),
