@@ -12,7 +12,20 @@ for command_name in rsync jq node; do
   }
 done
 
+# Every harness that reads a global skills directory. This list was missing
+# .claude, .codex, and .opencode — the three most-used ones on a typical
+# workstation — so running this script left Claude Code itself without the
+# pack's skills while reporting success. A harness absent from this list is a
+# harness that silently never updates.
+#
+# ~/.config/opencode and ~/.opencode are BOTH listed on purpose: opencode has
+# used each location across versions, and syncing both costs nothing while
+# missing the live one costs everything.
 skill_roots=(
+  "$HOME/.claude/skills"
+  "$HOME/.codex/skills"
+  "$HOME/.kimi/skills"
+  "$HOME/.opencode/skills"
   "$HOME/.config/opencode/skills"
   "$HOME/.kimi-code/skills"
   "$HOME/.agents/skills"
