@@ -88,6 +88,10 @@ PGLITE_OXIDE_VERSION="$(_require PGLITE_OXIDE_VERSION "$(toml_get data pglite_ox
 
 # ── [sync] ──────────────────────────────────────────────────────────────────
 PGLITE_VERSION="$(_require PGLITE_VERSION "$(toml_get sync pglite)")"
+# pgvector is NOT bundled in PGlite's core wasm. The emitted client-RAG surface
+# (384-dim embeddings, HNSW cosine indexes) imports it, so the manifest must
+# carry it — dropping one without the other breaks `tsc` on a fresh install.
+PGLITE_PGVECTOR_VERSION="$(_require PGLITE_PGVECTOR_VERSION "$(toml_get sync pglite_pgvector)")"
 LORO_CRDT_VERSION="$(_require LORO_CRDT_VERSION "$(toml_get sync loro_crdt)")"
 EMBEDDING_DIM="$(_require EMBEDDING_DIM "$(toml_get sync embedding_dim)")"
 
@@ -105,5 +109,5 @@ export RUST_VERSION NODE_VERSION FLUTTER_VERSION TYPESCRIPT_VERSION \
   ZUSTAND_VERSION GRADLE_VERSION AGP_VERSION KOTLIN_VERSION LITERT_LM_VERSION \
   DART_MIN DART_VERSION ANDROID_MIN_SDK ANDROID_ABI IOS_DEPLOYMENT_TARGET \
   MACOS_DEPLOYMENT_TARGET JVM_TARGET SURREALDB_VERSION PGLITE_OXIDE_VERSION \
-  PGLITE_VERSION LORO_CRDT_VERSION EMBEDDING_DIM \
+  PGLITE_VERSION PGLITE_PGVECTOR_VERSION LORO_CRDT_VERSION EMBEDDING_DIM \
   INFERENCE_DESKTOP INFERENCE_ANDROID INFERENCE_IOS INFERENCE_WEB

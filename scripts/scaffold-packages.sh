@@ -20,6 +20,13 @@
 # a variant is a compile error on both sides by design.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Version pins come from versions.toml — never inline a literal. These packages
+# are PATH DEPENDENCIES of the generated Flutter app, so their constraints must
+# admit the app's pins: a package requiring ^4.0.3 against an app pinned to 4.0.2
+# fails `pub get` before a single line compiles.
+source "$SCRIPT_DIR/lib-versions.sh"
+
 ROOT="${1:-.}"
 GREEN='\033[0;32m'; CYAN='\033[0;36m'; NC='\033[0m'
 step() { echo -e "\n${CYAN}── $1${NC}"; }
@@ -529,7 +536,7 @@ dependencies:
   flutter_rust_bridge: ^2.12.0
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   plugin:
@@ -623,7 +630,7 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 EOF
 
 # The ContentBlock sealed class mirrors the Rust enum. In the real app these come
@@ -840,18 +847,21 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^3.3.2
-  riverpod_annotation: ^4.0.3
+  # These must ADMIT the app's exact pins (scaffold-flutter.sh), not merely be
+  # newer: this package is a path dependency, so a floor above the app's pin is
+  # an unsatisfiable constraint, not a preference. Carets here, exact pins there.
+  flutter_riverpod: ^3.3.1
+  riverpod_annotation: ^4.0.2
   freezed_annotation: ^3.1.0
-  json_annotation: ^4.12.0
-  collection: ^1.19.0
+  json_annotation: ^4.11.0
+  collection: ^1.19.1
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
-  build_runner: ^2.4.13
+  flutter_lints: ^6.0.0
+  build_runner: ^2.15.1
   freezed: ^3.2.5
-  json_serializable: ^6.8.0
-  riverpod_generator: ^4.0.4
+  json_serializable: ^6.13.0
+  riverpod_generator: ^4.0.3
   # custom_lint + riverpod_lint intentionally OMITTED — see scaffold-flutter.sh for why
   # (unresolvable transitive analyzer/analyzer_plugin version conflict as of 2026-07).
 EOF

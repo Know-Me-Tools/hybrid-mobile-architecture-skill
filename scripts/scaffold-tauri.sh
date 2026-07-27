@@ -60,6 +60,7 @@ cat > package.json << PKGEOF
     "@tanstack/react-virtual": "^3.14.6",
     "@electric-sql/pglite":   "${PGLITE_VERSION}",
     "@electric-sql/pglite-sync": "^0.6.5",
+    "@electric-sql/pglite-pgvector": "${PGLITE_PGVECTOR_VERSION}",
     "@prometheus-ags/prometheus-entity-management": "3.0.0-alpha.0",
     "@prometheus-ags/gen-ui-react": "file:../packages/gen-ui-react",
     "@prometheus-ags/tauri-plugin-gen-ui": "file:../rust/crates/tauri-plugin-gen-ui/guest-js",
@@ -1055,6 +1056,130 @@ export async function acceptOfferSession(
 }
 EOF
 ok "src/features/vault/sync/webrtcDuplex.ts"
+
+# ── vault: hook + view ──────────────────────────────────────────────────────
+# Rule 16 applies to the vault like every other feature: components import
+# HOOKS, never a repository or a peer session. Without this seam a component
+# would reach VaultRepository directly, and the pairing lifecycle (which owns a
+# live WebRTC session) would end up duplicated across every view that shows it.
+mkdir -p src/features/vault/hooks src/features/vault/components
+cat > src/features/vault/hooks/useVault.ts << 'EOF'
+// TJ-ARCH-MOB-001 compliant — hooks compose stores/repositories; no invoke() here.
+import { useCallback, useEffect, useState } from 'react'
+import type { PGlite } from '@electric-sql/pglite'
+import { openVault, type VaultFact, type VaultRepository } from '../stores/vaultStore'
+
+export type VaultStatus = 'closed' | 'opening' | 'ready' | 'error'
+
+/**
+ * The vault seam for React.
+ *
+ * The vault is a Loro CRDT document synced device-to-device only — it is
+ * structurally excluded from every server sync path (see the peer-profile-sync
+ * skill). This hook therefore exposes local facts and no "push to server"
+ * affordance: there is nowhere to push.
+ *
+ * The PGlite handle is passed IN rather than reached for: the vault must open
+ * against the same database the rest of the app uses, and a module-level
+ * singleton here would silently create a second one.
+ */
+export function useVault(db: PGlite | null) {
+  const [repo, setRepo] = useState<VaultRepository | null>(null)
+  const [facts, setFacts] = useState<VaultFact[]>([])
+  const [status, setStatus] = useState<VaultStatus>('closed')
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!db) return
+    let cancelled = false
+    setStatus('opening')
+    openVault(db)
+      .then((opened) => {
+        if (cancelled) return
+        setRepo(opened)
+        setFacts(opened.agentFacts())
+        setStatus('ready')
+      })
+      .catch((cause: unknown) => {
+        if (cancelled) return
+        setError(cause instanceof Error ? cause.message : String(cause))
+        setStatus('error')
+      })
+    // Cancellation matters: openVault touches persistent storage, and a
+    // component unmounted mid-open must not set state on a dead tree.
+    return () => {
+      cancelled = true
+    }
+  }, [db])
+
+  const remember = useCallback(
+    (fact: VaultFact) => {
+      if (!repo) return
+      repo.addAgentFact(fact)
+      setFacts(repo.agentFacts())
+    },
+    [repo],
+  )
+
+  return { facts, status, error, remember, isReady: status === 'ready' }
+}
+EOF
+ok "src/features/vault/hooks/useVault.ts"
+
+cat > src/features/vault/components/VaultPanel.tsx << 'EOF'
+// TJ-ARCH-MOB-001 compliant — imports the hook only; never a store or repository.
+import type { PGlite } from '@electric-sql/pglite'
+import { useVault } from '../hooks/useVault'
+
+export interface VaultPanelProps {
+  db: PGlite | null
+}
+
+/**
+ * Agent-learned facts, device-local. Flat 2.0: regions are separated by
+ * background fill only — no borders, dividers, or layout shadows.
+ */
+export function VaultPanel({ db }: VaultPanelProps) {
+  const { facts, status, error, isReady } = useVault(db)
+
+  if (status === 'error') {
+    return (
+      <section aria-label="Profile vault" className="rounded-lg bg-bgSurface p-4">
+        <p role="alert" className="text-danger">
+          Vault unavailable: {error}
+        </p>
+      </section>
+    )
+  }
+
+  return (
+    <section aria-label="Profile vault" aria-busy={!isReady} className="rounded-lg bg-bgSurface p-4">
+      <h2 className="text-textPrimary">Profile vault</h2>
+      <p className="text-textSecondary">
+        Synced between your own devices only — never to a server.
+      </p>
+      {!isReady ? (
+        <p className="text-textTertiary">Opening…</p>
+      ) : facts.length === 0 ? (
+        <p className="text-textTertiary">Nothing learned yet.</p>
+      ) : (
+        <ul>
+          {facts.map((fact) => (
+            <li key={fact.key} className="flex items-center justify-between bg-bgElevated p-2">
+              <span className="text-textSecondary">{fact.key}</span>
+              <span className="text-textPrimary">{fact.value}</span>
+              <time className="text-textTertiary" dateTime={fact.learnedAt}>
+                {fact.learnedAt}
+              </time>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+EOF
+ok "src/features/vault/components/VaultPanel.tsx"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # features/memory — memory / graph-RAG panel. Store is the ONLY IPC layer
