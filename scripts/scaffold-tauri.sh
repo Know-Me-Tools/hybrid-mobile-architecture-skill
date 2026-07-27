@@ -1943,8 +1943,23 @@ PYEOF
 # The local npm CLI is installed later. The environment gate already requires
 # cargo-tauri, so use that deterministic bootstrap instead of an ambiguous
 # `npx tauri` registry lookup.
-cargo tauri icon app-icon.png > /dev/null
-ok "src-tauri/icons/ (placeholder — replace app-icon.png + rerun \`tauri icon\` with real branding)"
+# Guarded like the pnpm registry step below: cargo-tauri is an OPTIONAL tool, and
+# a missing optional tool must not destroy a scaffold that has already written
+# every file. Without this the run died here with a bare
+# "no such command: `tauri`" after emitting the entire project.
+if cargo tauri --version &>/dev/null; then
+  cargo tauri icon app-icon.png > /dev/null
+  ok "src-tauri/icons/ (placeholder — replace app-icon.png + rerun \`tauri icon\` with real branding)"
+else
+  # tauri::generate_context! reads the icon set at COMPILE time, so an empty
+  # icons/ directory is not a cosmetic gap — `cargo check` on src-tauri fails
+  # until these exist. Say so, rather than letting it surface later as a
+  # confusing build error.
+  warn "cargo-tauri not found — icons not generated"
+  echo "     src-tauri won't compile until they exist. Install and run inside ${OUT}/:"
+  echo "       cargo install tauri-cli --version '^2' --locked"
+  echo "       cargo tauri icon app-icon.png"
+fi
 
 # ── Capabilities (Tauri v2 ACL) ──────────────────────────────────────────────
 # Tauri v2's permission system denies every IPC/event call by default; without an
