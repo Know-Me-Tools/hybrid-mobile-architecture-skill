@@ -1,29 +1,18 @@
 {
   "schemaVersion": "1",
-  "updatedAt": "2026-07-18T15:49:16Z",
+  "updatedAt": "2026-07-18T22:29:32Z",
   "cursor": [
-    "pem-sync-bridge-and-mobile-tier",
-    "c129-rag-ipc-and-chat-wiring"
+    "pem-sync-bridge-and-mobile-tier"
   ],
   "root": {
     "type": "phase",
     "id": "pem-sync-bridge-and-mobile-tier",
-    "status": "executing",
+    "status": "phase_complete",
     "progress": {
-      "done": 3,
+      "done": 5,
       "total": 5
     },
-    "children": [
-      {
-        "type": "change",
-        "id": "c129-rag-ipc-and-chat-wiring",
-        "status": "PENDING",
-        "progress": {
-          "done": 0,
-          "total": 0
-        }
-      }
-    ],
+    "children": [],
     "annotations": []
   }
 }
