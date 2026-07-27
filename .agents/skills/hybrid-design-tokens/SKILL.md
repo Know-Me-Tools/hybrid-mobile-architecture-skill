@@ -36,7 +36,7 @@ token compiler and must never be cited as parity proof.
   `clamp()` for section-level rhythm on web.
 - **Typography** — at most two families with a deliberate pairing; fluid `clamp()` sizes
   (`text-base`, `text-hero`); `font-display: swap`; preload only the critical weight.
-- **Radius / motion** — `radius`, `duration-*`, `ease-*`. KnowMe is strict Flat 2.0: no
+- **Radius / motion** — `radius`, `duration-*`, `ease-*`. This project is strict Flat 2.0: no
   visible borders/divider lines and no layout shadows. Adjacent areas differ by background.
 
 ## Rules

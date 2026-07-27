@@ -101,7 +101,7 @@ fi
 
 opencode_config="$HOME/.config/opencode/opencode.json"
 if [[ -f "$opencode_config" ]]; then
-  opencode_tmp="$(mktemp "${TMPDIR:-/tmp}/knowme-opencode.XXXXXX")"
+  opencode_tmp="$(mktemp "${TMPDIR:-/tmp}/harness-opencode.XXXXXX")"
   jq '
     .mcp = (.mcp // {}) |
     .mcp["dart-mcp-server"] //= {
@@ -117,7 +117,7 @@ fi
 
 kimi_mcp="$HOME/.kimi-code/mcp.json"
 mkdir -p "$(dirname "$kimi_mcp")"
-kimi_tmp="$(mktemp "${TMPDIR:-/tmp}/knowme-kimi.XXXXXX")"
+kimi_tmp="$(mktemp "${TMPDIR:-/tmp}/harness-kimi.XXXXXX")"
 if [[ -f "$kimi_mcp" ]]; then
   jq '
     .mcpServers = (.mcpServers // {}) |

@@ -1438,8 +1438,11 @@ cat > src/index.css << 'EOF'
 @theme {
   --color-background: #0B0F14;
   --color-surface: #161D29;
-  --color-ember: #FF6A3D;
-  --color-violet: #8B78FF;
+  /* Semantic accent roles. These are PLACEHOLDER values — replace them with the
+     product palette. Never name a token after a brand ("ember"); name it after
+     the job it does, so re-theming is a value change, not a rename. */
+  --color-accent: #3D7DFF;
+  --color-accent-alt: #8B78FF;
   --color-text-primary: #F2F2FF;
   --color-text-secondary: #9898C0;
   --font-sans: 'Inter', sans-serif;

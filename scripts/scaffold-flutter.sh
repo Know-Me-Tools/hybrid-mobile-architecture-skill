@@ -282,9 +282,14 @@ abstract final class T {
   static const bgElevated = Color(0xFF181828);
   static const bgOverlay  = Color(0xFF1E1E35);
 
-  // Accents
-  static const ember   = Color(0xFFFF6A3D);
-  static const violet  = Color(0xFF8B78FF);
+  // Accents. PLACEHOLDER values — replace with the product palette. Tokens are
+  // named for their ROLE, never for a brand colour, so re-theming changes values
+  // and not every call site.
+  static const accent    = Color(0xFF3D7DFF);
+  static const accentAlt = Color(0xFF8B78FF);
+  // Light-mode accent: the same role, darkened to hold contrast on a light
+  // canvas. Both themes must satisfy WCAG 2.2 AA — see the a11y-gate skill.
+  static const accentOnLight = Color(0xFF1F5FD9);
   static const cyan    = Color(0xFF22D3EE);
   static const amber   = Color(0xFFF5A623);
   static const green   = Color(0xFF34D399);
@@ -1425,7 +1430,7 @@ import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/notes/presentation/screens/notes_screen.dart';
 import '../features/memory/presentation/screens/memory_screen.dart';
 
-/// The four KnowMe-slice tabs, in shell order. Adding a destination here is the
+/// The four vertical-slice tabs, in shell order. Adding a destination here is the
 /// only edit needed to surface a feature — labels/icons/paths stay in lockstep.
 const _tabs = <(String, IconData, String)>[
   ('/chat', Icons.chat_bubble_outline, 'Chat'),
@@ -1489,6 +1494,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart' as shad;
 import 'app/router.dart';
 // ignore: unused_import
 import 'bridge/rust_bridge_provider.dart';
+import 'core/theme/tokens.dart';
 import 'features/startup/presentation/screens/startup_gate.dart';
 import 'shared/providers/entity_transport.dart';
 
@@ -1526,7 +1532,7 @@ class AppRoot extends StatelessWidget {
       background: () => const Color(0xFF0B0F14),
       foreground: () => const Color(0xFFE8EDF3),
       card: () => const Color(0xFF1C2535),
-      primary: () => const Color(0xFFFF6A3D),
+      primary: () => T.accent,
       secondary: () => const Color(0xFF161D29),
       muted: () => const Color(0xFF253044),
       border: () => const Color(0x00000000),
@@ -1536,7 +1542,7 @@ class AppRoot extends StatelessWidget {
       background: () => const Color(0xFFF7F7F8),
       foreground: () => const Color(0xFF0B0F14),
       card: () => const Color(0xFFFFFFFF),
-      primary: () => const Color(0xFFE04E28),
+      primary: () => T.accentOnLight,
       secondary: () => const Color(0xFFFAFBFC),
       muted: () => const Color(0xFFF2F4F7),
       border: () => const Color(0x00000000),

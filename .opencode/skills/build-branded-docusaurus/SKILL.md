@@ -16,7 +16,7 @@ credentials, personal data, and machine-local paths never enter public output.
 2. Ask only unanswered questions about public audience, publication URL, search, and container delivery.
 3. Pin Docusaurus and runtime dependencies. Use separate docs plugin instances when content ownership differs.
 4. Apply the brand tokens in supported CSS variables and stable theme classes. Swizzle only when CSS cannot satisfy the structural contract.
-5. For KnowMe, enforce Flat 2.0: no visible borders, separator lines, gradients, or decorative shadows. Regions differ by filled backgrounds and spacing. Preserve visible keyboard focus.
+5. Enforce Flat 2.0: no visible borders, separator lines, gradients, or decorative shadows. Regions differ by filled backgrounds and spacing. Preserve visible keyboard focus.
 6. Add Mermaid with coordinated themes and deterministic local search by default.
 7. Add `SITE_URL` and `BASE_URL`, GitHub Pages publishing, and a non-root immutable container.
 8. Add a sanitizer that rejects private paths, secrets, and raw wiki content.

@@ -36,7 +36,7 @@ Do not substitute mocked tests, source inspection, a dev server response, or a s
 - Run the locked dependency install, code generators, static checks, behavior tests, production builds, and architecture audit required by the project. Invoke Dart code generators through `flutter pub run` when a separate system Dart SDK could shadow Flutter's bundled beta SDK.
 - Launch each claimed surface. Inspect persistent diagnostics as well as terminal output.
 - Verify startup creates the documented configuration, memory/database, and model-cache locations.
-- Exercise a public boundary. For KnowMe-style examples, prove seeded memory search returns ranked results and prove a chat prompt produces streamed `ContentBlock` output through the real UI. Use `GEN_UI_DEV_OLLAMA_MODEL=llama3.2:1b` when that local model is the declared development backend.
+- Exercise a public boundary. Prove seeded memory search returns ranked results and prove a chat prompt produces streamed `ContentBlock` output through the real UI. Use `GEN_UI_DEV_OLLAMA_MODEL=llama3.2:1b` when that local model is the declared development backend.
 - Serve the production web bundle separately from the source dev server and inspect browser console errors.
 - For mobile, launch the built app in a simulator/emulator and prove the Rust core reaches ready before accepting a rendered shell as success.
 

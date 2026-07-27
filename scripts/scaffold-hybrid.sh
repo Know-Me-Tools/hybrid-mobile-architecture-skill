@@ -19,7 +19,7 @@ source "$SCRIPT_DIR/lib-versions.sh"
 PROJECT="${1:-my-hybrid-app}"
 ORG="${2:---org}"; ORG="${3:-ai.prometheusags}"
 UAR_MODE="${5:-embedded}"
-# PROJECT may be a path (e.g. "apps/knowme-poc"); the leaf name is what downstream
+# PROJECT may be a path (e.g. "apps/my-app"); the leaf name is what downstream
 # scaffolds use for package/app naming (Dart snake_case, npm names, etc.) — passing
 # the full path broke a sed substitution once "/" appeared in a "name" value.
 APP_NAME="$(basename "$PROJECT")"

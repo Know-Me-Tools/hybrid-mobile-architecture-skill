@@ -4,7 +4,7 @@
 
 | Scenario | ID | Required recipe |
 |---|---|---|
-| Full KnowMe hybrid application | `scenario-full-knowme-hybrid` | `docs/prompting/scenarios/full-knowme-hybrid.md` |
+| Full hybrid application (all surfaces) | `scenario-full-hybrid` | `docs/prompting/scenarios/full-hybrid.md` |
 | Flutter-only mobile with Rust FFI | `scenario-flutter-rust-ffi` | `docs/prompting/scenarios/flutter-rust-ffi.md` |
 | Tauri local inference desktop | `scenario-tauri-local-inference` | `docs/prompting/scenarios/tauri-local-inference.md` and `docs/prompting/data/recipes/tauri-local-inference.json` |
 | Full-stack automation product | `scenario-full-stack-automation` | `docs/prompting/scenarios/full-stack-automation.md` |

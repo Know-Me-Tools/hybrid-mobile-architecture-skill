@@ -45,7 +45,7 @@ catches missing product surfaces—not only overflow, layout jumps, and contrast
 - [ ] **Not a default template.** Fails if it reads as stock shadcn/Tailwind with no point
       of view (centered hero + gradient blob + generic CTA; uniform card grid; gray-on-white
       with one accent). See the design-quality bar below.
-- [ ] **KnowMe Flat 2.0:** no visible borders, divider lines, or layout shadows; adjacent
+- [ ] **Flat 2.0:** no visible borders, divider lines, or layout shadows; adjacent
       regions are distinguished through background-color changes.
 - [ ] **Shadcn/Assistant UI are mounted at the real boundary**, not merely installed.
 - [ ] **Motion is compositor-friendly** (opacity/transform/clip-path only).
