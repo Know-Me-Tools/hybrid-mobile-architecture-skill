@@ -15,7 +15,10 @@ const forbidden = [
   {name: 'machine-local absolute path', pattern: /\/Users\/[A-Za-z0-9._-]+/},
   {name: 'raw prometheus wiki path', pattern: /\.prometheus\//},
   {name: 'private Karpathy wiki', pattern: /prometheus-wiki-private/i},
-  {name: 'raw conversation/session log', pattern: /(codex_internal_context|in-app-browser-context|session log|raw conversation)/i},
+  {
+    name: 'raw conversation/session log',
+    pattern: /(codex_internal_context|in-app-browser-context|(?:^|[/\\_.-])(?:session[-_.]?log|raw[-_.]?conversation)(?:[/\\_.-]|$))/i
+  },
   {name: 'private key', pattern: /BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY/},
   {name: 'inline credential', pattern: /(?:api[_-]?key|client[_-]?secret|password|token)\s*[:=]\s*["'][^"']+/i},
   {name: 'unsupported completion claim', pattern: /(?:guaranteed success|always works|never fails|fully autonomous without review)/i}

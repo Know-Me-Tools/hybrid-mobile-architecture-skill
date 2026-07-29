@@ -97,9 +97,9 @@ lane (browsers cannot join iroh gossip). The vault peer lane is:
 
 ## Agents and the vault
 
-- Client agents (PMPO loop in `gen_ui_core`) read the vault through
-  `VaultRepository` and write learned facts back as CRDT mutations — this is
-  the "client-side agent data" store for personal context.
+- UAR reads the vault through the governed `VaultRepository` capability and
+  writes approved learned facts back as CRDT mutations. Application UI and raw
+  MCP transports cannot access the vault directly.
 - Inference calls assemble a **momentary context**: selected vault fields are
   serialized into the prompt, sent to a local LLM (preferred) or an approved
   cloud endpoint, and the response is post-processed; the assembled context is

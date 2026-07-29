@@ -26,24 +26,31 @@
 - AG-UI protocol adapter (A2uiEvent → AguiEvent, bidirectional)
 - Local inference engines behind the `InferenceProvider` trait, chosen per **device**, not per "mobile/desktop": llama-cpp-2 desktop · LiteRT-LM Android · MLX-Swift iOS · MLX-C macOS · WebLLM web; mistral.rs optional (versions.toml [inference], `references/rust/inference-lanes.md`)
 - SurrealDB embedded (RocksDB, MemoryStore + ToolCache + EntityGraph)
-- MCP client registry (SSE + stdio transports, JSON-RPC 2.0)
-- Universal Agent Runtime (PMPO loop, max_turns guard, tool routing)
+- UAR runtime facade (embedded, service, and deterministic test adapters)
+- Governed tool execution inside UAR; raw MCP transports are not
+  application-facing APIs
 
 ## UAR integration modes
 
-**Embedded (default for standalone apps):**
-The full PMPO loop, MCP registry, and protocol pipeline run inside gen_ui_core.
-Appropriate for: KnowMe, TribeHealth mobile, standalone Prometheus AGS field tools.
+**Embedded (default for standalone and offline mobile apps):**
+The pinned UAR runtime, governed tool boundary, and protocol pipeline run
+in-process behind `UarRuntimeFacade`. Applications do not generate or own a
+second agent loop.
 
-**External (URL-based, for enterprise):**
-UAR runs as a separate service. gen_ui_core in HTTP-client mode connects via URL.
-Appropriate for: enterprise deployments where UAR is shared infrastructure.
+**Service (desktop, web, and hosted execution):**
+The application calls UAR through a typed BFF or service adapter. Appropriate
+when UAR is shared infrastructure.
+
+**Deterministic (tests):**
+CI uses a bounded, in-memory implementation of the same facade and event
+contracts. It does not weaken production policy or tool-governance semantics.
 
 Configure in `gen_ui_core/src/config.rs`:
 ```rust
 pub enum UarMode {
     Embedded,
-    External { url: String, api_key: Option<String> },
+    Service { url: String },
+    Deterministic,
 }
 ```
 

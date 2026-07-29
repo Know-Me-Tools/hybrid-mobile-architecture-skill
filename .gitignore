@@ -14,8 +14,26 @@
 # Build outputs (not part of the skill source)
 *.skill
 dist/
+build/
+site/build/
+site/.docusaurus/
+site/.cache/
+site/static/preview/
+**/.DS_Store
+*.nohup
+*.nohup[0-9]
 
 # Local runtime and verification artifacts
 .knowme-data/
 .playwright-mcp/
 **/__pycache__/
+.prometheus/events.jsonl
+.kbd-orchestrator/current-waypoint.json
+.kbd-orchestrator/current-waypoint.md
+.kbd-orchestrator/position.json
+.kbd-orchestrator/position-reminder.txt
+.kbd-orchestrator/dispatch/logs/
+.kbd-orchestrator/**/hooks-status.json
+.kbd-orchestrator/**/hooks.log.jsonl
+.kbd-orchestrator/**/hooks.log.jsonl.lock
+.kbd-orchestrator/**/model-routing.log

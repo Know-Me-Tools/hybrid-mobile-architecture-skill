@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "skills": {
+    "a11y-gate": {
+      "category": "Quality and release gates",
+      "why": "Accessibility failures are cross-cutting and are easiest to introduce when a visual change appears finished. This skill is a completion gate so accessible names, keyboard operation, semantics, contrast, motion, and streaming announcements are verified before visual polish is mistaken for product readiness.",
+      "useCases": [
+        "Review a new React, Tauri, or Flutter screen before completion",
+        "Audit keyboard focus, screen-reader output, contrast, or reduced motion",
+        "Verify accessible status updates for streaming agent and tool events"
+      ],
+      "notFor": "It does not replace platform visual review or runtime verification; pair it with tauri-ui-review, flutter-golden-ui, and hybrid-runtime-verification."
+    },
+    "a2ui-surface-contract": {
+      "category": "Agent UI contracts",
+      "why": "A2UI is deliberately a projection protocol. Keeping execution authority out of the renderer prevents generated UI, approval components, and action continuations from bypassing UAR governance.",
+      "useCases": [
+        "Render typed agent-generated forms or components",
+        "Continue an A2UI action after restart",
+        "Handle unknown component types, approval state, or cancellation consistently"
+      ],
+      "notFor": "Do not use it to select models, execute tools, or make policy decisions in a client."
+    },
+    "agent-runtime-security": {
+      "category": "Runtime security",
+      "why": "Tool descriptions, model output, transport metadata, and client claims are all untrusted. The skill establishes one governed sequence for trust resolution, schema validation, effect classification, authorization, confirmation, bounded execution, and immutable audit.",
+      "useCases": [
+        "Add or review an MCP-backed tool",
+        "Implement approval, cancellation, timeout, or output limits",
+        "Validate JWT/JWKS identity and tenant isolation around agent runs"
+      ],
+      "notFor": "It does not define application-specific policy. Put roles, tenant rules, and release boundaries in the project policy overlay."
+    },
+    "agui-event-contract": {
+      "category": "Agent UI contracts",
+      "why": "Streaming clients reconnect, duplicate messages, and observe partial failure. A versioned, replayable AG-UI envelope makes event application deterministic instead of inferring run state from prose or connection lifetime.",
+      "useCases": [
+        "Expose UAR events over SSE",
+        "Resume a run from Last-Event-ID",
+        "Test duplicate, out-of-order, unknown, denied, or cancelled events"
+      ],
+      "notFor": "It does not define visual components; use a2ui-surface-contract or content-block-ui for rendering."
+    },
+    "anonymized-replica": {
+      "category": "Data and privacy",
+      "why": "Removing names is not anonymization. The skill preserves scenario behavior and referential shape while explicitly controlling direct identifiers, quasi-identifiers, secrets, free text, provenance, and reproducibility.",
+      "useCases": [
+        "Create a production-shaped POC dataset",
+        "Build deterministic certification fixtures",
+        "Review de-identification and re-identification risk"
+      ],
+      "notFor": "Do not use it as permission to copy production transcripts, credentials, documents, or raw client notes."
+    },
+    "axum-agent-gateway": {
+      "category": "Runtime and service boundaries",
+      "why": "The browser must not become an agent runtime or authorization boundary. The Axum gateway derives verified identity, applies policy, submits bounded UAR commands, and streams typed results through a server-controlled boundary.",
+      "useCases": [
+        "Add authenticated run and cancellation endpoints",
+        "Stream AG-UI/A2UI events from UAR to a web client",
+        "Enforce tenant derivation, idempotency, policy denial, and slow-consumer behavior"
+      ],
+      "notFor": "Do not expose raw MCP execution, caller-selected tenants, or provider routing through the gateway."
+    },
+    "build-branded-docusaurus": {
+      "category": "Documentation and delivery",
+      "why": "A documentation site is a publication boundary, not a folder copied to the web. The skill separates public sources from private evidence, preserves brand and accessibility contracts, and requires deterministic search, sanitization, links, builds, screenshots, and deployment checks.",
+      "useCases": [
+        "Create or extend a Docusaurus product portal",
+        "Publish architecture and API guidance to GitHub Pages",
+        "Add Mermaid, local search, container delivery, or publication sanitization"
+      ],
+      "notFor": "Do not publish raw wikis, session logs, credentials, personal information, or generated build output as source."
+    },
+    "client-rag": {
+      "category": "Data and privacy",
+      "why": "Retrieval is derived application state and must preserve privacy-class boundaries. The skill fixes embedding dimensions, per-tier stores, local execution, provenance, and a single retrieval facade so each feature cannot invent an incompatible vector pipeline.",
+      "useCases": [
+        "Search conversations, notes, or agent memory on-device",
+        "Add pgvector, sqlite-vec, HNSW, BM25, or hybrid retrieval",
+        "Build embed-on-write and idempotent backfill workflows"
+      ],
+      "notFor": "Cloud RAG is a separate design and privacy review; vault vectors never enter server-synced tables."
+    },
+    "content-block-ui": {
+      "category": "Agent UI contracts",
+      "why": "One exhaustive discriminated union keeps Rust, Dart, TypeScript, A2UI, and AG-UI renderers aligned. Compile-time exhaustiveness and one renderer per variant prevent silent loss of new agent-output types.",
+      "useCases": [
+        "Render chat text, thinking, tools, skills, citations, artifacts, or media",
+        "Add a new ContentBlock variant across Rust, Flutter, and React",
+        "Review streaming, disclosure, accessibility, and status transitions"
+      ],
+      "notFor": "Do not hand-edit generated language mirrors or replace the exhaustive dispatcher with ad hoc conditionals."
+    },
+    "dependency-pin-discipline": {
+      "category": "Build and dependency governance",
+      "why": "A generator must reproduce the same stack on every machine. Exact pins, a single version authority, and rationale comments prevent silent drift and make coordinated code-generation dependency changes reviewable.",
+      "useCases": [
+        "Add or upgrade Cargo, npm, pnpm, Flutter, Gradle, or toolchain dependencies",
+        "Resolve analyzer or code-generation version conflicts",
+        "Audit version literals and lockfile consistency"
+      ],
+      "notFor": "It does not choose architecture or certify a release; it governs how selected versions are recorded and moved."
+    },
+    "deploy-hybrid-agentic-stack": {
+      "category": "Deployment and operations",
+      "why": "Hybrid applications share one typed service layer but have several delivery shapes. The skill makes deployment profiles explicit while preventing browsers, mobile clients, and generated apps from duplicating infrastructure or bypassing governance.",
+      "useCases": [
+        "Plan local, web, realtime, authenticated, or full-agentic deployment",
+        "Add Axum asset delivery, containers, Kubernetes, GitOps, or BYOK",
+        "Verify selected services from a clean checkout through a public workflow"
+      ],
+      "notFor": "Do not enable every service by default or create a second image/catalog pipeline inside a consumer."
+    },
+    "domain-glossary-service": {
+      "category": "Domain modeling",
+      "why": "Prompts are a poor place to hide vocabulary rules. A versioned glossary gives humans, retrieval, policy, and agents a deterministic terminology contract while keeping customer-specific language in project overlays.",
+      "useCases": [
+        "Normalize canonical terms and synonyms",
+        "Map vocabulary to entities or policy actions",
+        "Handle deprecation, locale fallback, ambiguity, and revision pinning"
+      ],
+      "notFor": "Do not place customer names, URLs, roles, or private terminology in the reusable Builder package."
+    },
+    "entity-graph-web-shell": {
+      "category": "Application architecture",
+      "why": "Normalized entity state must converge across views without making components aware of transports. PEM owns durable application state, hooks expose intent, and Axum owns remote effects and verified identity.",
+      "useCases": [
+        "Build a React shell over PEM and PGlite",
+        "Register entity transports and normalized cross-view updates",
+        "Test offline replay, projection recovery, and tenant denial"
+      ],
+      "notFor": "Components must not call fetch, IPC, raw stores, or UAR directly."
+    },
+    "flutter-golden-ui": {
+      "category": "Quality and release gates",
+      "why": "Widget correctness is visual and stateful, so helper-level unit coverage cannot prove it. Deterministic goldens in both themes plus the live Flutter inspector provide reviewable evidence at the public widget boundary.",
+      "useCases": [
+        "Complete a new or changed Flutter widget or screen",
+        "Capture light/dark visual states with production tokens",
+        "Review overflow, font loading, animation, semantics, and device sizing"
+      ],
+      "notFor": "Do not update goldens merely to make a failing test green; inspect and approve the intended visual change."
+    },
+    "hybrid-design-tokens": {
+      "category": "Design system",
+      "why": "Hand-maintained Flutter and web themes inevitably diverge. One typed token source and generated outputs turn cross-surface visual parity from a convention into a mechanically verifiable contract.",
+      "useCases": [
+        "Add or change color, typography, spacing, radius, motion, or breakpoints",
+        "Generate Tailwind/CSS and Flutter token outputs together",
+        "Audit semantic naming and light/dark contrast"
+      ],
+      "notFor": "Do not place raw color or spacing literals in components or hand-edit generated token outputs."
+    },
+    "hybrid-runtime-verification": {
+      "category": "Quality and release gates",
+      "why": "Compilation cannot prove startup, persistence, native symbol binding, model loading, or a real user workflow. The skill defines evidence levels and forces physical-device verification when host checks cannot observe the failure class.",
+      "useCases": [
+        "Validate a release, profile, platform baseline, or inference lane",
+        "Prove clean-checkout build, launch, persistence, and public workflow",
+        "Record physical Android or iOS certification evidence"
+      ],
+      "notFor": "Build-only, mocked, emulator-only, or source-inspection results must not be reported as a working physical-device release."
+    },
+    "karpathy-progress-memory": {
+      "category": "Workflow and retention",
+      "why": "Long-running work loses decisions and repeats failures when only transcripts retain context. Compact evidence records preserve intent, delta, proof, failure, and the next experiment without turning every tool call into permanent noise.",
+      "useCases": [
+        "Record a task or phase boundary",
+        "Prepare a cross-harness handoff",
+        "Promote a verified reusable lesson after a failure or design decision"
+      ],
+      "notFor": "Do not store secrets, raw transcripts, unsupported claims, or private memory in public repository documentation."
+    },
+    "legacy-app-embed": {
+      "category": "Integration boundaries",
+      "why": "An embedded legacy application is an independently deployed, potentially hostile system. A versioned, capability-limited bridge prevents postMessage convenience from becoming an identity, tenant, policy, or runtime bypass.",
+      "useCases": [
+        "Embed a frozen SSR application in a governed shell",
+        "Define origin, source-window, version, and correlation checks",
+        "Test replay, navigation, reload, timeout, and malformed messages"
+      ],
+      "notFor": "Never send credentials, trusted tenant IDs, policy decisions, database access, or raw runtime handles through the bridge."
+    },
+    "local-inference-lanes": {
+      "category": "Runtime and service boundaries",
+      "why": "Engine selection is per device while execution lane selection is per turn. Separating those concepts behind InferenceProvider prevents a false universal mobile engine, unsafe cloud fallback, and platform-specific types leaking into application code.",
+      "useCases": [
+        "Add or debug LiteRT-LM, MLX, llama.cpp, or WebLLM",
+        "Implement model download, checksums, revision pins, or RAM preflight",
+        "Route cloud, local, and UAR turns without silent fallback"
+      ],
+      "notFor": "Do not certify a local lane from compilation; model loading and native bridges require real-device evidence."
+    },
+    "mini-app-module": {
+      "category": "Application architecture",
+      "why": "A folder of components is not a removable product boundary. A versioned module manifest makes routes, entities, capabilities, policy actions, events, and migrations explicit so the shell can validate, isolate, lazy-load, upgrade, or disable the module.",
+      "useCases": [
+        "Add a governed applet to a web shell",
+        "Register routes, entities, navigation, capabilities, or migrations",
+        "Test isolation, permission denial, lazy-load failure, and disablement"
+      ],
+      "notFor": "Do not allow modules to import each other's internal stores, components, or transports."
+    },
+    "mobile-navigation": {
+      "category": "Design system",
+      "why": "Platform sniffing creates two navigation trees for a distinction that does not exist at phone width. One destination model with a width-driven bottom-bar-to-rail transition follows both platform conventions and preserves router authority.",
+      "useCases": [
+        "Add top-level Flutter, React, Tauri, or PWA destinations",
+        "Switch navigation chrome at responsive breakpoints",
+        "Audit safe areas, router-derived selection, and accessible landmarks"
+      ],
+      "notFor": "Do not use OS checks or user-agent detection to choose top-level navigation placement."
+    },
+    "orchestrate-prometheus-application": {
+      "category": "Workflow and retention",
+      "why": "Complex application work needs explicit scenario classification, authority boundaries, bounded phases, independent criticism, and public-boundary evidence. The skill coordinates those artifacts without replacing Prometheus lifecycle authority.",
+      "useCases": [
+        "Plan a composite hybrid, SaaS, automation, native-agent, or documentation build",
+        "Select relevant skills, references, harnesses, and producer/critic roles",
+        "Run Feynman, KBD, PMPO, verification, and retention loops coherently"
+      ],
+      "notFor": "Builder activation aids must not pause, resume, lease, hand off, or mutate Prometheus KBD state."
+    },
+    "peer-profile-sync": {
+      "category": "Data and privacy",
+      "why": "User-owned profile and learned-personalization data has a different authority model from shared relational data. A local-only Loro vault with authenticated device pairing makes server exclusion structural rather than a best-effort filter.",
+      "useCases": [
+        "Synchronize private profile data between a user's devices",
+        "Implement pairing, revocation, CRDT convergence, or encrypted export",
+        "Keep agent-learned personal facts out of server sync and cloud persistence"
+      ],
+      "notFor": "Shared tenant data belongs in the relational lane; do not weaken the vault because a feature needs server persistence."
+    },
+    "pem-local-first": {
+      "category": "Application architecture",
+      "why": "A query cache models requests, while a local-first application models durable entities and pending mutations. PEM provides one normalized entity graph over local stores so views converge without a second freshness authority.",
+      "useCases": [
+        "Add an entity type, transport, local projection, or optimistic mutation",
+        "Persist conversations across PGlite, pglite-oxide, or SQLite",
+        "Surface queue and dead-letter state through reactive views"
+      ],
+      "notFor": "Do not introduce TanStack Query, SWR, Apollo cache, a second replay queue, or direct component transports."
+    },
+    "persona-scoped-agent": {
+      "category": "Runtime security",
+      "why": "A persona is behavior configuration, not authorization. Pinning persona instructions, tools, retrieval scopes, budgets, policy revision, and eligibility prevents client-selected roles or prompt text from granting capabilities.",
+      "useCases": [
+        "Build role-aware or mode-specific assistants",
+        "Apply persona-specific retrieval and tool allowlists",
+        "Enforce prepare-only or named-human release boundaries"
+      ],
+      "notFor": "Do not trust a persona or role supplied by the client, and do not encode authorization solely in a system prompt."
+    },
+    "reference-ui-fidelity": {
+      "category": "Quality and release gates",
+      "why": "A supplied design is an acceptance oracle, not loose inspiration. Inventorying every route, state, theme, and form factor before coding prevents a polished shell from hiding missing product surfaces.",
+      "useCases": [
+        "Implement from Figma, OpenDesign, HTML prototypes, screenshots, or mood boards",
+        "Build a route/state/theme/form-factor coverage matrix",
+        "Run screenshot convergence while preserving real architecture"
+      ],
+      "notFor": "If no authoritative reference exists, do not invent one and claim fidelity."
+    },
+    "sync-doctrine": {
+      "category": "Data and privacy",
+      "why": "Most sync defects begin by assigning data to the wrong authority or privacy lane. The doctrine forces an explicit relational, CRDT, or event-log choice plus privacy class before transport and UI details obscure the decision.",
+      "useCases": [
+        "Add synced tables, subscriptions, offline writes, lookup bundles, or onboarding loads",
+        "Design scoped replication and durable operation queues",
+        "Review privacy-class refusal, auth re-checks, and thin-client fallback"
+      ],
+      "notFor": "Do not mirror the server database, apply CRDTs to every row, or create parallel write queues."
+    },
+    "tauri-custom-titlebar": {
+      "category": "Design system",
+      "why": "Removing native window chrome transfers platform behavior and accessibility responsibility to the application. The skill makes surface gating, control placement, dragging, web safety, and accessible controls explicit.",
+      "useCases": [
+        "Build branded Tauri window chrome",
+        "Implement drag regions and platform-correct window controls",
+        "Prevent Tauri-only APIs from crashing a shared web bundle"
+      ],
+      "notFor": "Do not render desktop window controls in a browser, PWA, or Flutter mobile surface."
+    },
+    "tauri-ui-review": {
+      "category": "Quality and release gates",
+      "why": "Responsive and themed defects are invisible from one developer viewport. A fixed screenshot matrix and layer-contract review makes visual completion repeatable and catches stock-template styling, overflow, missing states, and architecture shortcuts.",
+      "useCases": [
+        "Complete a changed React or Tauri screen",
+        "Review 320, 768, 1024, and 1440 pixel widths in both themes",
+        "Compare implemented states with an approved reference and accessibility gate"
+      ],
+      "notFor": "A single screenshot, dev-server load, or polished route cannot certify the full product surface."
+    }
+  }
+}

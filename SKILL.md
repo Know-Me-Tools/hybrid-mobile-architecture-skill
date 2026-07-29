@@ -1,36 +1,38 @@
 ---
 name: hybrid-mobile-architecture
 description: >
-  Build, scaffold, audit, and transform application codebases implementing the
-  Prometheus AGS hybrid mobile architecture — Flutter + Rust FFI for iOS/Android,
-  Tauri + React 19 for macOS/Windows/Linux, sharing a single gen_ui_core Rust crate.
-  Use this skill whenever: (1) creating a new Flutter, Tauri, or hybrid mobile/desktop
-  app; (2) adding AI agent features to an existing codebase; (3) wiring Rust inference,
-  MCP, SurrealDB, or A2UI/AG-UI protocols into any UI layer; (4) setting up feature-based
-  clean architecture with Riverpod (Flutter) or Zustand + Prometheus Entity Management 3.x (React); (5) integrating
-  Ory Kratos or Supabase authentication; (6) scaffolding the shared Rust core (gen_ui_core)
-  with networking, LLM interaction, local inference, and UAR support. Always trigger for
-  any mention of gen_ui, hybrid app, flutter rust, tauri react, riverpod, zustand, prometheus entity management,
-  universal agent runtime, A2UI, AG-UI, MCP mobile, or on-device inference.
-version: 1.0.0
-author: Travis James <travis@prometheusags.ai>
-organization: Prometheus AGS / KnowMe, LLC
-compatibility:
-  required_tools:
-    - bash
-    - git
-  optional_tools:
-    - flutter
-    - cargo
-    - node
-    - rustup
+  Build, adopt, upgrade, and audit governed agentic applications with Flutter,
+  Tauri, React, Axum, Rust, Universal Agent Runtime, A2UI/AG-UI, and Prometheus
+  Entity Management. Use for KnowMe Builder projects, hybrid mobile or desktop
+  apps, governed web shells, UAR integration, typed native bridges, agent-tool
+  security, or non-destructive application generation.
 ---
 
-# Hybrid Mobile Architecture Skill
+# KnowMe Builder
 
-Scaffold, extend, and maintain applications built on the Prometheus AGS hybrid
-mobile architecture: Flutter for mobile, Tauri for desktop, gen_ui_core Rust
-for all infrastructure. This skill covers the complete lifecycle.
+Create, adopt, extend, and maintain governed agentic applications. UAR owns
+agent execution, run lifecycle, model routing, and tool governance. Prometheus
+owns development workflow lifecycle and cross-harness coordination. The
+Builder owns application architecture, typed adapters, generation, skills, and
+conformance tests.
+
+## Documentation entry points
+
+- Installation and native harness setup:
+  `site/docs/reference/installation.md`
+- Full CLI behavior and safety model: `site/docs/reference/cli.md`
+- Profile selection: `site/docs/architecture/profiles.md`
+- Design and authority rationale:
+  `site/docs/architecture/design-principles.md`
+- All 29 skills and individual usage guides:
+  `site/docs/reference/skills.md`
+- Runtime, control-plane, data, identity, and protocol services:
+  `site/docs/reference/services.md`
+- Scripts, generators, templates, and CI:
+  `site/docs/reference/utilities.md`
+- Product recipes: `site/docs/reference/use-cases.md`
+- Documentation authority and legacy-source classification:
+  `docs/documentation-map.md`
 
 ## Quick orientation
 
@@ -45,10 +47,16 @@ For platform-specific deep dives:
 
 ---
 
-## Step 1 — Environment check and tool installation
+## Step 1 — Environment and contract check
 
-Before any scaffolding or transformation, verify the environment. Run
-`scripts/check-env.sh` which will detect missing tools and prompt to install them.
+Before any generation or adoption, run:
+
+```bash
+knowme-builder doctor --json
+```
+
+The compatibility wrapper `scripts/check-env.sh` remains available during the
+2.0 migration.
 
 ### Required tool matrix
 
@@ -73,17 +81,25 @@ bash scripts/check-env.sh
 
 Ask the user which of these they need. Read the relevant reference file afterward.
 
-### 2a. New project scaffold
-- **Flutter mobile app** — `scripts/scaffold-flutter.sh <project-name>`
-- **Tauri desktop app** — `scripts/scaffold-tauri.sh <project-name>`
-- **Hybrid (both surfaces + shared Rust)** — `scripts/scaffold-hybrid.sh <project-name>`
-- **Rust core only** — `scripts/scaffold-rust-core.sh <project-name>`
+### 2a. New project
 
-### 2b. Existing codebase transformation
-- Add gen_ui_core Rust to existing Flutter app
-- Add A2UI/AG-UI streaming to existing React/Tauri app
-- Add feature-based clean architecture to existing project
-- Add Ory Kratos or Supabase authentication
+Require an explicit profile and generation mode:
+
+```bash
+knowme-builder new <path> --profile <profile> --mode runnable|skeleton
+```
+
+Profiles are `sovereign-hybrid`, `governed-web-shell`, `flutter-mobile`,
+`tauri-desktop`, and `axum-web`.
+
+### 2b. Existing application adoption
+
+Never re-scaffold an evolved application. Preview first, then apply:
+
+```bash
+knowme-builder adopt <path> --profile <profile> --check
+knowme-builder adopt <path> --profile <profile> --apply
+```
 
 ### 2c. Code generation
 - New feature module (Flutter or Tauri)
@@ -195,11 +211,14 @@ The UAR can be integrated in two modes:
 
 **Embedded mode:** UAR is embedded directly in `gen_ui_core`. The agent loop, MCP registry, and protocol pipeline run in-process. This is the default for standalone consumer apps (KnowMe) and field tools (Prometheus AGS mobile).
 
-For embedded mode, `gen_ui_core` already contains the full UAR implementation:
-- `agent/mod.rs` — PMPO loop
-- `mcp/` — MCP client + registry
-- `protocol/` — A2UI + AG-UI pipeline
-- `inference/` — local inference behind the `InferenceProvider` trait (pinned llama.cpp/Qwen on desktop + mobile, WebLLM on web; mistral.rs optional — see `versions.toml` `[inference]`)
+Generated applications integrate through a pinned `UarRuntimeFacade`:
+
+- embedded implementation for mobile and local operation;
+- service implementation for desktop, web, and hosted execution;
+- deterministic implementation for CI.
+
+Applications must not generate a competing agent loop. Raw MCP transport is
+internal to UAR; application code invokes tools only through UAR governance.
 
 For external mode, configure the URL in `gen_ui_core/src/config.rs` and the crate switches to HTTP client mode.
 
@@ -234,13 +253,22 @@ When adding a new ContentBlock type, always do all 7 steps in `references/rust/n
 | `references/tauri/eslint-config.md` | ESLint 9 flat config, tsconfig strict, Prettier, Vitest setup |
 | `references/tauri/testing.md` | Vitest, React Testing Library, layer contract enforcement tests |
 | `references/rust/patterns.md` | layered crate structure, FFI rules, Tauri commands, UAR modes |
+| `references/rust/compile-speed.md` | Rust workspace dependency boundaries and compile-time controls |
 | `references/rust/inference-lanes.md` | per-device engines, the three lanes, native bridges, model acquisition |
 | `references/rust/wasm-plugin-sandbox.md` | Wasmtime limits for third-party plugin components |
+| `references/rust/tool-governance.md` | UAR trust, schema, policy, approval, cancellation, and immutable tool audit |
+| `references/rust/wasm-targets.md` | WASM target selection and browser/runtime constraints |
 | `references/generator-placeholders.md` | porting contract: `__APP_*__` / `@VERSION@` substitution |
 | `references/rust/new-block-type.md` | 7-step full-stack guide for new ContentBlock variants |
 | `references/rust/testing.md` | cargo test, tokio::test, wiremock, SurrealDB integration tests |
 | `references/auth/patterns.md` | Auth strategy selection — when Kratos vs Supabase vs combined |
+| `references/sync/doctrine.md` | authoritative sync lanes, privacy classes, and non-mirroring rule |
+| `references/sync/decisions.md` | local-first architecture decision records |
+| `references/sync/partial-replication.md` | scoped replication and hydration |
+| `references/sync/peer-crdt.md` | device-to-device private profile vault |
+| `references/sync/client-rag.md` | on-device retrieval and vector-storage boundaries |
+| `references/ui-skills.md` | UI skill routing and cross-surface quality gates |
 | `scripts/` | Runnable scripts — check-env, scaffold, new-feature, add-auth, audit |
-| `assets/templates/` | Code templates — flutter-feature, tauri-feature, rust-core, content-block |
+| `assets/templates/` | Maintained Flutter, Tauri, Rust, native bridge, and build-script templates |
 | `docs/tj-arch-mob-001.html` | Full XHTML architectural standard (TJ-ARCH-MOB-001) |
 | `docs/gen_ui_spec.html` | Full gen_ui technical specification and SVG architecture diagrams |

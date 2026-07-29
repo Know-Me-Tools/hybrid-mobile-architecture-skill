@@ -5,9 +5,11 @@ title: Architecture
 
 # One core, native surfaces
 
-TJ-ARCH-MOB-001 puts networking, LLM interaction, inference, MCP, agent behavior,
-and persistence in a shared Rust workspace. Flutter calls it through generated FFI
-on iOS and Android; Tauri exposes thin commands to React 19 on desktop; Axum exposes
+TJ-ARCH-MOB-001 puts application services, persistence, model adapters, and
+typed runtime facades in a shared Rust workspace. Universal Agent Runtime is the
+sole authority for agent execution, provider routing, prompts, governed tools,
+and run lifecycle. Flutter calls the shared services through generated FFI on
+iOS and Android; Tauri exposes thin commands to React on desktop; Axum exposes
 the same typed application services for web deployments.
 
 ```mermaid
@@ -16,7 +18,8 @@ flowchart LR
   Tauri[Tauri + React desktop] --> Rust
   Web[React + Axum web] --> Rust
   Rust --> Local[Local models and persistence]
-  Rust --> Cloud[Configured agentic services]
+  Rust --> UAR[Universal Agent Runtime]
+  UAR --> Cloud[Configured model and tool services]
 ```
 
 Mobile consumer and healthcare applications use Flutter. Desktop applications use
@@ -59,6 +62,15 @@ shorthand for that family, not a path.
 - Every version pin lives in `versions.toml` and reaches generated code through
   `scripts/lib-versions.sh`. A version literal inlined in a scaffolder is invisible
   to the drift audit.
+
+## Continue reading
+
+- [Why the Builder is designed this way](./design-principles)
+- [Choose a generation profile](./profiles)
+- [Install the CLI and harness payloads](../reference/installation)
+- [Build or adopt a first project](../reference/first-project)
+- [Understand every service boundary](../reference/services)
+- [Select and invoke the 29 skills](../reference/skills)
 
 ## Runtime verification
 

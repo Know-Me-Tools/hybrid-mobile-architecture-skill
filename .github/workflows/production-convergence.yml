@@ -1,0 +1,127 @@
+name: production-convergence
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  authority:
+    name: Canonical manifests, skills, and security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Generate canonical artifacts
+        run: |
+          node scripts/generate-builder-manifests.mjs
+          node scripts/generate-skill-metadata.mjs
+          node scripts/generate-skill-evals.mjs
+          node scripts/generate-command-contract.mjs
+          node site/scripts/generate-skill-reference.mjs
+      - name: Reject generated drift
+        run: git diff --exit-code
+      - name: Validate package authority
+        run: |
+          node scripts/check-builder-authority.mjs --release
+          node scripts/check-skill-contracts.mjs
+          node scripts/check-runtime-security.mjs
+          node scripts/check-prometheus-boundary.mjs
+          bash scripts/sync-harness-skills.sh --check
+          bash scripts/audit.sh doc-consistency
+          bash scripts/audit.sh generator-purity
+      - name: Reject tracked runtime exhaust
+        run: |
+          if git ls-files | grep -E '(^|/)(node_modules|target|dist|build|site/build|\\.docusaurus|\\.DS_Store)(/|$)|\\.kbd-orchestrator/(dispatch-logs|hook-logs|status)|\\.prometheus/events\\.jsonl'; then
+            echo "tracked runtime exhaust detected" >&2
+            exit 1
+          fi
+      - name: Shell syntax and portability
+        run: |
+          find scripts -type f -name '*.sh' -print0 | xargs -0 bash -n
+          shellcheck scripts/*.sh
+
+  cli:
+    name: CLI and byte-stable profiles (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
+        with:
+          workspaces: tools/knowme-builder
+      - name: Rust quality gates
+        run: |
+          cargo fmt --manifest-path tools/knowme-builder/Cargo.toml -- --check
+          cargo clippy --manifest-path tools/knowme-builder/Cargo.toml --all-targets -- -D warnings
+          cargo test --manifest-path tools/knowme-builder/Cargo.toml
+      - name: Generate runnable profiles twice
+        shell: bash
+        run: |
+          cli="cargo run --quiet --manifest-path tools/knowme-builder/Cargo.toml --"
+          for profile in sovereign-hybrid governed-web-shell; do
+            mkdir -p "${RUNNER_TEMP}/first" "${RUNNER_TEMP}/second"
+            $cli new "${RUNNER_TEMP}/first/fixture" --profile "$profile" --mode runnable
+            $cli new "${RUNNER_TEMP}/second/fixture" --profile "$profile" --mode runnable
+            diff -rq "${RUNNER_TEMP}/first/fixture" "${RUNNER_TEMP}/second/fixture"
+            rm -rf "${RUNNER_TEMP}/first/fixture" "${RUNNER_TEMP}/second/fixture"
+          done
+      - name: Manifest and command contract checks
+        run: |
+          cargo run --quiet --manifest-path tools/knowme-builder/Cargo.toml -- manifest check
+          node scripts/generate-command-contract.mjs --check
+
+  clean-install:
+    name: Isolated multi-harness install
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: [authority, cli]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Install into isolated home
+        env:
+          HOME: ${{ runner.temp }}/builder-home
+        run: bash scripts/install-global-harnesses.sh
+      - name: Verify all filesystem harnesses
+        env:
+          HOME: ${{ runner.temp }}/builder-home
+        run: |
+          for root in \
+            "$HOME/.claude/skills" \
+            "$HOME/.codex/skills" \
+            "$HOME/.opencode/skills" \
+            "$HOME/.config/opencode/skills" \
+            "$HOME/.kimi-code/skills" \
+            "$HOME/.kimi/skills" \
+            "$HOME/.agents/skills"; do
+            skill_count="$(find "$root" -mindepth 1 -maxdepth 2 -name SKILL.md | wc -l | tr -d ' ')"
+            test "$skill_count" -ge 30
+            test -f "$root/agent-runtime-security/SKILL.md"
+            test -f "$root/hybrid-mobile-architecture/SKILL.md"
+          done
+          test -f "$HOME/.claude/commands/knowme-builder/new.md"
+          test -f "$HOME/.codex/prompts/knowme-builder-new.md"
+          test -f "$HOME/.opencode/commands/knowme-builder-new.md"
+          test -f "$HOME/.config/opencode/commands/knowme-builder-new.md"
+          test -f "$HOME/.kimi-code/commands/knowme-builder-new.md"
+          test -x "$HOME/.claude/hooks/knowme-builder-skill-activation.py"
+          test -f "$HOME/.opencode/hooks/knowme-builder-skill-activation.mjs"
+          test -x "$HOME/.kimi-code/hooks/knowme-builder-skill-activation.py"
+          version="$(jq -r '.package.version' builder.manifest.json)"
+          test -f "$HOME/.claude/plugins/marketplaces/knowme-hybrid-architecture/.claude-plugin/marketplace.json"
+          test -f "$HOME/.codex/plugins/cache/knowme-hybrid-architecture/hybrid-mobile-architecture/$version/.agents/plugins/marketplace.json"

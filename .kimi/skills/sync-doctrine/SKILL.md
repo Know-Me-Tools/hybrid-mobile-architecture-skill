@@ -4,10 +4,11 @@ description: ALWAYS invoke before ANY sync, replication, realtime, offline, or l
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
-> **Binding:** this skill operates under the 40 Prometheus Base Rules
-> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md) at the project root). The full
-> doctrine lives in `references/sync/doctrine.md`, `partial-replication.md`, and
-> `decisions.md` — read them before designing; this skill is the working checklist.
+> **Binding:** The full doctrine lives in
+> [`doctrine.md`](../../../references/sync/doctrine.md),
+> [`partial-replication.md`](../../../references/sync/partial-replication.md), and
+> [`decisions.md`](../../../references/sync/decisions.md). Read them before
+> designing; the invariants below remain usable when references are unavailable.
 
 # Sync Doctrine
 

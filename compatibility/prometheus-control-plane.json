@@ -1,0 +1,27 @@
+{
+  "$schema": "../schemas/external-contract.schema.json",
+  "schemaVersion": 1,
+  "contract": "prometheus-control-plane",
+  "minimumVersion": "2.0.0",
+  "requiredFeatures": [
+    "canonical-kbd-runtime",
+    "kbd-pause",
+    "kbd-resume",
+    "kbd-cancel",
+    "kbd-audit",
+    "kbd-revise",
+    "kbd-handoff",
+    "expected-revision",
+    "lease-fencing",
+    "four-harness-capability-manifest",
+    "skill-lint",
+    "skill-budget",
+    "skill-eval",
+    "doctor-json"
+  ],
+  "authority": {
+    "lifecycle": "prometheus",
+    "compatibilityProjections": "read-only",
+    "builderHooks": "advisory"
+  }
+}

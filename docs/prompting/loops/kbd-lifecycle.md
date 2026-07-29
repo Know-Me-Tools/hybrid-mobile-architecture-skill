@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: KBD lifecycle
-description: A file-backed KBD lifecycle for assess, analyze, spec, plan, execute, apply, verify, retain, and recover loops.
+description: A canonical Prometheus KBD lifecycle for assess, analyze, spec, plan, execute, apply, verify, retain, and recover loops.
 ---
 
 # KBD lifecycle
@@ -45,50 +45,48 @@ parallel plan.
 | verify | evidence is compared against requirements by a critic. |
 | reflect | retained lessons and process improvements are recorded. |
 
-## Waypoint and handoff files
+## Canonical status and handoff
 
-Use repository files as the source of truth:
+Use the Prometheus control plane as the source of truth:
 
-- `.kbd-orchestrator/current-waypoint.json`
-- `.kbd-orchestrator/position-reminder.txt`
-- `.kbd-orchestrator/phases/<phase>/progress.json`
-- `.kbd-orchestrator/phases/<phase>/handoffs/*.handoff.json`
-- `openspec/changes/<change>/tasks.md`
-- `openspec/changes/<change>/specs/**/spec.md`
+```bash
+prometheus kbd status --json
+prometheus kbd audit
+prometheus kbd watch
+```
+
+`current-waypoint.json`, `progress.json`, `position.json`, and reminders are
+read-only compatibility projections. Never edit them to change lifecycle,
+ownership, or work position. OpenSpec requirements remain durable review
+artifacts, while state transitions use typed `prometheus kbd` commands.
 
 Resume prompt:
 
 ```text
-Read the position reminder first. Then read the current waypoint, phase
-progress, active OpenSpec tasks, and git status. Continue the next unchecked task
-only. Do not regenerate assessment, analysis, spec, or plan unless the waypoint
-is missing or invalid.
+Run `prometheus kbd status --json`, then inspect the active OpenSpec task and git
+status. Claim the mutation lease before writing. Continue only the exact
+committed revision and task. Do not regenerate assessment, analysis, spec, or
+plan unless an explicit plan revision supersedes it.
 ```
 
 ## Recovery for missing handoffs
 
-If a handoff file is missing but the phase files exist:
+If a compatibility projection or handoff export is missing:
 
 ```text
-Recover KBD state from:
-1. current-waypoint.json
-2. phase progress.json
-3. openspec/changes/*/tasks.md
-4. git status and changed files
-5. latest reviewed memory entry
-
-Recreate only the missing handoff summary. Do not rewrite completed phase
-artifacts unless they are internally inconsistent.
+1. Run `prometheus kbd status --json`.
+2. Run `prometheus kbd audit --since <known-revision-or-event>`.
+3. Inspect the active OpenSpec task and git status.
+4. Regenerate compatibility projections from canonical event replay.
+5. Never reconstruct authority by editing JSON files.
 ```
 
-If the waypoint and progress disagree, stop and create a recovery note:
+If a projection disagrees with canonical status, pause and audit:
 
 ```text
-KBD state conflict:
-- waypoint says: <state>
-- progress says: <state>
-- tasks say: <state>
-- safest next action: <one repair>
+prometheus kbd pause --reason "compatibility projection mismatch"
+prometheus kbd audit
+prometheus kbd migrate --check
 ```
 
 ## End-to-end phase example

@@ -1,151 +1,71 @@
 #!/usr/bin/env python3
-# TJ-ARCH-MOB-001 compliant
-"""UserPromptSubmit activation hook for TJ-ARCH-MOB-001 project-local UI/UX skills.
+"""Advisory skill activation adapter generated from the Builder manifest.
 
-Prompt-word matching raises skill-activation reliability from ~50% to ~84-100%
-(per the assessment's cited studies). This hook reads the user's prompt from stdin,
-matches it against each project-local skill's trigger words, and appends a directive
-reminder to invoke the matched skill(s) via additionalContext. It is additive and
-non-blocking — it never rejects a prompt, only nudges skill activation.
-
-Wired via .claude/settings.json:
-  { "hooks": { "UserPromptSubmit": [ { "command": "python3 .claude/hooks/skill-activation.py" } ] } }
+This adapter never blocks a prompt and owns no lifecycle or mutation state.
+Prometheus remains authoritative for pause, resume, cancel, lease, and handoff.
 """
+
+from __future__ import annotations
+
 import json
+import os
+from pathlib import Path
 import sys
 
-# skill name -> trigger words (lowercased substring match against the prompt)
-SKILLS = {
-    "reference-ui-fidelity": [
-        "reference app", "reference ui", "standalone html", "prototype",
-        "mood board", "moodboard", "screenshot", "attached image",
-        "match this design", "visual fidelity", "pixel parity", "redesign",
-        "product shell", "all screens", "design spec",
-    ],
-    "content-block-ui": [
-        "contentblock", "content block", "chat message", "streaming block",
-        "a2ui", "render message", "block variant", "toolresult", "tooluse",
-        "thinking block", "citation block", "artifact block",
-    ],
-    "hybrid-design-tokens": [
-        "design token", "theme", "palette", "color", "spacing", "typography",
-        "dark mode", "light mode", "tailwind", "shadcn theme", "css variable",
-        "themedata", "brand color", "theme-factory",
-    ],
-    "tauri-ui-review": [
-        "tauri ui", "desktop ui", "react component", "screen", "page", "layout",
-        "responsive", "breakpoint", "screenshot", "visual check", "ui review",
-        "web ui", "does it look",
-    ],
-    "tauri-custom-titlebar": [
-        "titlebar", "title bar", "window chrome", "window decorations",
-        "decorations false", "startdragging", "data-tauri-drag-region",
-        "traffic lights", "window controls", "minimize", "maximize", "close button",
-        "frameless", "drag region", "custom header",
-    ],
-    "mobile-navigation": [
-        "navigation", "nav bar", "navigation bar", "bottom nav", "tab bar", "tabs",
-        "navigationbar", "navigationrail", "bottomnavigationbar", "tabbar", "rail",
-        "sidebar", "app shell", "destinations", "shellroute", "router layout",
-        "pwa navigation", "mobile layout", "responsive nav",
-        # The wrong turn this skill exists to prevent: branching nav on OS rather
-        # than width. Catch the check itself, not just the nav vocabulary.
-        "platform.isios", "platform.isandroid", "useragent", "user agent",
-    ],
-    "flutter-golden-ui": [
-        "flutter widget", "flutter screen", "golden test", "golden file",
-        "widget test", "visual regression", "shadcn_flutter", "consumerwidget",
-        "flutter ui", "mobile ui", "pumpwidget", "matchesgoldenfile",
-    ],
-    "a11y-gate": [
-        "accessibility", "a11y", "wcag", "screen reader", "keyboard navigation",
-        "focus", "aria", "semantics", "contrast", "alt text", "reduced motion",
-        "tab order", "accessible name", "focus trap",
-    ],
-    "hybrid-runtime-verification": [
-        "working app", "application works", "app works", "actually runs",
-        "runnable", "runtime verification", "verify runtime", "real launch",
-        "production build", "clean checkout", "fresh clone", "smoke test",
-        "end-to-end", "e2e", "ready to ship", "shippable", "release gate",
-        "working example", "launch the app", "launch ios", "launch tauri",
-    ],
-    "deploy-hybrid-agentic-stack": [
-        "axum", "web server", "dockerfile", "docker compose", "docker-compose",
-        "kubernetes", "kustomize", "flint forge", "flint fabric", "flint gate",
-        "ory kratos", "byok", "liter-llm", "realtime sync", "web deployment",
-        "agentic stack", "embedded web assets",
-    ],
-    "karpathy-progress-memory": [
-        "karpathy", "running llm wiki", "progress memory", "session log",
-        "phase boundary", "continuous improvement", "prometheus wiki",
-        "private wiki", "record the lesson", "record our path", "handoff",
-    ],
-    "build-branded-docusaurus": [
-        "docusaurus", "documentation site", "docs portal", "github pages",
-        "branded docs", "documentation container", "mermaid docs", "local search",
-    ],
-    "orchestrate-prometheus-application": [
-        "prompting guide", "prompt pack", "feynman loop", "kbd loop", "pmpo",
-        "model routing", "autonomous development", "agent creator", "skill creator",
-        "claude desktop", "saas product", "business ideation", "native agent",
-    ],
-    "sync-doctrine": [
-        "sync", "replication", "offline", "local-first", "local first",
-        "realtime", "subscription", "write queue", "conflict", "lww", "bucket",
-        "shape", "sync scope", "lookup data", "reference data", "metatype",
-        "seed data", "onboarding load", "initial load", "hydration", "boot order",
-        "syncchip", "electricsql", "sync engine",
-    ],
-    "pem-local-first": [
-        "entity", "entities", "pem", "entity transport", "registerentitytransport",
-        "useentities", "entity graph", "tanstack query", "react-query", "swr",
-        "query cache", "stale-while-revalidate", "optimistic update", "pglite",
-        "pglite-oxide", "persistence adapter", "durable conversation",
-        "conversation store", "normalized state",
-    ],
-    "client-rag": [
-        "rag", "retrieval", "vector", "embedding", "embed", "semantic search",
-        "similarity", "pgvector", "sqlite-vec", "hnsw", "fastembed",
-        "search chat history", "search conversations", "agent memory", "recall",
-        "bm25", "hybrid search", "rerank", "knowledge base",
-    ],
-    "peer-profile-sync": [
-        "profile", "personal data", "sensitive data", "pii", "vault", "privacy",
-        "private data", "device sync", "device-to-device", "peer sync", "webrtc",
-        "datachannel", "pairing", "pair device", "multi-device", "crdt", "loro",
-        "version vector", "local only", "never store",
-    ],
-}
+
+def manifest_path() -> Path | None:
+    configured = os.environ.get("KNOWME_BUILDER_ACTIVATION_MANIFEST")
+    candidates = [Path(configured) if configured else None]
+    candidates.append(Path.cwd() / ".knowme-builder" / "activation-manifest.json")
+    candidates.extend(
+        ancestor / "templates" / "activation-manifest.json"
+        for ancestor in Path(__file__).resolve().parents
+    )
+    return next((path for path in candidates if path and path.is_file()), None)
 
 
-def matched_skills(prompt: str) -> list[str]:
-    p = prompt.lower()
-    return [name for name, words in SKILLS.items() if any(w in p for w in words)]
+def matched_skills(prompt: str, manifest: dict[str, object]) -> list[str]:
+    normalized = prompt.casefold()
+    matches: list[str] = []
+    for skill in manifest.get("skills", []):
+        if not isinstance(skill, dict):
+            continue
+        name = skill.get("name")
+        terms = skill.get("terms", [])
+        if isinstance(name, str) and any(
+            isinstance(term, str) and term.casefold() in normalized
+            for term in terms
+        ):
+            matches.append(name)
+    return matches
 
 
 def main() -> int:
     try:
         payload = json.load(sys.stdin)
     except (json.JSONDecodeError, ValueError):
-        return 0  # never block on malformed input
-
-    prompt = payload.get("prompt", "") or ""
-    hits = matched_skills(prompt)
+        return 0
+    path = manifest_path()
+    if path is None:
+        return 0
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return 0
+    hits = matched_skills(str(payload.get("prompt", "") or ""), manifest)
     if not hits:
         return 0
-
-    lines = [
-        "TJ-ARCH-MOB-001 project skills relevant to this prompt "
-        "— invoke each via the Skill tool before doing the matching work:",
+    context = [
+        "KnowMe Builder skills relevant to this prompt; invoke only those whose "
+        "contract actually applies:",
+        *[f"  - {name}" for name in hits],
     ]
-    lines += [f"  - {name}" for name in hits]
-
     print(
         json.dumps(
             {
                 "hookSpecificOutput": {
                     "hookEventName": "UserPromptSubmit",
-                    "additionalContext": "\n".join(lines),
+                    "additionalContext": "\n".join(context),
                 }
             }
         )
@@ -154,4 +74,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

@@ -4,9 +4,10 @@ description: ALWAYS invoke when handling user profile data, sensitive personal d
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
-> **Binding:** this skill operates under the 40 Prometheus Base Rules
-> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md)). Full design:
-> `references/sync/peer-crdt.md`. Privacy classes: `sync-doctrine` skill.
+> **Binding:** Prefer simple, surgical, strongly typed changes and preserve
+> privacy-class boundaries. Full design:
+> [`peer-crdt.md`](../../../references/sync/peer-crdt.md). Privacy classes:
+> `sync-doctrine` skill.
 
 # Peer Profile Sync — the vault lane
 

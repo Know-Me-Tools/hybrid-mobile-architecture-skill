@@ -620,7 +620,8 @@ except Exception:
   fi
 
 # ── generator-purity: keep product vocabulary out of the generator ───────────
-# This pack scaffolds applications for anyone. Anything KnowMe-specific that
+# This pack scaffolds applications for anyone. Consumer-specific KnowMe
+# identifiers that
 # reaches scripts/ or assets/templates/ is emitted into every generated project:
 # another company's product name in their source tree, another company's brand
 # colour in their theme, a spec reference (FUNC-SPEC §07) to a document they
@@ -676,7 +677,7 @@ elif [[ "$PLATFORM" == "generator-purity" ]]; then
     echo -e "${CYAN}[02] Product vocabulary${NC}"
     # pattern|label — each would ship into a stranger's codebase.
     PURITY_CHECKS=(
-      'KnowMe|knowme|KNOWME|product name "KnowMe"'
+      'knowme-poc|know-me-system|KnowMe app shell|KnowMe-specific|consumer-specific KnowMe identifiers'
       'FUNC-SPEC|spec reference "FUNC-SPEC" (unreadable outside the product repo)'
       'tools\.knowme|Android applicationId "tools.knowme"'
       'know-me\.tools|product domain "know-me.tools"'

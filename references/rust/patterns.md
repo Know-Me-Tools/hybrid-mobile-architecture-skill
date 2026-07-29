@@ -17,12 +17,12 @@ rust/crates/
   gen_ui_runtime/      # L1  runtime abstraction (native / web split)
   gen_ui_protocol/     # L1  A2UI / AG-UI adapters, ProtocolPipeline
   gen_ui_client/       # L2  Flint client (gate · forge · frf) + HTTP/SSE
-  gen_ui_mcp/          # L2  McpClient + McpRegistry (SSE / stdio transports)
+  gen_ui_mcp/          # L2  internal UAR transport adapters; never app-facing
   gen_ui_db/           # L2  relational + sync
   gen_ui_db_graph/     # L2  SurrealDB embedded hybrid graph-RAG — ISOLATED for caching
   gen_ui_inference/    # L2  InferenceProvider impls, per-DEVICE (CPU-bound → spawn_blocking)
   gen_ui_context/      # L2  deterministic, engine-neutral context assembly
-  gen_ui_agent/        # L3  PMPO loop (UAR embedded) + lane routing
+  gen_ui_uar/          # L3  pinned UarRuntimeFacade adapters; no competing loop
   gen_ui_ffi/          # LEAF flutter_rust_bridge surface
   tauri-plugin-gen-ui/ # LEAF Tauri commands/events/permissions
   gen_ui_wasm/         # LEAF wasm-bindgen surface
@@ -131,12 +131,12 @@ gen_ui_core/src/
     mod.rs            # ProtocolPipeline (dual broadcast channels)
     a2ui.rs           # A2UI adapter + 27-variant event enum
     agui.rs           # AG-UI adapter + bidirectional events
-  agent/mod.rs        # → gen_ui_agent — PMPO loop (UAR embedded)
+  uar/mod.rs          # → gen_ui_uar — embedded/service/test facade adapters
   inference/          # → gen_ui_inference
     mod.rs            # InferenceEngine, ModelId, ChatTemplate
     sampler.rs        # temperature / top-p / top-k
   mcp/                # → gen_ui_mcp
-    mod.rs            # McpClient + McpRegistry
+    mod.rs            # Internal UAR MCP transports behind governance
     sse_transport.rs  # HTTP SSE transport
     stdio_transport.rs
   db/mod.rs           # → gen_ui_db — SurrealDB 3.2 (MemoryStore, EntityGraph)
@@ -213,14 +213,15 @@ async fn stream_agent_a2ui(
 // config.rs
 #[derive(Debug, Clone, serde::Deserialize)]
 pub enum UarMode {
-    /// PMPO loop, MCP registry, and protocol pipeline run in-process
+    /// The pinned UAR implementation runs in-process behind the facade
     Embedded,
-    /// Connect to external UAR service via HTTP
-    External {
+    /// Connect to the UAR service through a governed adapter
+    Service {
         url: String,
-        api_key: Option<String>,
         timeout_secs: u64,
     },
+    /// Deterministic implementation for contract tests only
+    Deterministic,
 }
 
 pub struct AppConfig {

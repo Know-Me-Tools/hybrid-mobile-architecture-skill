@@ -6,7 +6,7 @@
           {
             "type": "command",
             "command": "python3 .claude/hooks/skill-activation.py",
-            "description": "TJ-ARCH-MOB-001: activate project-local UI/UX and runtime-verification skills by prompt-word match"
+            "description": "Advisory activation from the canonical KnowMe Builder manifest; owns no lifecycle state"
           }
         ]
       }

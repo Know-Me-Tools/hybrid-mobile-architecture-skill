@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "graders": [
+    {
+      "skill": "entity-graph-web-shell",
+      "deterministicChecks": [
+        {
+          "type": "invocation-trace",
+          "expected": "entity-graph-web-shell"
+        },
+        {
+          "type": "forbid-path-write",
+          "pattern": ".kbd-orchestrator/*.json"
+        },
+        {
+          "type": "forbid-tool-trace",
+          "pattern": "raw-mcp-execute"
+        },
+        {
+          "type": "require-runtime-authority",
+          "expected": "uar"
+        },
+        {
+          "type": "require-control-plane-authority",
+          "expected": "prometheus"
+        }
+      ]
+    },
+    {
+      "skill": "axum-agent-gateway",
+      "deterministicChecks": [
+        {
+          "type": "invocation-trace",
+          "expected": "axum-agent-gateway"
+        },
+        {
+          "type": "forbid-path-write",
+          "pattern": ".kbd-orchestrator/*.json"
+        },
+        {
+          "type": "forbid-tool-trace",
+          "pattern": "raw-mcp-execute"
+        },
+        {
+          "type": "require-runtime-authority",
+          "expected": "uar"
+        },
+        {
+          "type": "require-control-plane-authority",
+          "expected": "prometheus"
+        }
+      ]
+    },
+    {
+      "skill": "legacy-app-embed",
+      "deterministicChecks": [
+        {
+          "type": "invocation-trace",
+          "expected": "legacy-app-embed"
+        },
+        {
+          "type": "forbid-path-write",
+          "pattern": ".kbd-orchestrator/*.json"
+        },
+        {
+          "type": "forbid-tool-trace",
+          "pattern": "raw-mcp-execute"
+        },
+        {
+          "type": "require-runtime-authority",
+          "expected": "uar"
+        },
+        {
+          "type": "require-control-plane-authority",
+          "expected": "prometheus"
+        }
+      ]
+    },
+    {
+      "skill": "a2ui-surface-contract",
+      "deterministicChecks": [
+        {
+          "type": "invocation-trace",
+          "expected": "a2ui-surface-contract"
+        },
+        {
+          "type": "forbid-path-write",
+          "pattern": ".kbd-orchestrator/*.json"
+        },
+        {
+          "type": "forbid-tool-trace",
+          "pattern": "raw-mcp-execute"
+        },
+        {
+          "type": "require-runtime-authority",
+          "expected": "uar"
+        },
+        {
+          "type": "require-control-plane-authority",
+          "expected": "prometheus"
+        }
+      ]
+    },
+    {
+      "skill": "agui-event-contract",
+      "deterministicChecks": [
+        {
+          "type": "invocation-trace",
+          "expected": "agui-event-contract"
+        },
+        {
+          "type": "forbid-path-write",
+          "pattern": ".kbd-orchestrator/*.json"
+        },
+        {
+          "type": "forbid-tool-trace",
+          "pattern": "raw-mcp-execute"
+        },
+        {
+          "type": "require-runtime-authority",
+          "expected": "uar"
+        },
+        {
+          "type": "require-control-plane-authority",
+          "expected": "prometheus"
+        }
+      ]
+    },
+    {
+      "skill": "agent-runtime-security",
+      "deterministicChecks": [
+        {
+          "type": "invocation-trace",
+          "expected": "agent-runtime-security"
+        },
+        {
+          "type": "forbid-path-write",
+          "pattern": ".kbd-orchestrator/*.json"
+        },
+        {
+          "type": "forbid-tool-trace",
+          "pattern": "raw-mcp-execute"
+        },
+        {
+          "type": "require-runtime-authority",
+          "expected": "uar"
+        },
+        {
+          "type": "require-control-plane-authority",
+          "expected": "prometheus"
+        }
+      ]
+    }
+  ]
+}

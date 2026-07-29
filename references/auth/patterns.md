@@ -1,6 +1,25 @@
 # Authentication Patterns Reference
 > Ory Kratos (self-hosted identity) · Supabase (managed Postgres + Auth)
 
+## Trusted identity boundary
+
+Decoded token payloads are not authorization evidence.
+
+- `UntrustedTokenHints` may parse display-only values such as a suggested name
+  while validation is pending. Never expose roles, tenant authority, or policy
+  decisions through this type.
+- `VerifiedSession` exists only after signature, issuer, audience, expiry, and
+  revocation-aware JWKS or authoritative server validation.
+- Derive tenant IDs and trusted role state on the backend from
+  `VerifiedSession`. Never accept a caller-selected tenant.
+- Service roles, administration endpoints, signing keys, and approval polling
+  are backend-only.
+- Consumer-specific role models belong in project policy overlays rather than
+  the generic Builder.
+
+Required negative tests cover forged, expired, wrong-issuer, wrong-audience,
+revoked-key, and cross-tenant credentials.
+
 ## When to use which
 
 | Scenario | Auth Strategy |

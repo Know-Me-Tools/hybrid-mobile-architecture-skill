@@ -52,8 +52,10 @@ export default {
     navbar: {
       title: 'KnowMe', logo: {alt: 'KnowMe conviction mark', src: 'img/knowme-mark.svg'},
       items: [
+        {to: '/reference/installation', label: 'Get started', position: 'left'},
         {to: '/architecture/intro', label: 'Architecture', position: 'left'},
-        {to: '/reference/knowme-app', label: 'Reference app', position: 'left'},
+        {to: '/reference/skills', label: 'Skills', position: 'left'},
+        {to: '/reference/cli', label: 'CLI', position: 'left'},
         {to: '/deployment/catalog', label: 'Deploy', position: 'left'},
         {to: '/prompting/playbook', label: 'Prompting', position: 'left'},
         {href: 'https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill', label: 'GitHub', position: 'right'}

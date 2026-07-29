@@ -1,110 +1,227 @@
-# Hybrid Mobile Architecture Skill
-**TJ-ARCH-MOB-001 · v1.0.0 · Prometheus AGS / KnowMe, LLC**
+# KnowMe Builder
 
-An [agentskills.io](https://agentskills.io) skill for building, scaffolding, and maintaining
-applications on the Prometheus AGS hybrid mobile architecture: **one Rust core, every
-platform** — Flutter iOS/Android, Tauri macOS/Windows/Linux, and web via WASM.
+**Version 2.0.0-alpha.1 · governed agentic application generator and skill pack**
 
-**Public documentation:**
+KnowMe Builder creates and adopts Flutter, Tauri/React, Axum, and Rust
+applications without treating the consumer repository as disposable generator
+output. It combines:
+
+- a Rust CLI with ownership-aware generation and upgrades;
+- explicit application profiles;
+- typed UAR, A2UI, AG-UI, identity, policy, persistence, and native-bridge
+  boundaries;
+- 29 portable Agent Skills;
+- generated commands and advisory activation adapters for Claude Code, Codex,
+  OpenCode, and Kimi; and
+- conformance, security, documentation, and installation gates.
+
+Public documentation:
 [KnowMe Builder documentation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/)
 
-**Prompting guide:**
-[Prometheus application prompting playbook](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/prompting/playbook)
-and
-[scenario prompt packs](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/prompting/scenarios)
+Start with:
 
----
+- [Installation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/installation)
+- [CLI reference](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/cli)
+- [Generation profiles](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/architecture/profiles)
+- [All 29 skills](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/skills)
+- [Services and boundaries](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/services)
+- [Utilities and automation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/utilities)
+- [Common use cases](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/use-cases)
 
-## What this skill does
+## Authority model
 
-- **Scaffolds** complete hybrid projects: Flutter mobile + Tauri desktop + web/WASM sharing a layered 14-crate Rust workspace
-- **Bootstraps** the full toolchain (Rust 1.97.1 w/ WASM target, Flutter 3.47 beta + Dart MCP server, Node 26.5.0 + bun + pnpm + TypeScript 7.0.2, OpenSpec, Prometheus Skill System)
-- **Enforces** the 40 Prometheus Base Rules ([AGENT_BASE_RULES.md](AGENT_BASE_RULES.md)), feature-based clean architecture, strict layering, and component contracts — for humans, coding agents, and generated projects alike
-- **Generates** feature modules, ContentBlock variants, authentication flows, MCP integrations, publishable packages (crates.io / pub.dev / npm), and project-local UI/UX skills with activation hooks
-- **Audits** codebases for TJ-ARCH-MOB-001 compliance (`audit.sh all` — layer contracts, per-surface checks)
+Three systems have deliberately separate jobs:
 
----
+| System | Authority |
+|---|---|
+| KnowMe Builder | Application architecture, templates, typed adapters, skills, and conformance |
+| Prometheus | Development lifecycle, KBD state, pause/resume/cancel, lease/fencing, audit, and handoff |
+| Universal Agent Runtime | Agent runs, providers, prompts, governed tools, cancellation, recovery, and A2UI/AG-UI events |
 
-## Architecture overview
+Builder activation hooks are advisory. They never own lifecycle or mutation
+authority. Generated applications must not introduce a second agent loop beside
+UAR.
 
-```
-iOS / Android              macOS / Windows / Linux         Web
-Flutter + Riverpod 3       Tauri 2 + React 19 + Zustand    WASM (wasm-bindgen)
-flutter_rust_bridge 2.12   Tauri IPC (invoke/emit)         @prometheus-ags/gen-ui-wasm
-        ↓                            ↓                          ↓
-   ╔═══════════════════════════════════════════════════════════════╗
-   ║             gen_ui layered Rust workspace (14 crates)          ║
-   ║                                                                ║
-   ║  gen_ui_types      frozen trait seams · ContentBlock contract  ║
-   ║  gen_ui_runtime    one Tokio runtime (native) / wasm futures   ║
-   ║  gen_ui_protocol   A2UI / AG-UI adapters                       ║
-   ║  gen_ui_client     Anthropic + Flint (gate/forge/FRF)          ║
-   ║  gen_ui_mcp        MCP registry (JSON-RPC 2.0 + SSE)           ║
-   ║  gen_ui_db         relational (pg/sqlite) + sync + startup     ║
-   ║  gen_ui_db_graph   SurrealDB 3.2 hybrid graph-RAG (HNSW+BM25)  ║
-   ║  gen_ui_inference  InferenceProvider — per-device engines      ║
-   ║  gen_ui_context    engine-neutral context assembly             ║
-   ║  gen_ui_agent      Universal Agent Runtime (PMPO loop)         ║
-   ║  leaves: gen_ui_ffi · tauri-plugin-gen-ui · gen_ui_wasm        ║
-   ╚═══════════════════════════════════════════════════════════════╝
-```
+## Install
 
-Business logic, networking, inference, and persistence live **only** in Rust —
-never re-implemented in Dart or TypeScript.
+Build and install the CLI from a trusted checkout:
 
----
-
-## Current status & roadmap
-
-**Done (phase: scaffold-full-hybrid-project, 12/12 changes):** the layered workspace
-scaffold with compile-speed profiles (clippy-first loop, panic=unwind FFI fix,
-wasm-release profile), wasm32 compile-proven core, unified relational+sync+graph-RAG
-data layer, Flint platform integration, FFI/Tauri/wasm leaves + publishing scaffolds,
-Flutter surface (Riverpod 3.3, PEM Dart port), React surface (Vite 8 + PEM +
-gen-ui-react), features-first testing philosophy, project-local UI/UX skills, and
-project-level MCP config (Dart/Flutter + shadcn) for Claude Code / Codex / OpenCode /
-Kimi.
-
-**In progress (phase: codegen-and-ci-verification):**
-
-1. **Bootstrap pillars** — extend `check-env.sh` into a four-pillar installer that
-   verifies-or-installs on any box: Rust + WASM + a full
-   [Prometheus Skill System](https://github.com/Prometheus-AGS/prometheus-skill-system)
-   instance (self-improving loops included); OpenSpec (latest, `@fission-ai/openspec`);
-   Flutter/Dart **beta channel** (ships the Dart MCP server); Node + bun + pnpm +
-   TypeScript — exact versions in `versions.toml`.
-2. **Verified scaffold output** — `bash scripts/verify-scaffold.sh` generates a
-   throwaway project and structurally diffs it against `ci/expected-tree.txt`, then
-   proves placeholders substituted, the JNI class path matches its Kotlin bridge, and
-   every emitted manifest parses. CI runs it on every push.
-
-   This replaced a committed 40k-LOC example app. That app *read* like generator
-   output but was a snapshot of a real product, so when the generator fell behind,
-   nothing failed — which is exactly how the drift went unnoticed. A generated
-   fixture cannot go stale without CI saying so.
-3. **CI** — clippy + `audit.sh all` + boundary test suites on every push.
-
----
-
-## Quick start
-
-### Check and install the toolchain
 ```bash
-bash scripts/check-env.sh --install
+cargo build --release --locked --manifest-path tools/knowme-builder/Cargo.toml
+install -m 0755 tools/knowme-builder/target/release/knowme-builder \
+  "$HOME/.cargo/bin/knowme-builder"
+knowme-builder --version
 ```
 
-### Install skills and utilities globally
+Install the complete workstation payload:
+
 ```bash
 bash scripts/install-global-harnesses.sh
 ```
 
-This installs the architecture and companion skills for Claude Code, OpenCode, Codex,
-Kimi Code CLI, and Zed, and merges the project Dart/shadcn MCP utilities into each
-harness's global configuration. See
-[Global harness installation](docs/global-harness-installation.md) for marketplace setup
-and verification commands.
+That installs the root skill, 29 companion skills, slash-command equivalents,
+advisory adapters, local Claude/Codex plugin payloads, and Dart/shadcn MCP
+entries while preserving unrelated user configuration.
 
-### Build and verify the documentation site
+Verify:
+
+```bash
+knowme-builder manifest check
+knowme-builder --json doctor --path .
+prometheus doctor --json
+```
+
+See [docs/global-harness-installation.md](docs/global-harness-installation.md)
+for native plugin registration and per-harness verification.
+
+## Generate a project
+
+Profiles are explicit:
+
+```bash
+knowme-builder new my-app \
+  --profile sovereign-hybrid \
+  --mode runnable \
+  --check
+
+knowme-builder new my-app \
+  --profile sovereign-hybrid \
+  --mode runnable
+```
+
+Available profiles:
+
+| Profile | Architecture |
+|---|---|
+| `sovereign-hybrid` | Flutter mobile, Tauri desktop, Rust adapters, embedded/service UAR |
+| `governed-web-shell` | React, Axum BFF, service UAR, PEM/PGlite, optional legacy embed |
+| `flutter-mobile` | Flutter, Rust, embedded UAR |
+| `tauri-desktop` | Tauri/React, Rust, service or in-process UAR facade |
+| `axum-web` | React, Axum, service UAR |
+
+`runnable` emits a deterministic agentic vertical slice. `skeleton` may contain
+explicitly declared unsupported surfaces and TODOs.
+
+## Adopt an existing application
+
+Do not regenerate an evolved application:
+
+```bash
+knowme-builder adopt existing-app \
+  --profile governed-web-shell \
+  --check
+
+knowme-builder adopt existing-app \
+  --profile governed-web-shell \
+  --apply
+```
+
+Adoption records profile and package state, installs skills, and creates a
+project policy overlay without claiming ownership of existing application
+files.
+
+## Ownership-aware upgrades
+
+```bash
+knowme-builder upgrade existing-app --check
+knowme-builder upgrade existing-app --apply
+```
+
+`.knowme-builder/generated.lock.json` records the generated path, template,
+source digest, last installed digest, ownership, and version. The Builder
+replaces only managed files that still match their last installed digest.
+Modified files produce a conflict report and proposed replacement.
+
+## Add capabilities
+
+```bash
+knowme-builder add feature conversations --path .
+knowme-builder add auth verified-session --path .
+knowme-builder add module reporting --path .
+knowme-builder add legacy-embed frozen-portal --path .
+```
+
+Additions are emitted under `.knowme-builder/additions` for deliberate
+integration. They do not overwrite feature code.
+
+## Skill bundle
+
+`templates/project-skills` is the single canonical tree. The package currently
+ships 29 skills:
+
+- quality and release: `a11y-gate`, `flutter-golden-ui`,
+  `tauri-ui-review`, `reference-ui-fidelity`,
+  `hybrid-runtime-verification`;
+- agent UI and runtime: `a2ui-surface-contract`, `agui-event-contract`,
+  `content-block-ui`, `local-inference-lanes`,
+  `agent-runtime-security`, `axum-agent-gateway`,
+  `persona-scoped-agent`;
+- application architecture: `entity-graph-web-shell`, `mini-app-module`,
+  `legacy-app-embed`, `pem-local-first`;
+- data and privacy: `sync-doctrine`, `peer-profile-sync`, `client-rag`,
+  `anonymized-replica`, `domain-glossary-service`;
+- design: `hybrid-design-tokens`, `mobile-navigation`,
+  `tauri-custom-titlebar`;
+- build, delivery, and workflow: `dependency-pin-discipline`,
+  `deploy-hybrid-agentic-stack`, `build-branded-docusaurus`,
+  `orchestrate-prometheus-application`, `karpathy-progress-memory`.
+
+Install or check project copies:
+
+```bash
+knowme-builder skills install --path .
+knowme-builder skills check --path .
+```
+
+Generated harness trees must not be edited independently:
+
+```bash
+bash scripts/sync-harness-skills.sh
+bash scripts/sync-harness-skills.sh --check
+```
+
+## Application runtime contract
+
+A runnable profile must support:
+
+```text
+message
+  → UAR run
+  → model stream
+  → governed tool
+  → A2UI/AG-UI event
+  → persisted projection
+  → restart recovery
+```
+
+UI layers are projections. They do not own provider routing, prompts, tools,
+policy, or run lifecycle.
+
+Application-facing tool requests go through UAR governance:
+
+1. trusted server/tool resolution;
+2. JSON Schema validation;
+3. independent effect classification;
+4. verified identity and policy;
+5. confirmation when required;
+6. idempotent, bounded, cancellable execution;
+7. result validation/redaction; and
+8. immutable audit outcome.
+
+## Verification
+
+Core package checks:
+
+```bash
+node scripts/check-builder-authority.mjs --release
+node scripts/check-skill-contracts.mjs
+node scripts/check-runtime-security.mjs
+node scripts/check-prometheus-boundary.mjs
+bash scripts/sync-harness-skills.sh --check
+cargo test --locked --manifest-path tools/knowme-builder/Cargo.toml
+```
+
+Documentation:
 
 ```bash
 cd site
@@ -112,104 +229,29 @@ npm ci
 npm run release:check
 ```
 
-The release gate sanitizes public content, rejects unsuffixed model IDs such as
-`gpt-5.6`, validates prompt recipes and harness source maps, checks generated model
-routing drift, builds the KnowMe-branded Docusaurus site, verifies required routes,
-runs internal/external link checks, and launches browser accessibility checks at
-desktop/dark and mobile/light sizes before GitHub Pages upload.
+A build is not runtime evidence. Use `hybrid-runtime-verification` for a clean
+checkout, production artifact, real launch, persistence, public workflow, and
+physical-device proof when native bridges or local inference are involved.
 
-### Scaffold a new hybrid project
-```bash
-bash scripts/scaffold-hybrid.sh my-app
-```
-Generated projects receive `AGENT_BASE_RULES.md`, CLAUDE.md/AGENTS.md declaring it
-binding, project-local UI/UX skills with an activation hook, and publishable package
-skeletons (npm + pub.dev) alongside the three surfaces.
+## Repository map
 
-### Single surfaces / pieces
-```bash
-bash scripts/scaffold-flutter.sh mobile my-app     # Flutter app
-bash scripts/scaffold-tauri.sh desktop my-app      # Tauri desktop/web app
-bash scripts/scaffold-rust-core.sh rust            # layered Rust workspace
-bash scripts/scaffold-packages.sh .                # publishable packages
-bash scripts/add-project-skills.sh .               # project-local skills + hooks
-```
-
-### Add authentication / features · audit
-```bash
-bash scripts/add-auth.sh supabase flutter ./mobile
-bash scripts/add-auth.sh kratos tauri ./desktop
-bash scripts/new-feature.sh conversation flutter ./mobile
-bash scripts/audit.sh all .                        # both surfaces + workspace detection
-```
-
----
-
-## Standards enforced
-
-| Standard | Rule |
+| Path | Purpose |
 |---|---|
-| Agent conduct | [AGENT_BASE_RULES.md](AGENT_BASE_RULES.md) — the 40 Prometheus Base Rules, binding for humans, agents, skills, and generated projects |
-| KnowMe UI/UX | [KnowMe UI/UX standard](docs/knowme-ui-ux-standard.md) — Shadcn UI, Assistant UI, strict borderless Flat 2.0, rich chat events, and React/Flutter theme parity |
-| State management | Riverpod 3.3 codegen (Flutter) · Zustand 5 + Prometheus Entity Management 3.x (React); TanStack Router/Table only |
-| Model routing | Exact model IDs only; `gpt-5.6` is invalid by itself, use routed IDs such as `gpt-5.6-sol` |
-| Component layer | Components → Hooks → Stores → API/Rust (stores are the only `invoke()` layer) |
-| Architecture | Feature-based clean arch (`data/domain/presentation` · `api/stores/queries/hooks/components`) |
-| UI components | shadcn_flutter (Flutter) · shadcn/ui (React) |
-| Authentication | Ory Kratos (self-hosted) · Supabase (managed) · Flint gate (platform) |
-| Business logic | Always in the Rust workspace — never re-implemented in Dart/TS |
-| Streaming | A2UI/AG-UI protocol pipeline — 11-variant ContentBlock sealed union |
-| Testing | Features first; boundary tests at public APIs; snapshot-preferred; no internal mocks |
-| Compile speed | `bacon clippy` inner loop · dep-optimized dev profiles · cross-target `cargo check` gates |
+| `builder.manifest.json` | Canonical package, profile, skill, template, target, and harness manifest |
+| `tools/knowme-builder` | Rust CLI |
+| `templates/project-skills` | Canonical 29-skill source |
+| `assets/templates` | Maintained profile, feature, adapter, native, build, and contract templates |
+| `compatibility` | Prometheus and UAR external contract descriptors |
+| `versions.toml` | Builder application-stack version authority |
+| `scripts` | Bootstrap, generation, compatibility, audit, and installation utilities |
+| `site` | Public Docusaurus source and publication gates |
+| `docs` | Specifications, evidence, prompting guides, research, and documentation map |
 
----
+Read [docs/documentation-map.md](docs/documentation-map.md) before treating a
+dated assessment or research file as current authority.
 
-## Package contents
+## Release status
 
-```
-hybrid-mobile-architecture/
-  SKILL.md                          # Skill instructions + triggering
-  AGENT_BASE_RULES.md               # The 40 Prometheus Base Rules (canonical)
-  CLAUDE.md / AGENTS.md             # Repo rules for coding agents (all harnesses)
-  .claude-plugin/                   # Claude Code plugin + marketplace listing
-  .agents/plugins/                  # Codex plugin marketplace listing
-  plugin.json / marketplace.json    # Legacy catalog metadata
-  .mcp.json / opencode.json /       # Project-level MCP config (Dart/Flutter + shadcn)
-  .codex/config.toml / .kimi-code/  #   for Claude Code, OpenCode, Codex, Kimi
-  docs/
-    tj-arch-mob-001.html            # Full architectural standard
-    gen_ui_spec.html                # gen_ui technical specification
-    reference-app/                  # KnowMe reference docs (PoC source material)
-    pglite-oxide-tauri-hybrid.md    # Embedded Postgres options (desktop/web)
-    prompting/                      # Model registry, harness playbooks, loops,
-                                    #   scenario prompt packs, and agent orchestration
-  site/                             # KnowMe-branded Docusaurus documentation site
-  references/                       # Patterns: flutter/ tauri/ rust/ auth/ + wasm-targets,
-                                    #   compile-speed, ui-skills (features-first testing)
-  scripts/
-    check-env.sh                    # Toolchain check/install (pillar bootstrap in progress)
-    scaffold-hybrid.sh              # Full hybrid project (rust + surfaces + packages + skills)
-    scaffold-{flutter,tauri,rust-core,packages}.sh
-    add-project-skills.sh           # Project-local UI/UX skills + activation hook
-    new-feature.sh / add-auth.sh / audit.sh
-  templates/project-skills/         # content-block-ui · hybrid-design-tokens ·
-                                    #   tauri-ui-review · tauri-custom-titlebar ·
-                                    #   mobile-navigation · flutter-golden-ui · a11y-gate
-  ci/expected-tree.txt              # structural manifest of the scaffold output
-  openspec/                         # OpenSpec change management (active + archive)
-```
-
----
-
-## Products
-
-Built for and maintained by [Prometheus Agentic Growth Solutions](https://prometheusags.ai)
-and [KnowMe, LLC](https://know-me.tools).
-
-- **KnowMe** — Flutter mobile (iOS/Android) + Tauri desktop
-- **Prometheus AGS** — Tauri desktop primary + Flutter field mobile
-- **TribeHealth.ai** — Flutter mobile (healthcare, non-negotiable)
-
----
-
-*travisjames.ai · TJ-ARCH-MOB-001 · v1.0.0 · July 2026*
+`2.0.0-alpha.1` contains the production-convergence architecture and consumer
+adoption support. Stable `2.0.0` remains gated by the complete consumer CI
+suites and current physical-device certification required by their profiles.

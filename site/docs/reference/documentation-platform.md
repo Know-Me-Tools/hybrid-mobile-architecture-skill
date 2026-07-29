@@ -19,6 +19,11 @@ beside the code in `site/`; every merge affecting public documentation performs 
 install, sanitization, broken-link enforcement, production build, artifact upload, and
 GitHub Pages deployment.
 
+The 29 detailed skill pages are generated from two reviewed sources:
+`templates/project-skills/*/SKILL.md` supplies the canonical operating contract,
+and `docs/catalog/skill-guidance.json` supplies public rationale, use cases, and
+scope boundaries. `npm run check:skill-docs` prevents either side from drifting.
+
 The public site is:
 
 [KnowMe Builder documentation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/)
@@ -58,3 +63,17 @@ OpenAPI generation should run before Docusaurus, place reviewed output under an 
 generated-content path, and pass the same sanitization and link gates. Generated HTML is
 never edited directly; changes belong in Rust/TypeScript source, OpenAPI contracts, or the
 generation pipeline.
+
+## Publication workflow
+
+```bash
+cd site
+npm ci
+npm run generate:skill-docs
+npm run release:check
+```
+
+`release:check` validates generated skill references, public sanitization,
+prompting fixtures, skill parity, orchestration behavior, style, model-routing
+drift, production output, required routes, search, internal/external links, and
+responsive accessibility.

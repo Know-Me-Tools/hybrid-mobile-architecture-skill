@@ -120,14 +120,14 @@ impl AnthropicClient {
 ### Phase 3 — Infrastructure
 
 8. **`db/mod.rs`** — SurrealDB: MemoryStore, ToolCache, EntityGraph
-9. **`mcp/mod.rs`** — McpClient + McpRegistry
+9. **`mcp/mod.rs`** — internal UAR transports behind the governance boundary
 10. **`mcp/sse_transport.rs`** — HTTP SSE MCP transport
 
 ### Phase 4 — Agent loop
 
 11. **`inference/mod.rs`** — InferenceEngine, ModelId, ChatTemplate
 12. **`inference/sampler.rs`** — Token sampling
-13. **`agent/mod.rs`** — PMPO agent loop (uses all of the above)
+13. **`uar/mod.rs`** — pinned embedded/service/test `UarRuntimeFacade` adapters
 
 ### Phase 5 — FFI surface
 
@@ -140,10 +140,10 @@ impl AnthropicClient {
 # Cargo.toml — optional features to control binary size
 [features]
 default     = ["embedded-uar", "local-inference", "surreal-db"]
-embedded-uar    = []             # Include PMPO agent loop
+embedded-uar    = []             # Include the pinned UAR facade implementation
 local-inference = ["candle-core", "candle-nn", "candle-transformers", "hf-hub", "tokenizers"]
 surreal-db      = ["surrealdb"]
-mcp-support     = []             # MCP client registry
+mcp-support     = []             # Internal UAR transport support; never app-facing
 flutter-ffi     = ["flutter_rust_bridge"]   # Flutter FFI surface
 tauri-plugin    = ["tauri"]                 # Tauri plugin surface
 ```

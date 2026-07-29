@@ -69,7 +69,7 @@ Before doing implementation, discover the active instruction stack:
 - read AGENTS.md and CLAUDE.md;
 - list relevant project-local skills under .agents/skills;
 - read only the SKILL.md files needed for this task;
-- inspect current KBD/OpenSpec waypoint files if a phase is active;
+- run `prometheus kbd status --json` and inspect the active OpenSpec task;
 - summarize authority boundaries and verification gates in 10 lines or fewer.
 ```
 
@@ -138,7 +138,7 @@ requires another explicit instruction. Then implement only inside that boundary.
 ## Planning, bounded tasks, and goals
 
 Use Codex goals only when the user explicitly asks to persist toward an outcome.
-For KBD phases, the KBD waypoint files are the source of truth; do not generate a
+For KBD phases, canonical `prometheus kbd` status is the source of truth; do not generate a
 new plan over an active execution state.
 
 Good bounded implementation prompt:
@@ -152,7 +152,7 @@ Inputs:
 - task: the next unchecked item in openspec/changes/<change>/tasks.md
 
 Rules:
-- read .kbd-orchestrator/position-reminder.txt first;
+- read canonical status with `prometheus kbd status --json` first;
 - use the KBD apply driver to begin and end the task;
 - update docs and validators together;
 - run the smallest relevant verification;
@@ -191,23 +191,27 @@ completion.
 
 ## Interruption and resume
 
-Codex tasks may span context compaction or user interruptions. The durable resume
-path is repository state, not hidden chat memory.
+Codex tasks may span context compaction or user interruptions. The durable
+resume path is the canonical Prometheus journal, not hidden chat memory or
+compatibility files.
 
-Keep these files current during KBD work:
+Use these canonical interfaces during KBD work:
 
-- `.kbd-orchestrator/current-waypoint.json`
-- `.kbd-orchestrator/position-reminder.txt`
-- `.kbd-orchestrator/phases/<phase>/progress.json`
+- `prometheus kbd status --json`
+- `prometheus kbd audit`
+- `prometheus kbd claim|release|handoff`
 - `openspec/changes/<change>/tasks.md`
 - the reviewed project memory wiki for retained lessons
+
+Compatibility waypoint, progress, and position JSON are read-only projections.
 
 Resume prompt:
 
 ```text
-Resume from repository state, not memory. First read
-.kbd-orchestrator/position-reminder.txt, current-waypoint.json, the active
-OpenSpec tasks.md, and git status. Continue only the next unchecked task.
+Resume from canonical state, not memory. First run
+`prometheus kbd status --json`, inspect the active OpenSpec task and git status,
+then claim the mutation lease. Continue only the exact committed task and
+revision.
 ```
 
 ## Handoff examples
@@ -219,8 +223,8 @@ You are taking over phase build-detailed-prompting-guide.
 
 Read first:
 - AGENTS.md
-- .kbd-orchestrator/position-reminder.txt
-- .kbd-orchestrator/current-waypoint.json
+- output of `prometheus kbd status --json`
+- relevant `prometheus kbd audit` events
 - openspec/changes/<active-change>/tasks.md
 
 Continue exactly one unchecked KBD task. Preserve .prometheus records, run the
@@ -230,14 +234,14 @@ nearest validator, and stop with a compact evidence summary.
 ### Handoff from Codex to Claude Code or OpenCode
 
 ```text
-Repository state is authoritative.
+Canonical Prometheus state is authoritative.
 
 Current phase:
 - phase: <phase-id>
 - active change: <change-id>
 - next unchecked task: <task-id and title>
 
-Do not trust the conversation alone. Read the KBD waypoint files, OpenSpec task
+Do not trust the conversation alone. Read canonical KBD status, the OpenSpec task
 list, and changed files. Continue with your harness-native skills and return
 evidence as committed files plus command output.
 ```

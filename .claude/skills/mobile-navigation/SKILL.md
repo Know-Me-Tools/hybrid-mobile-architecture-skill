@@ -4,10 +4,9 @@ description: ALWAYS invoke before adding, moving, or restyling top-level navigat
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
-> **Binding:** this skill operates under the 40 Prometheus Base Rules
-> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md) at the project root). Simplicity
-> first, surgical changes, strict layering, strong typing, verified versions — the
-> rules apply to every line this skill helps generate.
+> **Binding:** Prefer simple, surgical, strongly typed changes; preserve strict
+> layering and verify dependency versions. When installed in a project, also
+> obey that project's `AGENT_BASE_RULES.md`; this skill remains self-contained.
 
 # Mobile Navigation Placement
 
@@ -50,7 +49,7 @@ to the **top** on iPadOS (or a sidebar); M3 swaps the bar for a **rail** at expa
 widths. That is the only real split, and it is about **width**, not OS.
 
 Breakpoint: **600px** — M3's compact→medium
-[window size class](https://m3.material.io/foundations/layout/applying-layout/window-size-classes)
+[adaptive breakpoint](https://m3.material.io/foundations/layout/canonical-examples/overview)
 boundary. Note this is *not* Tailwind's `sm:` default (640px); set the token so the
 class means the spec'd value:
 
