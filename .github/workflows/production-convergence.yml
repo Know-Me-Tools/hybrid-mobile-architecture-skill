@@ -25,6 +25,7 @@ jobs:
           node scripts/generate-skill-metadata.mjs
           node scripts/generate-skill-evals.mjs
           node scripts/generate-command-contract.mjs
+          node site/scripts/generate-skill-reference.mjs
       - name: Reject generated drift
         run: git diff --exit-code
       - name: Validate package authority

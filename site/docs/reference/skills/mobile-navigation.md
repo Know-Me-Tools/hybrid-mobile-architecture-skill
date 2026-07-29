@@ -1,14 +1,50 @@
 ---
-name: mobile-navigation
-description: ALWAYS invoke before adding, moving, or restyling top-level navigation on ANY surface (Flutter NavigationBar/TabBar, React/PWA nav, Tauri shell) — top-level destinations belong in a BOTTOM bar on both iOS and Android, and the switch to a rail is by WIDTH, never by platform. Also invoke before writing any Platform.isIOS / navigator.userAgent check in navigation code, because that check is wrong. Triggers on navigation, nav bar, navigation bar, bottom nav, tab bar, tabs, NavigationBar, NavigationRail, BottomNavigationBar, TabBar, rail, sidebar, app shell, destinations, GoRouter ShellRoute, TanStack Router layout, PWA navigation, mobile layout, responsive nav.
+title: mobile-navigation
+sidebar_label: mobile-navigation
+sidebar_position: 12
+description: "ALWAYS invoke before adding, moving, or restyling top-level navigation on ANY surface (Flutter NavigationBar/TabBar, React/PWA nav, Tauri shell) — top-level destinations belong in a BOTTOM bar on both iOS and Android, and the switch to a rail is by WIDTH, never by platform. Also invoke before writing any Platform.isIOS / navigator.userAgent check in navigation code, because that check is wrong. Triggers on navigation, nav bar, navigation bar, bottom nav, tab bar, tabs, NavigationBar, NavigationRail, BottomNavigationBar, TabBar, rail, sidebar, app shell, destinations, GoRouter ShellRoute, TanStack Router layout, PWA navigation, mobile layout, responsive nav."
 ---
-<!-- TJ-ARCH-MOB-001 compliant -->
+
+# mobile-navigation
+
+**Category:** Design system
+
+## What it is for
+
+ALWAYS invoke before adding, moving, or restyling top-level navigation on ANY surface (Flutter NavigationBar/TabBar, React/PWA nav, Tauri shell) — top-level destinations belong in a BOTTOM bar on both iOS and Android, and the switch to a rail is by WIDTH, never by platform. Also invoke before writing any Platform.isIOS / navigator.userAgent check in navigation code, because that check is wrong. Triggers on navigation, nav bar, navigation bar, bottom nav, tab bar, tabs, NavigationBar, NavigationRail, BottomNavigationBar, TabBar, rail, sidebar, app shell, destinations, GoRouter ShellRoute, TanStack Router layout, PWA navigation, mobile layout, responsive nav.
+
+## Why it is designed this way
+
+Platform sniffing creates two navigation trees for a distinction that does not exist at phone width. One destination model with a width-driven bottom-bar-to-rail transition follows both platform conventions and preserves router authority.
+
+## Common use cases
+
+- Add top-level Flutter, React, Tauri, or PWA destinations
+- Switch navigation chrome at responsive breakpoints
+- Audit safe areas, router-derived selection, and accessible landmarks
+
+## How to invoke it
+
+Use the explicit skill name when the gate is important or implicit activation
+would be ambiguous:
+
+```text
+/mobile-navigation <your task or question>
+```
+
+Claude Code, Codex, OpenCode, and Kimi discover the same canonical
+`SKILL.md`. Their activation adapters may recommend the skill, but the
+adapter is advisory: Prometheus remains the lifecycle and mutation authority.
+
+## Scope boundary
+
+Do not use OS checks or user-agent detection to choose top-level navigation placement.
+
+## Canonical operating contract
 
 > **Binding:** Prefer simple, surgical, strongly typed changes; preserve strict
 > layering and verify dependency versions. When installed in a project, also
 > obey that project's `AGENT_BASE_RULES.md`; this skill remains self-contained.
-
-# Mobile Navigation Placement
 
 ## The rule
 
@@ -40,7 +76,7 @@ M3's own illustration puts tabs *inside* a navigation-bar destination. So:
 - **Content switching within one destination** → top tabs (Android) / segmented control
   (iOS). Subordinate to the bottom bar, not a replacement for it.
 
-M3 also caps this: <3 destinations → use tabs, not a nav bar; >5 → tabs or a rail.
+M3 also caps this: &lt;3 destinations → use tabs, not a nav bar; &gt;5 → tabs or a rail.
 
 ## What DOES vary: form factor
 
@@ -135,3 +171,17 @@ HIG and M3, so adapting would buy nothing while costing UA-sniffing and double t
 This skill owns **placement and structure** of navigation. It does not own colors,
 spacing, or typography (`hybrid-design-tokens`), ContentBlock rendering
 (`content-block-ui`), or the desktop window frame (`tauri-custom-titlebar`).
+
+## Installation and verification
+
+Install the complete bundle with `knowme-builder skills install --path <project>`
+or the workstation installer described in [Installation](../installation).
+Verify a project copy with:
+
+```bash
+knowme-builder skills check --path <project>
+```
+
+The canonical source is
+`templates/project-skills/mobile-navigation/SKILL.md`; generated harness copies
+must never be edited independently.

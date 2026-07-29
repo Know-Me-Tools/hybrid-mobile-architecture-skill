@@ -1,85 +1,114 @@
 ---
-sidebar_position: 2
-title: Project skills
+sidebar_position: 7
+title: Skills
+description: Complete index and usage model for all 29 KnowMe Builder Agent Skills.
 ---
 
-# The 19 project skills
+# The 29 Builder skills
 
-Every project the pack scaffolds receives these skills in all supported harness
-directories (`.claude`, `.codex`, `.opencode`, `.kimi`, `.kimi-code`, `.agents`),
-plus an activation hook.
+KnowMe Builder installs the same 29 canonical skills into Claude Code, Codex,
+OpenCode, Kimi, and generic Agent Skills discovery. Each skill is deliberately
+narrow: it protects one architectural, security, data, design, delivery, or
+verification boundary.
 
-Most are **behavioral gates**, not code generators: they fire before a class of
-work and state the rule that class gets wrong. Their descriptions are written to
-be directive and trigger-rich on purpose — prompt-matching descriptions raise
-activation from roughly 50% to 84–100%, and a gate that does not fire is not a
-gate.
+## How skills work
 
-## Before you write code
+The harness discovers a skill from its `name` and `description`, then reads the
+body when the task matches. Invoke one explicitly when the boundary is
+important:
 
-| Skill | Fires before |
-|---|---|
-| [`local-inference-lanes`](../architecture/inference-lanes) | Adding, selecting, or debugging an on-device inference engine, or deciding where a chat turn runs |
-| `dependency-pin-discipline` | Adding, bumping, or unpinning a dependency in any manifest, or writing a version literal into a script |
-| `hybrid-design-tokens` | Writing any color, spacing, typography, radius, or theme value on any surface |
-| `mobile-navigation` | Adding, moving, or restyling top-level navigation — including any `Platform.isIOS` check in nav code, which is wrong |
-| `content-block-ui` | Rendering, adding, or editing a ContentBlock variant |
-| `pem-local-first` | Wiring client entity/server state |
-| `sync-doctrine` | Any sync, replication, realtime, offline, or local-first work |
-| `peer-profile-sync` | Handling profile data, sensitive personal data, or agent-learned facts |
-| `client-rag` | Adding vector search, embeddings, semantic recall, or retrieval |
-| `reference-ui-fidelity` | Implementing a UI when a spec, mood board, prototype, or reference app exists |
-| `tauri-custom-titlebar` | Building or debugging a Tauri window frame |
-
-## Before you call it done
-
-| Skill | Fires before |
-|---|---|
-| `hybrid-runtime-verification` | Calling anything working, complete, ready, shippable, or verified |
-| `a11y-gate` | Calling any UI change done — cross-surface WCAG 2.2 AA |
-| `tauri-ui-review` | Calling any React/Tauri surface done — screenshots at 320/768/1024/1440, both themes |
-| `flutter-golden-ui` | Calling any Flutter widget or screen done |
-
-## Orchestration and docs
-
-| Skill | Purpose |
-|---|---|
-| `orchestrate-prometheus-application` | Classify and route work across hybrid, mobile-only, desktop, automation, and SaaS scenarios |
-| `deploy-hybrid-agentic-stack` | Plan, scaffold, and verify the full stack — web, desktop, mobile, Rust host, Axum, Flint services |
-| `build-branded-docusaurus` | Scaffold, brand, sanitize, and verify a documentation portal |
-| `karpathy-progress-memory` | Capture evidence-backed progress records and reusable lessons |
-
-## Two rules worth reading in full
-
-**Per-device inference.** The engine is chosen per device — Android LiteRT-LM,
-iOS/macOS MLX, desktop llama.cpp, web WebLLM — and the lane (`cloud` / `local` /
-`uar`) is chosen per turn. Conflating them, or assuming a single "mobile" engine,
-is the most common mistake in this area. See
-[Inference lanes](../architecture/inference-lanes).
-
-**Exact pins with rationale.** Pins are exact, not floors, and the comment
-explaining *why* is the real artifact. A pin without a reason is a number nobody
-dares change, so someone eventually "tidies" it back to a caret and re-derives
-the same failure. Dart codegen packages share one `analyzer` dependency and do
-not move together; the resolution is a coherent set pinned exactly, moved
-together or not at all.
-
-## Keeping them in sync
-
-`templates/project-skills/` is the source. The six harness trees are copies, and
-a copy edited in place diverges silently — each harness would then teach a
-different rule for the same situation.
-
-```bash
-bash scripts/sync-harness-skills.sh          # mirror source into every tree
-bash scripts/sync-harness-skills.sh --check  # verify only; non-zero on drift
+```text
+/agent-runtime-security Review this MCP-backed tool.
+/hybrid-runtime-verification Prove the Android lane works on a device.
 ```
 
-The drift check runs as part of `audit.sh doc-consistency`, alongside a gate that
-fails when a skill exists but `plugin.json` does not distribute it.
+Activation adapters may recommend a skill from prompt terms. They are
+advisory. They cannot mutate Prometheus KBD state, acquire a lease, or force a
+session to continue.
 
-To install the skills globally for every harness on a workstation:
+## Quality and release gates
+
+| Skill | Use it when |
+|---|---|
+| [a11y-gate](./skills/a11y-gate) | Completing UI work; verify WCAG 2.2 AA, keyboard, semantics, contrast, motion, and streaming announcements |
+| [flutter-golden-ui](./skills/flutter-golden-ui) | Completing a Flutter widget/screen; capture deterministic production-theme goldens |
+| [tauri-ui-review](./skills/tauri-ui-review) | Completing React/Tauri UI; review four widths in both themes |
+| [reference-ui-fidelity](./skills/reference-ui-fidelity) | Implementing from a prototype, screenshot, design file, mood board, or specification |
+| [hybrid-runtime-verification](./skills/hybrid-runtime-verification) | Making any working, ready, or shippable claim |
+
+## Agent UI and runtime
+
+| Skill | Use it when |
+|---|---|
+| [a2ui-surface-contract](./skills/a2ui-surface-contract) | Rendering typed generated UI and continuing actions |
+| [agui-event-contract](./skills/agui-event-contract) | Designing runtime event streams, SSE resume, ordering, or recovery |
+| [content-block-ui](./skills/content-block-ui) | Rendering or adding a rich agent-output variant |
+| [agent-runtime-security](./skills/agent-runtime-security) | Governing tools, approvals, identity, tenants, audit, or cancellation |
+| [axum-agent-gateway](./skills/axum-agent-gateway) | Building the authenticated Axum-to-UAR boundary |
+| [persona-scoped-agent](./skills/persona-scoped-agent) | Constraining prompts, tools, retrieval, and release behavior by verified persona |
+| [local-inference-lanes](./skills/local-inference-lanes) | Selecting or changing per-device engines and per-turn execution lanes |
+
+## Application architecture and integration
+
+| Skill | Use it when |
+|---|---|
+| [entity-graph-web-shell](./skills/entity-graph-web-shell) | Building a React/PEM shell over normalized entity state |
+| [mini-app-module](./skills/mini-app-module) | Adding a manifest-driven, removable applet |
+| [legacy-app-embed](./skills/legacy-app-embed) | Embedding a frozen or separately deployed application safely |
+| [pem-local-first](./skills/pem-local-first) | Adding entities, local projections, transports, or durable optimistic mutations |
+| [orchestrate-prometheus-application](./skills/orchestrate-prometheus-application) | Planning a composite application and routing work to the correct skills and control loop |
+
+## Data, privacy, and domain
+
+| Skill | Use it when |
+|---|---|
+| [sync-doctrine](./skills/sync-doctrine) | Designing sync, replication, offline writes, scopes, queues, or privacy lanes |
+| [peer-profile-sync](./skills/peer-profile-sync) | Synchronizing private user profile/vault data device-to-device |
+| [client-rag](./skills/client-rag) | Adding on-device embeddings and retrieval |
+| [anonymized-replica](./skills/anonymized-replica) | Producing production-shaped but privacy-reviewed fixtures |
+| [domain-glossary-service](./skills/domain-glossary-service) | Versioning canonical terms, synonyms, and domain mappings |
+
+## Design system
+
+| Skill | Use it when |
+|---|---|
+| [hybrid-design-tokens](./skills/hybrid-design-tokens) | Changing color, type, spacing, radius, motion, or responsive tokens |
+| [mobile-navigation](./skills/mobile-navigation) | Adding top-level destinations or responsive navigation chrome |
+| [tauri-custom-titlebar](./skills/tauri-custom-titlebar) | Building desktop window chrome in a shared Tauri/web bundle |
+
+## Build, delivery, documentation, and retention
+
+| Skill | Use it when |
+|---|---|
+| [dependency-pin-discipline](./skills/dependency-pin-discipline) | Adding or moving any dependency or toolchain version |
+| [deploy-hybrid-agentic-stack](./skills/deploy-hybrid-agentic-stack) | Planning local, web, realtime, authenticated, or full-agentic deployment |
+| [build-branded-docusaurus](./skills/build-branded-docusaurus) | Building and publishing a sanitized product documentation portal |
+| [karpathy-progress-memory](./skills/karpathy-progress-memory) | Recording evidence, decisions, failures, and exact handoff position |
+
+## Installation
+
+Workstation:
 
 ```bash
 bash scripts/install-global-harnesses.sh
 ```
+
+Project:
+
+```bash
+knowme-builder skills install --path <project>
+knowme-builder skills check --path <project>
+```
+
+## Source and generation
+
+`templates/project-skills` is canonical. The six repository harness trees and
+the 29 detailed pages linked above are generated projections.
+
+```bash
+bash scripts/sync-harness-skills.sh --check
+node site/scripts/generate-skill-reference.mjs --check
+```
+
+Edit the canonical `SKILL.md` and
+`docs/catalog/skill-guidance.json`, regenerate, then review the diff.

@@ -4,10 +4,12 @@ import Link from '@docusaurus/Link';
 import styles from './index.module.css';
 
 const paths = [
-  ['Architecture', 'One Rust core, three native surfaces.', '/architecture/intro'],
-  ['Reference app', 'See KnowMe’s local-first agent experience.', '/reference/knowme-app'],
-  ['Deployment', 'Compose, immutable images, and multi-cloud GitOps.', '/deployment/catalog'],
-  ['Prompting', 'Run deliberate learn, build, verify, and retain loops.', '/prompting/playbook'],
+  ['Install', 'CLI, 29 skills, commands, plugins, adapters, and MCP utilities.', '/reference/installation'],
+  ['Choose a profile', 'Sovereign hybrid, governed web shell, and component profiles.', '/architecture/profiles'],
+  ['Use the skills', 'When to invoke every skill, why it exists, and its operating contract.', '/reference/skills'],
+  ['CLI reference', 'Generate, adopt, upgrade, add, audit, and verify without destructive rewrites.', '/reference/cli'],
+  ['Services', 'UAR, Prometheus, identity, policy, events, persistence, sync, and inference.', '/reference/services'],
+  ['Use cases', 'Practical recipes for private assistants, governed shells, legacy apps, and more.', '/reference/use-cases'],
 ];
 
 export default function Home() {
@@ -16,8 +18,8 @@ export default function Home() {
       <section className={styles.hero}>
         <span className={styles.eyebrow}>KNOWME BUILDER</span>
         <h1>Build software that understands its users.</h1>
-        <p>One architecture for Flutter mobile, Tauri desktop, React and Axum web—powered by a shared Rust agent runtime.</p>
-        <div className={styles.actions}><Link className={styles.primary} to="/architecture/intro">Start building</Link><Link className={styles.secondary} to="/prompting/playbook">Open the playbook</Link></div>
+        <p>Versioned, non-destructive application generation for Flutter, Tauri, React, Axum, Rust, and Universal Agent Runtime.</p>
+        <div className={styles.actions}><Link className={styles.primary} to="/reference/installation">Install Builder</Link><Link className={styles.secondary} to="/reference/first-project">Build or adopt a project</Link></div>
       </section>
       <section className={styles.grid}>{paths.map(([title, copy, to]) => <Link className={styles.card} to={to} key={title}><span>{title}</span><p>{copy}</p></Link>)}</section>
     </main>

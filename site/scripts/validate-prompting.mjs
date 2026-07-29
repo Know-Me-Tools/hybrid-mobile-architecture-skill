@@ -97,7 +97,7 @@ const loopPages = [
   },
   {
     file: 'kbd-lifecycle.md',
-    fields: ['Stage sequence', 'Stage gates', 'Waypoint and handoff files', 'Recovery for missing handoffs', 'End-to-end phase example']
+    fields: ['Stage sequence', 'Stage gates', 'Canonical status and handoff', 'Recovery for missing handoffs', 'End-to-end phase example']
   },
   {
     file: 'karpathy-pmpo.md',

@@ -49,7 +49,7 @@ to the **top** on iPadOS (or a sidebar); M3 swaps the bar for a **rail** at expa
 widths. That is the only real split, and it is about **width**, not OS.
 
 Breakpoint: **600px** — M3's compact→medium
-[window size class](https://m3.material.io/foundations/layout/applying-layout/window-size-classes)
+[adaptive breakpoint](https://m3.material.io/foundations/layout/canonical-examples/overview)
 boundary. Note this is *not* Tailwind's `sm:` default (640px); set the token so the
 class means the spec'd value:
 

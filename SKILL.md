@@ -16,6 +16,24 @@ owns development workflow lifecycle and cross-harness coordination. The
 Builder owns application architecture, typed adapters, generation, skills, and
 conformance tests.
 
+## Documentation entry points
+
+- Installation and native harness setup:
+  `site/docs/reference/installation.md`
+- Full CLI behavior and safety model: `site/docs/reference/cli.md`
+- Profile selection: `site/docs/architecture/profiles.md`
+- Design and authority rationale:
+  `site/docs/architecture/design-principles.md`
+- All 29 skills and individual usage guides:
+  `site/docs/reference/skills.md`
+- Runtime, control-plane, data, identity, and protocol services:
+  `site/docs/reference/services.md`
+- Scripts, generators, templates, and CI:
+  `site/docs/reference/utilities.md`
+- Product recipes: `site/docs/reference/use-cases.md`
+- Documentation authority and legacy-source classification:
+  `docs/documentation-map.md`
+
 ## Quick orientation
 
 Read the architectural standard document before any substantial work:

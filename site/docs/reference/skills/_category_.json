@@ -1,0 +1,11 @@
+{
+  "label": "Individual skills",
+  "position": 8,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Individual skill reference",
+    "description": "Detailed rationale, use cases, invocation guidance, scope boundaries, and canonical operating contracts for every KnowMe Builder skill."
+  }
+}
