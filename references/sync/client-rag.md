@@ -90,10 +90,10 @@ Pipeline stages (fixed order, each independently testable):
    caller's sink rules apply (momentary context only — see
    [peer-crdt.md](peer-crdt.md)).
 
-Agent wiring: the PMPO loop calls `retrieve()` before each planning step with
-`scope` chosen by intent (conversation recall vs agent memory vs personal
-context). Retrieval is read-only; agents write conclusions back as entities
-(lane 1) or vault facts (`local`), never into the indices directly.
+Agent wiring: UAR calls the governed `retrieve()` capability with a scope
+chosen by verified intent (conversation recall, agent memory, or personal
+context). Retrieval is read-only; UAR writes approved conclusions back as
+entities (lane 1) or vault facts (`local`), never into indices directly.
 
 ## Non-rules (rejected designs)
 

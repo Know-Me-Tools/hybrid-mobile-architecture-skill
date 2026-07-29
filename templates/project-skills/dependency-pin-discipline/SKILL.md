@@ -4,10 +4,9 @@ description: ALWAYS invoke before adding, bumping, or unpinning a dependency in 
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
-> **Binding:** this skill operates under the 40 Prometheus Base Rules
-> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md) at the project root). Rule 12
-> (Open Standards First) and the "verified dependency versions" clause are the
-> operative ones here.
+> **Binding:** Prefer open standards and exact, independently verified
+> dependency versions. When installed in a project, also obey that project's
+> dependency policy; the rules below remain self-contained.
 
 # Dependency Pin Discipline
 

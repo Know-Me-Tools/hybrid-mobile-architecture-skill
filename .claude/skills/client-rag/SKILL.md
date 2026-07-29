@@ -4,9 +4,10 @@ description: ALWAYS invoke when adding vector search, embeddings, semantic recal
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
-> **Binding:** this skill operates under the 40 Prometheus Base Rules
-> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md)). Full design:
-> `references/sync/client-rag.md`. Lanes/privacy: `sync-doctrine` skill.
+> **Binding:** Full design:
+> [`client-rag.md`](../../../references/sync/client-rag.md). Lanes and privacy:
+> `sync-doctrine` skill. Retrieval remains local and privacy-class boundaries
+> remain mandatory even when the optional reference is unavailable.
 
 # Client-Side RAG
 
@@ -51,9 +52,9 @@ provenance. Scopes: `ThisConversation | AllConversations | AgentMemory |
 Vault`. Chat messages are already the right chunk size — no chunker pipelines;
 split artifacts at paragraph boundaries only past ~1k tokens.
 
-Agents: the PMPO loop calls `retrieve()` before planning steps; conclusions are
-written back as entities (lane 1) or vault facts (`local`) — never directly
-into indices.
+Agents: UAR calls the governed `retrieve()` capability before planning with an
+authorized scope; approved conclusions are written back as entities (lane 1)
+or vault facts (`local`) — never directly into indices.
 
 ## Privacy rules (review-blocking)
 

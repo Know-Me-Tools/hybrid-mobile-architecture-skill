@@ -4,9 +4,10 @@ description: ALWAYS invoke when wiring client entity/server state on any surface
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
-> **Binding:** this skill operates under the 40 Prometheus Base Rules
-> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md)). Decisions: ADR-LFS-2/3/4 in
-> `references/sync/decisions.md`. Layer contract: `references/tauri/patterns.md`.
+> **Binding:** Decisions: ADR-LFS-2/3/4 in
+> [`decisions.md`](../../../references/sync/decisions.md). Layer contract:
+> [`patterns.md`](../../../references/tauri/patterns.md). The invariants below
+> remain authoritative when the optional references are unavailable.
 
 # PEM Local-First — the entity layer
 

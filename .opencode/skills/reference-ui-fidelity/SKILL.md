@@ -4,8 +4,9 @@ description: ALWAYS invoke before implementing or materially changing a product 
 ---
 <!-- TJ-ARCH-MOB-001 compliant -->
 
-> **Binding:** this skill operates under the 40 Prometheus Base Rules
-> ([AGENT_BASE_RULES.md](../../AGENT_BASE_RULES.md) at the project root).
+> **Binding:** Treat the supplied reference as the acceptance oracle while
+> preserving strict layering and accessibility. Project-local rules supplement,
+> but do not replace, the self-contained verification contract below.
 
 # Reference UI Fidelity Gate
 

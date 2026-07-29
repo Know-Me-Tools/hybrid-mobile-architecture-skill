@@ -100,7 +100,7 @@ declare module '@tanstack/react-router' {
 }
 ```
 
-## Supabase auth store (production-grade)
+## Supabase auth store reference
 
 ```typescript
 // src/features/auth/stores/authStore.ts
@@ -273,6 +273,12 @@ export function useUpdateProfile() {
   })
 }
 ```
+
+The frontend role union is a presentation projection only. The backend derives
+the effective role and tenant from `VerifiedSession` after JWKS or authoritative
+session validation. Never decode a JWT and treat its claims as verified, never
+include a service role in client-visible types, and never accept a tenant ID
+from a frontend request.
 
 ## Ory Kratos auth store
 

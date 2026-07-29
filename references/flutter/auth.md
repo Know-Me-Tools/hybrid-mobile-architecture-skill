@@ -199,11 +199,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 }
 ```
 
-## Ory Kratos — native flow complete implementation
+## Ory Kratos — native flow reference
 
 ```dart
 // lib/features/auth/data/repositories/kratos_auth_repository.dart
 // Requires: http: ^1.2.0, flutter_secure_storage, ory_client (optional)
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -214,6 +215,8 @@ class KratosAuthRepository implements AuthRepository {
   final String publicUrl;
   final http.Client _http;
   final FlutterSecureStorage _storage;
+  final StreamController<AuthState> _authState =
+      StreamController<AuthState>.broadcast();
   static const _tokenKey = 'kratos_session_token';
 
   KratosAuthRepository({
@@ -263,10 +266,12 @@ class KratosAuthRepository implements AuthRepository {
     }
 
     final identity = session['session']['identity'] as Map<String, dynamic>;
-    return AuthUser(
+    final user = AuthUser(
       id:    identity['id'] as String,
       email: (identity['traits'] as Map)['email'] as String? ?? email,
     );
+    _authState.add(AuthState.authenticated(user: user));
+    return user;
   }
 
   // ── Registration ──────────────────────────────────────────────────────
@@ -316,6 +321,7 @@ class KratosAuthRepository implements AuthRepository {
       );
     }
     await _storage.delete(key: _tokenKey);
+    _authState.add(const AuthState.unauthenticated());
   }
 
   // ── Current user ──────────────────────────────────────────────────────
@@ -341,7 +347,9 @@ class KratosAuthRepository implements AuthRepository {
   }
 
   @override
-  Stream<AuthState> get authStateChanges => const Stream.empty();
+  Stream<AuthState> get authStateChanges => _authState.stream;
+
+  Future<void> dispose() => _authState.close();
 }
 ```
 

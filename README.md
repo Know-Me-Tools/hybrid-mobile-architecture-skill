@@ -131,7 +131,7 @@ skeletons (npm + pub.dev) alongside the three surfaces.
 bash scripts/scaffold-flutter.sh mobile my-app     # Flutter app
 bash scripts/scaffold-tauri.sh desktop my-app      # Tauri desktop/web app
 bash scripts/scaffold-rust-core.sh rust            # layered Rust workspace
-bash scripts/scaffold-packages.sh .                # publishable packages
+knowme-builder add module shared-packages --path . # typed package manifest
 bash scripts/add-project-skills.sh .               # project-local skills + hooks
 ```
 

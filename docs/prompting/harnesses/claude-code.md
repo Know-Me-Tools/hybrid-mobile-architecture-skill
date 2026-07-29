@@ -58,8 +58,10 @@ Then read only the SKILL.md files required for this task. Summarize:
 ## Skills, plugins, hooks, and subagents
 
 Claude Code skills belong in the project skill directory for the repository.
-Hooks are useful for enforcing command logging, formatting checks, KBD waypoint
-updates, and safety stops. Subagents are useful only when ownership is explicit.
+Hooks are useful for bounded evidence capture and advisory activation.
+Prometheus alone owns KBD lifecycle, mutation leases, emergency pause, and
+handoff. Builder hooks must not block operator stop or mutate lifecycle state.
+Subagents are useful only when ownership is explicit.
 
 Subagent prompt:
 
@@ -150,12 +152,14 @@ date, or retention artifact is missing. Do not accept "implemented" as evidence.
 
 ## Continuation and resume
 
-Claude Code loops must resume from files, not chat memory:
+Claude Code loops resume from the canonical Prometheus journal, not chat memory
+or compatibility projections:
 
 ```text
-Resume by reading the phase waypoint, OpenSpec task list, git status, and recent
-project memory summary. Continue the next unchecked task only. If state is
-ambiguous, report the ambiguity and stop instead of creating a parallel plan.
+Run `prometheus kbd status --json`, inspect the active OpenSpec task, git status,
+and recent project memory summary, then claim the mutation lease. Continue the
+exact committed task only. If state is ambiguous, pause and audit instead of
+creating a parallel plan.
 ```
 
 ## Handoff examples
@@ -168,8 +172,8 @@ You are continuing a Prometheus KBD phase from Codex.
 Read:
 - CLAUDE.md
 - AGENTS.md
-- .kbd-orchestrator/current-waypoint.json
-- .kbd-orchestrator/position-reminder.txt
+- output of `prometheus kbd status --json`
+- relevant `prometheus kbd audit` events
 - openspec/changes/<active-change>/tasks.md
 
 Run one bounded task. Use Claude Code skills/hooks where configured. Return
@@ -179,7 +183,7 @@ changed files, verification output, and blockers.
 ### Claude Code to another harness
 
 ```text
-Repository state is authoritative. The active phase is <phase-id>, change
+Canonical Prometheus state is authoritative. The active phase is <phase-id>, change
 <change-id>, task <task-id>. The completed evidence is <commands/artifacts>.
 The next task is <next unchecked item>. Do not rely on the transcript; inspect
 the files and continue from the waypoint.

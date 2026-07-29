@@ -46,6 +46,18 @@ sync_skill() {
   rsync -a --delete "$source_dir/" "$destination_dir/"
 }
 
+install_matching_files() {
+  local source_dir="$1"
+  local destination_dir="$2"
+  local pattern="$3"
+  local source_file
+
+  mkdir -p "$destination_dir"
+  while IFS= read -r source_file; do
+    install -m 0644 "$source_file" "$destination_dir/$(basename "$source_file")"
+  done < <(find "$source_dir" -mindepth 1 -maxdepth 1 -type f -name "$pattern" | sort)
+}
+
 install_main_skill() {
   local skill_root="$1"
   local destination="$skill_root/hybrid-mobile-architecture"
@@ -68,6 +80,21 @@ install_main_skill() {
     "$repo_root/" "$destination/"
 }
 
+install_plugin_payload() {
+  local destination="$1"
+  mkdir -p "$destination"
+  rsync -a --delete \
+    --exclude '.git/' \
+    --exclude '.prometheus/' \
+    --exclude 'node_modules/' \
+    --exclude 'target/' \
+    --exclude 'build/' \
+    --exclude 'dist/' \
+    --exclude 'apps/' \
+    --exclude 'site/' \
+    "$repo_root/" "$destination/"
+}
+
 for skill_root in "${skill_roots[@]}"; do
   mkdir -p "$skill_root"
   install_main_skill "$skill_root"
@@ -78,11 +105,50 @@ for skill_root in "${skill_roots[@]}"; do
     sync_skill "$source_dir" "$skill_root/$skill_name"
   done
 
-  mkdir -p "$skill_root/content-block-ui/references/rust"
-  install -m 0644 \
-    "$repo_root/references/rust/new-block-type.md" \
-    "$skill_root/content-block-ui/references/rust/new-block-type.md"
 done
+
+# Commands and activation adapters are installed into harness-native discovery
+# locations. Shared directories are updated file-by-file so unrelated user
+# commands and hooks are never deleted.
+sync_skill \
+  "$repo_root/.claude/commands/knowme-builder" \
+  "$HOME/.claude/commands/knowme-builder"
+install_matching_files \
+  "$repo_root/.codex/prompts" \
+  "$HOME/.codex/prompts" \
+  'knowme-builder-*.md'
+install_matching_files \
+  "$repo_root/.opencode/commands" \
+  "$HOME/.opencode/commands" \
+  'knowme-builder-*.md'
+install_matching_files \
+  "$repo_root/.opencode/commands" \
+  "$HOME/.config/opencode/commands" \
+  'knowme-builder-*.md'
+install_matching_files \
+  "$repo_root/.kimi-code/commands" \
+  "$HOME/.kimi-code/commands" \
+  'knowme-builder-*.md'
+
+mkdir -p "$HOME/.claude/hooks" "$HOME/.opencode/hooks" "$HOME/.kimi-code/hooks"
+install -m 0755 \
+  "$repo_root/.claude/hooks/skill-activation.py" \
+  "$HOME/.claude/hooks/knowme-builder-skill-activation.py"
+install -m 0644 \
+  "$repo_root/.opencode/hooks/skill-activation.mjs" \
+  "$HOME/.opencode/hooks/knowme-builder-skill-activation.mjs"
+install -m 0755 \
+  "$repo_root/.kimi-code/hooks/skill-activation.py" \
+  "$HOME/.kimi-code/hooks/knowme-builder-skill-activation.py"
+
+# Install relocatable marketplace/plugin payloads without mutating a harness's
+# private registry. Claude Code can register the local marketplace using its
+# native CLI, while Codex discovers the versioned cache payload directly.
+builder_version="$(jq -r '.package.version' "$repo_root/builder.manifest.json")"
+claude_marketplace="$HOME/.claude/plugins/marketplaces/knowme-hybrid-architecture"
+codex_plugin_cache="$HOME/.codex/plugins/cache/knowme-hybrid-architecture/hybrid-mobile-architecture/$builder_version"
+install_plugin_payload "$claude_marketplace"
+install_plugin_payload "$codex_plugin_cache"
 
 add_claude_mcp() {
   local name="$1"
@@ -152,5 +218,7 @@ node "$repo_root/scripts/merge-zed-context-servers.mjs" "$zed_settings"
 
 echo "Installed hybrid-mobile-architecture and ${#project_skills[@]} companion skills for filesystem-based harness discovery."
 printf '  %s\n' "${skill_roots[@]}"
-echo "Claude Code and Codex consume the same skills through this repository's marketplace plugin."
+echo "Installed namespaced commands and advisory activation adapters for Claude Code, Codex, OpenCode, and Kimi Code CLI."
+echo "Installed Claude marketplace payload at $claude_marketplace"
+echo "Installed Codex plugin payload at $codex_plugin_cache"
 echo "Configured Dart and shadcn MCP servers for Claude Code, Codex, OpenCode, Kimi Code CLI, and Zed."

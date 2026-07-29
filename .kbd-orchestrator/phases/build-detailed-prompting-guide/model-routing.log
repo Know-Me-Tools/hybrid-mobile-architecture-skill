@@ -1,2 +1,0 @@
-[WARN] model_policy absent from project.json — defaulting all phases to frontier.
-       Add model_policy block to enable cost optimization.

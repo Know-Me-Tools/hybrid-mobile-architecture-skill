@@ -3,6 +3,7 @@
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/repositories/__feature_name___repository_impl.dart';
+import '../../data/datasources/__feature_name___data_source.dart';
 import '../../domain/entities/__feature_name___entity.dart';
 import '../../domain/repositories/__feature_name___repository.dart';
 
@@ -12,7 +13,7 @@ part '__feature_name___provider.g.dart';
 
 @riverpod
 __FEATURE_NAME__Repository __feature_name__Repository(Ref ref) =>
-    __FEATURE_NAME__RepositoryImpl();
+    __FEATURE_NAME__RepositoryImpl(InMemory__FEATURE_NAME__DataSource());
 
 // ── List provider ─────────────────────────────────────────────────────────
 
