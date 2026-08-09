@@ -66,7 +66,7 @@ build_manifest() {
         -not -path './rust/vendor/*' \
         -not -path './rust/target/*' \
         -not -name '*.lock' \
-        | sed 's|^\./||' | sort )
+        | sed 's|^\./||' | LC_ALL=C sort )
     echo
     echo "## builder metadata"
     grep -E '^(profile|builderVersion|requiredPrometheusContract|generationMode) =' \
