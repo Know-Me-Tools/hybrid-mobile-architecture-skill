@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::cli::{GenerationMode, Profile};
 
 pub const BUILDER_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const PROMETHEUS_PACKAGE_VERSION: &str = "1.7.0";
 pub const PROMETHEUS_CONTRACT: &str = "2.0.0";
 
 #[derive(Debug, Deserialize)]

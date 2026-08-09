@@ -42,9 +42,9 @@ Builder activation aids must not pause, resume, lease, hand off, or mutate Prome
 
 ## Canonical operating contract
 
-Read `AGENT_BASE_RULES.md`, the architecture standard, and the dated model registry.
-Never infer model capabilities from names or copy mutable prices/context into stable
-guidance.
+Read the consuming project's base rules, architecture authority, and dated model
+registry. Never infer model capabilities from names or copy mutable prices/context
+into stable guidance.
 
 Progressive references:
 
@@ -74,6 +74,17 @@ Progressive references:
    new skill in a scratch project. When the missing capability requires an independent
    runtime/protocol lifecycle, use the native-agent creator.
 
+## Current Prometheus control plane
+
+- Require `prometheus kbd projects` to confirm project UUID identity before lifecycle writes.
+- Treat the signed grow-only Loro event map and per-replica journals as canonical;
+  generated waypoint/progress files are read-only projections.
+- Use `prometheus kbd claim`, `conflicts`, and `resolve` for concurrent work. Do not
+  emulate the removed lease/fencing or handoff model.
+- Express work through typed `phase`, `stage`, `change`, `task`, `completion`,
+  `decision`, and `blocker` commands; use pause/revise/resume/cancel for lifecycle.
+- Inspect durable learning delivery with `prometheus learning status --json`.
+
 Do not let PMPO rewrite requirements to fit a failing output, let a producer certify
 its own work, or run an autonomous loop without explicit authority and termination.
 
@@ -88,5 +99,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/orchestrate-prometheus-application/SKILL.md`; generated harness copies
+`skills/orchestrate-prometheus-application/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

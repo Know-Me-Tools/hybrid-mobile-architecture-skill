@@ -3,8 +3,8 @@
 # Audit a codebase for TJ-ARCH-MOB-001 architectural compliance.
 # Usage: bash scripts/audit.sh <platform: flutter|tauri|rust|doc-consistency|generator-purity|all> [project-root]
 #
-# `doc-consistency` audits the PACK's own authority docs (SKILL.md, CLAUDE.md,
-# AGENTS.md, README.md, references/*.md) against versions.toml — the pack's
+# `doc-consistency` audits the PACK's own authority docs (the package skill,
+# CLAUDE.md, AGENTS.md, README.md, references/*.md) against versions.toml — the pack's
 # instructions to agents must not contradict themselves.
 #
 # `generator-purity` audits the GENERATOR (scripts/ + assets/templates/) for
@@ -151,7 +151,7 @@ if [[ "$PLATFORM" == "flutter" ]]; then
   echo ""
   echo -e "${CYAN}[03] Riverpod pattern compliance${NC}"
   # Check for codegen annotations
-  if find "$LIB" -name "*.dart" | xargs grep -l "@riverpod\|@Riverpod" 2>/dev/null | head -1 | grep -q .; then
+  if find "$LIB" -name "*.dart" -exec grep -l "@riverpod\|@Riverpod" {} + 2>/dev/null | head -1 | grep -q .; then
     pass "@riverpod codegen annotations found"
   else
     warn "@riverpod codegen annotations not found — use codegen, not manual providers"
@@ -344,7 +344,7 @@ elif [[ "$PLATFORM" == "tauri" ]]; then
   if grep -qi '"name"[[:space:]]*:[[:space:]]*"knowme-poc"' "$PKG" \
     || [[ -f "$ROOT/../docs/KnowMe.dc.html" ]]; then
     for destination in Home Chat Hands Memory Models Settings; do
-      grep -r "['\"]$destination['\"]" "$SRC/app" 2>/dev/null | grep -q . \
+      grep -r "['\"]${destination}['\"]" "$SRC/app" 2>/dev/null | grep -q . \
         && pass "destination: $destination" || fail "destination $destination MISSING from KnowMe app shell"
     done
   else
@@ -500,9 +500,11 @@ elif [[ "$PLATFORM" == "doc-consistency" ]]; then
   # Authority docs subject to the drift gate. wasm-targets.md is excluded: it is
   # a bannered historical finding that legitimately quotes superseded versions.
   AUTHORITY_DOCS=()
-  for doc in SKILL.md CLAUDE.md AGENTS.md README.md; do
+  for doc in CLAUDE.md AGENTS.md README.md; do
     [[ -f "$PACK_ROOT/$doc" ]] && AUTHORITY_DOCS+=("$PACK_ROOT/$doc")
   done
+  [[ -f "$PACK_ROOT/skills/hybrid-mobile-architecture/SKILL.md" ]] && \
+    AUTHORITY_DOCS+=("$PACK_ROOT/skills/hybrid-mobile-architecture/SKILL.md")
   while IFS= read -r -d '' ref; do
     [[ "$ref" == *"wasm-targets.md" ]] && continue
     AUTHORITY_DOCS+=("$ref")
@@ -559,27 +561,19 @@ elif [[ "$PLATFORM" == "doc-consistency" ]]; then
     echo ""
     echo -e "${CYAN}[04] Skill distribution parity${NC}"
     # Three lists must agree, or a skill is authored and shipped to nobody:
-    #   templates/project-skills/*/SKILL.md  — what exists
+    #   skills/*/SKILL.md                    — public source
     #   .claude-plugin/plugin.json "skills"  — what the plugin distributes
     #   scripts/add-project-skills.sh        — what generated projects receive
     # This drifted once already (4 skills authored, 0 shipped), silently,
     # because nothing compared them.
-    TEMPLATE_SKILLS="$(find "$PACK_ROOT/templates/project-skills" -maxdepth 2 -name 'SKILL.md' 2>/dev/null \
-      | xargs -n1 dirname 2>/dev/null | xargs -n1 basename 2>/dev/null | sort)"
-    MANIFEST_SKILLS="$(python3 -c "
-import json,sys
-try:
-    d = json.load(open('$PACK_ROOT/.claude-plugin/plugin.json'))
-    for s in sorted(x.split('/')[-1] for x in d.get('skills', []) if x != './'):
-        print(s)
-except Exception:
-    sys.exit(0)
-" 2>/dev/null)"
+    TEMPLATE_SKILLS="$(find "$PACK_ROOT/skills" -maxdepth 2 -name 'SKILL.md' \
+      -exec sh -c 'for path do basename "$(dirname "$path")"; done' sh {} + 2>/dev/null | sort)"
+    MANIFEST_SKILLS="$(jq -r '.skills[] | split("/")[-1]' "$PACK_ROOT/.claude-plugin/plugin.json" 2>/dev/null | sort)"
 
     if [[ -z "$TEMPLATE_SKILLS" ]]; then
       warn "No template skills found — skipping distribution parity"
     elif [[ "$TEMPLATE_SKILLS" == "$MANIFEST_SKILLS" ]]; then
-      pass "plugin.json distributes all $(echo "$TEMPLATE_SKILLS" | wc -l | tr -d ' ') template skills"
+        pass "plugin.json distributes all $(echo "$TEMPLATE_SKILLS" | wc -l | tr -d ' ') public skills"
     else
       missing="$(comm -23 <(echo "$TEMPLATE_SKILLS") <(echo "$MANIFEST_SKILLS") | tr '\n' ' ')"
       extra="$(comm -13 <(echo "$TEMPLATE_SKILLS") <(echo "$MANIFEST_SKILLS") | tr '\n' ' ')"
@@ -595,12 +589,12 @@ except Exception:
       pass "add-project-skills.sh discovers skills dynamically"
     fi
 
-    # The six harness trees are COPIES of templates/project-skills. A copy edited
+    # The scaffold and six harness trees are COPIES of the 29 companion skills. A copy edited
     # in place diverges silently, and each harness then teaches a different rule
     # for the same situation.
     if [[ -x "$PACK_ROOT/scripts/sync-harness-skills.sh" ]]; then
       if bash "$PACK_ROOT/scripts/sync-harness-skills.sh" --check >/dev/null 2>&1; then
-        pass "harness skill trees match templates/project-skills"
+        pass "generated skill trees match skills"
       else
         fail "harness skill trees drifted — run: bash scripts/sync-harness-skills.sh"
       fi

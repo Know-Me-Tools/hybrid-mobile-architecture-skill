@@ -4,7 +4,7 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 const root = resolve(new URL("..", import.meta.url).pathname);
-const skillsRoot = join(root, "templates/project-skills");
+const skillsRoot = join(root, "skills");
 const check = process.argv.includes("--check");
 
 function title(name) {
@@ -27,7 +27,7 @@ function frontmatter(markdown) {
 
 let drift = false;
 const directories = (await readdir(skillsRoot, { withFileTypes: true }))
-  .filter((entry) => entry.isDirectory() && entry.name !== "hooks")
+  .filter((entry) => entry.isDirectory())
   .sort((a, b) => a.name.localeCompare(b.name));
 
 for (const directory of directories) {

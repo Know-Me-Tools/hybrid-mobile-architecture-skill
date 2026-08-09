@@ -2,7 +2,8 @@
 """Advisory skill activation adapter generated from the Builder manifest.
 
 This adapter never blocks a prompt and owns no lifecycle or mutation state.
-Prometheus remains authoritative for pause, resume, cancel, lease, and handoff.
+Prometheus remains authoritative for project identity, signed KBD events, CRDT
+claims/conflicts, pause, revise, resume, and cancel.
 """
 
 from __future__ import annotations

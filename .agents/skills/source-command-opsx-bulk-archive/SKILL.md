@@ -1,6 +1,8 @@
 ---
 name: "source-command-opsx-bulk-archive"
 description: "Archive multiple completed changes at once"
+metadata:
+  internal: true
 ---
 
 # source-command-opsx-bulk-archive

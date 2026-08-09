@@ -34,7 +34,10 @@ jobs:
           node scripts/check-skill-contracts.mjs
           node scripts/check-runtime-security.mjs
           node scripts/check-prometheus-boundary.mjs
+          node scripts/sync-skill-resources.mjs --check
           bash scripts/sync-harness-skills.sh --check
+          node --check .opencode/plugins/knowme-builder.mjs
+          node scripts/test-opencode-plugin.mjs
           bash scripts/audit.sh doc-consistency
           bash scripts/audit.sh generator-purity
       - name: Reject tracked runtime exhaust
@@ -46,7 +49,7 @@ jobs:
       - name: Shell syntax and portability
         run: |
           find scripts -type f -name '*.sh' -print0 | xargs -0 bash -n
-          shellcheck scripts/*.sh
+          find scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck --severity=warning
 
   cli:
     name: CLI and byte-stable profiles (${{ matrix.os }})
@@ -87,41 +90,13 @@ jobs:
           node scripts/generate-command-contract.mjs --check
 
   clean-install:
-    name: Isolated multi-harness install
+    name: Git URL discovery and isolated harness install
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     needs: [authority, cli]
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
-      - name: Install into isolated home
-        env:
-          HOME: ${{ runner.temp }}/builder-home
-        run: bash scripts/install-global-harnesses.sh
-      - name: Verify all filesystem harnesses
-        env:
-          HOME: ${{ runner.temp }}/builder-home
-        run: |
-          for root in \
-            "$HOME/.claude/skills" \
-            "$HOME/.codex/skills" \
-            "$HOME/.opencode/skills" \
-            "$HOME/.config/opencode/skills" \
-            "$HOME/.kimi-code/skills" \
-            "$HOME/.kimi/skills" \
-            "$HOME/.agents/skills"; do
-            skill_count="$(find "$root" -mindepth 1 -maxdepth 2 -name SKILL.md | wc -l | tr -d ' ')"
-            test "$skill_count" -ge 30
-            test -f "$root/agent-runtime-security/SKILL.md"
-            test -f "$root/hybrid-mobile-architecture/SKILL.md"
-          done
-          test -f "$HOME/.claude/commands/knowme-builder/new.md"
-          test -f "$HOME/.codex/prompts/knowme-builder-new.md"
-          test -f "$HOME/.opencode/commands/knowme-builder-new.md"
-          test -f "$HOME/.config/opencode/commands/knowme-builder-new.md"
-          test -f "$HOME/.kimi-code/commands/knowme-builder-new.md"
-          test -x "$HOME/.claude/hooks/knowme-builder-skill-activation.py"
-          test -f "$HOME/.opencode/hooks/knowme-builder-skill-activation.mjs"
-          test -x "$HOME/.kimi-code/hooks/knowme-builder-skill-activation.py"
-          version="$(jq -r '.package.version' builder.manifest.json)"
-          test -f "$HOME/.claude/plugins/marketplaces/knowme-hybrid-architecture/.claude-plugin/marketplace.json"
-          test -f "$HOME/.codex/plugins/cache/knowme-hybrid-architecture/hybrid-mobile-architecture/$version/.agents/plugins/marketplace.json"
+      - name: Verify public and internal discovery counts
+        run: bash scripts/check-git-url-discovery.sh
+      - name: Verify idempotence, receipts, and safe uninstall
+        run: bash scripts/test-harness-installer.sh

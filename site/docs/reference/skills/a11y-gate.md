@@ -107,5 +107,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/a11y-gate/SKILL.md`; generated harness copies
+`skills/a11y-gate/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

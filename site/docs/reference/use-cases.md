@@ -105,13 +105,13 @@ handles, or direct UAR access.
    browser accessibility.
 6. Publish the immutable static artifact through the Pages workflow.
 
-## Hand work between harnesses
+## Continue work in another harness
 
 1. Use `karpathy-progress-memory` to retain evidence and the exact next step.
 2. Pause and audit through `prometheus kbd`.
 3. Revise the plan if the architecture changed.
-4. Handoff or release the mutation lease.
-5. Start the next harness at the committed revision.
+4. Release or revise the CRDT work claim and resolve any conflicts.
+5. Start the next harness from the same project UUID and committed revision.
 
 Builder skills provide the same instructions in every harness; Prometheus
-provides the durable causal position and single-writer authority.
+provides the durable causal position and convergent claim/conflict authority.

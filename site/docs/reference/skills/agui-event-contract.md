@@ -73,5 +73,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/agui-event-contract/SKILL.md`; generated harness copies
+`skills/agui-event-contract/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

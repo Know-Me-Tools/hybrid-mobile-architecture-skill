@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "packageVersion": "2.0.0-alpha.1",
+  "packageVersion": "2.0.0-alpha.2",
   "generatedFrom": "builder.manifest.json",
   "harnesses": [
     "claude-code",
@@ -30,7 +30,7 @@
         "focus trap"
       ],
       "explicitInvocation": "/a11y-gate",
-      "canonicalPath": "templates/project-skills/a11y-gate"
+      "canonicalPath": "skills/a11y-gate"
     },
     {
       "name": "build-branded-docusaurus",
@@ -39,7 +39,7 @@
         "build branded docusaurus"
       ],
       "explicitInvocation": "/build-branded-docusaurus",
-      "canonicalPath": "templates/project-skills/build-branded-docusaurus"
+      "canonicalPath": "skills/build-branded-docusaurus"
     },
     {
       "name": "client-rag",
@@ -68,7 +68,7 @@
         "rerank"
       ],
       "explicitInvocation": "/client-rag",
-      "canonicalPath": "templates/project-skills/client-rag"
+      "canonicalPath": "skills/client-rag"
     },
     {
       "name": "content-block-ui",
@@ -83,7 +83,7 @@
         "adding a new block type"
       ],
       "explicitInvocation": "/content-block-ui",
-      "canonicalPath": "templates/project-skills/content-block-ui"
+      "canonicalPath": "skills/content-block-ui"
     },
     {
       "name": "dependency-pin-discipline",
@@ -112,7 +112,7 @@
         "transitive dependency"
       ],
       "explicitInvocation": "/dependency-pin-discipline",
-      "canonicalPath": "templates/project-skills/dependency-pin-discipline"
+      "canonicalPath": "skills/dependency-pin-discipline"
     },
     {
       "name": "deploy-hybrid-agentic-stack",
@@ -121,7 +121,7 @@
         "deploy hybrid agentic stack"
       ],
       "explicitInvocation": "/deploy-hybrid-agentic-stack",
-      "canonicalPath": "templates/project-skills/deploy-hybrid-agentic-stack"
+      "canonicalPath": "skills/deploy-hybrid-agentic-stack"
     },
     {
       "name": "flutter-golden-ui",
@@ -142,7 +142,7 @@
         "matchesgoldenfile"
       ],
       "explicitInvocation": "/flutter-golden-ui",
-      "canonicalPath": "templates/project-skills/flutter-golden-ui"
+      "canonicalPath": "skills/flutter-golden-ui"
     },
     {
       "name": "hybrid-design-tokens",
@@ -165,7 +165,7 @@
         "theme-factory"
       ],
       "explicitInvocation": "/hybrid-design-tokens",
-      "canonicalPath": "templates/project-skills/hybrid-design-tokens"
+      "canonicalPath": "skills/hybrid-design-tokens"
     },
     {
       "name": "hybrid-runtime-verification",
@@ -194,7 +194,7 @@
         "does it run"
       ],
       "explicitInvocation": "/hybrid-runtime-verification",
-      "canonicalPath": "templates/project-skills/hybrid-runtime-verification"
+      "canonicalPath": "skills/hybrid-runtime-verification"
     },
     {
       "name": "karpathy-progress-memory",
@@ -203,7 +203,7 @@
         "karpathy progress memory"
       ],
       "explicitInvocation": "/karpathy-progress-memory",
-      "canonicalPath": "templates/project-skills/karpathy-progress-memory"
+      "canonicalPath": "skills/karpathy-progress-memory"
     },
     {
       "name": "local-inference-lanes",
@@ -237,7 +237,7 @@
         "byok"
       ],
       "explicitInvocation": "/local-inference-lanes",
-      "canonicalPath": "templates/project-skills/local-inference-lanes"
+      "canonicalPath": "skills/local-inference-lanes"
     },
     {
       "name": "mobile-navigation",
@@ -265,7 +265,7 @@
         "responsive nav"
       ],
       "explicitInvocation": "/mobile-navigation",
-      "canonicalPath": "templates/project-skills/mobile-navigation"
+      "canonicalPath": "skills/mobile-navigation"
     },
     {
       "name": "orchestrate-prometheus-application",
@@ -274,7 +274,7 @@
         "orchestrate prometheus application"
       ],
       "explicitInvocation": "/orchestrate-prometheus-application",
-      "canonicalPath": "templates/project-skills/orchestrate-prometheus-application"
+      "canonicalPath": "skills/orchestrate-prometheus-application"
     },
     {
       "name": "peer-profile-sync",
@@ -306,7 +306,7 @@
         "personalization data"
       ],
       "explicitInvocation": "/peer-profile-sync",
-      "canonicalPath": "templates/project-skills/peer-profile-sync"
+      "canonicalPath": "skills/peer-profile-sync"
     },
     {
       "name": "pem-local-first",
@@ -336,7 +336,7 @@
         "normalized state"
       ],
       "explicitInvocation": "/pem-local-first",
-      "canonicalPath": "templates/project-skills/pem-local-first"
+      "canonicalPath": "skills/pem-local-first"
     },
     {
       "name": "reference-ui-fidelity",
@@ -359,7 +359,7 @@
         "design spec"
       ],
       "explicitInvocation": "/reference-ui-fidelity",
-      "canonicalPath": "templates/project-skills/reference-ui-fidelity"
+      "canonicalPath": "skills/reference-ui-fidelity"
     },
     {
       "name": "sync-doctrine",
@@ -396,7 +396,7 @@
         "sync engine"
       ],
       "explicitInvocation": "/sync-doctrine",
-      "canonicalPath": "templates/project-skills/sync-doctrine"
+      "canonicalPath": "skills/sync-doctrine"
     },
     {
       "name": "tauri-custom-titlebar",
@@ -418,7 +418,7 @@
         "drag region"
       ],
       "explicitInvocation": "/tauri-custom-titlebar",
-      "canonicalPath": "templates/project-skills/tauri-custom-titlebar"
+      "canonicalPath": "skills/tauri-custom-titlebar"
     },
     {
       "name": "tauri-ui-review",
@@ -440,7 +440,7 @@
         "web ui"
       ],
       "explicitInvocation": "/tauri-ui-review",
-      "canonicalPath": "templates/project-skills/tauri-ui-review"
+      "canonicalPath": "skills/tauri-ui-review"
     },
     {
       "name": "entity-graph-web-shell",
@@ -454,7 +454,7 @@
         "or normalized cross-view updates"
       ],
       "explicitInvocation": "/entity-graph-web-shell",
-      "canonicalPath": "templates/project-skills/entity-graph-web-shell"
+      "canonicalPath": "skills/entity-graph-web-shell"
     },
     {
       "name": "mini-app-module",
@@ -470,7 +470,7 @@
         "or independently testable applets"
       ],
       "explicitInvocation": "/mini-app-module",
-      "canonicalPath": "templates/project-skills/mini-app-module"
+      "canonicalPath": "skills/mini-app-module"
     },
     {
       "name": "axum-agent-gateway",
@@ -488,7 +488,7 @@
         "or uar service integration"
       ],
       "explicitInvocation": "/axum-agent-gateway",
-      "canonicalPath": "templates/project-skills/axum-agent-gateway"
+      "canonicalPath": "skills/axum-agent-gateway"
     },
     {
       "name": "legacy-app-embed",
@@ -503,7 +503,7 @@
         "or frozen-substrate constraints"
       ],
       "explicitInvocation": "/legacy-app-embed",
-      "canonicalPath": "templates/project-skills/legacy-app-embed"
+      "canonicalPath": "skills/legacy-app-embed"
     },
     {
       "name": "a2ui-surface-contract",
@@ -518,7 +518,7 @@
         "or cross-platform rendering parity"
       ],
       "explicitInvocation": "/a2ui-surface-contract",
-      "canonicalPath": "templates/project-skills/a2ui-surface-contract"
+      "canonicalPath": "skills/a2ui-surface-contract"
     },
     {
       "name": "agui-event-contract",
@@ -534,7 +534,7 @@
         "or unknown-event compatibility"
       ],
       "explicitInvocation": "/agui-event-contract",
-      "canonicalPath": "templates/project-skills/agui-event-contract"
+      "canonicalPath": "skills/agui-event-contract"
     },
     {
       "name": "agent-runtime-security",
@@ -552,7 +552,7 @@
         "or cancellation"
       ],
       "explicitInvocation": "/agent-runtime-security",
-      "canonicalPath": "templates/project-skills/agent-runtime-security"
+      "canonicalPath": "skills/agent-runtime-security"
     },
     {
       "name": "anonymized-replica",
@@ -567,7 +567,7 @@
         "or privacy-preserving test environments"
       ],
       "explicitInvocation": "/anonymized-replica",
-      "canonicalPath": "templates/project-skills/anonymized-replica"
+      "canonicalPath": "skills/anonymized-replica"
     },
     {
       "name": "persona-scoped-agent",
@@ -581,7 +581,7 @@
         "or persona-specific context"
       ],
       "explicitInvocation": "/persona-scoped-agent",
-      "canonicalPath": "templates/project-skills/persona-scoped-agent"
+      "canonicalPath": "skills/persona-scoped-agent"
     },
     {
       "name": "domain-glossary-service",
@@ -595,7 +595,7 @@
         "or terminology-driven retrieval"
       ],
       "explicitInvocation": "/domain-glossary-service",
-      "canonicalPath": "templates/project-skills/domain-glossary-service"
+      "canonicalPath": "skills/domain-glossary-service"
     }
   ]
 }

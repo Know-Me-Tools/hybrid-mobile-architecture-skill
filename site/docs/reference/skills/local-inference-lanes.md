@@ -192,5 +192,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/local-inference-lanes/SKILL.md`; generated harness copies
+`skills/local-inference-lanes/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

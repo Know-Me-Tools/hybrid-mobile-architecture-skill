@@ -71,5 +71,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/anonymized-replica/SKILL.md`; generated harness copies
+`skills/anonymized-replica/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

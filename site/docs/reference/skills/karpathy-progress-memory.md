@@ -43,7 +43,8 @@ Do not store secrets, raw transcripts, unsupported claims, or private memory in 
 ## Canonical operating contract
 
 Keep a lossless path of decisions and failures without turning every tool call into noise.
-Apply `AGENT_BASE_RULES.md`; record observations as facts only when evidence exists.
+Apply the consuming project's base rules; record observations as facts only when
+evidence exists.
 
 ## Capture cadence
 
@@ -63,9 +64,11 @@ Apply `AGENT_BASE_RULES.md`; record observations as facts only when evidence exi
 4. Run `scripts/record-progress.sh` with a phase, title, summary, evidence, and next step.
 5. At a phase gate, run `prometheus learn --capture-session --compile --lint`, then
    `pk lint`. Fix malformed newly-authored entries; preserve imported historical variants.
-6. Promote only reviewed, project-independent lessons into the shared private KB.
+6. Run `prometheus learning status --json` and record queue, retry, dead-letter, and
+   memory-delivery state separately from successful trace capture.
+7. Promote only reviewed, project-independent lessons into the shared private KB.
 
-Read [record-schema.md](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/record-schema.md) before changing the recorder or
+Read [record-schema.md](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/karpathy-progress-memory/references/record-schema.md) before changing the recorder or
 manually creating a compatible entry.
 
 ## Prohibitions
@@ -88,5 +91,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/karpathy-progress-memory/SKILL.md`; generated harness copies
+`skills/karpathy-progress-memory/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

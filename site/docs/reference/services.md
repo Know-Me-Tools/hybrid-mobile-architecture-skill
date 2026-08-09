@@ -37,18 +37,20 @@ roles, tenants, tool permissions, or bypass confirmations.
 
 ### Prometheus control plane
 
-**Role:** Development workflow authority: canonical KBD state, pause, resume,
-cancel, revise, audit, lease/fencing, and cross-harness handoff.
+**Role:** Development workflow authority: project UUID identity, signed
+grow-only Loro events, per-replica journals, CRDT work claims and conflict
+adjudication, typed lifecycle transitions, audit, and durable learning status.
 
 **Why:** Skills are portable instructions, not durable concurrency control.
-Prometheus supplies the event journal and single-writer ownership needed when
-work moves between machines or harnesses.
+Prometheus supplies canonical signed events and deterministic CRDT convergence
+when work proceeds across machines or harnesses.
 
-**Common uses:** claim a mutation lease, checkpoint before architectural review,
-audit exact work position, revise a plan, and hand off to another harness.
+**Common uses:** register a project replica, claim work, inspect or resolve a
+conflict, checkpoint before architectural review, audit exact causal position,
+and transition typed phases, stages, changes, tasks, or completion dimensions.
 
-**Boundary:** Builder hooks remain advisory. Compatibility waypoint/progress
-files are read-only projections.
+**Boundary:** Builder hooks remain advisory. Prometheus project UUID identity
+names the project; waypoint/progress compatibility files remain read-only projections.
 
 ## Application boundary services
 

@@ -18,6 +18,7 @@ set -euo pipefail
 # Required toolchain versions come from versions.toml. Hardcoding them here
 # lets this gate pass a toolchain the scaffolders then emit manifests against.
 CHECK_ENV_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
 source "$CHECK_ENV_DIR/lib-versions.sh"
 
 INSTALL_MODE=false
@@ -46,7 +47,9 @@ $INSTALL_MODE && echo -e "${YELLOW}  mode: --install$($FULL_MODE && echo " --ful
 MISSING=()
 version_ge() { # version_ge <have> <want> — dotted numeric compare, "have >= want"
   [[ "$1" == "$2" ]] && return 0
-  local IFS=.; local -a a=($1) b=($2)
+  local -a a b
+  IFS=. read -r -a a <<< "$1"
+  IFS=. read -r -a b <<< "$2"
   for ((i=0; i<${#b[@]}; i++)); do
     local ai="${a[i]:-0}" bi="${b[i]:-0}"
     ((10#$ai > 10#$bi)) && return 0
@@ -74,6 +77,7 @@ else
   if $INSTALL_MODE; then
     info "Installing Rust via rustup..."
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+    # shellcheck disable=SC1091
     source "$HOME/.cargo/env"
     ok "Rust installed"
   fi
@@ -99,7 +103,7 @@ check_cargo_tool() {
   local bin="$1" pkg="$2" want="${3:-}" ver_flag="${4:---version}"
   if command -v "$bin" &>/dev/null; then
     local have
-    have=$($bin $ver_flag 2>&1 | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1) || have=""
+    have=$("$bin" "$ver_flag" 2>&1 | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1) || have=""
     if [[ -n "$want" ]] && [[ -n "$have" ]] && ! version_ge "$have" "$want"; then
       warn "$bin $have — requires $want+ (must align with the workspace's flutter_rust_bridge crate version)"
       MISSING+=("$pkg-update")
@@ -146,6 +150,32 @@ for bin in prometheus forge pk pk-cherry liter-llm; do
     PK_BINS_OK=false
   fi
 done
+PROMETHEUS_VERSION=""
+if command -v prometheus &>/dev/null; then
+  PROMETHEUS_VERSION="$(prometheus --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)"
+fi
+if version_ge "$PROMETHEUS_VERSION" "1.7.0"; then
+  ok "  prometheus package $PROMETHEUS_VERSION (minimum 1.7.0)"
+else
+  warn "  prometheus package ${PROMETHEUS_VERSION:-unknown} is older than 1.7.0"
+  PK_BINS_OK=false
+fi
+PROMETHEUS_DOCTOR_JSON=""
+if command -v prometheus &>/dev/null; then
+  PROMETHEUS_DOCTOR_JSON="$(prometheus doctor --json \
+    --exclude control.kbd-runtime \
+    --exclude state.kbd-orchestrator \
+    --exclude control.kbd-rollout \
+    --exclude service:sovereign-sync 2>/dev/null || true)"
+fi
+PROMETHEUS_CONTRACT_VERSION="$(jq -r '.contractVersion // .controlPlane.contractVersion // empty' \
+  <<<"${PROMETHEUS_DOCTOR_JSON:-{}}" 2>/dev/null || true)"
+if version_ge "$PROMETHEUS_CONTRACT_VERSION" "2.0.0"; then
+  ok "  Prometheus control-plane contract $PROMETHEUS_CONTRACT_VERSION (minimum 2.0.0)"
+else
+  warn "  Prometheus contract ${PROMETHEUS_CONTRACT_VERSION:-unknown} is older than 2.0.0"
+  PK_BINS_OK=false
+fi
 if command -v pk &>/dev/null && pk doctor --json &>/dev/null; then
   ok "  pk doctor: operational"
 else
@@ -159,19 +189,42 @@ else
   if $INSTALL_MODE && $FULL_MODE; then
     info "  Installing Prometheus Skill System (full instance, this is a long operation)..."
     SKILL_SYS_HOME="${PROMETHEUS_SKILL_SYSTEM_HOME:-$HOME/.prometheus-skill-system}"
-    if [[ ! -d "$SKILL_SYS_HOME" ]]; then
+    PROMETHEUS_REPOSITORY="https://github.com/Prometheus-AGS/prometheus-skill-system.git"
+    if [[ ! -d "$SKILL_SYS_HOME/.git" ]]; then
       git clone --recurse-submodules \
-        https://github.com/Prometheus-AGS/prometheus-skill-system.git "$SKILL_SYS_HOME"
+        "$PROMETHEUS_REPOSITORY" "$SKILL_SYS_HOME"
+    else
+      current_origin="$(git -C "$SKILL_SYS_HOME" remote get-url origin)"
+      if [[ "$current_origin" != "$PROMETHEUS_REPOSITORY" && "$current_origin" != "${PROMETHEUS_REPOSITORY%.git}" ]]; then
+        fail "  Existing Prometheus checkout has unexpected origin: $current_origin"
+        exit 1
+      fi
+      if [[ -n "$(git -C "$SKILL_SYS_HOME" status --porcelain)" ]]; then
+        fail "  Existing Prometheus checkout is dirty; refusing to update it"
+        exit 1
+      fi
+      git -C "$SKILL_SYS_HOME" fetch origin main
+      git -C "$SKILL_SYS_HOME" merge --ff-only origin/main
     fi
     (
       cd "$SKILL_SYS_HOME"
+      git submodule sync --recursive
+      git submodule update --init --recursive
       bash scripts/check-prerequisites.sh --install --build-tools
       bash scripts/install-skills-flat.sh
+      node scripts/install-plugin-generation.js
+      node scripts/install-plugin-generation.js --verify
       bash scripts/install-mcp-services.sh
-      bash scripts/configure-mcp-all-tools.sh
-      bash scripts/prometheus-services.sh load
+      prometheus doctor --json \
+        --exclude control.kbd-runtime \
+        --exclude state.kbd-orchestrator \
+        --exclude control.kbd-rollout \
+        --exclude service:sovereign-sync
+      pk doctor --json
+      bash scripts/prometheus-services.sh doctor --exclude sovereign-sync
+      prometheus learning status --json
     )
-    ok "  Prometheus Skill System installed — verify with: pk doctor --json"
+    ok "  Prometheus Skill System installed and verified at package 1.7.0+ / contract 2.0.0+"
   elif $INSTALL_MODE; then
     warn "  Skipping full skill-system install (pass --full for this long operation)"
   fi

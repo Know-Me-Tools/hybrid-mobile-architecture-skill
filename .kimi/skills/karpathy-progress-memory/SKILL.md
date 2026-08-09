@@ -6,7 +6,8 @@ description: Capture compact, evidence-backed Karpathy-style progress records an
 # Karpathy Progress Memory
 
 Keep a lossless path of decisions and failures without turning every tool call into noise.
-Apply `AGENT_BASE_RULES.md`; record observations as facts only when evidence exists.
+Apply the consuming project's base rules; record observations as facts only when
+evidence exists.
 
 ## Capture cadence
 
@@ -26,7 +27,9 @@ Apply `AGENT_BASE_RULES.md`; record observations as facts only when evidence exi
 4. Run `scripts/record-progress.sh` with a phase, title, summary, evidence, and next step.
 5. At a phase gate, run `prometheus learn --capture-session --compile --lint`, then
    `pk lint`. Fix malformed newly-authored entries; preserve imported historical variants.
-6. Promote only reviewed, project-independent lessons into the shared private KB.
+6. Run `prometheus learning status --json` and record queue, retry, dead-letter, and
+   memory-delivery state separately from successful trace capture.
+7. Promote only reviewed, project-independent lessons into the shared private KB.
 
 Read [record-schema.md](references/record-schema.md) before changing the recorder or
 manually creating a compatible entry.

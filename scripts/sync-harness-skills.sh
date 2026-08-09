@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 # scripts/sync-harness-skills.sh
-# Mirror templates/project-skills into every harness skill tree in THIS repo.
+# Project the canonical public companion skills into scaffold and harness trees.
 #
 # Usage:
 #   bash scripts/sync-harness-skills.sh          # sync
 #   bash scripts/sync-harness-skills.sh --check  # verify only, non-zero on drift (CI)
 #
-# templates/project-skills/ is the SOURCE. The six harness directories are
-# copies, and a copy that is edited directly is a copy that silently diverges —
-# each harness would then teach a different rule for the same situation. Editing
-# the source and running this script is the only supported flow.
+# skills/ is the SOURCE. templates/project-skills and the six harness directories
+# are generated copies. The package-level hybrid-mobile-architecture skill is
+# intentionally not scaffolded into consuming projects.
 #
 # The pack's own .claude/skills also carries vendored openspec-* skills that have
 # no template. Those are left untouched: this script only mirrors what the
@@ -20,31 +19,48 @@ set -euo pipefail
 MODE="${1:-sync}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACK_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SRC="$PACK_ROOT/templates/project-skills"
+SRC="$PACK_ROOT/skills"
+PROJECT_TARGET="$PACK_ROOT/templates/project-skills"
+MANIFEST="$PACK_ROOT/builder.manifest.json"
 
 GREEN='\033[0;32m'; RED='\033[0;31m'; CYAN='\033[0;36m'; NC='\033[0m'
 
 [[ -d "$SRC" ]] || { echo "FATAL: $SRC not found" >&2; exit 1; }
+[[ -f "$MANIFEST" ]] || { echo "FATAL: $MANIFEST not found" >&2; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo "FATAL: jq is required" >&2; exit 1; }
 
 HARNESS_DIRS=(.claude .codex .opencode .kimi .agents .kimi-code)
 
 SKILLS=()
-while IFS= read -r skill_md; do
-  SKILLS+=("$(basename "$(dirname "$skill_md")")")
-done < <(find "$SRC" -maxdepth 2 -name 'SKILL.md' -print | sort)
+while IFS= read -r skill; do
+  SKILLS+=("$skill")
+done < <(jq -r '.skills[]' "$MANIFEST")
 
 [[ ${#SKILLS[@]} -gt 0 ]] || { echo "FATAL: no skills found under $SRC" >&2; exit 1; }
 
 DRIFT=0
+TARGET_ROOTS=("$PROJECT_TARGET")
 for harness in "${HARNESS_DIRS[@]}"; do
-  target_root="$PACK_ROOT/$harness/skills"
-  [[ -d "$target_root" ]] || continue
+  TARGET_ROOTS+=("$PACK_ROOT/$harness/skills")
+done
+
+for target_root in "${TARGET_ROOTS[@]}"; do
+  if [[ ! -d "$target_root" ]]; then
+    if [[ "$MODE" == "--check" ]]; then
+      relative_target="${target_root#"$PACK_ROOT/"}"
+      echo -e "  ${RED}✗${NC} missing generated root: $relative_target"
+      DRIFT=1
+      continue
+    fi
+    mkdir -p "$target_root"
+  fi
   for skill in "${SKILLS[@]}"; do
     src="$SRC/$skill"
     dst="$target_root/$skill"
     if [[ "$MODE" == "--check" ]]; then
       if ! diff -rq "$src" "$dst" >/dev/null 2>&1; then
-        echo -e "  ${RED}✗${NC} drift: $harness/skills/$skill"
+        relative_target="${dst#"$PACK_ROOT/"}"
+        echo -e "  ${RED}✗${NC} drift: $relative_target"
         DRIFT=1
       fi
     else
@@ -59,12 +75,12 @@ done
 
 if [[ "$MODE" == "--check" ]]; then
   if [[ $DRIFT -eq 0 ]]; then
-    echo -e "${GREEN}  ✓ all ${#HARNESS_DIRS[@]} harness trees match templates/project-skills${NC}"
+    echo -e "${GREEN}  ✓ scaffold and all ${#HARNESS_DIRS[@]} harness trees match skills/${NC}"
   else
-    echo -e "${RED}  ✗ harness skill trees have drifted — run: bash scripts/sync-harness-skills.sh${NC}"
+    echo -e "${RED}  ✗ generated skill trees have drifted — run: bash scripts/sync-harness-skills.sh${NC}"
     exit 1
   fi
 else
-  echo -e "${CYAN}Synced ${#SKILLS[@]} skills into ${#HARNESS_DIRS[@]} harness trees${NC}"
-  echo -e "${GREEN}  ✓ templates/project-skills is the source of truth${NC}"
+  echo -e "${CYAN}Synced ${#SKILLS[@]} companion skills into scaffold and ${#HARNESS_DIRS[@]} harness trees${NC}"
+  echo -e "${GREEN}  ✓ skills is the source of truth${NC}"
 fi

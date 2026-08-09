@@ -112,5 +112,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/flutter-golden-ui/SKILL.md`; generated harness copies
+`skills/flutter-golden-ui/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

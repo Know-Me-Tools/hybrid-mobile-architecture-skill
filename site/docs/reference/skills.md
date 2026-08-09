@@ -1,13 +1,14 @@
 ---
 sidebar_position: 7
 title: Skills
-description: Complete index and usage model for all 29 KnowMe Builder Agent Skills.
+description: Complete index and usage model for all 30 public KnowMe Builder Agent Skills.
 ---
 
-# The 29 Builder skills
+# The 30 public Builder skills
 
-KnowMe Builder installs the same 29 canonical skills into Claude Code, Codex,
-OpenCode, Kimi, and generic Agent Skills discovery. Each skill is deliberately
+KnowMe Builder publishes one package-level `hybrid-mobile-architecture` skill
+and 29 project companions for Claude Code, Codex, OpenCode, and compatible Agent
+Skills clients. Each skill is deliberately
 narrow: it protects one architectural, security, data, design, delivery, or
 verification boundary.
 
@@ -23,8 +24,14 @@ important:
 ```
 
 Activation adapters may recommend a skill from prompt terms. They are
-advisory. They cannot mutate Prometheus KBD state, acquire a lease, or force a
-session to continue.
+advisory. They cannot mutate Prometheus project identity, signed KBD state,
+claims/conflicts, or lifecycle, and cannot force a session to continue.
+
+## Package routing skill
+
+| Skill | Use it when |
+|---|---|
+| `hybrid-mobile-architecture` | Selecting a Builder profile, adopting an evolved application, or applying the overall Flutter/Tauri/React/Axum/Rust architecture |
 
 ## Quality and release gates
 
@@ -102,8 +109,8 @@ knowme-builder skills check --path <project>
 
 ## Source and generation
 
-`templates/project-skills` is canonical. The six repository harness trees and
-the 29 detailed pages linked above are generated projections.
+`skills` is canonical. The project template, six repository harness trees, and
+the 29 detailed companion pages linked above are generated projections.
 
 ```bash
 bash scripts/sync-harness-skills.sh --check

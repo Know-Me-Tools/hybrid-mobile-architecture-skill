@@ -1,6 +1,6 @@
 # KnowMe Builder
 
-**Version 2.0.0-alpha.1 · governed agentic application generator and skill pack**
+**Version 2.0.0-alpha.2 · governed agentic application generator and skill pack**
 
 KnowMe Builder creates and adopts Flutter, Tauri/React, Axum, and Rust
 applications without treating the consumer repository as disposable generator
@@ -10,7 +10,7 @@ output. It combines:
 - explicit application profiles;
 - typed UAR, A2UI, AG-UI, identity, policy, persistence, and native-bridge
   boundaries;
-- 29 portable Agent Skills;
+- 30 public, self-contained Agent Skills (one package skill and 29 companions);
 - generated commands and advisory activation adapters for Claude Code, Codex,
   OpenCode, and Kimi; and
 - conformance, security, documentation, and installation gates.
@@ -23,7 +23,7 @@ Start with:
 - [Installation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/installation)
 - [CLI reference](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/cli)
 - [Generation profiles](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/architecture/profiles)
-- [All 29 skills](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/skills)
+- [All 30 public skills](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/skills)
 - [Services and boundaries](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/services)
 - [Utilities and automation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/utilities)
 - [Common use cases](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/use-cases)
@@ -35,7 +35,7 @@ Three systems have deliberately separate jobs:
 | System | Authority |
 |---|---|
 | KnowMe Builder | Application architecture, templates, typed adapters, skills, and conformance |
-| Prometheus | Development lifecycle, KBD state, pause/resume/cancel, lease/fencing, audit, and handoff |
+| Prometheus | Project UUID identity, signed KBD events, CRDT claims/conflicts, typed lifecycle, audit, and durable learning |
 | Universal Agent Runtime | Agent runs, providers, prompts, governed tools, cancellation, recovery, and A2UI/AG-UI events |
 
 Builder activation hooks are advisory. They never own lifecycle or mutation
@@ -53,15 +53,23 @@ install -m 0755 tools/knowme-builder/target/release/knowme-builder \
 knowme-builder --version
 ```
 
-Install the complete workstation payload:
+Install all 30 portable skills directly from the Git repository URL:
+
+```bash
+npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill \
+  --skill '*' -a claude-code -a codex -a opencode -g -y
+```
+
+Install the complete native harness package from a trusted checkout:
 
 ```bash
 bash scripts/install-global-harnesses.sh
 ```
 
-That installs the root skill, 29 companion skills, slash-command equivalents,
-advisory adapters, local Claude/Codex plugin payloads, and Dart/shadcn MCP
-entries while preserving unrelated user configuration.
+That registers the Git source through the supported Claude/Codex marketplace
+CLIs, installs OpenCode skills plus its native advisory plugin, and records an
+ownership receipt. CLI compilation, MCP configuration, and the full Prometheus
+runtime are opt-in with `--with-cli`, `--with-mcp`, and `--with-prometheus`.
 
 Verify:
 
@@ -146,8 +154,8 @@ integration. They do not overwrite feature code.
 
 ## Skill bundle
 
-`templates/project-skills` is the single canonical tree. The package currently
-ships 29 skills:
+`skills` is the canonical public tree. It contains the package-level
+`hybrid-mobile-architecture` skill plus 29 project companions:
 
 - quality and release: `a11y-gate`, `flutter-golden-ui`,
   `tauri-ui-review`, `reference-ui-fidelity`,
@@ -217,7 +225,10 @@ node scripts/check-builder-authority.mjs --release
 node scripts/check-skill-contracts.mjs
 node scripts/check-runtime-security.mjs
 node scripts/check-prometheus-boundary.mjs
+node scripts/sync-skill-resources.mjs --check
 bash scripts/sync-harness-skills.sh --check
+bash scripts/check-git-url-discovery.sh
+bash scripts/test-harness-installer.sh
 cargo test --locked --manifest-path tools/knowme-builder/Cargo.toml
 ```
 
@@ -239,7 +250,8 @@ physical-device proof when native bridges or local inference are involved.
 |---|---|
 | `builder.manifest.json` | Canonical package, profile, skill, template, target, and harness manifest |
 | `tools/knowme-builder` | Rust CLI |
-| `templates/project-skills` | Canonical 29-skill source |
+| `skills` | Canonical 30-skill public source |
+| `templates/project-skills` | Generated 29-skill project/scaffold projection |
 | `assets/templates` | Maintained profile, feature, adapter, native, build, and contract templates |
 | `compatibility` | Prometheus and UAR external contract descriptors |
 | `versions.toml` | Builder application-stack version authority |
@@ -252,6 +264,7 @@ dated assessment or research file as current authority.
 
 ## Release status
 
-`2.0.0-alpha.1` contains the production-convergence architecture and consumer
-adoption support. Stable `2.0.0` remains gated by the complete consumer CI
+`2.0.0-alpha.2` adds standards-conformant Git-URL distribution and current
+Prometheus 1.7 integration to the production-convergence architecture and
+consumer adoption support. Stable `2.0.0` remains gated by the complete consumer CI
 suites and current physical-device certification required by their profiles.

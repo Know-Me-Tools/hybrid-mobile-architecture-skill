@@ -1,11 +1,6 @@
 ---
 name: hybrid-mobile-architecture
-description: >
-  Build, adopt, upgrade, and audit governed agentic applications with Flutter,
-  Tauri, React, Axum, Rust, Universal Agent Runtime, A2UI/AG-UI, and Prometheus
-  Entity Management. Use for KnowMe Builder projects, hybrid mobile or desktop
-  apps, governed web shells, UAR integration, typed native bridges, agent-tool
-  security, or non-destructive application generation.
+description: Build, adopt, upgrade, and audit governed agentic applications with Flutter, Tauri, React, Axum, Rust, Universal Agent Runtime, A2UI/AG-UI, and Prometheus Entity Management. Use for KnowMe Builder projects, hybrid mobile or desktop apps, governed web shells, UAR integration, typed native bridges, agent-tool security, or non-destructive application generation.
 ---
 
 # KnowMe Builder
@@ -16,23 +11,15 @@ owns development workflow lifecycle and cross-harness coordination. The
 Builder owns application architecture, typed adapters, generation, skills, and
 conformance tests.
 
-## Documentation entry points
+## Distribution boundary
 
-- Installation and native harness setup:
-  `site/docs/reference/installation.md`
-- Full CLI behavior and safety model: `site/docs/reference/cli.md`
-- Profile selection: `site/docs/architecture/profiles.md`
-- Design and authority rationale:
-  `site/docs/architecture/design-principles.md`
-- All 29 skills and individual usage guides:
-  `site/docs/reference/skills.md`
-- Runtime, control-plane, data, identity, and protocol services:
-  `site/docs/reference/services.md`
-- Scripts, generators, templates, and CI:
-  `site/docs/reference/utilities.md`
-- Product recipes: `site/docs/reference/use-cases.md`
-- Documentation authority and legacy-source classification:
-  `docs/documentation-map.md`
+This standalone skill contains the architecture references needed for design and
+review. Executable generation, environment remediation, and maintained templates
+belong to the versioned `knowme-builder` CLI and the trusted source checkout.
+Never assume repository scripts or templates exist beside an individually
+installed skill. Use the public installation guide at
+<https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/installation>
+when the CLI or native harness package is required.
 
 ## Quick orientation
 
@@ -55,25 +42,22 @@ Before any generation or adoption, run:
 knowme-builder doctor --json
 ```
 
-The compatibility wrapper `scripts/check-env.sh` remains available during the
-2.0 migration.
+The source checkout also provides `scripts/check-env.sh` for maintainers. An
+individually installed skill must use `knowme-builder doctor --json` instead.
 
 ### Required tool matrix
 
 | Tool | Minimum Version | Install command |
 |------|----------------|-----------------|
 | Rust + Cargo | 1.97.1 | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
-| Flutter SDK | beta channel, latest | See `scripts/install-flutter.sh` |
+| Flutter SDK | beta channel, latest | Follow the public installation guide |
 | Node.js | 26.5.0 (current release — pin, not `--lts`) | `curl -fsSL https://fnm.vercel.app/install \| bash && fnm install 26` |
 | Tauri CLI | 2.10+ | `cargo install tauri-cli --version "^2"` |
 | flutter_rust_bridge_codegen | 2.12+ | `cargo install flutter_rust_bridge_codegen` |
 | cargo-ndk | latest | `cargo install cargo-ndk` (Android only) |
 | create-tauri-app | latest | `npm create tauri-app@latest` |
 
-Run the environment check before proceeding:
-```bash
-bash scripts/check-env.sh
-```
+Do not attempt environment remediation unless the user explicitly requests it.
 
 ---
 
@@ -268,7 +252,3 @@ When adding a new ContentBlock type, always do all 7 steps in `references/rust/n
 | `references/sync/peer-crdt.md` | device-to-device private profile vault |
 | `references/sync/client-rag.md` | on-device retrieval and vector-storage boundaries |
 | `references/ui-skills.md` | UI skill routing and cross-surface quality gates |
-| `scripts/` | Runnable scripts — check-env, scaffold, new-feature, add-auth, audit |
-| `assets/templates/` | Maintained Flutter, Tauri, Rust, native bridge, and build-script templates |
-| `docs/tj-arch-mob-001.html` | Full XHTML architectural standard (TJ-ARCH-MOB-001) |
-| `docs/gen_ui_spec.html` | Full gen_ui technical specification and SVG architecture diagrams |

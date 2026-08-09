@@ -70,5 +70,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/a2ui-surface-contract/SKILL.md`; generated harness copies
+`skills/a2ui-surface-contract/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

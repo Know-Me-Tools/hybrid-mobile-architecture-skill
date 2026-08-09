@@ -6,6 +6,7 @@ on:
       - "site/**"
       - "docs/**"
       - "templates/project-skills/**"
+      - "skills/**"
       - "builder.manifest.json"
       - ".github/workflows/docs-pages.yml"
   push:
@@ -14,6 +15,7 @@ on:
       - "site/**"
       - "docs/**"
       - "templates/project-skills/**"
+      - "skills/**"
       - "builder.manifest.json"
       - ".github/workflows/docs-pages.yml"
   workflow_dispatch:

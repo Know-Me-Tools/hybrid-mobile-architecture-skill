@@ -1,6 +1,8 @@
 ---
 name: "source-command-opsx-sync"
 description: "Sync delta specs from a change to main specs"
+metadata:
+  internal: true
 ---
 
 # source-command-opsx-sync

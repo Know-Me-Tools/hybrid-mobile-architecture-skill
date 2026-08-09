@@ -43,7 +43,7 @@ Cloud RAG is a separate design and privacy review; vault vectors never enter ser
 ## Canonical operating contract
 
 > **Binding:** Full design:
-> [`client-rag.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/sync/client-rag.md). Lanes and privacy:
+> [`client-rag.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/client-rag/references/client-rag.md). Lanes and privacy:
 > `sync-doctrine` skill. Retrieval remains local and privacy-class boundaries
 > remain mandatory even when the optional reference is unavailable.
 
@@ -121,5 +121,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/client-rag/SKILL.md`; generated harness copies
+`skills/client-rag/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

@@ -7,7 +7,7 @@ const root = resolve(new URL("..", import.meta.url).pathname);
 const scanRoots = [
   "assets/templates",
   "references",
-  "templates/project-skills",
+  "skills",
 ];
 const textExtensions = new Set([
   ".dart", ".json", ".kt", ".md", ".mjs", ".rs", ".swift", ".toml", ".ts", ".tsx", ".yaml", ".yml",

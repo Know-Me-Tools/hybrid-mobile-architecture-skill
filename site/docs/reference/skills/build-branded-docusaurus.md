@@ -75,5 +75,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/build-branded-docusaurus/SKILL.md`; generated harness copies
+`skills/build-branded-docusaurus/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

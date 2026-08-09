@@ -43,8 +43,8 @@ Do not introduce TanStack Query, SWR, Apollo cache, a second replay queue, or di
 ## Canonical operating contract
 
 > **Binding:** Decisions: ADR-LFS-2/3/4 in
-> [`decisions.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/sync/decisions.md). Layer contract:
-> [`patterns.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/tauri/patterns.md). The invariants below
+> [`decisions.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/pem-local-first/references/decisions.md). Layer contract:
+> [`patterns.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/pem-local-first/references/tauri-patterns.md). The invariants below
 > remain authoritative when the optional references are unavailable.
 
 ## Why not TanStack Query (the layering argument, once)
@@ -65,7 +65,7 @@ Flutter: Widget → @riverpod provider → prometheus_entity_management (Dart) �
 
 - Local store per tier: PGlite (web `idb://`), pglite-oxide via typed Tauri
   commands (desktop), SQLite via FFI (mobile). Embedded-engine singleton
-  lifecycle rules apply (`references/rust/patterns.md`).
+  lifecycle rules apply (`references/rust-patterns.md`).
 - Zustand keeps ONLY transient interaction state (selection, filters, stream
   buffers). Anything durable is a PEM entity.
 
@@ -127,5 +127,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/pem-local-first/SKILL.md`; generated harness copies
+`skills/pem-local-first/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

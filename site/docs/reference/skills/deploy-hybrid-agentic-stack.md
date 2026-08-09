@@ -44,7 +44,8 @@ Do not enable every service by default or create a second image/catalog pipeline
 
 Build deployment choices around one host-neutral Rust application layer while preserving
 the mandatory Flutter-mobile and recommended Tauri-desktop architecture. Apply
-`AGENT_BASE_RULES.md` and `references/arch-standard.md` before changing code.
+Apply the consuming project's `AGENT_BASE_RULES.md` and architecture authority
+before changing code; this standalone skill does not replace project policy.
 
 ## Choose the requested surface
 
@@ -74,8 +75,8 @@ Do not replace Flutter mobile with Tauri unless the operator explicitly chooses 
 5. Use AG-UI SSE for runs and typed ContentBlocks for thinking, citation, memory, tool,
    artifact, and media events.
 
-Read [architecture.md](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/architecture.md) before implementing service or API
-changes. Read [deployment.md](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/deployment.md) before emitting containers or
+Read [architecture.md](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/deploy-hybrid-agentic-stack/references/architecture.md) before implementing service or API
+changes. Read [deployment.md](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/deploy-hybrid-agentic-stack/references/deployment.md) before emitting containers or
 Kubernetes resources.
 
 When a Prometheus deployment catalog is available, consume its pinned sources,
@@ -122,5 +123,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/deploy-hybrid-agentic-stack/SKILL.md`; generated harness copies
+`skills/deploy-hybrid-agentic-stack/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

@@ -5,8 +5,8 @@ description: ALWAYS invoke when wiring client entity/server state on any surface
 <!-- TJ-ARCH-MOB-001 compliant -->
 
 > **Binding:** Decisions: ADR-LFS-2/3/4 in
-> [`decisions.md`](../../../references/sync/decisions.md). Layer contract:
-> [`patterns.md`](../../../references/tauri/patterns.md). The invariants below
+> [`decisions.md`](references/decisions.md). Layer contract:
+> [`patterns.md`](references/tauri-patterns.md). The invariants below
 > remain authoritative when the optional references are unavailable.
 
 # PEM Local-First — the entity layer
@@ -29,7 +29,7 @@ Flutter: Widget → @riverpod provider → prometheus_entity_management (Dart) �
 
 - Local store per tier: PGlite (web `idb://`), pglite-oxide via typed Tauri
   commands (desktop), SQLite via FFI (mobile). Embedded-engine singleton
-  lifecycle rules apply (`references/rust/patterns.md`).
+  lifecycle rules apply (`references/rust-patterns.md`).
 - Zustand keeps ONLY transient interaction state (selection, filters, stream
   buffers). Anything durable is a PEM entity.
 

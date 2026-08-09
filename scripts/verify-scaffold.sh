@@ -45,7 +45,8 @@ trap 'rm -rf "$WORK"' EXIT
 
 step "Scaffolding $APP_NAME into a throwaway directory"
 mkdir -p "$WORK/proj"
-bash "$SCRIPT_DIR/scaffold-rust-core.sh" "$WORK/proj/rust" embedded "$APP_NAME" "$APP_ORG" >/dev/null
+KNOWME_BUILDER_FORCE_SOURCE="${KNOWME_BUILDER_FORCE_SOURCE:-1}" \
+  bash "$SCRIPT_DIR/scaffold-rust-core.sh" "$WORK/proj" embedded "$APP_NAME" "$APP_ORG" >/dev/null
 bash "$SCRIPT_DIR/add-project-skills.sh" "$WORK/proj" >/dev/null
 ok "scaffolded"
 
@@ -67,15 +68,9 @@ build_manifest() {
         -not -name '*.lock' \
         | sed 's|^\./||' | sort )
     echo
-    echo "## workspace members"
-    grep -oE '"crates/[a-z_-]+"' "$root/rust/Cargo.toml" | tr -d '"' | sort
-    echo
-    echo "## inference features"
-    sed -n '/^\[features\]/,/^\[dependencies\]/p' "$root/rust/crates/gen_ui_inference/Cargo.toml" \
-      | grep -oE '^[a-z-]+ =' | tr -d ' =' | sort
-    echo
-    echo "## agent lanes"
-    grep -oE 'LANE_[A-Z]+: &str = "[a-z]+"' "$root/rust/crates/gen_ui_agent/src/lane.rs" | sort
+    echo "## builder metadata"
+    grep -E '^(profile|builderVersion|requiredPrometheusContract|generationMode) =' \
+      "$root/.knowme-builder/project.toml" | sort
   } 2>/dev/null
 }
 
@@ -124,20 +119,15 @@ if [[ -n "$LEFTOVER" ]]; then
 fi
 ok "no unsubstituted placeholders in emitted code"
 
-# ── Identity substitution actually happened ─────────────────────────────────
-# Guards the inverse failure: a substitution pass that silently no-ops leaves
-# valid-looking output with the WRONG identity baked in.
-step "Checking app identity reached the native bridges"
-JNI="$(grep -oE '"com\.example\.[a-z_]+\.[A-Za-z]+"' \
-  "$WORK/proj/rust/crates/gen_ui_inference/src/android_litert_jni.rs" 2>/dev/null | head -1 | tr -d '"')"
-KT_PKG="$(head -1 "$WORK/proj/rust/native/android/VerifyAppLiteRtLmBridge.kt" 2>/dev/null | sed 's/package //')"
-KT_OBJ="$(grep -oE 'object [A-Za-z]+' "$WORK/proj/rust/native/android/VerifyAppLiteRtLmBridge.kt" 2>/dev/null | head -1 | cut -d' ' -f2)"
-
-[[ -n "$JNI" ]] || die "JNI class path missing or not substituted"
-[[ "$JNI" == "$KT_PKG.$KT_OBJ" ]] || die "JNI lookup '$JNI' != Kotlin '$KT_PKG.$KT_OBJ' — the lane cannot find its bridge on device"
-# Hyphens are legal in a Rust string and illegal in a Java package name.
-[[ "$JNI" != *-* ]] || die "JNI class path '$JNI' contains a hyphen — not a legal Java identifier"
-ok "JNI path matches the Kotlin bridge: $JNI"
+# ── Skill projection actually happened ──────────────────────────────────────
+step "Checking companion skill projection"
+for harness in .claude .codex .opencode .kimi .agents .kimi-code; do
+  skill_count="$(find "$WORK/proj/$harness/skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l | tr -d ' ')"
+  [[ "$skill_count" == "29" ]] || die "$harness contains $skill_count skills; expected 29 companions"
+  [[ ! -e "$WORK/proj/$harness/skills/hybrid-mobile-architecture" ]] || \
+    die "$harness incorrectly contains the repository package-routing skill"
+done
+ok "29 companion skills projected to all six project harnesses"
 
 # ── Manifests parse ─────────────────────────────────────────────────────────
 step "Validating emitted manifests"

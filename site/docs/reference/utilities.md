@@ -46,8 +46,9 @@ deprecation notice. New documentation and automation should use the CLI.
 |---|---|---|
 | `check-env.sh` | Check or install the four pinned toolchain pillars | Before generation and after toolchain changes |
 | `install-flutter.sh` | Install/switch the pinned Flutter beta, optionally through FVM | When Flutter is absent or on the wrong channel |
-| `install-global-harnesses.sh` | Install all skills, commands, adapters, plugin payloads, and MCP entries | Initial setup and every Builder upgrade |
-| `merge-zed-context-servers.mjs` | Non-destructively add Dart/shadcn context servers to Zed | Called by the global installer; Zed is an auxiliary integration |
+| `install-harness-package.sh` | Receipt-based Git-URL install, update, check, or uninstall for Claude Code, Codex, and OpenCode | Initial setup and every Builder upgrade |
+| `install-global-harnesses.sh` | Compatibility wrapper for `install-harness-package.sh` | Existing automation; accepts the same options |
+| `merge-zed-context-servers.mjs` | Non-destructively add Dart/shadcn context servers to Zed | Auxiliary integration; not part of the default harness install |
 | `patch-cargokit-ios.sh` | Apply the maintained iOS Cargokit compatibility patch | Only when the selected Flutter/Rust bridge baseline requires it |
 
 ## Generation utilities
@@ -59,7 +60,8 @@ deprecation notice. New documentation and automation should use the CLI.
 | `generate-skill-metadata.mjs` | `agents/openai.yaml` for every skill | Canonical `SKILL.md` frontmatter |
 | `generate-skill-evals.mjs` | Positive, negative, near-miss, and trace evaluation data | Canonical skills and evaluation policy |
 | `gen-design-tokens.sh` | Tailwind/CSS and Flutter token outputs | `assets/templates/design-tokens/tokens.toml` |
-| `sync-harness-skills.sh` | Six repository harness trees | `templates/project-skills` |
+| `sync-skill-resources.mjs` | Self-contained reference bundles within public skills | Repository-level reference documents |
+| `sync-harness-skills.sh` | 29-skill scaffold projection and six repository harness trees | Canonical `skills/` source |
 | `site/scripts/generate-skill-reference.mjs` | 29 public skill reference pages | Canonical skills plus `docs/catalog/skill-guidance.json` |
 | `site/scripts/generate-model-routing.mjs` | Dated public model-routing table | Prompting model registry |
 
@@ -75,6 +77,9 @@ but their source manifests remain authoritative.
 | `check-prometheus-boundary.mjs` | Builder does not duplicate Prometheus lifecycle or mutation authority |
 | `check-runtime-security.mjs` | Raw MCP, identity, tool governance, tenant, and runtime boundary invariants |
 | `check-skill-contracts.mjs` | Agent Skills metadata, reference reachability, evaluation coverage, and skill declarations |
+| `check-git-url-discovery.sh` | Exactly 30 public skills by default and 50 with internal authoring helpers enabled |
+| `test-harness-installer.sh` | Clean-home install, update, check, receipt, preservation, and uninstall ownership |
+| `test-opencode-plugin.mjs` | Bounded advisory routing and dependency-free OpenCode plugin loading |
 | `verify-scaffold.sh` | Scratch generation, expected tree, placeholders, manifests, and compatibility shape |
 | `verify-tauri-boot.sh` | Bounded Tauri launch and ready-state evidence |
 | `site/scripts/sanitize.mjs` | Machine paths, private data, credentials, raw evidence, and unsupported public claims |

@@ -86,5 +86,5 @@ fi
 
 echo ""
 echo -e "${GREEN}  ✅ Project-local skills installed${NC}"
-echo "     13 skills × 6 harnesses · 2 activation hooks · fidelity, runtime, deployment, documentation, orchestration, memory, and WCAG 2.2 AA gates"
+echo "     ${#SKILLS[@]} companion skills × 6 harnesses · 2 activation hooks · fidelity, runtime, deployment, documentation, orchestration, memory, and WCAG 2.2 AA gates"
 echo "     See references/ui-skills.md for the external skill stack."

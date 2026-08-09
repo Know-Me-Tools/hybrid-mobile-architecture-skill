@@ -6,7 +6,7 @@ description: ALWAYS invoke when handling user profile data, sensitive personal d
 
 > **Binding:** Prefer simple, surgical, strongly typed changes and preserve
 > privacy-class boundaries. Full design:
-> [`peer-crdt.md`](../../../references/sync/peer-crdt.md). Privacy classes:
+> [`peer-crdt.md`](references/peer-crdt.md). Privacy classes:
 > `sync-doctrine` skill.
 
 # Peer Profile Sync — the vault lane

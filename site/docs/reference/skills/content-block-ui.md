@@ -126,5 +126,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/content-block-ui/SKILL.md`; generated harness copies
+`skills/content-block-ui/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

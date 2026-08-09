@@ -7,7 +7,8 @@ description: Plan, scaffold, configure, and verify a full hybrid agentic applica
 
 Build deployment choices around one host-neutral Rust application layer while preserving
 the mandatory Flutter-mobile and recommended Tauri-desktop architecture. Apply
-`AGENT_BASE_RULES.md` and `references/arch-standard.md` before changing code.
+Apply the consuming project's `AGENT_BASE_RULES.md` and architecture authority
+before changing code; this standalone skill does not replace project policy.
 
 ## Choose the requested surface
 

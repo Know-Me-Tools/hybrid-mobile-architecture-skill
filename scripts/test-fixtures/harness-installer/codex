@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'codex %s\n' "$*" >> "$KNOWME_TEST_LOG"
+if [[ "$*" == "plugin marketplace list --json" ]]; then
+  if [[ -f "$KNOWME_TEST_STATE/codex-marketplace" ]]; then
+    printf '{"marketplaces":[{"name":"knowme-builder"}]}\n'
+  else
+    printf '{"marketplaces":[]}\n'
+  fi
+elif [[ "$*" == plugin\ marketplace\ add* ]]; then
+  touch "$KNOWME_TEST_STATE/codex-marketplace"
+elif [[ "$*" == "plugin marketplace remove knowme-builder" ]]; then
+  rm -f "$KNOWME_TEST_STATE/codex-marketplace"
+fi

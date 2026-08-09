@@ -20,7 +20,7 @@ use crate::{
     },
     model::{
         BUILDER_VERSION, CommandResult, GeneratedFile, GeneratedLock, Ownership,
-        PROMETHEUS_CONTRACT, ProjectManifest,
+        PROMETHEUS_CONTRACT, PROMETHEUS_PACKAGE_VERSION, ProjectManifest,
     },
 };
 
@@ -246,7 +246,7 @@ fn doctor(args: DoctorArgs) -> Result<CommandResult> {
     let mut result = CommandResult::new("doctor");
     result.path = Some(destination.display().to_string());
     let manifest = bundle::manifest()?;
-    let _prometheus = bundle::prometheus_contract()?;
+    let prometheus_contract = bundle::prometheus_contract()?;
     let _uar = bundle::uar_contract()?;
     result.actions.push(format!(
         "Builder {} manifest {} is internally consistent across {} harnesses",
@@ -255,48 +255,40 @@ fn doctor(args: DoctorArgs) -> Result<CommandResult> {
         manifest.supported_harnesses.len()
     ));
 
-    let prometheus = std::process::Command::new("prometheus")
-        .args(["doctor", "--json"])
+    let required_package = prometheus_contract
+        .get("minimumPackageVersion")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or(PROMETHEUS_PACKAGE_VERSION);
+    let required_contract = prometheus_contract
+        .get("minimumContractVersion")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or(PROMETHEUS_CONTRACT);
+
+    match std::process::Command::new("prometheus")
+        .arg("--version")
         .current_dir(&destination)
-        .output();
-    match prometheus {
-        Ok(output) => {
-            let parsed: serde_json::Value = serde_json::from_slice(&output.stdout)
-                .context("prometheus doctor returned invalid JSON")?;
-            let contract = parsed
-                .get("contractVersion")
-                .or_else(|| parsed.pointer("/controlPlane/contractVersion"))
-                .and_then(serde_json::Value::as_str);
-            if contract.is_none() {
-                result.ok = false;
-                result
-                    .warnings
-                    .push("Prometheus doctor lacks a machine-readable contractVersion".to_owned());
-            } else if !version_at_least(contract.unwrap_or_default(), PROMETHEUS_CONTRACT) {
-                result.ok = false;
-                result.warnings.push(format!(
-                    "Prometheus contract {} is older than required {}",
-                    contract.unwrap_or_default(),
-                    PROMETHEUS_CONTRACT
-                ));
-            } else {
+        .output()
+    {
+        Ok(output) if output.status.success() => {
+            let text = String::from_utf8_lossy(&output.stdout);
+            let package_version = prometheus_package_version(&text).unwrap_or_default();
+            if version_at_least(package_version, required_package) {
                 result.actions.push(format!(
-                    "Prometheus control-plane contract {} is compatible",
-                    contract.unwrap_or_default()
+                    "Prometheus package {package_version} is compatible (required {required_package})"
                 ));
-            }
-            if output.status.success() {
-                result.actions.push("Prometheus doctor passed".to_owned());
             } else {
                 result.ok = false;
-                let failed = parsed
-                    .pointer("/summary/failed")
-                    .and_then(serde_json::Value::as_u64)
-                    .unwrap_or_default();
                 result.warnings.push(format!(
-                    "Prometheus doctor reported {failed} failing health check(s)"
+                    "Prometheus package {package_version} is older than required {required_package}"
                 ));
             }
+        }
+        Ok(output) => {
+            result.ok = false;
+            result.warnings.push(format!(
+                "Prometheus package version probe failed with status {}",
+                output.status
+            ));
         }
         Err(error) => {
             result.ok = false;
@@ -305,7 +297,173 @@ fn doctor(args: DoctorArgs) -> Result<CommandResult> {
                 .push(format!("Prometheus CLI is unavailable: {error}"));
         }
     }
+
+    let prometheus = std::process::Command::new("prometheus")
+        .args(["doctor", "--json"])
+        .current_dir(&destination)
+        .output();
+    match prometheus {
+        Ok(output) => {
+            let assessment = assess_prometheus_doctor(
+                &output.stdout,
+                output.status.success(),
+                required_contract,
+            );
+            result.ok &= assessment.ok;
+            result.actions.extend(assessment.actions);
+            result.warnings.extend(assessment.warnings);
+        }
+        Err(error) => {
+            result.ok = false;
+            result.warnings.push(format!(
+                "Prometheus operational doctor is unavailable: {error}"
+            ));
+        }
+    }
+
+    let kbd_help = command_stdout(&destination, &["kbd", "--help"]);
+    let learning_help = command_stdout(&destination, &["learning", "--help"]);
+    let missing = missing_prometheus_capabilities(&kbd_help, &learning_help);
+    if missing.is_empty() {
+        result
+            .actions
+            .push("Prometheus typed KBD and durable learning commands are available".to_owned());
+    } else {
+        result.ok = false;
+        result.warnings.push(format!(
+            "Prometheus CLI lacks required capabilities: {}",
+            missing.join(", ")
+        ));
+    }
     Ok(result)
+}
+
+fn prometheus_package_version(output: &str) -> Option<&str> {
+    output
+        .split_whitespace()
+        .map(|candidate| {
+            candidate.trim_matches(|character: char| {
+                !character.is_ascii_alphanumeric() && character != '.' && character != '-'
+            })
+        })
+        .map(|candidate| candidate.strip_prefix('v').unwrap_or(candidate))
+        .find(|candidate| version_at_least(candidate, "0.0.0"))
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct PrometheusDoctorAssessment {
+    ok: bool,
+    actions: Vec<String>,
+    warnings: Vec<String>,
+}
+
+fn assess_prometheus_doctor(
+    output: &[u8],
+    status_success: bool,
+    required_contract: &str,
+) -> PrometheusDoctorAssessment {
+    let mut assessment = PrometheusDoctorAssessment {
+        ok: true,
+        actions: Vec::new(),
+        warnings: Vec::new(),
+    };
+    let parsed: serde_json::Value = match serde_json::from_slice(output) {
+        Ok(parsed) => parsed,
+        Err(error) => {
+            assessment.ok = false;
+            assessment
+                .warnings
+                .push(format!("Prometheus doctor returned invalid JSON: {error}"));
+            return assessment;
+        }
+    };
+    let contract = parsed
+        .get("contractVersion")
+        .or_else(|| parsed.pointer("/controlPlane/contractVersion"))
+        .and_then(serde_json::Value::as_str);
+    match contract {
+        None => {
+            assessment.ok = false;
+            assessment
+                .warnings
+                .push("Prometheus doctor lacks a machine-readable contractVersion".to_owned());
+        }
+        Some(contract) if !version_at_least(contract, required_contract) => {
+            assessment.ok = false;
+            assessment.warnings.push(format!(
+                "Prometheus contract {contract} is older than required {required_contract}"
+            ));
+        }
+        Some(contract) => assessment.actions.push(format!(
+            "Prometheus control-plane contract {contract} is compatible"
+        )),
+    }
+    if status_success {
+        assessment
+            .actions
+            .push("Prometheus doctor passed".to_owned());
+    } else {
+        assessment.ok = false;
+        let failed = parsed
+            .pointer("/summary/failed")
+            .and_then(serde_json::Value::as_u64)
+            .unwrap_or_default();
+        assessment.warnings.push(format!(
+            "Prometheus doctor reported {failed} failing health check(s)"
+        ));
+    }
+    assessment
+}
+
+fn command_stdout(destination: &Path, arguments: &[&str]) -> String {
+    std::process::Command::new("prometheus")
+        .args(arguments)
+        .current_dir(destination)
+        .output()
+        .ok()
+        .filter(|output| output.status.success())
+        .map(|output| String::from_utf8_lossy(&output.stdout).into_owned())
+        .unwrap_or_default()
+}
+
+fn missing_prometheus_capabilities(kbd_help: &str, learning_help: &str) -> Vec<&'static str> {
+    let mut missing = Vec::new();
+    for command in [
+        "status",
+        "projects",
+        "register",
+        "replicas",
+        "adopt",
+        "conflicts",
+        "resolve",
+        "claim",
+        "pause",
+        "revise",
+        "resume",
+        "cancel",
+        "audit",
+        "phase",
+        "stage",
+        "change",
+        "task",
+        "completion",
+        "decision",
+        "blocker",
+    ] {
+        if !kbd_help
+            .lines()
+            .any(|line| line.split_whitespace().next() == Some(command))
+        {
+            missing.push(command);
+        }
+    }
+    if !learning_help
+        .lines()
+        .any(|line| line.split_whitespace().next() == Some("status"))
+    {
+        missing.push("learning-status");
+    }
+    missing
 }
 
 fn version_at_least(actual: &str, required: &str) -> bool {
@@ -915,7 +1073,7 @@ fn skills_lock_bytes(skills: &[String]) -> Result<Vec<u8>> {
                 .with_context(|| format!("packaged skill is missing: {skill}"))?;
             Ok(serde_json::json!({
                 "id": skill,
-                "source": format!("builder:templates/project-skills/{skill}"),
+                "source": format!("builder:skills/{skill}"),
                 "version": BUILDER_VERSION,
                 "digest": digest_embedded_dir(source)?
             }))
@@ -1088,13 +1246,79 @@ fn print_result(result: &CommandResult, json: bool) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::version_at_least;
+    use super::{
+        assess_prometheus_doctor, missing_prometheus_capabilities, prometheus_package_version,
+        version_at_least,
+    };
 
     #[test]
     fn compares_control_plane_versions() {
+        assert!(version_at_least("1.7.0", "1.7.0"));
+        assert!(!version_at_least("1.6.2", "1.7.0"));
         assert!(version_at_least("2.0.0", "2.0.0"));
         assert!(version_at_least("2.1.0", "2.0.0"));
         assert!(!version_at_least("1.99.0", "2.0.0"));
         assert!(!version_at_least("not-a-version", "2.0.0"));
+    }
+
+    #[test]
+    fn reports_missing_prometheus_capabilities() {
+        let kbd = include_str!("../tests/fixtures/prometheus-doctor/kbd-missing.txt");
+        let learning = include_str!("../tests/fixtures/prometheus-doctor/learning-current.txt");
+        let missing = missing_prometheus_capabilities(kbd, learning);
+        assert!(!missing.contains(&"status"));
+        assert!(!missing.contains(&"pause"));
+        assert!(!missing.contains(&"learning-status"));
+        assert!(missing.contains(&"conflicts"));
+        assert!(missing.contains(&"completion"));
+    }
+
+    #[test]
+    fn distinguishes_package_release_compatibility() {
+        let outdated = include_str!("../tests/fixtures/prometheus-doctor/package-outdated.txt");
+        let current = include_str!("../tests/fixtures/prometheus-doctor/package-current.txt");
+        assert!(!version_at_least(
+            prometheus_package_version(outdated).unwrap_or_default(),
+            "1.7.0"
+        ));
+        assert!(version_at_least(
+            prometheus_package_version(current).unwrap_or_default(),
+            "1.7.0"
+        ));
+    }
+
+    #[test]
+    fn distinguishes_contract_and_operational_health() {
+        let outdated = assess_prometheus_doctor(
+            include_bytes!("../tests/fixtures/prometheus-doctor/outdated-contract.json"),
+            true,
+            "2.0.0",
+        );
+        assert!(!outdated.ok);
+        assert!(outdated.warnings[0].contains("older than required"));
+
+        let current = assess_prometheus_doctor(
+            include_bytes!("../tests/fixtures/prometheus-doctor/current.json"),
+            true,
+            "2.0.0",
+        );
+        assert!(current.ok);
+
+        let unhealthy = assess_prometheus_doctor(
+            include_bytes!("../tests/fixtures/prometheus-doctor/compatible-unhealthy.json"),
+            false,
+            "2.0.0",
+        );
+        assert!(!unhealthy.ok);
+        assert!(unhealthy.actions[0].contains("compatible"));
+        assert!(unhealthy.warnings[0].contains("3 failing"));
+
+        let malformed = assess_prometheus_doctor(
+            include_bytes!("../tests/fixtures/prometheus-doctor/malformed.json"),
+            false,
+            "2.0.0",
+        );
+        assert!(!malformed.ok);
+        assert!(malformed.warnings[0].contains("invalid JSON"));
     }
 }

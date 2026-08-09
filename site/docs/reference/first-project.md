@@ -18,8 +18,8 @@ knowme-builder manifest check
 ```
 
 Fix missing control-plane requirements before generating. Builder hooks are
-advisory and cannot replace Prometheus pause, resume, cancel, lease, audit, or
-handoff behavior.
+advisory and cannot replace Prometheus project identity, signed KBD events,
+claims/conflicts, pause, revise, resume, cancel, or audit behavior.
 
 ## 2. Choose generation or adoption
 
@@ -87,12 +87,14 @@ Use Prometheus KBD commands for development state:
 ```bash
 prometheus kbd status --json
 prometheus kbd claim
+prometheus kbd conflicts
 prometheus kbd audit
 ```
 
-Use `prometheus kbd pause`, `resume`, `cancel`, `revise`, and `handoff` as
-operator controls. Treat waypoint, progress, and position JSON files as
-read-only compatibility projections.
+Use `prometheus kbd pause`, `revise`, `resume`, and `cancel` as operator
+controls. Use typed `phase`, `stage`, `change`, `task`, `completion`,
+`decision`, and `blocker` commands for state transitions. Treat waypoint,
+progress, and position JSON files as read-only compatibility projections.
 
 ## 6. Add a capability
 

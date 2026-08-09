@@ -141,5 +141,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/hybrid-design-tokens/SKILL.md`; generated harness copies
+`skills/hybrid-design-tokens/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

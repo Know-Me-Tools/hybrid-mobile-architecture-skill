@@ -77,5 +77,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/mini-app-module/SKILL.md`; generated harness copies
+`skills/mini-app-module/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

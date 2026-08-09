@@ -9,8 +9,17 @@ const activation = JSON.parse(
 );
 const check = process.argv.includes("--check");
 const cases = [];
+const builder = JSON.parse(await readFile(join(root, "builder.manifest.json"), "utf8"));
+const packageSkill = builder.distribution.packageSkill;
+const evalSkills = [
+  ...activation.skills,
+  {
+    name: packageSkill,
+    terms: ["hybrid mobile architecture", "knowme builder", "governed application"],
+  },
+];
 
-for (const skill of activation.skills) {
+for (const skill of evalSkills) {
   const primaryTerm = skill.terms.find((term) => term !== skill.name.replaceAll("-", " "))
     ?? skill.name.replaceAll("-", " ");
   cases.push({

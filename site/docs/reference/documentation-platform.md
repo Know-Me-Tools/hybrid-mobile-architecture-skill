@@ -19,8 +19,9 @@ beside the code in `site/`; every merge affecting public documentation performs 
 install, sanitization, broken-link enforcement, production build, artifact upload, and
 GitHub Pages deployment.
 
-The 29 detailed skill pages are generated from two reviewed sources:
-`templates/project-skills/*/SKILL.md` supplies the canonical operating contract,
+The 29 companion-skill detail pages are generated from two reviewed sources;
+the package-routing skill is documented by the catalog overview:
+`skills/*/SKILL.md` supplies the canonical operating contract,
 and `docs/catalog/skill-guidance.json` supplies public rationale, use cases, and
 scope boundaries. `npm run check:skill-docs` prevents either side from drifting.
 

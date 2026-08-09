@@ -5,7 +5,7 @@ import process from 'node:process';
 const checkOnly = process.argv.includes('--check');
 const siteRoot = path.resolve(import.meta.dirname, '..');
 const repoRoot = path.resolve(siteRoot, '..');
-const skillRoot = path.join(repoRoot, 'templates', 'project-skills');
+const skillRoot = path.join(repoRoot, 'skills');
 const outputRoot = path.join(siteRoot, 'docs', 'reference', 'skills');
 const manifest = JSON.parse(await readFile(path.join(repoRoot, 'builder.manifest.json'), 'utf8'));
 const catalog = JSON.parse(
@@ -23,18 +23,18 @@ function parseSkill(text, skillName) {
   return {description, body: match[2]};
 }
 
-function publicBody(body) {
+function publicBody(body, skillName) {
   return body
     .replace(/<!--[\s\S]*?-->\n?/g, '')
     .replace(/^# .+\n+/m, '')
     .replace(/\[\[([a-z0-9-]+)\]\]/g, '[$1](./$1)')
     .replace(
       /\]\((?:\.\.\/)+references\/([^)]+)\)/g,
-      '](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/$1)'
+      `](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/${skillName}/references/$1)`
     )
     .replace(
       /\]\(references\/([^)]+)\)/g,
-      '](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/$1)'
+      `](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/${skillName}/references/$1)`
     )
     .replace(/<(?=\d)/g, '&lt;')
     .replace(/>(?=\d)/g, '&gt;')
@@ -85,7 +85,7 @@ ${guidance.notFor}
 
 ## Canonical operating contract
 
-${publicBody(source.body)}
+${publicBody(source.body, skillName)}
 
 ## Installation and verification
 
@@ -98,7 +98,7 @@ knowme-builder skills check --path <project>
 \`\`\`
 
 The canonical source is
-\`templates/project-skills/${skillName}/SKILL.md\`; generated harness copies
+\`skills/${skillName}/SKILL.md\`; generated scaffold and harness copies
 must never be edited independently.
 `;
 }

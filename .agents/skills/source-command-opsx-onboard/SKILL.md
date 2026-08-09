@@ -1,6 +1,8 @@
 ---
 name: "source-command-opsx-onboard"
 description: "Guided onboarding - walk through a complete OpenSpec workflow cycle with narration"
+metadata:
+  internal: true
 ---
 
 # source-command-opsx-onboard

@@ -1,6 +1,8 @@
 ---
 name: "source-command-opsx-new"
 description: "Start a new change using the experimental artifact workflow (OPSX)"
+metadata:
+  internal: true
 ---
 
 # source-command-opsx-new

@@ -43,9 +43,9 @@ Do not mirror the server database, apply CRDTs to every row, or create parallel 
 ## Canonical operating contract
 
 > **Binding:** The full doctrine lives in
-> [`doctrine.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/sync/doctrine.md),
-> [`partial-replication.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/sync/partial-replication.md), and
-> [`decisions.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/sync/decisions.md). Read them before
+> [`doctrine.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/sync-doctrine/references/doctrine.md),
+> [`partial-replication.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/sync-doctrine/references/partial-replication.md), and
+> [`decisions.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/sync-doctrine/references/decisions.md). Read them before
 > designing; the invariants below remain usable when references are unavailable.
 
 ## First question, always: which lane?
@@ -91,7 +91,7 @@ value of `local` data is itself `local`.
   `post_onboarding_load` (after preferences/personal data exist), idempotent
   via the local `_load_ledger`, pull-only, never block onboarding on failure.
 
-Full mechanics: `references/sync/partial-replication.md`.
+Full mechanics: `references/partial-replication.md`.
 
 ## Write path (one queue, not two)
 
@@ -132,5 +132,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/sync-doctrine/SKILL.md`; generated harness copies
+`skills/sync-doctrine/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

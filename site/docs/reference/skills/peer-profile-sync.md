@@ -44,7 +44,7 @@ Shared tenant data belongs in the relational lane; do not weaken the vault becau
 
 > **Binding:** Prefer simple, surgical, strongly typed changes and preserve
 > privacy-class boundaries. Full design:
-> [`peer-crdt.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/references/sync/peer-crdt.md). Privacy classes:
+> [`peer-crdt.md`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/blob/main/skills/peer-profile-sync/references/peer-crdt.md). Privacy classes:
 > `sync-doctrine` skill.
 
 ## What goes in the vault
@@ -121,5 +121,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/peer-profile-sync/SKILL.md`; generated harness copies
+`skills/peer-profile-sync/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

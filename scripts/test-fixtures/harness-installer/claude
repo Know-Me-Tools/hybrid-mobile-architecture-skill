@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'claude %s\n' "$*" >> "$KNOWME_TEST_LOG"
+if [[ "$*" == "plugin marketplace list" ]]; then
+  [[ -f "$KNOWME_TEST_STATE/claude-marketplace" ]] && echo 'knowme-builder'
+elif [[ "$*" == plugin\ marketplace\ add* ]]; then
+  touch "$KNOWME_TEST_STATE/claude-marketplace"
+elif [[ "$*" == "plugin marketplace remove knowme-builder" ]]; then
+  rm -f "$KNOWME_TEST_STATE/claude-marketplace"
+fi

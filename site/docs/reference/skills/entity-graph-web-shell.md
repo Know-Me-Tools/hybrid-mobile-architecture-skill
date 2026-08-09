@@ -75,5 +75,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/entity-graph-web-shell/SKILL.md`; generated harness copies
+`skills/entity-graph-web-shell/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

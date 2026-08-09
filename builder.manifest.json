@@ -4,7 +4,7 @@
   "package": {
     "id": "hybrid-mobile-architecture",
     "displayName": "KnowMe Builder",
-    "version": "2.0.0-alpha.1",
+    "version": "2.0.0-alpha.2",
     "description": "Versioned, non-destructive application generator and instruction pack for governed agentic applications.",
     "license": "MIT",
     "homepage": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill",
@@ -20,6 +20,10 @@
     "prometheus": "./compatibility/prometheus-control-plane.json",
     "uar": "./compatibility/uar-runtime.json",
     "agentSkills": "1.0"
+  },
+  "distribution": {
+    "skillSourceRoot": "skills",
+    "packageSkill": "hybrid-mobile-architecture"
   },
   "profiles": {
     "sovereign-hybrid": {
@@ -146,6 +150,7 @@
     "marketplace.json",
     ".claude-plugin/plugin.json",
     ".claude-plugin/marketplace.json",
+    ".codex-plugin/plugin.json",
     ".agents/plugins/marketplace.json",
     "templates/activation-manifest.json",
     "templates/harness-activation-capabilities.json"

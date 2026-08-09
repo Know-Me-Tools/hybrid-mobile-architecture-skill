@@ -10,10 +10,12 @@ const manifest = JSON.parse(
   await readFile(join(root, "builder.manifest.json"), "utf8"),
 );
 const pkg = manifest.package;
+const skillsRoot = manifest.distribution.skillSourceRoot;
+const packageSkill = manifest.distribution.packageSkill;
 const skillDefinitions = await Promise.all(
   manifest.skills.map(async (name) => {
     const markdown = await readFile(
-      join(root, "templates/project-skills", name, "SKILL.md"),
+      join(root, skillsRoot, name, "SKILL.md"),
       "utf8",
     );
     const frontmatter = markdown.match(/^---\n([\s\S]*?)\n---\n/)?.[1] ?? "";
@@ -37,10 +39,8 @@ const skillDefinitions = await Promise.all(
     };
   }),
 );
-const skillPaths = [
-  "./",
-  ...manifest.skills.map((skill) => `./templates/project-skills/${skill}`),
-];
+const publicSkills = [packageSkill, ...manifest.skills];
+const skillPaths = publicSkills.map((skill) => `./${skillsRoot}/${skill}`);
 
 const commandDescriptions = {
   new: "Create a validated project in an empty destination",
@@ -101,6 +101,25 @@ const claudePlugin = {
   keywords: plugin.keywords,
   skills: skillPaths,
   mcpServers: "./.mcp.json",
+};
+
+const codexPlugin = {
+  ...claudePlugin,
+  skills: `./${skillsRoot}/`,
+  interface: {
+    displayName: pkg.displayName,
+    shortDescription: "Build and audit governed hybrid applications.",
+    longDescription: pkg.description,
+    developerName: pkg.organization,
+    category: "Productivity",
+    capabilities: ["Skills", "MCP"],
+    websiteURL: pkg.homepage,
+    defaultPrompt: [
+      "Adopt this application with KnowMe Builder.",
+      "Audit this hybrid architecture.",
+      "Choose a governed application profile.",
+    ],
+  },
 };
 
 const marketplacePlugin = {
@@ -181,7 +200,7 @@ const activationManifest = {
     description,
     terms,
     explicitInvocation: `/${name}`,
-    canonicalPath: `templates/project-skills/${name}`,
+    canonicalPath: `${skillsRoot}/${name}`,
   })),
 };
 
@@ -218,6 +237,7 @@ const targets = new Map([
   ["marketplace.json", publicMarketplace],
   [".claude-plugin/plugin.json", claudePlugin],
   [".claude-plugin/marketplace.json", marketplace],
+  [".codex-plugin/plugin.json", codexPlugin],
   [".agents/plugins/marketplace.json", agentsMarketplace],
   ["templates/activation-manifest.json", activationManifest],
   ["templates/harness-activation-capabilities.json", activationCapabilities],

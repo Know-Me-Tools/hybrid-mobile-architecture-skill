@@ -28,7 +28,8 @@ The public site is:
 | `versions.toml` | Builder application-stack pins and engine selections |
 | `compatibility/prometheus-control-plane.json` | Required Prometheus development-control contract |
 | `compatibility/uar-runtime.json` | Required UAR runtime contract |
-| `templates/project-skills` | Canonical skill instructions |
+| `skills` | Canonical public skill instructions |
+| `templates/project-skills` | Generated project/scaffold skill projection |
 | `assets/templates` | Canonical generated application artifacts |
 | `tools/knowme-builder` | Generation, adoption, ownership, upgrade, audit, and doctor behavior |
 

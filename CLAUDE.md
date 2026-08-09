@@ -425,7 +425,7 @@ Enable RLS on every Supabase table. Never expose the service role key to clients
 | Tauri CLI | 2.10+ |
 | flutter_rust_bridge_codegen | 2.12+ (must match the workspace's frb crate version) |
 | OpenSpec | 1.6.0+ (`@fission-ai/openspec` — NEVER the bare `openspec` npm package, which is squatted) |
-| Prometheus Skill System | full instance ([Prometheus-AGS/prometheus-skill-system](https://github.com/Prometheus-AGS/prometheus-skill-system)) — verify with `pk doctor --json` |
+| Prometheus Skill System | package 1.7.0+ and control-plane contract 2.0.0+ ([canonical repository](https://github.com/Prometheus-AGS/prometheus-skill-system)) — verify with `prometheus --version`, `prometheus doctor --json`, and `pk doctor --json` |
 
 ---
 

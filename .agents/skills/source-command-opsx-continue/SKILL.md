@@ -1,6 +1,8 @@
 ---
 name: "source-command-opsx-continue"
 description: "Continue working on a change - create the next artifact (Experimental)"
+metadata:
+  internal: true
 ---
 
 # source-command-opsx-continue

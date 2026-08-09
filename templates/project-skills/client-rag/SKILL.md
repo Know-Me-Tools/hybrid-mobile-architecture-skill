@@ -5,7 +5,7 @@ description: ALWAYS invoke when adding vector search, embeddings, semantic recal
 <!-- TJ-ARCH-MOB-001 compliant -->
 
 > **Binding:** Full design:
-> [`client-rag.md`](../../../references/sync/client-rag.md). Lanes and privacy:
+> [`client-rag.md`](references/client-rag.md). Lanes and privacy:
 > `sync-doctrine` skill. Retrieval remains local and privacy-class boundaries
 > remain mandatory even when the optional reference is unavailable.
 

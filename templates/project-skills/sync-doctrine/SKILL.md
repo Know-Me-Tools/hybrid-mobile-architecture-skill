@@ -5,9 +5,9 @@ description: ALWAYS invoke before ANY sync, replication, realtime, offline, or l
 <!-- TJ-ARCH-MOB-001 compliant -->
 
 > **Binding:** The full doctrine lives in
-> [`doctrine.md`](../../../references/sync/doctrine.md),
-> [`partial-replication.md`](../../../references/sync/partial-replication.md), and
-> [`decisions.md`](../../../references/sync/decisions.md). Read them before
+> [`doctrine.md`](references/doctrine.md),
+> [`partial-replication.md`](references/partial-replication.md), and
+> [`decisions.md`](references/decisions.md). Read them before
 > designing; the invariants below remain usable when references are unavailable.
 
 # Sync Doctrine
@@ -55,7 +55,7 @@ value of `local` data is itself `local`.
   `post_onboarding_load` (after preferences/personal data exist), idempotent
   via the local `_load_ledger`, pull-only, never block onboarding on failure.
 
-Full mechanics: `references/sync/partial-replication.md`.
+Full mechanics: `references/partial-replication.md`.
 
 ## Write path (one queue, not two)
 

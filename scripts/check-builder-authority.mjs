@@ -35,6 +35,12 @@ if (new Set(manifest.skills).size !== manifest.skills.length) {
 if (manifest.supportedHarnesses.length !== 4) {
   fail("exactly four supported harnesses are required");
 }
+if (manifest.distribution?.skillSourceRoot !== "skills") {
+  fail("skills must be the canonical public source root");
+}
+if (manifest.distribution?.packageSkill !== manifest.package.id) {
+  fail("distribution packageSkill must match package.id");
+}
 
 for (const target of manifest.generatedTargets) {
   if (!(await exists(join(root, target)))) fail(`missing generated target: ${target}`);
@@ -51,7 +57,7 @@ for (const template of manifest.templates) {
 }
 
 for (const skill of manifest.skills) {
-  const skillPath = join(root, "templates/project-skills", skill, "SKILL.md");
+  const skillPath = join(root, manifest.distribution.skillSourceRoot, skill, "SKILL.md");
   if (!(await exists(skillPath))) {
     const message = `declared skill is not implemented: ${skill}`;
     if (release) fail(message);
@@ -61,10 +67,17 @@ for (const skill of manifest.skills) {
 
 const skillFiles = [];
 for (const skill of manifest.skills) {
-  const path = join(root, "templates/project-skills", skill, "SKILL.md");
+  const path = join(root, manifest.distribution.skillSourceRoot, skill, "SKILL.md");
   if (await exists(path)) skillFiles.push(path);
 }
-skillFiles.push(join(root, "SKILL.md"));
+skillFiles.push(
+  join(
+    root,
+    manifest.distribution.skillSourceRoot,
+    manifest.distribution.packageSkill,
+    "SKILL.md",
+  ),
+);
 const skillText = (
   await Promise.all(skillFiles.map((path) => readFile(path, "utf8")))
 ).join("\n");

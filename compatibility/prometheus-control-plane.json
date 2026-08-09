@@ -1,19 +1,31 @@
 {
   "$schema": "../schemas/external-contract.schema.json",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "contract": "prometheus-control-plane",
-  "minimumVersion": "2.0.0",
+  "upstream": {
+    "repository": "https://github.com/Prometheus-AGS/prometheus-skill-system",
+    "installationGuide": "https://github.com/Prometheus-AGS/prometheus-skill-system/blob/main/docs/guide/19-installation.md",
+    "updateGuide": "https://github.com/Prometheus-AGS/prometheus-skill-system/blob/main/docs/guide/20-updating.md"
+  },
+  "minimumPackageVersion": "1.7.0",
+  "minimumContractVersion": "2.0.0",
   "requiredFeatures": [
     "canonical-kbd-runtime",
+    "project-uuid-identity",
+    "signed-loro-event-map",
+    "replica-journals",
+    "crdt-work-claims",
+    "conflict-adjudication",
     "kbd-pause",
     "kbd-resume",
     "kbd-cancel",
     "kbd-audit",
     "kbd-revise",
-    "kbd-handoff",
     "expected-revision",
-    "lease-fencing",
     "four-harness-capability-manifest",
+    "immutable-plugin-generations",
+    "durable-learning-status",
+    "typed-kbd-lifecycle",
     "skill-lint",
     "skill-budget",
     "skill-eval",
@@ -21,6 +33,8 @@
   ],
   "authority": {
     "lifecycle": "prometheus",
+    "projectIdentity": "prometheus-project-uuid",
+    "canonicalState": "signed-loro-event-map",
     "compatibilityProjections": "read-only",
     "builderHooks": "advisory"
   }

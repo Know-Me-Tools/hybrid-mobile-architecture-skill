@@ -8,6 +8,7 @@
     "schemaVersion",
     "package",
     "contracts",
+    "distribution",
     "profiles",
     "skills",
     "commands",
@@ -48,6 +49,15 @@
       "type": "object",
       "required": ["prometheus", "uar", "agentSkills"],
       "additionalProperties": { "type": "string" }
+    },
+    "distribution": {
+      "type": "object",
+      "required": ["skillSourceRoot", "packageSkill"],
+      "properties": {
+        "skillSourceRoot": { "const": "skills" },
+        "packageSkill": { "const": "hybrid-mobile-architecture" }
+      },
+      "additionalProperties": false
     },
     "profiles": {
       "type": "object",

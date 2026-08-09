@@ -190,5 +190,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/dependency-pin-discipline/SKILL.md`; generated harness copies
+`skills/dependency-pin-discipline/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

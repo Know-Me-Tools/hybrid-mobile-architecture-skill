@@ -76,5 +76,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/axum-agent-gateway/SKILL.md`; generated harness copies
+`skills/axum-agent-gateway/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

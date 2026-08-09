@@ -121,5 +121,5 @@ knowme-builder skills check --path <project>
 ```
 
 The canonical source is
-`templates/project-skills/tauri-ui-review/SKILL.md`; generated harness copies
+`skills/tauri-ui-review/SKILL.md`; generated scaffold and harness copies
 must never be edited independently.

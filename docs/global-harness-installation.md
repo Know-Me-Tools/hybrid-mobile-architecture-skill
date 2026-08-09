@@ -1,136 +1,188 @@
 # Global harness installation
 
-KnowMe Builder distributes one canonical instruction package to Claude Code,
-Codex, OpenCode, Kimi Code CLI, and generic Agent Skills discovery roots. The
-same installer also deploys native commands, advisory activation adapters,
-plugin payloads, and supported development MCP entries.
+KnowMe Builder `2.0.0-alpha.2` exposes exactly 30 public Agent Skills from the
+Git repository URL. The package contains the `hybrid-mobile-architecture`
+routing skill and 29 independently installable companion skills.
 
-For the public walkthrough, see the
-[Docusaurus installation guide](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/installation).
+Repository URL:
 
-## Install the CLI
-
-```bash
-cargo build --release --locked --manifest-path tools/knowme-builder/Cargo.toml
-install -m 0755 tools/knowme-builder/target/release/knowme-builder \
-  "$HOME/.cargo/bin/knowme-builder"
-knowme-builder --version
+```text
+https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 ```
 
-## Run the idempotent installer
+## Portable Agent Skills installation
+
+Install the same public set into Claude Code, Codex, and OpenCode:
+
+```bash
+npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill \
+  --skill '*' -a claude-code -a codex -a opencode -g -y
+```
+
+List without installing:
+
+```bash
+npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill --list
+```
+
+Normal discovery returns 30 skills. The 20 OpenSpec/OPSX repository-authoring
+helpers are marked internal and are visible only with
+`INSTALL_INTERNAL_SKILLS=1` plus full-depth discovery.
+
+## Native Claude Code marketplace
+
+```bash
+claude plugin marketplace add \
+  https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
+claude plugin install hybrid-mobile-architecture@knowme-builder --scope user
+claude plugin list
+```
+
+Update or remove:
+
+```bash
+claude plugin marketplace update knowme-builder
+claude plugin uninstall hybrid-mobile-architecture@knowme-builder --scope user
+```
+
+## Native Codex marketplace
+
+```bash
+codex plugin marketplace add \
+  https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill --ref main
+codex plugin add hybrid-mobile-architecture@knowme-builder
+codex plugin list
+```
+
+Update or remove:
+
+```bash
+codex plugin marketplace upgrade knowme-builder
+codex plugin remove hybrid-mobile-architecture@knowme-builder
+```
+
+## OpenCode
+
+OpenCode has no native Git marketplace. It discovers Agent Skills through its
+standard skill directories and loads JavaScript/TypeScript plugins from
+`.opencode/plugins` or `~/.config/opencode/plugins`.
+
+The portable command above installs its 30 skills. The repository installer
+also installs the dependency-free advisory plugin and namespaced commands:
+
+```bash
+git clone https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
+cd hybrid-mobile-architecture-skill
+bash scripts/install-harness-package.sh --harness opencode \
+  --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
+opencode debug skill
+```
+
+Update and safely uninstall the receipt-owned OpenCode payload:
+
+```bash
+git pull --ff-only
+bash scripts/install-harness-package.sh --harness opencode \
+  --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
+bash scripts/install-harness-package.sh --harness opencode --uninstall
+```
+
+## Unified receipt-based installer
+
+From a trusted checkout:
+
+```bash
+bash scripts/install-harness-package.sh \
+  --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
+```
+
+The compatibility entry point remains:
 
 ```bash
 bash scripts/install-global-harnesses.sh
 ```
 
-The installer:
+Options:
 
-- discovers all 29 skills from `templates/project-skills`;
-- installs the root `hybrid-mobile-architecture` skill;
-- mirrors each companion skill into seven global discovery roots;
-- installs eight namespaced Builder command wrappers for each supported
-  harness command surface;
-- installs Claude, OpenCode, and Kimi advisory activation adapters;
-- builds relocatable local plugin payloads for Claude and Codex;
-- adds Dart and shadcn MCP entries without replacing same-named user entries;
-  and
-- preserves unrelated skills, hooks, commands, plugins, and configuration.
-
-## Installed locations
-
-| Harness | Skill roots | Command/advisory surface |
-|---|---|---|
-| Claude Code | `~/.claude/skills` | `~/.claude/commands/knowme-builder`, hook adapter |
-| Codex | `~/.codex/skills` | `~/.codex/prompts`, native skill descriptions |
-| OpenCode | `~/.opencode/skills`, `~/.config/opencode/skills` | both command roots, plugin prompt adapter |
-| Kimi Code CLI | `~/.kimi-code/skills`, `~/.kimi/skills` | `~/.kimi-code/commands`, prompt hook |
-| Generic Agent Skills | `~/.agents/skills` | discovery only |
-
-Zed is an auxiliary MCP/context-server integration, not one of the four
-Builder lifecycle adapters.
-
-## Native plugin registration
-
-The installer copies a marketplace payload to:
-
-- `~/.claude/plugins/marketplaces/knowme-hybrid-architecture`; and
-- `~/.codex/plugins/cache/knowme-hybrid-architecture`.
-
-Register the local source and install the plugin with the marketplace name
-reported by the native CLI.
-
-Claude:
-
-```bash
-claude plugin marketplace add "$HOME/.claude/plugins/marketplaces/knowme-hybrid-architecture"
-claude plugin marketplace list
-claude plugin install hybrid-mobile-architecture@knowme-builder --scope user
-claude plugin list
+```text
+--harness claude-code|codex|opencode|all
+--scope user|project
+--source <git-url-or-path>
+--ref <git-ref>
+--check
+--uninstall
+--with-cli
+--with-mcp
+--with-prometheus
 ```
 
-Codex:
+The default installs skills, native marketplace registrations, commands, and
+advisory adapters. It does not compile the CLI, mutate MCP configuration, or
+bootstrap Prometheus unless the corresponding explicit flag is present.
+
+User-scope ownership is recorded under
+`${XDG_STATE_HOME:-$HOME/.local/state}/knowme-builder/install.json`. Project
+scope uses `.knowme-builder/harness-install.json`. Uninstall removes only
+receipt-owned paths and marketplace registrations.
+
+For an all-harness install, the exact check, update, and uninstall lifecycle is:
 
 ```bash
-codex plugin marketplace add "$HOME/.codex/plugins/cache/knowme-hybrid-architecture"
-codex plugin marketplace list
-codex plugin add hybrid-mobile-architecture@knowme-builder
-codex plugin list
+bash scripts/install-harness-package.sh --check \
+  --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
+git pull --ff-only
+bash scripts/install-harness-package.sh \
+  --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
+bash scripts/install-harness-package.sh --uninstall
 ```
 
-If the marketplace was assigned a different name, substitute that name after
-the `@`.
+Codex native plugins are user-scoped. For `--scope project`, the installer uses
+portable Codex skills and project prompt files instead of claiming unsupported
+native plugin scope.
 
-## Project installation
+## Builder CLI and project projection
 
-Global discovery is not a substitute for a pinned application payload:
+CLI installation is optional:
+
+```bash
+bash scripts/install-harness-package.sh --with-cli
+knowme-builder --version
+```
+
+Generated or adopted applications receive only the 29 companion skills:
 
 ```bash
 knowme-builder skills install --path <project>
 knowme-builder skills check --path <project>
 ```
 
-The project receives six skill trees and a digest-pinned `skills-lock.json`.
-Conflicting existing skills are preserved and reported.
+## Prometheus compatibility
 
-## MCP verification
+Prometheus remains external. KnowMe Builder requires:
+
+- package `1.7.0` or newer;
+- control-plane contract `2.0.0` or newer; and
+- current typed KBD, CRDT claim/conflict, immutable plugin-generation, and
+  durable learning capabilities.
+
+The canonical source and runbooks are:
+
+- <https://github.com/Prometheus-AGS/prometheus-skill-system>
+- <https://github.com/Prometheus-AGS/prometheus-skill-system/blob/main/docs/guide/19-installation.md>
+- <https://github.com/Prometheus-AGS/prometheus-skill-system/blob/main/docs/guide/20-updating.md>
+
+Use `--with-prometheus` only when the long, host-mutating bootstrap is intended.
+
+## Verification
 
 ```bash
-claude mcp list
-codex mcp list
-opencode mcp list
-kimi doctor config
-```
-
-The Dart MCP supports Flutter launch, hot reload, widget inspection, and
-analysis. The shadcn MCP assists supported component sourcing. Neither service
-owns application architecture or acceptance.
-
-## Payload verification
-
-At minimum:
-
-```bash
-knowme-builder manifest check
+node scripts/check-skill-contracts.mjs
+node scripts/sync-skill-resources.mjs --check
 bash scripts/sync-harness-skills.sh --check
+bash scripts/check-git-url-discovery.sh
+bash scripts/test-harness-installer.sh
+node scripts/test-opencode-plugin.mjs
 knowme-builder --json doctor --path .
 ```
 
-Verify that every installed helper under a skill `scripts` directory remains
-executable. Restart active harness sessions so they rebuild their skill and
-command indexes.
-
-## Upgrades and cache refresh
-
-Rerun the installer after every Builder upgrade. Native plugin systems may
-cache a payload by version, so remove and reinstall the same-version plugin
-when testing a corrected prerelease payload.
-
-Project upgrades remain ownership-aware:
-
-```bash
-knowme-builder upgrade <project> --check
-knowme-builder upgrade <project> --apply
-```
-
-Do not refresh consumer applications by copying repository harness directories
-over them.
+Restart active harness sessions after changing plugin or skill payloads.

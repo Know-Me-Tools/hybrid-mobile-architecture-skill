@@ -1,6 +1,8 @@
 ---
 name: "source-command-opsx-ff"
 description: "Create a change and generate all artifacts needed for implementation in one go"
+metadata:
+  internal: true
 ---
 
 # source-command-opsx-ff

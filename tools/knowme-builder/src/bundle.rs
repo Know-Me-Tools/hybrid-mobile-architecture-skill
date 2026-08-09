@@ -9,7 +9,7 @@ use crate::{
 };
 
 pub static TEMPLATES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../../assets/templates");
-pub static SKILLS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../../templates/project-skills");
+pub static SKILLS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../../skills");
 const MANIFEST_JSON: &str = include_str!("../../../builder.manifest.json");
 const PROMETHEUS_CONTRACT_JSON: &str =
     include_str!("../../../compatibility/prometheus-control-plane.json");

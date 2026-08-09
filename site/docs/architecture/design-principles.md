@@ -16,8 +16,8 @@ The system has three intentionally independent authorities:
 
 | Authority | Owns | Does not own |
 |---|---|---|
-| KnowMe Builder | Application architecture, templates, typed adapters, skills, conformance | Live development leases or agent execution |
-| Prometheus | Development lifecycle, KBD journal, pause/resume/cancel, lease/fencing, handoff | Application model routing or tool execution |
+| KnowMe Builder | Application architecture, templates, typed adapters, skills, conformance | Canonical development state or agent execution |
+| Prometheus | Project UUID identity, signed Loro events, CRDT claims/conflicts, typed lifecycle, audit | Application model routing or tool execution |
 | Universal Agent Runtime | Agent runs, providers, prompts, tool governance, A2UI/AG-UI lifecycle | Repository planning or generated UI state |
 
 Earlier designs blurred these boundaries. A portable skill could steer a
@@ -49,13 +49,13 @@ over silent data loss.
 Claude Code, Codex, OpenCode, and Kimi have different discovery and command
 surfaces, but the behavioral contract must not change with the harness.
 
-The canonical skill tree is `templates/project-skills`. Generated trees,
+The canonical public skill tree is `skills`. The project-template and harness trees,
 marketplace manifests, command wrappers, and activation adapters are derived
 from the package manifest. CI compares them byte-for-byte. This prevents one
 harness from teaching a different privacy, runtime, or completion rule.
 
 Activation adapters are hints. They can recommend a relevant skill, but they
-never own operator pause, mutation leases, or workflow continuation.
+never own project identity, work claims, operator lifecycle, or workflow continuation.
 
 ## Skills are narrow contracts
 
