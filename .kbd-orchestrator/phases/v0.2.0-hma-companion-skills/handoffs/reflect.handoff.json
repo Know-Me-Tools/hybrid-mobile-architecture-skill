@@ -1,0 +1,11 @@
+{
+  "stage": "reflect",
+  "completedAt": "2026-08-20T13:10:00Z",
+  "outputs": [
+    "reflection.md"
+  ],
+  "nextStage": null,
+  "summaryForNext": "6/6 changes shipped and verified locally. First-pass rate was 2/6 \u2014 four deliverables failed first execution, three of which (wrong marketplace file, BSD awk newline, W6.5 false positive) would have shipped as working-looking code. The verifier found a live W6.9 violation in this repo's own .claude/settings.json and fixed it. Debt: 6 of 9 hook fixes are advisory, tray.rs is never compiled, no release tag despite telling consumers to pin tags, refiner Verify does not replay the failing input. Recommended next phase: hma-companion-consumer-integration.",
+  "skipped": false,
+  "skipReason": null
+}
