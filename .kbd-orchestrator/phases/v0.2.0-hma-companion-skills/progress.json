@@ -1,0 +1,129 @@
+{
+  "phase": "v0.2.0-hma-companion-skills",
+  "status": "executing",
+  "previousPhase": "pem-sync-bridge-and-mobile-tier",
+  "seededFrom": {
+    "specs": [
+      "docs/01-connected-skill-packages.md",
+      "docs/03-hooks-reliability.md",
+      "docs/04-skill-refiner-loop.md",
+      "docs/05-hma-pmp-companion-architecture.md",
+      "docs/06-tauri-tray-app-spec.md",
+      "docs/07-launchagent-supervisor-spec.md",
+      "docs/08-auto-skill-package-integration.md"
+    ],
+    "architectureReview": "prometheus-skill-pack/docs/audits/2026-08-20-skill-pack-architecture-review.md",
+    "companionSpec": "prometheus-companion/docs/00-architecture-and-implementation-plan.md",
+    "gitCommit": "d06c408"
+  },
+  "startedAt": "2026-08-20T07:30:00Z",
+  "startedBy": "travis (via Mavis session mvs_b80e8100929d4bb5a4cf083663ec5575)",
+  "activeChange": "2026-08-20-c200-skill-scaffolds-and-mirror",
+  "implementation_total": 6,
+  "implementation_completed": 0,
+  "changes_total": 6,
+  "changes_completed": 0,
+  "completedChanges": 0,
+  "totalChanges": 6,
+  "assessment_complete": false,
+  "plan_complete": false,
+  "execute_complete": false,
+  "reflect_complete": false,
+  "completion": {
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 0,
+      "total": 6,
+      "status": "PENDING"
+    },
+    "evidence": {
+      "status": "NOT_TRACKED",
+      "blockers": []
+    },
+    "certification": {
+      "status": "NOT_TRACKED",
+      "blockers": []
+    },
+    "publication": {
+      "status": "NOT_TRACKED",
+      "blockers": []
+    }
+  },
+  "changes": [
+    {
+      "id": "2026-08-20-c200-skill-scaffolds-and-mirror",
+      "title": "Scaffold + mirror the 6 new HMA skills",
+      "status": "in_progress",
+      "wave": 0,
+      "deliverable": "skills/<name>/SKILL.md for each of the 6 new skills, plus mirrored copies in .agents/, .claude/, .codex/, .kimi-code/, .opencode/, templates/project-skills/, and a plugin.json `skills` array entry. Run `scripts/add-project-skills.sh` to propagate.",
+      "depends_on": [],
+      "specs": [
+        "docs/05-hma-pmp-companion-architecture.md §16.1",
+        "docs/01-connected-skill-packages.md",
+        "docs/03-hooks-reliability.md",
+        "docs/04-skill-refiner-loop.md",
+        "docs/06-tauri-tray-app-spec.md",
+        "docs/07-launchagent-supervisor-spec.md",
+        "docs/08-auto-skill-package-integration.md"
+      ]
+    },
+    {
+      "id": "2026-08-20-c201-install-contract-verifier",
+      "title": "Add scripts/verify-skill-manifest.sh (the 4-condition install contract)",
+      "status": "pending",
+      "wave": 1,
+      "deliverable": "scripts/verify-skill-manifest.sh — checks valid marketplace.json, valid plugin.json, every SKILL.md exists + name matches folder, idempotent install.",
+      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "specs": [
+        "docs/01-connected-skill-packages.md",
+        "docs/05-hma-pmp-companion-architecture.md §16.2"
+      ]
+    },
+    {
+      "id": "2026-08-20-c202-hooks-reliability-scripts",
+      "title": "Add scripts/install-hooks-reliability.sh + scripts/verify-hooks-reliability.sh",
+      "status": "pending",
+      "wave": 1,
+      "deliverable": "Two scripts: install- applies the 9 hook fixes; verify- inverse-checks. Both exit 0/1, are idempotent, and CI-runnable.",
+      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "specs": [
+        "docs/03-hooks-reliability.md",
+        "docs/05-hma-pmp-companion-architecture.md §16.4"
+      ]
+    },
+    {
+      "id": "2026-08-20-c203-launchagent-supervisor-templates",
+      "title": "Add scripts/render-supervisor-plist.sh + launchd/systemd template assets",
+      "status": "pending",
+      "wave": 1,
+      "deliverable": "Template generator + the 9-fix plist template + systemd unit template. Companion's `doctor` will consume these.",
+      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "specs": [
+        "docs/07-launchagent-supervisor-spec.md",
+        "docs/05-hma-pmp-companion-architecture.md §16.4"
+      ]
+    },
+    {
+      "id": "2026-08-20-c204-tauri-tray-scaffold",
+      "title": "Add the tauri-tray-app HMA skill's scaffold scripts (tray + popover + health-aggregator)",
+      "status": "pending",
+      "wave": 2,
+      "deliverable": "scripts/scaffold-tauri-tray.sh + the health-aggregator Rust crate. The Companion's tray icon will reuse this.",
+      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "specs": [
+        "docs/06-tauri-tray-app-spec.md"
+      ]
+    },
+    {
+      "id": "2026-08-20-c205-realtime-refiner-loop",
+      "title": "Add the realtime-skill-refiner HMA skill's loop implementation",
+      "status": "pending",
+      "wave": 2,
+      "deliverable": "scripts/refiner-loop.sh (the 5-stage Detect → Triage → Refine → Verify → Ship loop). HALT at Triage for human approval.",
+      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "specs": [
+        "docs/04-skill-refiner-loop.md"
+      ]
+    }
+  ]
+}

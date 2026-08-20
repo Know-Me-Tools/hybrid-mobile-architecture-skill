@@ -1,6 +1,10 @@
 {
   "phase": "cross-platform-app-theming",
-  "status": "executing",
+  "status": "deferred",
+  "deferralReason": "All 6 changes still pending. Deferred on 2026-08-20 to free the waypoint for the HMA × Companion bridge phase (v0.2.0-hma-companion-skills). The theming work is downstream of that phase — the Companion's React/Tauri shell needs to be in place before token-pipeline / theme-parity-skill / scaffold-theme-wiring / theme-drift-audit / knowme-mobile-retrofit / opendesign-design-system-entry can land. Re-open after the HMA × Companion bridge ships.",
+  "deferredBy": "travis (via Mavis session mvs_b80e8100929d4bb5a4cf083663ec5575)",
+  "deferredAt": "2026-08-20T07:24:00Z",
+  "notBlocking": "v0.2.0-hma-companion-skills",
   "changes": [
     {
       "id": "2026-07-17-c114-token-pipeline",

@@ -1,6 +1,49 @@
 {
   "phase": "scaffold-full-hybrid-project",
-  "status": "reflect_complete",
+  "status": "complete",
+  "parentPhase": null,
+  "childPhases": [],
+  "childPointer": null,
+  "previousPhase": null,
+  "startedAt": "2026-07-15T16:28:38Z",
+  "closedAt": "2026-08-20T07:18:00Z",
+  "closedBy": "travis (via Mavis session mvs_b80e8100929d4bb5a4cf083663ec5575)",
+  "closedReason": "All 12 changes merged. Scaffolding is shipped and stable. Closing to free the waypoint for the HMA × Companion bridge phase.",
+  "assessment_complete": true,
+  "analysis_complete": true,
+  "spec_complete": true,
+  "plan_complete": true,
+  "execute_complete": true,
+  "reflect_complete": true,
+  "implementation_total": 12,
+  "implementation_completed": 12,
+  "changes_total": 12,
+  "changes_completed": 12,
+  "completedChanges": 12,
+  "totalChanges": 12,
+  "completion": {
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 12,
+      "total": 12,
+      "status": "COMPLETE"
+    },
+    "evidence": {
+      "status": "NOT_TRACKED",
+      "summary": "Scaffolding phase predates the evidence/certification/publication gate. No formal evidence record — closing on the strength of the merged-change ledger and the reflection note.",
+      "blockers": []
+    },
+    "certification": {
+      "status": "NOT_TRACKED",
+      "summary": "Closed without certification. The phase outputs (scaffolding scripts) are validated by `scripts/audit.sh` on every change; no separate certification step was run.",
+      "blockers": []
+    },
+    "publication": {
+      "status": "NOT_TRACKED",
+      "summary": "Scaffolding is consumed in-repo; no external publication required.",
+      "blockers": []
+    }
+  },
   "changes": [
     {
       "id": "2026-07-15-c001-layered-workspace",
@@ -62,12 +105,5 @@
       "status": "merged",
       "wave": 2
     }
-  ],
-  "completedChanges": 12,
-  "totalChanges": 12,
-  "previousPhase": null,
-  "startedAt": "2026-07-15T16:28:38Z",
-  "assessment_complete": true,
-  "analysis_complete": true,
-  "plan_complete": true
+  ]
 }

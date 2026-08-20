@@ -79,5 +79,11 @@
   "startedAt": "2026-07-15T22:04:11Z",
   "assessment_complete": true,
   "analysis_complete": true,
-  "plan_complete": true
+  "plan_complete": true,
+  "status": "deferred",
+  "deferralReason": "9/14 changes merged (6 merged, 3 archived, 3 in_progress: c105/c106/c114, 2 pending). Deferred on 2026-08-20 to free the waypoint for the HMA × Companion bridge phase. The 5 outstanding items (c105 local-model-desktop, c106 sync-local-first, c114 desktop-app-actually-runs, plus 2 pending) are dependent on the Companion's Tauri desktop shell being in place — that's exactly what the HMA × Companion bridge phase enables. Re-open after that phase ships.",
+  "deferredBy": "travis (via Mavis session mvs_b80e8100929d4bb5a4cf083663ec5575)",
+  "deferredAt": "2026-08-20T07:25:00Z",
+  "notBlocking": "v0.2.0-hma-companion-skills",
+  "reopenTrigger": "Once the HMA × Companion bridge phase ships and the Companion's Tauri shell is running, resume the 5 outstanding changes (c105, c106, c114, plus 2 pending)."
 }

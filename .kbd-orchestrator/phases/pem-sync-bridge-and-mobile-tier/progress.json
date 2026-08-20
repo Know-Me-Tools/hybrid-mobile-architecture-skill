@@ -1,4 +1,14 @@
 {
+  "phase": "pem-sync-bridge-and-mobile-tier",
+  "status": "complete",
+  "parentPhase": null,
+  "childPhases": [],
+  "childPointer": null,
+  "previousPhase": "local-first-realtime-sync",
+  "startedAt": "2026-07-17T00:00:00Z",
+  "closedAt": "2026-08-20T07:22:00Z",
+  "closedBy": "travis (via Mavis session mvs_b80e8100929d4bb5a4cf083663ec5575)",
+  "closedReason": "Implementation 5/5 COMPLETE. All five changes (c126-c130) shipped: pem-scope-bridge, mobile-local-store-and-frb, sqlite-vec-vector-store, vault-roster-auth, and the design correction (SurrealDB local store + GraphVectorStore over existing HNSW+BM25). QA artifact_refiner UNAVAILABLE throughout; compensating verification (clippy + tsc + vitest) green, real defects caught and fixed (disposed-guard, async-ordering race). Closing the phase — the HMA × Companion bridge specs landed on main in commit d06c408 (docs/01, /03, /04, /05, /06, /07, /08 — the 6 new HMA v0.2.0 skills + master spec), and the next phase will implement them.",
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
