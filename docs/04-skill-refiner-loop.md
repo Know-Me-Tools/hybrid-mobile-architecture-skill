@@ -3,7 +3,7 @@
 > **Status:** v0.1.0 draft (for HMA v0.2.0)
 > **Parent doc:** [`05-hma-pmp-companion-architecture.md`](./05-hma-pmp-companion-architecture.md)
 > **Built on:** `prometheus-skill-pack/skills/process/skill-refiner/`
-> **File path:** `skills/realtime-skill-refiner/SKILL.md` (+ 5 mirrors)
+> **File path:** `skills/realtime-skill-refiner/SKILL.md` (+ 6 harness mirrors + project templates)
 
 ---
 
@@ -329,8 +329,11 @@ wrote the patch).
 - [ ] `skills/realtime-skill-refiner/SKILL.md` exists with
       the frontmatter above
 - [ ] The SKILL.md body covers all of §1-§6
-- [ ] Mirrored to the 5 per-harness directories
-- [ ] Added to the `plugin.json` `skills` array
+- [ ] Mirrored to the 6 per-harness directories + `templates/project-skills/`
+      via `bash scripts/sync-harness-skills.sh` (verify with `--check`)
+- [ ] Declared in `builder.manifest.json` `skills[]` and
+      `templates/activation-manifest.json`, then regenerated
+      (`plugin.json` is generated and has no `skills` array)
 - [ ] The Tauri commands in §3 are implemented in
       `crates/prometheus-companion/src/commands/skill_refiner.rs`
 - [ ] The `bugTicket` PEM entity is in the Companion's

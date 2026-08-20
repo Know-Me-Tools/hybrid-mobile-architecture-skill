@@ -254,7 +254,8 @@ uses it the standard way:
 # 1. Add the marketplace
 git clone https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill \
   ~/.prometheus/skill-packages/hybrid-mobile-architecture
-# 2. The marketplace.json is at the repo root, so it is already
+# 2. The harness marketplace manifest lives at
+#    .claude-plugin/marketplace.json, so the clone is already
 #    Claude Code marketplace-shaped
 # 3. Register with the harness
 claude plugin marketplace add ~/.prometheus/skill-packages/hybrid-mobile-architecture
@@ -269,9 +270,9 @@ UX. Both must agree.
 The HMA repo's job is to make step 1 work. To do that, the
 repo must satisfy four conditions:
 
-1. **The marketplace.json must be valid** (it is).
-2. **The plugin.json must be valid** (it is).
-3. **Every `SKILL.md` referenced in plugin.json must exist** —
+1. **The `.claude-plugin/marketplace.json` must be valid** (it is).
+2. **The plugin.json must be valid, and agree on version** (it does).
+3. **Every skill in `builder.manifest.json` `skills[]` must exist** —
    this is the "skill manifest matches the directory" check
    that §10 of this document makes a CI gate.
 4. **The `install.sh` or `bootstrap.sh` (if any) must be
@@ -955,13 +956,20 @@ trust it.
 
 ### 10.1 The 4 conditions (the install contract)
 
-1. **Valid `marketplace.json`** at the repo root (it has
-   one; we verified the schema).
-2. **Valid `plugin.json`** at the repo root (it has one).
-3. **Every `SKILL.md` referenced in `plugin.json` exists**
-   AND has a valid `name` in its YAML frontmatter that
-   matches its directory name. Enforced by
-   `scripts/verify-skill-manifest.sh` (new).
+1. **Valid marketplace manifest.** The harness-facing manifest
+   is `.claude-plugin/marketplace.json`, declaring `name`,
+   `version`, and `plugins[]`. The root `marketplace.json` is
+   this package's *registry descriptor* and has a different
+   shape (a single `skill` object); it is cross-checked for
+   version agreement, not for `plugins[]`.
+2. **Valid `plugin.json`** at the repo root, declaring `name`
+   and `version`, agreeing with the marketplace version.
+3. **Every skill in the canonical registry resolves.** For each
+   entry in `builder.manifest.json` `skills[]` (plus
+   `distribution.packageSkill`), `skills/<name>/SKILL.md`
+   exists and its frontmatter `name` equals its directory
+   name; no skill directory may be left undeclared. Enforced
+   by `scripts/verify-skill-manifest.sh`.
 4. **Idempotent install** — the install path is
    `git clone` (idempotent) or `git pull --ff-only
    --reset-hard <sha>` (idempotent). No global state
@@ -983,22 +991,34 @@ trust it.
 
 | Skill | Path | Status |
 |---|---|---|
-| `tauri-tray-app` | `skills/tauri-tray-app/SKILL.md` (+ 5 mirrors) | **new in v0.2.0** |
-| `connected-skill-packages` | `skills/connected-skill-packages/SKILL.md` (+ 5 mirrors) | **new in v0.2.0** |
-| `launchagent-supervisor` | `skills/launchagent-supervisor/SKILL.md` (+ 5 mirrors) | **new in v0.2.0** |
-| `realtime-skill-refiner` | `skills/realtime-skill-refiner/SKILL.md` (+ 5 mirrors) | **new in v0.2.0** |
-| `claude-hooks-reliability` | `skills/claude-hooks-reliability/SKILL.md` (+ 5 mirrors) | **new in v0.2.0** |
+| `tauri-tray-app` | `skills/tauri-tray-app/SKILL.md` (+ 6 harness mirrors + project templates) | **new in v0.2.0** |
+| `connected-skill-packages` | `skills/connected-skill-packages/SKILL.md` (+ 6 harness mirrors + project templates) | **new in v0.2.0** |
+| `launchagent-supervisor` | `skills/launchagent-supervisor/SKILL.md` (+ 6 harness mirrors + project templates) | **new in v0.2.0** |
+| `realtime-skill-refiner` | `skills/realtime-skill-refiner/SKILL.md` (+ 6 harness mirrors + project templates) | **new in v0.2.0** |
+| `claude-hooks-reliability` | `skills/claude-hooks-reliability/SKILL.md` (+ 6 harness mirrors + project templates) | **new in v0.2.0** |
 
-The 5 mirrors are: `.agents/skills/`, `.claude/skills/`,
-`.codex/skills/`, `.kimi-code/skills/`, `.opencode/skills/`,
-`templates/project-skills/`. Use the existing
-`scripts/add-project-skills.sh` to do the mirror in one
-shot.
+The mirror targets are the six harness directories —
+`.agents/skills/`, `.claude/skills/`, `.codex/skills/`,
+`.kimi/skills/`, `.kimi-code/skills/`, `.opencode/skills/` —
+plus `templates/project-skills/`. They are **generated, not
+hand-written**: run `bash scripts/sync-harness-skills.sh` to
+write them and `--check` to fail on drift. The mirror set is
+driven by `builder.manifest.json` `skills[]`, so a skill that
+is not declared there ships to nobody.
 
-### 10.4 The updated `plugin.json`
+### 10.4 The updated skill registry
 
-The `plugin.json` `skills` array is updated to include the
-five new skills:
+`plugin.json` has no `skills` array, and is itself generated
+by `scripts/generate-builder-manifests.mjs`. The canonical
+registry is **`builder.manifest.json` `skills[]`**, and every
+new skill must also be declared in
+`templates/activation-manifest.json`. Adding a skill means
+editing those two files and regenerating; hand-editing a
+generated manifest produces drift that `git diff --exit-code`
+rejects.
+
+The illustrative shape below is retained for context only —
+it is not the file to edit:
 
 ```jsonc
 {
@@ -1074,9 +1094,11 @@ a verifiable checkpoint.
 For each of the 5 new skills:
 
 - [ ] Write `skills/<name>/SKILL.md` (the frontmatter + body)
-- [ ] Mirror to `.agents/`, `.claude/`, `.codex/`,
+- [ ] Declare in `builder.manifest.json` `skills[]` and
+      `templates/activation-manifest.json`
+- [ ] Mirror to `.agents/`, `.claude/`, `.codex/`, `.kimi/`,
       `.kimi-code/`, `.opencode/`, `templates/project-skills/`
-      via `scripts/add-project-skills.sh`
+      via `scripts/sync-harness-skills.sh` (`--check` fails on drift)
 - [ ] Write any helper scripts
 - [ ] Update the skill inventory in this doc (§5.7)
 - [ ] Verify: each skill loads in Claude Code and

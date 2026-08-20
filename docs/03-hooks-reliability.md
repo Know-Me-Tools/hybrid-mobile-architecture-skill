@@ -3,7 +3,7 @@
 > **Status:** v0.1.0 draft (for HMA v0.2.0)
 > **Parent doc:** [`05-hma-pmp-companion-architecture.md`](./05-hma-pmp-companion-architecture.md)
 > **Source of truth:** `prometheus-skill-pack/docs/audits/2026-08-20-skill-pack-architecture-review.md` §6
-> **File path:** `skills/claude-hooks-reliability/SKILL.md` (+ 5 mirrors)
+> **File path:** `skills/claude-hooks-reliability/SKILL.md` (+ 6 harness mirrors + project templates)
 
 ---
 
@@ -342,7 +342,8 @@ Do **not** invoke when:
 - [ ] `skills/claude-hooks-reliability/SKILL.md` exists with
       the frontmatter above
 - [ ] The SKILL.md body covers all of §1-§6
-- [ ] Mirrored to the 5 per-harness directories
+- [ ] Mirrored to the 6 per-harness directories + `templates/project-skills/`
+      via `bash scripts/sync-harness-skills.sh` (verify with `--check`)
 - [ ] `scripts/install-hooks-reliability.sh` exists and is
       executable
 - [ ] `scripts/verify-hooks-reliability.sh` exists and is

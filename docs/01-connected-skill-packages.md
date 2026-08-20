@@ -2,7 +2,7 @@
 
 > **Status:** v0.1.0 draft (for HMA v0.2.0)
 > **Parent doc:** [`05-hma-pmp-companion-architecture.md`](./05-hma-pmp-companion-architecture.md)
-> **File path:** `skills/connected-skill-packages/SKILL.md` (+ 5 mirrors)
+> **File path:** `skills/connected-skill-packages/SKILL.md` (+ 6 harness mirrors + project templates)
 
 ---
 
@@ -113,9 +113,10 @@ pub async fn install_skill_package(
 **HMA (producer side) — what the package must do to be
 installable:**
 
-- Have a valid `marketplace.json` at the repo root
-- Have a valid `plugin.json` (or a `strict: false` skill
-  bundle entry in `marketplace.json`)
+- Have a valid harness marketplace manifest at
+  `.claude-plugin/marketplace.json`
+- Have a valid `plugin.json` at the repo root, agreeing with
+  the marketplace version
 - Pass `scripts/verify-skill-manifest.sh` (the install
   contract check)
 - Be reachable via the `git_url` (HTTPS or SSH)
@@ -202,23 +203,34 @@ pub async fn remove_skill_package(
 
 The HMA repo must satisfy 4 conditions to be installable:
 
-1. **Valid `marketplace.json`** at the repo root. Schema:
-   `https://json-schema.org/draft/2020-12/schema` with
-   required fields `name`, `version`, `skills[]`.
-2. **Valid `plugin.json`** at the repo root. Required:
-   `name`, `version`, `skills[]`, optional
-   `mcpServers`, `repository.url`.
-3. **Every `SKILL.md` referenced in `plugin.json` exists** AND
-   has a valid `name` in its YAML frontmatter that matches
-   its directory name. Verified by
+1. **Valid marketplace manifest** at
+   `.claude-plugin/marketplace.json`, with `name`, `version`,
+   and a non-empty `plugins[]`. The root `marketplace.json`
+   is this package's *registry descriptor* — a different
+   shape (a single `skill` object) — and is cross-checked for
+   version agreement rather than for `plugins[]`. Assuming
+   the root file is the harness manifest is the most common
+   way this condition is misread.
+2. **Valid `plugin.json`** at the repo root, with `name` and
+   `version`, and its `version` equal to the marketplace
+   version. It carries no `skills` array and is generated.
+3. **Every skill in the canonical registry resolves.** For
+   each entry in `builder.manifest.json` `skills[]` (plus
+   `distribution.packageSkill`), `skills/<name>/SKILL.md`
+   exists and its frontmatter `name` equals its directory
+   name. No skill directory may be left undeclared — an
+   undeclared directory ships to nobody. Verified by
    `scripts/verify-skill-manifest.sh`.
 4. **Idempotent install.** The install path is
    `git clone` (idempotent) or
    `git pull --ff-only --reset-hard <sha>` (idempotent).
    No global state outside the install path.
 
-The Companion enforces conditions 1, 2, 3 with its validator.
-Condition 4 is a behavior check; a failure here surfaces as
+`scripts/verify-skill-manifest.sh` checks conditions 1-3
+mechanically and asserts condition 4's structural
+precondition: no shipped manifest may pin an absolute or
+home-relative path outside the package root. Condition 4 is
+otherwise a behavior property, and its failure is silent —
 "install appears to work but the harness can't find the
 skills."
 
@@ -353,7 +365,9 @@ git SHA is the natural conflict-resolution key.
 - [ ] Mirrored to `.agents/skills/`, `.claude/skills/`,
       `.codex/skills/`, `.kimi-code/skills/`,
       `.opencode/skills/`, `templates/project-skills/`
-- [ ] Added to the `plugin.json` `skills` array
+- [ ] Declared in `builder.manifest.json` `skills[]` and
+      `templates/activation-manifest.json`, then regenerated
+      (`plugin.json` is generated and has no `skills` array)
 - [ ] The Companion's "Discover" page lists HMA
 - [ ] The HMA's `marketplace.json` summary mentions
       "Connected Skill Packages" integration

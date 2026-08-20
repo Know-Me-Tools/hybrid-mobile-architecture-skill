@@ -307,6 +307,8 @@
 ## SessionRecord
 
 * [Karpathy session 105b8bed16a9](/karpathy-session-105b8bed16a97283.md)
+* [Karpathy session 8d8ba3c14041](/karpathy-session-8d8ba3c14041c15e.md)
+* [Karpathy session b1ec578a3db0](/karpathy-session-b1ec578a3db03c93.md)
 
 ## Uncategorized
 

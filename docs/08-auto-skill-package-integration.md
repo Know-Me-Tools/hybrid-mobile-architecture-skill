@@ -3,7 +3,7 @@
 > **Status:** v0.1.0 draft (for HMA v0.2.0)
 > **Parent doc:** [`05-hma-pmp-companion-architecture.md`](./05-hma-pmp-companion-architecture.md)
 > **Built on:** `connected-skill-packages` (HMA v0.2.0)
-> **File path:** `skills/auto-skill-package-integration/SKILL.md` (+ 5 mirrors)
+> **File path:** `skills/auto-skill-package-integration/SKILL.md` (+ 6 harness mirrors + project templates)
 
 ---
 
@@ -54,8 +54,8 @@ mode, prompts the operator).
 
 | Source | What it is | How the Companion watches it |
 |---|---|---|
-| **Git URL** | a git repo with a `marketplace.json` at the root (the HMA, the PMP, any third-party marketplace) | `git fetch` + `git diff` every N minutes (configurable; default 15 min) |
-| **Local directory** | a directory on disk with a `SKILL.md` per subdir; no git, no marketplace.json | `notify` (macOS) / `inotifywait` (Linux) / `ReadDirectoryChangesW` (Windows) for fs events |
+| **Git URL** | a git repo carrying a harness marketplace manifest at `.claude-plugin/marketplace.json` (the HMA, the PMP, any third-party marketplace) | `git fetch` + `git diff` every N minutes (configurable; default 15 min) |
+| **Local directory** | a directory on disk with a `SKILL.md` per subdir; no git, no marketplace manifest | `notify` (macOS) / `inotifywait` (Linux) / `ReadDirectoryChangesW` (Windows) for fs events |
 
 ### §2.1 The Git URL source
 
@@ -196,10 +196,10 @@ install contract** as the manual path (see
 §4). For a local-directory source, the contract applies
 to each sub-package:
 
-1. **Valid manifest** — for git sources, the
-   `marketplace.json` is at the repo root. For local
-   sources, the Companion's synthetic marketplace is
-   well-formed.
+1. **Valid manifest** — for git sources, the harness
+   marketplace manifest is at
+   `.claude-plugin/marketplace.json`. For local sources, the
+   Companion's synthetic marketplace is well-formed.
 2. **Valid `plugin.json`** — for git sources, the
    `plugin.json` is at the repo root. For local sources,
    the Companion derives a `plugin.json` per sub-package
@@ -565,8 +565,11 @@ Do **not** invoke when:
 - [ ] `skills/auto-skill-package-integration/SKILL.md`
       exists with the frontmatter above
 - [ ] The SKILL.md body covers all of §1-§12
-- [ ] Mirrored to the 5 per-harness directories
-- [ ] Added to the `plugin.json` `skills` array
+- [ ] Mirrored to the 6 per-harness directories + `templates/project-skills/`
+      via `bash scripts/sync-harness-skills.sh` (verify with `--check`)
+- [ ] Declared in `builder.manifest.json` `skills[]` and
+      `templates/activation-manifest.json`, then regenerated
+      (`plugin.json` is generated and has no `skills` array)
 - [ ] The `skillSource` and `detectedSkill` PEM entities
       are in the Companion's domain
 - [ ] The 6 Tauri commands in §6 are implemented

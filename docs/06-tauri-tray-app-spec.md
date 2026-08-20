@@ -5,7 +5,7 @@
 > **Built on:** `hybrid-mobile-architecture/skills/tauri-custom-titlebar/`,
 > `prometheus-skill-pack/skills/tauri/tauri-react-vite/`
 > **Reference impl:** `prometheus-companion/crates/prometheus-companion/src/tray.rs`
-> **File path:** `skills/tauri-tray-app/SKILL.md` (+ 5 mirrors)
+> **File path:** `skills/tauri-tray-app/SKILL.md` (+ 6 harness mirrors + project templates)
 
 ---
 
@@ -370,8 +370,11 @@ Do **not** invoke when:
 - [ ] `skills/tauri-tray-app/SKILL.md` exists with the
       frontmatter above
 - [ ] The SKILL.md body covers all of §1-§8
-- [ ] Mirrored to the 5 per-harness directories
-- [ ] Added to the `plugin.json` `skills` array
+- [ ] Mirrored to the 6 per-harness directories + `templates/project-skills/`
+      via `bash scripts/sync-harness-skills.sh` (verify with `--check`)
+- [ ] Declared in `builder.manifest.json` `skills[]` and
+      `templates/activation-manifest.json`, then regenerated
+      (`plugin.json` is generated and has no `skills` array)
 - [ ] The reference impl
       (`prometheus-companion/crates/prometheus-companion/src/tray.rs`)
       is linked from the skill body
