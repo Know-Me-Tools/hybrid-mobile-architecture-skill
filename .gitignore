@@ -28,6 +28,7 @@ site/static/preview/
 .playwright-mcp/
 **/__pycache__/
 .prometheus/events.jsonl
+.prometheus/refiner/
 .kbd-orchestrator/current-waypoint.json
 .kbd-orchestrator/current-waypoint.md
 .kbd-orchestrator/position.json
