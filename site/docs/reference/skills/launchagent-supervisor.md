@@ -1,0 +1,144 @@
+---
+title: launchagent-supervisor
+sidebar_label: launchagent-supervisor
+sidebar_position: 32
+description: "Author, install, and supervise a macOS LaunchAgent, a Linux systemd --user unit, or a Windows Scheduled Task for a long-running managed daemon. Use when adding a service to the substrate, when a service is crash-looping or silently disappearing, or when asked for auto-restart, self-healing, or a watchdog. Triggers on LaunchAgent, plist, launchd, launchctl, KeepAlive, ThrottleInterval, ProcessType, RunAtLoad, daemon, supervisor, self-healing, restart loop, watchdog, systemd user unit, scheduled task."
+---
+
+# launchagent-supervisor
+
+**Category:** Operations
+
+## What it is for
+
+Author, install, and supervise a macOS LaunchAgent, a Linux systemd --user unit, or a Windows Scheduled Task for a long-running managed daemon. Use when adding a service to the substrate, when a service is crash-looping or silently disappearing, or when asked for auto-restart, self-healing, or a watchdog. Triggers on LaunchAgent, plist, launchd, launchctl, KeepAlive, ThrottleInterval, ProcessType, RunAtLoad, daemon, supervisor, self-healing, restart loop, watchdog, systemd user unit, scheduled task.
+
+## Why it is designed this way
+
+KeepAlive without a throttle lets launchd silently remove a crash-looping job, leaving an installer that checks only for the written file reporting healthy while the port is dead.
+
+## Common use cases
+
+- Author a LaunchAgent, systemd --user unit, or Scheduled Task for a managed daemon
+- Diagnose a service that disappears after repeated restarts
+- Render supervision definitions consistently across macOS and Linux
+
+## How to invoke it
+
+Use the explicit skill name when the gate is important or implicit activation
+would be ambiguous:
+
+```text
+/launchagent-supervisor <your task or question>
+```
+
+Claude Code, Codex, OpenCode, and Kimi discover the same canonical
+`SKILL.md`. Their activation adapters may recommend the skill, but the
+adapter is advisory: Prometheus remains the lifecycle and mutation authority.
+
+## Scope boundary
+
+Do not treat a written plist as a health check, hand-write plists, or run two installers against one label.
+
+## Canonical operating contract
+
+The failure this prevents is **crash-loop amnesia**: `KeepAlive: true` with no
+`ThrottleInterval` lets launchd classify a restarting job as inefficient and
+silently remove it. The port goes quiet, no error is logged, and an installer
+that only checks "did the file get written" reports healthy.
+
+Render templates with `scripts/render-supervisor-plist.sh`; never hand-write a
+plist. Templates live in `assets/templates/launchagent-supervisor/`.
+
+## The 9 fixes
+
+| # | Fix | Why it matters |
+|---|---|---|
+| R1.1 | `ThrottleInterval` ≥ 15 | Restarting faster than launchd's threshold gets the job removed, not throttled. |
+| R1.2 | `KeepAlive` dictionary form | `SuccessfulExit: false` + `Crashed: true` restarts crashes without fighting planned shutdowns. Bare `true` restarts everything, including a deliberate stop. |
+| R1.3 | `ProcessType: Interactive` | Raises launchd's resource threshold; a background-classified job gets terminated under pressure. |
+| R1.4 | `StandardOutPath` / `StandardErrorPath` | Without explicit paths the output is unreachable and the failure is invisible. |
+| R1.5 | `RunAtLoad: true` | Otherwise the service is down after every reboot until someone runs `launchctl kickstart` by hand. |
+| R1.6 | Self-check watchdog | The service periodically confirms it is still registered and re-bootstraps if launchd dropped it. This is what actually closes the amnesia hole. |
+| R1.7 | Down-for-too-long notification | A service down past a threshold must surface to the operator rather than waiting to be noticed. |
+| R1.8 | PID-file bootstrap lock | A `mkdir` lock survives the crash that created it and deadlocks the next install. A PID file lets a successor reclaim a lock whose owner is gone. |
+| R1.9 | Exactly one installer | Two installers racing the same label produce a service whose definition depends on install order. |
+
+## macOS plist shape
+
+```xml
+<key>KeepAlive</key>
+<dict>
+  <key>SuccessfulExit</key><false/>
+  <key>Crashed</key><true/>
+</dict>
+<key>ThrottleInterval</key><integer&gt;15</integer>
+<key>ProcessType</key><string>Interactive</string>
+<key>RunAtLoad</key><true/>
+```
+
+Validate every rendered plist before loading it:
+
+```bash
+plutil -lint ~/Library/LaunchAgents/<label>.plist
+```
+
+A plist that fails `plutil -lint` is rejected by launchd with no useful message.
+
+## Linux systemd --user
+
+`RestartSec=15` is the `ThrottleInterval` equivalent; `Restart=on-failure` is
+the `KeepAlive` dictionary equivalent. Using `Restart=always` reintroduces the
+bare-`KeepAlive` bug.
+
+```ini
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=15
+StandardOutput=append:%h/.prometheus/logs/<service>.log
+StandardError=append:%h/.prometheus/logs/<service>.err
+
+[Install]
+WantedBy=default.target
+```
+
+## Windows Scheduled Task
+
+The weakest of the three supervisors. Trigger at logon, restart on failure at a
+fixed interval with a bounded retry count, run as the current user. Treat its
+health reporting as unreliable and lean harder on the R1.6 watchdog.
+
+## Verification
+
+```bash
+bash scripts/render-supervisor-plist.sh --label ai.prometheus.demo \
+  --program /usr/local/bin/demo --out /tmp/demo.plist
+plutil -lint /tmp/demo.plist
+launchctl print gui/"$(id -u)"/ai.prometheus.demo    # after bootstrap
+```
+
+Checking that the plist file exists is not a health check. Confirm launchd
+reports the label and the service answers on its port.
+
+## Anti-patterns
+
+- `KeepAlive: true` with no `ThrottleInterval`.
+- Treating "the plist was written" as "the service is running".
+- Two installers writing the same label.
+- A lock directory rather than a PID file.
+- Logging to a path the operator is never told about.
+
+## Installation and verification
+
+Install the complete bundle with `knowme-builder skills install --path <project>`
+or the workstation installer described in [Installation](../installation).
+Verify a project copy with:
+
+```bash
+knowme-builder skills check --path <project>
+```
+
+The canonical source is
+`skills/launchagent-supervisor/SKILL.md`; generated scaffold and harness copies
+must never be edited independently.

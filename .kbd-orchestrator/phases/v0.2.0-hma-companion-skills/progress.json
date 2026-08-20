@@ -1,6 +1,6 @@
 {
   "phase": "v0.2.0-hma-companion-skills",
-  "status": "executing",
+  "status": "complete",
   "previousPhase": "pem-sync-bridge-and-mobile-tier",
   "seededFrom": {
     "specs": [
@@ -18,31 +18,46 @@
   },
   "startedAt": "2026-08-20T07:30:00Z",
   "startedBy": "travis (via Mavis session mvs_b80e8100929d4bb5a4cf083663ec5575)",
-  "activeChange": "2026-08-20-c200-skill-scaffolds-and-mirror",
+  "activeChange": null,
   "implementation_total": 6,
-  "implementation_completed": 0,
+  "implementation_completed": 6,
   "changes_total": 6,
-  "changes_completed": 0,
-  "completedChanges": 0,
+  "changes_completed": 6,
+  "completedChanges": 6,
   "totalChanges": 6,
-  "assessment_complete": false,
-  "plan_complete": false,
-  "execute_complete": false,
+  "assessment_complete": true,
+  "plan_complete": true,
+  "execute_complete": true,
   "reflect_complete": false,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 0,
+      "completed": 6,
       "total": 6,
-      "status": "PENDING"
+      "status": "COMPLETE"
     },
     "evidence": {
-      "status": "NOT_TRACKED",
-      "blockers": []
+      "status": "VERIFIED",
+      "blockers": [],
+      "gates": [
+        "node scripts/check-builder-authority.mjs --release",
+        "node scripts/check-skill-contracts.mjs (36 skills, 108 eval cases)",
+        "node scripts/check-runtime-security.mjs",
+        "node scripts/check-prometheus-boundary.mjs",
+        "node scripts/sync-skill-resources.mjs --check",
+        "bash scripts/sync-harness-skills.sh --check",
+        "bash scripts/audit.sh doc-consistency",
+        "bash scripts/audit.sh generator-purity",
+        "bash -n + shellcheck --severity=warning over scripts/*.sh",
+        "bash scripts/verify-skill-manifest.sh (4/4 conditions)",
+        "bash scripts/verify-hooks-reliability.sh (9 fixes)",
+        "cargo test + cargo clippy -D warnings on the scaffolded health-aggregator crate"
+      ]
     },
     "certification": {
-      "status": "NOT_TRACKED",
-      "blockers": []
+      "status": "LOCAL_ONLY",
+      "blockers": [],
+      "note": "All validation run locally on this machine; no CI workflow started or cited."
     },
     "publication": {
       "status": "NOT_TRACKED",
@@ -53,12 +68,12 @@
     {
       "id": "2026-08-20-c200-skill-scaffolds-and-mirror",
       "title": "Scaffold + mirror the 6 new HMA skills",
-      "status": "in_progress",
+      "status": "merged",
       "wave": 0,
       "deliverable": "skills/<name>/SKILL.md for each of the 6 new skills, plus mirrored copies in .agents/, .claude/, .codex/, .kimi-code/, .opencode/, templates/project-skills/, and a plugin.json `skills` array entry. Run `scripts/add-project-skills.sh` to propagate.",
       "depends_on": [],
       "specs": [
-        "docs/05-hma-pmp-companion-architecture.md §16.1",
+        "docs/05-hma-pmp-companion-architecture.md \u00a716.1",
         "docs/01-connected-skill-packages.md",
         "docs/03-hooks-reliability.md",
         "docs/04-skill-refiner-loop.md",
@@ -70,46 +85,54 @@
     {
       "id": "2026-08-20-c201-install-contract-verifier",
       "title": "Add scripts/verify-skill-manifest.sh (the 4-condition install contract)",
-      "status": "pending",
+      "status": "merged",
       "wave": 1,
-      "deliverable": "scripts/verify-skill-manifest.sh — checks valid marketplace.json, valid plugin.json, every SKILL.md exists + name matches folder, idempotent install.",
-      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "deliverable": "scripts/verify-skill-manifest.sh \u2014 checks valid marketplace.json, valid plugin.json, every SKILL.md exists + name matches folder, idempotent install.",
+      "depends_on": [
+        "2026-08-20-c200-skill-scaffolds-and-mirror"
+      ],
       "specs": [
         "docs/01-connected-skill-packages.md",
-        "docs/05-hma-pmp-companion-architecture.md §16.2"
+        "docs/05-hma-pmp-companion-architecture.md \u00a716.2"
       ]
     },
     {
       "id": "2026-08-20-c202-hooks-reliability-scripts",
       "title": "Add scripts/install-hooks-reliability.sh + scripts/verify-hooks-reliability.sh",
-      "status": "pending",
+      "status": "merged",
       "wave": 1,
       "deliverable": "Two scripts: install- applies the 9 hook fixes; verify- inverse-checks. Both exit 0/1, are idempotent, and CI-runnable.",
-      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "depends_on": [
+        "2026-08-20-c200-skill-scaffolds-and-mirror"
+      ],
       "specs": [
         "docs/03-hooks-reliability.md",
-        "docs/05-hma-pmp-companion-architecture.md §16.4"
+        "docs/05-hma-pmp-companion-architecture.md \u00a716.4"
       ]
     },
     {
       "id": "2026-08-20-c203-launchagent-supervisor-templates",
       "title": "Add scripts/render-supervisor-plist.sh + launchd/systemd template assets",
-      "status": "pending",
+      "status": "merged",
       "wave": 1,
       "deliverable": "Template generator + the 9-fix plist template + systemd unit template. Companion's `doctor` will consume these.",
-      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "depends_on": [
+        "2026-08-20-c200-skill-scaffolds-and-mirror"
+      ],
       "specs": [
         "docs/07-launchagent-supervisor-spec.md",
-        "docs/05-hma-pmp-companion-architecture.md §16.4"
+        "docs/05-hma-pmp-companion-architecture.md \u00a716.4"
       ]
     },
     {
       "id": "2026-08-20-c204-tauri-tray-scaffold",
       "title": "Add the tauri-tray-app HMA skill's scaffold scripts (tray + popover + health-aggregator)",
-      "status": "pending",
+      "status": "merged",
       "wave": 2,
       "deliverable": "scripts/scaffold-tauri-tray.sh + the health-aggregator Rust crate. The Companion's tray icon will reuse this.",
-      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "depends_on": [
+        "2026-08-20-c200-skill-scaffolds-and-mirror"
+      ],
       "specs": [
         "docs/06-tauri-tray-app-spec.md"
       ]
@@ -117,13 +140,48 @@
     {
       "id": "2026-08-20-c205-realtime-refiner-loop",
       "title": "Add the realtime-skill-refiner HMA skill's loop implementation",
-      "status": "pending",
+      "status": "merged",
       "wave": 2,
-      "deliverable": "scripts/refiner-loop.sh (the 5-stage Detect → Triage → Refine → Verify → Ship loop). HALT at Triage for human approval.",
-      "depends_on": ["2026-08-20-c200-skill-scaffolds-and-mirror"],
+      "deliverable": "scripts/refiner-loop.sh (the 5-stage Detect \u2192 Triage \u2192 Refine \u2192 Verify \u2192 Ship loop). HALT at Triage for human approval.",
+      "depends_on": [
+        "2026-08-20-c200-skill-scaffolds-and-mirror"
+      ],
       "specs": [
         "docs/04-skill-refiner-loop.md"
       ]
     }
+  ],
+  "completedAt": "2026-08-20T12:55:00Z",
+  "deviations": [
+    {
+      "planned": "Bump plugin.json version to 0.2.0",
+      "actual": "Bumped builder.manifest.json package.version 2.0.0-alpha.2 -> 2.0.0-alpha.3; all other manifests are generated from it",
+      "reason": "check-builder-authority.mjs pins the package to ^2.0.0-(alpha|beta).N; 0.2.0 fails the release gate and regresses the version. 'v0.2.0' is the phase codename. Confirmed with the operator."
+    },
+    {
+      "planned": "Add the 6 skills to the plugin.json `skills` array",
+      "actual": "Registered in builder.manifest.json .skills[] and templates/activation-manifest.json",
+      "reason": "plugin.json has no skills array and is itself generated; builder.manifest.json is the canonical registry driving every generated artifact."
+    },
+    {
+      "planned": "npm run validate:strict skills/<name>",
+      "actual": "node scripts/check-skill-contracts.mjs plus the 4 generators and sync-harness-skills.sh --check",
+      "reason": "The repo has no package.json; this is the actual validation gate used by production-convergence."
+    },
+    {
+      "planned": "Skill frontmatter per each spec's section 0 (license, version, allowed-tools, metadata)",
+      "actual": "Frontmatter carries only name and description; spec trigger text folded into the description",
+      "reason": "check-skill-contracts.mjs requires frontmatter keys to be exactly name,description. Confirmed with the operator."
+    },
+    {
+      "planned": "Mirror to 5 per-harness directories",
+      "actual": "Mirrored to 6 harness dirs (.agents .claude .codex .kimi .kimi-code .opencode) plus templates/project-skills via sync-harness-skills.sh",
+      "reason": "The repo mirrors 6 harnesses, not 5; mirrors are generated, not hand-written."
+    }
+  ],
+  "out_of_scope": [
+    "Companion-side deliverables named in specs 04/06/08 DoD (Tauri commands, PEM bugTicket/skillSource entities, Companion UI panels) \u2014 these live in prometheus-companion per this phase's stated non-goals.",
+    "Spec 07 DoD: migrating the 7 existing PMP LaunchAgents \u2014 those live in prometheus-skill-system, not this repo.",
+    "Spec 03 DoD: the prom-hook-dispatch Rust binary (W6.7) \u2014 reported by the verifier as a human-decision item rather than shipped."
   ]
 }

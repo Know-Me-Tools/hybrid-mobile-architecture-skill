@@ -1,0 +1,169 @@
+---
+title: claude-hooks-reliability
+sidebar_label: claude-hooks-reliability
+sidebar_position: 34
+description: "Diagnose, fix, and prevent silent hook failures in the agent hook chain. Use when a hook is not firing, when a skill did not trigger, when a matcher is too narrow or too broad, when a hook runner leaks processes, or when hook stdout corrupts a tool decision. Triggers on hook not firing, hook unreliable, matcher issue, hook timeout, PostToolUse, SessionStart, UserPromptSubmit, SubagentStop, hook bundle, hook runtime, hook script, dispatcher hash, hooks.json, settings.json hooks."
+---
+
+# claude-hooks-reliability
+
+**Category:** Agent harness
+
+## What it is for
+
+Diagnose, fix, and prevent silent hook failures in the agent hook chain. Use when a hook is not firing, when a skill did not trigger, when a matcher is too narrow or too broad, when a hook runner leaks processes, or when hook stdout corrupts a tool decision. Triggers on hook not firing, hook unreliable, matcher issue, hook timeout, PostToolUse, SessionStart, UserPromptSubmit, SubagentStop, hook bundle, hook runtime, hook script, dispatcher hash, hooks.json, settings.json hooks.
+
+## Why it is designed this way
+
+A hook that does not fire produces no error and no log line; the rule simply never reaches the model. Each fix converts one silent failure into a loud one.
+
+## Common use cases
+
+- Diagnose a hook that is reported as not firing or as firing too often
+- Audit hooks.json or settings.json before shipping a hook chain
+- Apply and verify the matcher, stdout, and process-group fixes
+
+## How to invoke it
+
+Use the explicit skill name when the gate is important or implicit activation
+would be ambiguous:
+
+```text
+/claude-hooks-reliability <your task or question>
+```
+
+Claude Code, Codex, OpenCode, and Kimi discover the same canonical
+`SKILL.md`. Their activation adapters may recommend the skill, but the
+adapter is advisory: Prometheus remains the lifecycle and mutation authority.
+
+## Scope boundary
+
+Do not use for plugin-installation or skill-registration problems; confirm the skill is in the canonical registry first.
+
+## Canonical operating contract
+
+Hooks fail silently. A hook that does not fire produces no error — the rule
+simply never reaches the model, and the system "feels broken" with nothing in
+any log. Every fix below converts a silent failure into a loud one.
+
+Apply with `scripts/install-hooks-reliability.sh <target>`; check with
+`scripts/verify-hooks-reliability.sh <target>`. The verifier is the inverse of
+the installer and is what a consumer's `doctor` command runs.
+
+## The 9 fixes
+
+### W6.1 — Inline `bash -c '…'` is fragile
+
+A long inline script buried in JSON has an unreadable quoting chain and cannot
+be tested in isolation. Extract it to a checked-in file and have the JSON call
+that file with arguments.
+
+```json
+{ "type": "command", "command": "bash $BUNDLE_ROOT/hooks/sessionstart-control.sh \"$1\" \"$2\"" }
+```
+
+Each script then tests standalone: `echo '{"event":"…"}' | bash the-script.sh`.
+
+### W6.2 — Dispatcher SHA re-validated on every hook
+
+Five SessionStart hooks pay five `shasum` calls before the first prompt. Cache
+the validated digest briefly and skip re-hashing within the window.
+
+```bash
+CACHE="${TMPDIR:-/tmp}/.prom-hook-cache-${BUNDLE_ID}"
+if [ ! -f "$CACHE" ] || [ "$(( $(date +%s) - $(stat -f %m "$CACHE" 2>/dev/null || stat -c %Y "$CACHE") ))" -ge 60 ]; then
+  actual="$(shasum -a 256 "$DISPATCHER" | awk '{print $1}')"
+  [ "$actual" = "$DISPATCHER_SHA" ] || exit 1
+  printf '%s\n' "$actual" > "$CACHE"
+fi
+```
+
+### W6.3 — Subagent matchers are fragile
+
+Bare-string matchers match one exact agent name. A later `planner-v2` silently
+never fires. Anchor matchers as regex alternations, and give the fallback entry
+a real matcher so it does not fire for every subagent.
+
+```json
+{ "matcher": "^(planner|plan|planner-v2)$" }
+```
+
+### W6.4 — Hooks leak processes on timeout
+
+A hook that backgrounds work and exits returns inside the timeout but leaks the
+child. Spawn in a new process group, kill the group on timeout, then reap.
+
+```bash
+setsid bash -c "exec $HOOK_SCRIPT" & hook_pid=$!
+wait "$hook_pid" || kill -KILL -"$hook_pid" 2>/dev/null || true
+wait "$hook_pid" 2>/dev/null || true
+```
+
+### W6.5 — Hook stdout pollutes tool decisions
+
+A `WARN:` line on stdout is parsed as the decision payload and the real
+decision is discarded — the hook "ran but did not block". Redirect diagnostics
+before any work so stdout carries only the decision.
+
+```bash
+#!/usr/bin/env bash
+exec 2>>"$LOG_DIR/hooks.log"
+```
+
+Nothing but decision JSON may reach stdout.
+
+### W6.6 — No structured hook-result log
+
+With the bundle, the script, and the dispatcher each logging elsewhere, a
+misfire has no single observable. Append one line per invocation to a single
+NDJSON file.
+
+```json
+{"ts":"2026-08-20T12:34:56Z","hook_id":"sessionstart-control","harness":"claude-code","exit":0,"dur_ms":42}
+```
+
+### W6.7 — A `bash` interpreter sits in every hook path
+
+Even with extracted scripts, a malformed environment variable or missing binary
+breaks the whole chain. Route hooks through one small bundled dispatcher binary
+that clears the environment, passes only a known-safe set, and is ABI-versioned.
+Until that binary ships, treat W6.1 and W6.5 as the mitigation.
+
+### W6.8 — `SessionStart` matchers are too broad
+
+A `*` matcher fires every SessionStart hook for every session, multiplying
+cold-start cost across sessions that will never use them. Narrow the matcher to
+the harness that actually consumes the hook.
+
+### W6.9 — `UserPromptSubmit` entries omit `matcher`
+
+An entry with no matcher is unconditional. It works while it is the only entry
+and silently double-fires the moment a second is added. Give every entry an
+explicit matcher, `"*"` included, so the intent survives the next edit.
+
+## Verification
+
+```bash
+bash scripts/verify-hooks-reliability.sh .
+```
+
+Exits 0 when all nine hold, and names the violated fix otherwise.
+
+## When not to use this
+
+Plugin-installation problems and skill-registration problems are not hook
+problems. Check that the skill is in the canonical registry first.
+
+## Installation and verification
+
+Install the complete bundle with `knowme-builder skills install --path <project>`
+or the workstation installer described in [Installation](../installation).
+Verify a project copy with:
+
+```bash
+knowme-builder skills check --path <project>
+```
+
+The canonical source is
+`skills/claude-hooks-reliability/SKILL.md`; generated scaffold and harness copies
+must never be edited independently.

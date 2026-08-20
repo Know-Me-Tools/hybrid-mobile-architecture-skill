@@ -51,6 +51,16 @@
       ],
       "notFor": "Do not use it as permission to copy production transcripts, credentials, documents, or raw client notes."
     },
+    "auto-skill-package-integration": {
+      "category": "Packaging and distribution",
+      "why": "Auto-installing from a watched source is remote code execution triggered by someone else's commit. Detection can be automatic; the install gate stays with the operator.",
+      "useCases": [
+        "Watch a git remote or a shared directory for newly available skill packages",
+        "Present detected candidates with their source and verification result",
+        "Record installs and declines so candidates are not re-offered each cycle"
+      ],
+      "notFor": "Do not install without operator confirmation, treat any new SKILL.md as installable before the contract check, or watch a directory the operator does not control."
+    },
     "axum-agent-gateway": {
       "category": "Runtime and service boundaries",
       "why": "The browser must not become an agent runtime or authorization boundary. The Axum gateway derives verified identity, applies policy, submits bounded UAR commands, and streams typed results through a server-controlled boundary.",
@@ -71,6 +81,16 @@
       ],
       "notFor": "Do not publish raw wikis, session logs, credentials, personal information, or generated build output as source."
     },
+    "claude-hooks-reliability": {
+      "category": "Agent harness",
+      "why": "A hook that does not fire produces no error and no log line; the rule simply never reaches the model. Each fix converts one silent failure into a loud one.",
+      "useCases": [
+        "Diagnose a hook that is reported as not firing or as firing too often",
+        "Audit hooks.json or settings.json before shipping a hook chain",
+        "Apply and verify the matcher, stdout, and process-group fixes"
+      ],
+      "notFor": "Do not use for plugin-installation or skill-registration problems; confirm the skill is in the canonical registry first."
+    },
     "client-rag": {
       "category": "Data and privacy",
       "why": "Retrieval is derived application state and must preserve privacy-class boundaries. The skill fixes embedding dimensions, per-tier stores, local execution, provenance, and a single retrieval facade so each feature cannot invent an incompatible vector pipeline.",
@@ -80,6 +100,16 @@
         "Build embed-on-write and idempotent backfill workflows"
       ],
       "notFor": "Cloud RAG is a separate design and privacy review; vault vectors never enter server-synced tables."
+    },
+    "connected-skill-packages": {
+      "category": "Packaging and distribution",
+      "why": "A package that fails the install contract still clones successfully, so the failure surfaces later as 'the harness cannot find the skills' rather than as an install error. Stating the four conditions makes that failure loud at install time.",
+      "useCases": [
+        "Install, upgrade, validate, or remove a git-based skill package marketplace",
+        "Ship a package that a consumer must be able to install unattended",
+        "Diagnose a marketplace entry that registers but exposes no skills"
+      ],
+      "notFor": "Do not auto-pull on new commits, install outside the package install path, or register a package before the validation gate passes."
     },
     "content-block-ui": {
       "category": "Agent UI contracts",
@@ -171,6 +201,16 @@
       ],
       "notFor": "Do not store secrets, raw transcripts, unsupported claims, or private memory in public repository documentation."
     },
+    "launchagent-supervisor": {
+      "category": "Operations",
+      "why": "KeepAlive without a throttle lets launchd silently remove a crash-looping job, leaving an installer that checks only for the written file reporting healthy while the port is dead.",
+      "useCases": [
+        "Author a LaunchAgent, systemd --user unit, or Scheduled Task for a managed daemon",
+        "Diagnose a service that disappears after repeated restarts",
+        "Render supervision definitions consistently across macOS and Linux"
+      ],
+      "notFor": "Do not treat a written plist as a health check, hand-write plists, or run two installers against one label."
+    },
     "legacy-app-embed": {
       "category": "Integration boundaries",
       "why": "An embedded legacy application is an independently deployed, potentially hostile system. A versioned, capability-limited bridge prevents postMessage convenience from becoming an identity, tenant, policy, or runtime bypass.",
@@ -251,6 +291,16 @@
       ],
       "notFor": "Do not trust a persona or role supplied by the client, and do not encode authorization solely in a system prompt."
     },
+    "realtime-skill-refiner": {
+      "category": "Process",
+      "why": "Reactive fixes are where a producer is most tempted to grade its own work. The loop halts after triage so the diagnosis is ruled on by someone other than whoever writes the fix.",
+      "useCases": [
+        "Refine a skill that fired on the wrong prompt or failed to fire",
+        "Triage a failure flagged by a log monitor or a sycophancy check",
+        "Verify and ship a skill fix with its regression case attached"
+      ],
+      "notFor": "Do not skip the triage halt, edit a generated mirror instead of the canonical skill, or broaden a description without checking which neighbours lose prompts."
+    },
     "reference-ui-fidelity": {
       "category": "Quality and release gates",
       "why": "A supplied design is an acceptance oracle, not loose inspiration. Inventorying every route, state, theme, and form factor before coding prevents a polished shell from hiding missing product surfaces.",
@@ -280,6 +330,16 @@
         "Prevent Tauri-only APIs from crashing a shared web bundle"
       ],
       "notFor": "Do not render desktop window controls in a browser, PWA, or Flutter mobile surface."
+    },
+    "tauri-tray-app": {
+      "category": "Desktop surfaces",
+      "why": "A tray app inverts the usual window contract: closing the dashboard must not quit the process, and the icon must reflect aggregated health rather than any single probe.",
+      "useCases": [
+        "Scaffold a tray-resident supervisor, fleet console, or status app",
+        "Wire a tray icon, transient popover, and frameless dashboard together",
+        "Aggregate per-service probes into one rendered state"
+      ],
+      "notFor": "Do not compute tray state at the call site, let the dashboard close quit the app, or leave the default left-click menu in place when a popover is wanted."
     },
     "tauri-ui-review": {
       "category": "Quality and release gates",
