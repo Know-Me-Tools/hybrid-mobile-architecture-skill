@@ -8,7 +8,8 @@
             "command": "python3 .claude/hooks/skill-activation.py",
             "description": "Advisory activation from the canonical KnowMe Builder manifest; owns no lifecycle state"
           }
-        ]
+        ],
+        "matcher": "*"
       }
     ],
     "PostToolUse": [
