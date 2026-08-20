@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "packageVersion": "2.0.0-alpha.2",
+  "packageVersion": "2.0.0-alpha.3",
   "generatedFrom": "builder.manifest.json",
   "harnesses": [
     "claude-code",
@@ -596,6 +596,134 @@
       ],
       "explicitInvocation": "/domain-glossary-service",
       "canonicalPath": "skills/domain-glossary-service"
+    },
+    {
+      "name": "connected-skill-packages",
+      "description": "Install, upgrade, validate, or remove a git-based agent skill package marketplace consumed by the Prometheus Companion. Use when extending the substrate with third-party skill packages, pairing a new device, shipping a package that must be installable, or recovering from a broken marketplace. Triggers on skill package, marketplace, marketplace.json, plugin install, plugin upgrade, plugin remove, connected skill, install contract, hybrid-mobile-architecture, knowme-builder, plugin marketplace add, skill bundle, additional skills.",
+      "terms": [
+        "connected skill packages",
+        "skill package",
+        "marketplace",
+        "marketplace.json",
+        "plugin install",
+        "plugin upgrade",
+        "plugin remove",
+        "connected skill",
+        "install contract",
+        "hybrid-mobile-architecture",
+        "knowme-builder",
+        "plugin marketplace add",
+        "skill bundle",
+        "additional skills"
+      ],
+      "explicitInvocation": "/connected-skill-packages",
+      "canonicalPath": "skills/connected-skill-packages"
+    },
+    {
+      "name": "tauri-tray-app",
+      "description": "Build a tray-resident Tauri 2 desktop application with a health-driven tray icon, a transient popover for at-a-glance status, and a frameless dashboard window with a custom title bar. Use when scaffolding a fleet operator console, a substrate supervisor, or any app that lives in the menu bar and watches background services rather than owning a dock icon. Triggers on tray app, system tray, menu bar app, LSUIElement, accessory activation policy, popover, health aggregator, frameless window, Tauri 2 tray, TrayIconBuilder, tray icon state.",
+      "terms": [
+        "tauri tray app",
+        "tray app",
+        "system tray",
+        "menu bar app",
+        "lsuielement",
+        "accessory activation policy",
+        "popover",
+        "health aggregator",
+        "frameless window",
+        "tauri 2 tray",
+        "trayiconbuilder",
+        "tray icon state"
+      ],
+      "explicitInvocation": "/tauri-tray-app",
+      "canonicalPath": "skills/tauri-tray-app"
+    },
+    {
+      "name": "launchagent-supervisor",
+      "description": "Author, install, and supervise a macOS LaunchAgent, a Linux systemd --user unit, or a Windows Scheduled Task for a long-running managed daemon. Use when adding a service to the substrate, when a service is crash-looping or silently disappearing, or when asked for auto-restart, self-healing, or a watchdog. Triggers on LaunchAgent, plist, launchd, launchctl, KeepAlive, ThrottleInterval, ProcessType, RunAtLoad, daemon, supervisor, self-healing, restart loop, watchdog, systemd user unit, scheduled task.",
+      "terms": [
+        "launchagent supervisor",
+        "launchagent",
+        "plist",
+        "launchd",
+        "launchctl",
+        "keepalive",
+        "throttleinterval",
+        "processtype",
+        "runatload",
+        "daemon",
+        "supervisor",
+        "self-healing",
+        "restart loop",
+        "watchdog",
+        "systemd user unit",
+        "scheduled task"
+      ],
+      "explicitInvocation": "/launchagent-supervisor",
+      "canonicalPath": "skills/launchagent-supervisor"
+    },
+    {
+      "name": "realtime-skill-refiner",
+      "description": "Reactively detect, triage, refine, verify, and ship a fix for a bug in an installed skill package, driven by a real observed failure rather than a proactive review. Use when a skill produces wrong answers, fires on the wrong prompts, fails to fire at all, or is flagged by a log monitor or sycophancy check. Triggers on skill bug, skill failing, fix skill, patch skill, refine skill, realtime correction, skill regression, wrong skill fired, skill did not fire, sycophancy, bug ticket.",
+      "terms": [
+        "realtime skill refiner",
+        "skill bug",
+        "skill failing",
+        "fix skill",
+        "patch skill",
+        "refine skill",
+        "realtime correction",
+        "skill regression",
+        "wrong skill fired",
+        "skill did not fire",
+        "sycophancy",
+        "bug ticket"
+      ],
+      "explicitInvocation": "/realtime-skill-refiner",
+      "canonicalPath": "skills/realtime-skill-refiner"
+    },
+    {
+      "name": "claude-hooks-reliability",
+      "description": "Diagnose, fix, and prevent silent hook failures in the agent hook chain. Use when a hook is not firing, when a skill did not trigger, when a matcher is too narrow or too broad, when a hook runner leaks processes, or when hook stdout corrupts a tool decision. Triggers on hook not firing, hook unreliable, matcher issue, hook timeout, PostToolUse, SessionStart, UserPromptSubmit, SubagentStop, hook bundle, hook runtime, hook script, dispatcher hash, hooks.json, settings.json hooks.",
+      "terms": [
+        "claude hooks reliability",
+        "hook not firing",
+        "hook unreliable",
+        "matcher issue",
+        "hook timeout",
+        "posttooluse",
+        "sessionstart",
+        "userpromptsubmit",
+        "subagentstop",
+        "hook bundle",
+        "hook runtime",
+        "hook script",
+        "dispatcher hash",
+        "hooks.json",
+        "settings.json hooks"
+      ],
+      "explicitInvocation": "/claude-hooks-reliability",
+      "canonicalPath": "skills/claude-hooks-reliability"
+    },
+    {
+      "name": "auto-skill-package-integration",
+      "description": "Auto-detect newly available skill packages from a watched git remote or a watched local directory and bring them through a confirmed install, instead of installing each one by hand. Use when an organization ships skills from a shared folder or feed, when a marketplace should be polled for new releases, or when onboarding a device to a team's skill set. Triggers on auto install, watch directory, watch git, skill feed, marketplace feed, plugin marketplace add, organization skills, team skills, detected skill, new skill available.",
+      "terms": [
+        "auto skill package integration",
+        "auto install",
+        "watch directory",
+        "watch git",
+        "skill feed",
+        "marketplace feed",
+        "plugin marketplace add",
+        "organization skills",
+        "team skills",
+        "detected skill",
+        "new skill available"
+      ],
+      "explicitInvocation": "/auto-skill-package-integration",
+      "canonicalPath": "skills/auto-skill-package-integration"
     }
   ]
 }

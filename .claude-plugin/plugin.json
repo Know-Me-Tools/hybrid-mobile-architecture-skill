@@ -1,6 +1,6 @@
 {
   "name": "hybrid-mobile-architecture",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "description": "Versioned, non-destructive application generator and instruction pack for governed agentic applications.",
   "author": {
     "name": "Travis James",
@@ -51,7 +51,13 @@
     "./skills/agent-runtime-security",
     "./skills/anonymized-replica",
     "./skills/persona-scoped-agent",
-    "./skills/domain-glossary-service"
+    "./skills/domain-glossary-service",
+    "./skills/connected-skill-packages",
+    "./skills/tauri-tray-app",
+    "./skills/launchagent-supervisor",
+    "./skills/realtime-skill-refiner",
+    "./skills/claude-hooks-reliability",
+    "./skills/auto-skill-package-integration"
   ],
   "mcpServers": "./.mcp.json"
 }

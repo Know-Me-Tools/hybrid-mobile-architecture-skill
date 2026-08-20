@@ -4,7 +4,7 @@
   "package": {
     "id": "hybrid-mobile-architecture",
     "displayName": "KnowMe Builder",
-    "version": "2.0.0-alpha.2",
+    "version": "2.0.0-alpha.3",
     "description": "Versioned, non-destructive application generator and instruction pack for governed agentic applications.",
     "license": "MIT",
     "homepage": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill",
@@ -28,31 +28,47 @@
   "profiles": {
     "sovereign-hybrid": {
       "description": "Flutter mobile, Tauri desktop, Rust adapters, embedded UAR on mobile, and service UAR on desktop/web.",
-      "surfaces": ["flutter-mobile", "tauri-desktop", "rust-core"],
+      "surfaces": [
+        "flutter-mobile",
+        "tauri-desktop",
+        "rust-core"
+      ],
       "uarMode": "hybrid",
       "runnableVerticalSlice": true
     },
     "governed-web-shell": {
       "description": "React web shell and Axum BFF with service UAR, AG-UI/A2UI, PEM/PGlite, governed identity, and optional legacy embedding.",
-      "surfaces": ["react-web", "axum-bff"],
+      "surfaces": [
+        "react-web",
+        "axum-bff"
+      ],
       "uarMode": "service",
       "runnableVerticalSlice": true
     },
     "flutter-mobile": {
       "description": "Flutter mobile surface with Rust/FRB bindings and embedded UAR.",
-      "surfaces": ["flutter-mobile", "rust-core"],
+      "surfaces": [
+        "flutter-mobile",
+        "rust-core"
+      ],
       "uarMode": "embedded",
       "runnableVerticalSlice": true
     },
     "tauri-desktop": {
       "description": "Tauri desktop surface with React and service or in-process UAR facade.",
-      "surfaces": ["tauri-desktop", "rust-core"],
+      "surfaces": [
+        "tauri-desktop",
+        "rust-core"
+      ],
       "uarMode": "service",
       "runnableVerticalSlice": true
     },
     "axum-web": {
       "description": "Axum BFF and React web surface with service UAR.",
-      "surfaces": ["react-web", "axum-bff"],
+      "surfaces": [
+        "react-web",
+        "axum-bff"
+      ],
       "uarMode": "service",
       "runnableVerticalSlice": true
     }
@@ -86,7 +102,13 @@
     "agent-runtime-security",
     "anonymized-replica",
     "persona-scoped-agent",
-    "domain-glossary-service"
+    "domain-glossary-service",
+    "connected-skill-packages",
+    "tauri-tray-app",
+    "launchagent-supervisor",
+    "realtime-skill-refiner",
+    "claude-hooks-reliability",
+    "auto-skill-package-integration"
   ],
   "commands": [
     "new",
@@ -161,5 +183,10 @@
     "opencode": ".opencode/commands",
     "kimi-code": ".kimi-code/commands"
   },
-  "supportedHarnesses": ["claude-code", "codex", "opencode", "kimi-code"]
+  "supportedHarnesses": [
+    "claude-code",
+    "codex",
+    "opencode",
+    "kimi-code"
+  ]
 }
