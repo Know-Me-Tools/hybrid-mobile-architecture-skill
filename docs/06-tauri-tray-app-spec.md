@@ -11,32 +11,21 @@
 
 ## §0 · Frontmatter
 
+As shipped in `skills/tauri-tray-app/SKILL.md`:
+
 ```yaml
 ---
 name: tauri-tray-app
-description: >
-  Build a tray-resident Tauri 2.0 desktop application with a
-  health-aggregator-driven tray icon, a frameless main
-  dashboard window with a custom title bar, and a popover
-  for at-a-glance status. Use when scaffolding the
-  Prometheus Companion, a fleet operator's console, or any
-  app that lives in the OS menu bar / system tray and
-  supervises a set of background services. Triggers on:
-  tray app, system tray, menu bar app, LSUIElement,
-  accessory activation policy, popover, health
-  aggregator, frameless window, Tauri 2, TrayIconBuilder.
-license: MIT
-version: '1.0.0'
-allowed-tools: file_system code_interpreter sequential_thinking
-metadata:
-  author: Prometheus AGS
-  category: tauri
-  tags: [tauri, desktop, tray, system-tray, menubar,
-         observability, health-aggregator, accessory]
+description: Build a tray-resident Tauri 2 desktop application with a health-driven tray icon, a transient popover for at-a-glance status, and a frameless dashboard window with a custom title bar. Use when scaffolding a fleet operator console, a substrate supervisor, or any app that lives in the menu bar and watches background services rather than owning a dock icon. Triggers on tray app, system tray, menu bar app, LSUIElement, accessory activation policy, popover, health aggregator, frameless window, Tauri 2 tray, TrayIconBuilder, tray icon state.
 ---
-
-# tauri-tray-app
 ```
+
+`scripts/check-skill-contracts.mjs` requires the frontmatter keys to be
+exactly `name` and `description`, in that order, with `description` a single
+line of at most 1024 characters. It rejects `license`, `version`,
+`allowed-tools`, and `metadata`, so the trigger vocabulary that would
+otherwise live in those keys is folded into `description` — which is what the
+harness matches on anyway. `name` must equal the skill's directory name.
 
 ---
 

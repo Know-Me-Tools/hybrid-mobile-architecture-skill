@@ -304,6 +304,10 @@
 * [Shared host and Axum vertical slice launched](/karpathy-progress-20260717T221423Z-axum-host.md)
 * [Worktree consolidation postmortem and runtime verification failures](/worktree-consolidation-postmortem-runtime-verification-failures.md)
 
+## SessionRecord
+
+* [Karpathy session 105b8bed16a9](/karpathy-session-105b8bed16a97283.md)
+
 ## Uncategorized
 
 * [Prompting publication gates archived through kbd-apply](/karpathy-progress-20260718T114700Z-prompting-publication-gates-archived.md)

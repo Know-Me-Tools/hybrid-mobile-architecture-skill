@@ -9,31 +9,21 @@
 
 ## §0 · Frontmatter
 
+As shipped in `skills/launchagent-supervisor/SKILL.md`:
+
 ```yaml
 ---
 name: launchagent-supervisor
-description: >
-  Author, install, and supervise a macOS LaunchAgent (or
-  Linux systemd --user unit / Windows Scheduled Task) for a
-  Prometheus-managed daemon. Use when adding a new service
-  to the substrate, when a service is crash-looping, or
-  when the user asks for "auto-restart", "self-healing",
-  "watchdog", "KeepAlive", "throttle", or "ProcessType".
-  Triggers on: LaunchAgent, plist, launchd, keepalive,
-  throttle, ProcessType, daemon, supervisor,
-  self-healing, restart loop, watchdog, systemd --user.
-license: MIT
-version: '1.0.0'
-allowed-tools: file_system code_interpreter sequential_thinking
-metadata:
-  author: Prometheus AGS
-  category: devops
-  tags: [launchd, plist, supervisor, daemon, macos, linux,
-         windows, self-healing, watchdog, systemd]
+description: Author, install, and supervise a macOS LaunchAgent, a Linux systemd --user unit, or a Windows Scheduled Task for a long-running managed daemon. Use when adding a service to the substrate, when a service is crash-looping or silently disappearing, or when asked for auto-restart, self-healing, or a watchdog. Triggers on LaunchAgent, plist, launchd, launchctl, KeepAlive, ThrottleInterval, ProcessType, RunAtLoad, daemon, supervisor, self-healing, restart loop, watchdog, systemd user unit, scheduled task.
 ---
-
-# launchagent-supervisor
 ```
+
+`scripts/check-skill-contracts.mjs` requires the frontmatter keys to be
+exactly `name` and `description`, in that order, with `description` a single
+line of at most 1024 characters. It rejects `license`, `version`,
+`allowed-tools`, and `metadata`, so the trigger vocabulary that would
+otherwise live in those keys is folded into `description` — which is what the
+harness matches on anyway. `name` must equal the skill's directory name.
 
 ---
 

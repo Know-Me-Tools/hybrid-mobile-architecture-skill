@@ -9,31 +9,21 @@
 
 ## §0 · Frontmatter
 
+As shipped in `skills/realtime-skill-refiner/SKILL.md`:
+
 ```yaml
 ---
 name: realtime-skill-refiner
-description: >
-  Realtime detection and refinement of bugs in currently
-  installed skill packages. Invokes skill-refiner on the
-  affected skills, verifies the fix, and ships a local
-  patch. Use when a skill is producing wrong answers,
-  when the Companion's log monitor flags a skill as
-  failing, or when the user says "skill X is broken, fix
-  it". Triggers on: skill bug, skill failing, fix skill,
-  patch skill, refine skill, realtime correction, skill
-  regression, sycophancy.
-license: MIT
-version: '1.0.0'
-allowed-tools: file_system code_interpreter sequential_thinking
-metadata:
-  author: Prometheus AGS
-  category: process
-  tags: [skill-refiner, bug-fix, realtime, companion,
-         sycophancy, triage, ship]
+description: Reactively detect, triage, refine, verify, and ship a fix for a bug in an installed skill package, driven by a real observed failure rather than a proactive review. Use when a skill produces wrong answers, fires on the wrong prompts, fails to fire at all, or is flagged by a log monitor or sycophancy check. Triggers on skill bug, skill failing, fix skill, patch skill, refine skill, realtime correction, skill regression, wrong skill fired, skill did not fire, sycophancy, bug ticket.
 ---
-
-# realtime-skill-refiner
 ```
+
+`scripts/check-skill-contracts.mjs` requires the frontmatter keys to be
+exactly `name` and `description`, in that order, with `description` a single
+line of at most 1024 characters. It rejects `license`, `version`,
+`allowed-tools`, and `metadata`, so the trigger vocabulary that would
+otherwise live in those keys is folded into `description` — which is what the
+harness matches on anyway. `name` must equal the skill's directory name.
 
 ---
 

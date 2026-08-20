@@ -9,31 +9,21 @@
 
 ## §0 · Frontmatter
 
+As shipped in `skills/auto-skill-package-integration/SKILL.md`:
+
 ```yaml
 ---
 name: auto-skill-package-integration
-description: >
-  Auto-detect and install new skill packages from a watched
-  git URL or a watched local directory. Use when the
-  operator wants the Companion to pick up new skills
-  without clicking Install each time; when an org ships
-  skills in a shared directory; or when a third-party
-  marketplace has a known feed. Triggers on: auto
-  install, watch directory, watch git, skill feed,
-  marketplace feed, /plugin marketplace add <url>,
-  organization skills, team skills.
-license: MIT
-version: '1.0.0'
-allowed-tools: file_system code_interpreter sequential_thinking
-metadata:
-  author: Prometheus AGS
-  category: process
-  tags: [marketplace, plugins, companion, auto-install,
-         watch, fs-events, git-poll, team-skills]
+description: Auto-detect newly available skill packages from a watched git remote or a watched local directory and bring them through a confirmed install, instead of installing each one by hand. Use when an organization ships skills from a shared folder or feed, when a marketplace should be polled for new releases, or when onboarding a device to a team's skill set. Triggers on auto install, watch directory, watch git, skill feed, marketplace feed, plugin marketplace add, organization skills, team skills, detected skill, new skill available.
 ---
-
-# auto-skill-package-integration
 ```
+
+`scripts/check-skill-contracts.mjs` requires the frontmatter keys to be
+exactly `name` and `description`, in that order, with `description` a single
+line of at most 1024 characters. It rejects `license`, `version`,
+`allowed-tools`, and `metadata`, so the trigger vocabulary that would
+otherwise live in those keys is folded into `description` — which is what the
+harness matches on anyway. `name` must equal the skill's directory name.
 
 ---
 

@@ -8,31 +8,21 @@
 
 ## §0 · Frontmatter
 
+As shipped in `skills/connected-skill-packages/SKILL.md`:
+
 ```yaml
 ---
 name: connected-skill-packages
-description: >
-  Install, upgrade, validate, or remove a git-based Claude Code
-  skill package marketplace from the Prometheus Companion. Use
-  when extending the substrate with third-party skill packages,
-  pairing a new device, or recovering from a broken marketplace.
-  Triggers on: skill package, marketplace, plugin install,
-  plugin upgrade, plugin remove, connected skill,
-  hybrid-mobile-architecture, knowme-builder,
-  /plugin marketplace, /plugin install, skill bundle,
-  strict false, additional skills.
-license: MIT
-version: '1.0.0'
-allowed-tools: file_system code_interpreter sequential_thinking
-metadata:
-  author: Prometheus AGS
-  category: process
-  tags: [marketplace, plugins, companion, hybrid, installation,
-         git, claude-code]
+description: Install, upgrade, validate, or remove a git-based agent skill package marketplace consumed by the Prometheus Companion. Use when extending the substrate with third-party skill packages, pairing a new device, shipping a package that must be installable, or recovering from a broken marketplace. Triggers on skill package, marketplace, marketplace.json, plugin install, plugin upgrade, plugin remove, connected skill, install contract, hybrid-mobile-architecture, knowme-builder, plugin marketplace add, skill bundle, additional skills.
 ---
-
-# connected-skill-packages
 ```
+
+`scripts/check-skill-contracts.mjs` requires the frontmatter keys to be
+exactly `name` and `description`, in that order, with `description` a single
+line of at most 1024 characters. It rejects `license`, `version`,
+`allowed-tools`, and `metadata`, so the trigger vocabulary that would
+otherwise live in those keys is folded into `description` — which is what the
+harness matches on anyway. `name` must equal the skill's directory name.
 
 ---
 

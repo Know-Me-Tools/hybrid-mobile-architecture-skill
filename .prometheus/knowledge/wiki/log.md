@@ -1,5 +1,8 @@
 # Update Log
 
+## 2026-08-20
+* **Ingest**: [Karpathy session 105b8bed16a9](/karpathy-session-105b8bed16a97283.md)
+
 ## 2026-07-27
 * **Creation**: [PEM sync bridge and mobile tier executor completed with unknown change](/pem-sync-bridge-and-mobile-tier-executor-completed-with-unknown-change.md)
 * **Creation**: [PEM sync bridge and mobile tier phase complete at 12:20](/pem-sync-bridge-and-mobile-tier-phase-complete-at-12-20.md)

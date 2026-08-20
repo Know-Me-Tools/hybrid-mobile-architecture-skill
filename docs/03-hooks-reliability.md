@@ -9,31 +9,21 @@
 
 ## §0 · Frontmatter
 
+As shipped in `skills/claude-hooks-reliability/SKILL.md`:
+
 ```yaml
 ---
 name: claude-hooks-reliability
-description: >
-  Diagnose, fix, and prevent silent hook failures in the
-  Claude Code hook chain. Use when a hook is not firing,
-  when the user reports "skill didn't trigger", when a
-  matcher is too narrow or too broad, or when a hook
-  runner is leaking processes. Triggers on: hook not
-  firing, hook unreliable, matcher issue, hook timeout,
-  PostToolUse, SessionStart, UserPromptSubmit,
-  SubagentStop, hook bundle, hook runtime, bash -c,
-  data-tauri-drag-region, hook script.
-license: MIT
-version: '1.0.0'
-allowed-tools: file_system code_interpreter sequential_thinking
-metadata:
-  author: Prometheus AGS
-  category: process
-  tags: [hooks, claude-code, reliability, debug,
-         bundle, dispatcher, matcher]
+description: Diagnose, fix, and prevent silent hook failures in the agent hook chain. Use when a hook is not firing, when a skill did not trigger, when a matcher is too narrow or too broad, when a hook runner leaks processes, or when hook stdout corrupts a tool decision. Triggers on hook not firing, hook unreliable, matcher issue, hook timeout, PostToolUse, SessionStart, UserPromptSubmit, SubagentStop, hook bundle, hook runtime, hook script, dispatcher hash, hooks.json, settings.json hooks.
 ---
-
-# claude-hooks-reliability
 ```
+
+`scripts/check-skill-contracts.mjs` requires the frontmatter keys to be
+exactly `name` and `description`, in that order, with `description` a single
+line of at most 1024 characters. It rejects `license`, `version`,
+`allowed-tools`, and `metadata`, so the trigger vocabulary that would
+otherwise live in those keys is folded into `description` — which is what the
+harness matches on anyway. `name` must equal the skill's directory name.
 
 ---
 
