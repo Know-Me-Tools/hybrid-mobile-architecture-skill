@@ -41,7 +41,7 @@
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 1,
+      "completed": 2,
       "total": 6,
       "status": "IN_PROGRESS"
     },
@@ -109,12 +109,35 @@
       "dependsOn": [
         "2026-08-22-c300-openspec-mirror-repair"
       ],
-      "status": "pending",
-      "implementation_status": "PENDING",
+      "status": "implemented",
+      "implementation_status": "COMPLETE",
       "certification_status": "PENDING",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c301-simulated-consumer-proof/",
-      "note": "Executable half of G1. Does NOT prove prometheus-companion can consume the package \u2014 that repo is a 2-commit scaffold."
+      "note": "Executable half of G1. Does NOT prove prometheus-companion can consume the package \u2014 that repo is a 2-commit scaffold.",
+      "tasks_done": 9,
+      "tasks_total": 9,
+      "tasks_complete": 9,
+      "branch": "kbd/c301-simulated-consumer-proof",
+      "qa": {
+        "gatesGreen": "12/12",
+        "positiveControl": true,
+        "negativeFixtures": 5,
+        "pathIsolation": "proven empirically \u2014 source tree deliberately broken (undeclared skill + deleted mirror) made the source's own gate fail while the consumer proof still passed",
+        "adversarialReview": {
+          "verdict": "BLOCK -> resolved",
+          "isolation": "harness-native (judge == producer)",
+          "findings": {
+            "critical": 3,
+            "warning": 3,
+            "suggestion": 1
+          },
+          "allReproducedAndFixed": true,
+          "headline": "The negative suite scored 5/5 against a stub that read no input \u2014 it lacked a positive control, the exact defect class it exists to catch.",
+          "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c301-simulated-consumer-proof/findings.json"
+        }
+      },
+      "notClaimed": "This does NOT demonstrate that prometheus-companion can consume the package (that repo is a 2-commit scaffold). It demonstrates that a generic consumer following the documented contract can. G1'' remains on the Companion's roadmap."
     },
     {
       "id": "2026-08-22-c302-refiner-verify-replay",

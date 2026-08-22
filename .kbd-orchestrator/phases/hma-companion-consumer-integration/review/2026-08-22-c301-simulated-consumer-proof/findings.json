@@ -1,0 +1,63 @@
+{
+  "mode": "diff",
+  "target": "2026-08-22-c301-simulated-consumer-proof",
+  "verdict": "BLOCK",
+  "judge_model": "claude-opus-5 (harness-native subagent, fresh context)",
+  "isolation_mode": "harness-native",
+  "producer_model": "claude-opus-5",
+  "cross_model_check": "same-model-family — JUDGE_MODEL_COLLISION",
+  "gateway_note": "REST dispatch unavailable: HTTP 401 token_expired at http://localhost:8181/v1.",
+  "rounds": 1,
+  "resolution": "All 7 findings reproduced and fixed; 12/12 gates green; positive control + 5 fixtures pass.",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/test-fixtures/consumer-install-negative.sh",
+      "claim": "The negative suite scored 5/5 green against a 6-line stub that read no input and always exited 1, because every assertion demanded a NON-ZERO exit and none asserted that an unbroken package passes.",
+      "evidence": "Reproduced: a stub echoing all five needles and exiting 1 produced 'all 5 fixture(s) fail for their own stated reason', SUITE_RC=0.",
+      "status": "REPRODUCED — FIXED. A POSITIVE CONTROL now runs first and aborts the suite if the proof cannot pass an unbroken package. Re-tested against the stub: the suite aborts with 'the fixtures below would be meaningless', exit 1. This was the sharpest finding of the phase — the harness had exactly the defect it exists to catch."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/test-consumer-install.sh",
+      "claim": "`git checkout \"$REF\" || true` swallowed failure, so --ref <nonexistent> reported PASS while validating the default branch and printing the requested ref as though it were checked out.",
+      "evidence": "`bash scripts/test-consumer-install.sh --ref totally-bogus-ref` printed 'source: ... (totally-bogus-ref)' and PASS.",
+      "status": "REPRODUCED — FIXED. Checkout now fails closed and the resolved short SHA is printed. Re-tested: exits 1 naming the bad ref. This matters most for the documented release case (--ref v2.0.0-alpha.3), which c305 depends on."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/test-consumer-install.sh",
+      "claim": "CONSUMER_INSTALL_REUSE_CLONE was accepted unvalidated, so pointing it at the live source tree yielded PASS — the exact circularity the script's header claims is impossible.",
+      "evidence": "CONSUMER_INSTALL_REUSE_CLONE=$PWD ... produced PASS and still printed 'clone is path-isolated'. The isolation assertion inspects only $WORK, which is always a fresh mktemp dir, so it can never catch this.",
+      "status": "REPRODUCED — FIXED. A handed-in tree must now be a git repo, must not resolve to the source tree, and must have a clean `git status --porcelain` (a consumer receives committed content only). Re-tested: exits 1 with 'points at the source tree — the proof would be circular'."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/test-consumer-install.sh",
+      "claim": "CONSUMER_INSTALL_SKIP_CONTRACT disabled contract verification on any non-empty value while the verdict line still claimed the full contract held.",
+      "evidence": "Setting it alone produced an unqualified PASS with the verifier skipped.",
+      "status": "REPRODUCED — FIXED. Now honored only alongside CONSUMER_INSTALL_FIXTURE, and the verdict degrades to 'PASS (DEGRADED — install contract NOT verified)'."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/test-fixtures/consumer-install-negative.sh",
+      "claim": "`expect` matched the needle anywhere in combined output and treated a pre-assertion crash as a detection, so collateral breakage or the fixture banner echoing its own name could satisfy an assertion.",
+      "evidence": "The match was an unanchored grep over stdout+stderr with only an rc!=0 test; the proof has an `exit 2` path producing no assertion at all.",
+      "status": "REPRODUCED — FIXED. Matching is anchored to the proof's own failure prefixes, and rc>=2 is now reported as a CRASH rather than a detection."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/test-fixtures/consumer-install-negative.sh",
+      "claim": "The missing-plugin-json needle was the bare string 'C2', which four distinct verifier violations emit, so the fixture did not pin its documented cause.",
+      "evidence": "verify-skill-manifest.sh lines 101/103/107/113 all emit C2 for different failures.",
+      "status": "REPRODUCED — FIXED. Needle is now 'C2: missing plugin.json at package root'."
+    },
+    {
+      "severity": "SUGGESTION",
+      "file": "scripts/test-consumer-install.sh",
+      "claim": "Hardcoding REQUIRED_SKILLS correctly defeats circularity but left mirror coverage asserted for only 6 of 35 declared skills.",
+      "evidence": "The mirror loops iterated REQUIRED_SKILLS only; the other 29 were never checked for mirror presence.",
+      "status": "REPRODUCED — FIXED. The hardcoded list stays as the anti-circularity floor; mirror coverage now spans all 35 declared skills. NOTE: the widened check immediately found and correctly excluded distribution.packageSkill, which sync-harness-skills.sh:10 documents as intentionally unmirrored — reporting it would have flagged design as drift."
+    }
+  ]
+}
