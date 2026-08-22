@@ -24,10 +24,10 @@
   "startedBy": "travis (via /kbd-new-phase)",
   "activeChange": null,
   "implementation_total": 6,
-  "implementation_completed": 1,
+  "implementation_completed": 2,
   "changes_total": 6,
-  "changes_completed": 1,
-  "completedChanges": 1,
+  "changes_completed": 2,
+  "completedChanges": 2,
   "totalChanges": 6,
   "assessment_complete": true,
   "plan_complete": true,
@@ -109,9 +109,9 @@
       "dependsOn": [
         "2026-08-22-c300-openspec-mirror-repair"
       ],
-      "status": "implemented",
+      "status": "merged",
       "implementation_status": "COMPLETE",
-      "certification_status": "PENDING",
+      "certification_status": "VERIFIED",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c301-simulated-consumer-proof/",
       "note": "Executable half of G1. Does NOT prove prometheus-companion can consume the package \u2014 that repo is a 2-commit scaffold.",
@@ -137,7 +137,10 @@
           "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c301-simulated-consumer-proof/findings.json"
         }
       },
-      "notClaimed": "This does NOT demonstrate that prometheus-companion can consume the package (that repo is a 2-commit scaffold). It demonstrates that a generic consumer following the documented contract can. G1'' remains on the Companion's roadmap."
+      "notClaimed": "This does NOT demonstrate that prometheus-companion can consume the package (that repo is a 2-commit scaffold). It demonstrates that a generic consumer following the documented contract can. G1'' remains on the Companion's roadmap.",
+      "commit": "19b4136",
+      "archived": true,
+      "promotedSpec": "openspec/specs/package-install-contract/"
     },
     {
       "id": "2026-08-22-c302-refiner-verify-replay",
