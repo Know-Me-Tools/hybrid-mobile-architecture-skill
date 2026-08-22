@@ -96,11 +96,15 @@ cat <<NEXT
        members = ["crates/$CRATE_NAME", "src-tauri"]
   2. Depend on it from src-tauri/Cargo.toml:
        $CRATE_NAME = { path = "../crates/$CRATE_NAME" }
-  3. Declare the module and call the wiring from your Tauri setup:
+  3. Declare the module and call the wiring from your Tauri setup. `setup`
+     hands you "&mut App", which apply_accessory_policy requires:
        mod tray;
-       tray::apply_accessory_policy(app);
-       tray::build_tray(app)?;
-       tray::intercept_dashboard_close(app);
+       .setup(|app| {
+           tray::apply_accessory_policy(app);   // needs &mut App
+           tray::build_tray(app)?;
+           tray::intercept_dashboard_close(app);
+           Ok(())
+       })
   4. Define the "$(printf '%s' 'popover')" window (frameless, transparent,
      always-on-top, skipTaskbar) alongside the "main" dashboard window.
   5. Verify:  cargo test -p $CRATE_NAME

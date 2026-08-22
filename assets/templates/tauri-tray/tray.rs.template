@@ -79,6 +79,12 @@ pub fn toggle_popover(app: &AppHandle) {
     }
 }
 
+/// Pause or resume supervision.
+///
+/// Intentionally empty in the scaffold. The tray owns no state, and the
+/// aggregator handle this must call lives in the consuming app — the generator
+/// cannot know its type. Wire it to your aggregator's `set_paused` and delete
+/// this comment.
 pub fn toggle_pause(_app: &AppHandle) {
     // Route to the health aggregator's set_paused; the tray owns no state.
 }
@@ -100,9 +106,15 @@ pub fn intercept_dashboard_close(app: &App) {
 }
 
 /// Remove the dock icon and the app-switcher entry on macOS.
-pub fn apply_accessory_policy(app: &App) {
+///
+/// Takes `&mut App`: `set_activation_policy` mutates the running app, so a
+/// shared reference does not compile (E0596). Call it from `setup`, which
+/// hands you `&mut App`.
+pub fn apply_accessory_policy(app: &mut App) {
+    // No `let _ =`: set_activation_policy returns unit in Tauri 2.x, and
+    // binding a unit value trips clippy::let_unit_value under -D warnings.
     #[cfg(target_os = "macos")]
-    let _ = app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+    app.set_activation_policy(tauri::ActivationPolicy::Accessory);
     #[cfg(not(target_os = "macos"))]
     let _ = app;
 }

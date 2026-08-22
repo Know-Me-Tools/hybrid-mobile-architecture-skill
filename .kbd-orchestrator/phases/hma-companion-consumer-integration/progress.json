@@ -41,7 +41,7 @@
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 3,
+      "completed": 4,
       "total": 6,
       "status": "IN_PROGRESS"
     },
@@ -190,12 +190,42 @@
       "dependsOn": [
         "2026-08-22-c300-openspec-mirror-repair"
       ],
-      "status": "pending",
-      "implementation_status": "PENDING",
+      "status": "implemented",
+      "implementation_status": "COMPLETE",
       "certification_status": "PENDING",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c303-tauri-tray-template-rot/",
-      "note": "Blocking task 1.1 decides gate-vs-delete. Artifacts are templates, not .rs files."
+      "note": "Blocking task 1.1 decides gate-vs-delete. Artifacts are templates, not .rs files.",
+      "tasks_done": 11,
+      "tasks_total": 11,
+      "tasks_complete": 11,
+      "branch": "kbd/c303-tauri-tray-template-rot",
+      "decisions": {
+        "option": "A \u2014 fix + gate both (user, task 1.1)",
+        "why": "Measuring first found tray.rs.template did NOT compile (E0596), so the scaffold had been shipping broken code. Deleting would have removed a broken artifact; the gate is what FOUND it."
+      },
+      "defectsFound": [
+        "E0596: apply_accessory_policy(app: &App) cannot call set_activation_policy (needs &mut App) \u2014 shipped to every scaffolded project",
+        "clippy::let_unit_value: `let _ =` on a unit-returning call, found by the gate immediately after the E0596 fix",
+        "unquoted heredoc in scaffold-tauri-tray.sh command-substituted a backticked `&mut App` out of the printed guidance (introduced and fixed in this change)"
+      ],
+      "qa": {
+        "gatesGreen": "12/12 + tray gate PASS",
+        "negativeFixtures": 4,
+        "adversarialReview": {
+          "verdict": "BLOCK -> resolved",
+          "isolation": "harness-native (judge == producer)",
+          "findings": {
+            "critical": 1,
+            "warning": 2,
+            "suggestion": 1
+          },
+          "allReproducedAndFixed": true,
+          "headline": "--fast printed 'PASS \u2014 every rendered template builds' with a deliberately broken tray.rs, exit 0. Third instance this phase of a checker that could not fail.",
+          "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c303-tauri-tray-template-rot/findings.json"
+        }
+      },
+      "outOfScopeFinding": "43 .rs files across 4 crates under assets/templates/rust/ are ungated by any build \u2014 the same defect class at 15x scale. Recorded as design.md D-3; NOT fixed here."
     },
     {
       "id": "2026-08-22-c304-hook-dispatch-decision",

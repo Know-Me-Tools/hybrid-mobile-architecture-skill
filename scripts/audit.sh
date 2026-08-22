@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/audit.sh
 # Audit a codebase for TJ-ARCH-MOB-001 architectural compliance.
-# Usage: bash scripts/audit.sh <platform: flutter|tauri|rust|doc-consistency|generator-purity|all> [project-root]
+# Usage: bash scripts/audit.sh <platform: flutter|tauri|rust|doc-consistency|generator-purity|tray-templates|all> [project-root]
 #
 # `doc-consistency` audits the PACK's own authority docs (the package skill,
 # CLAUDE.md, AGENTS.md, README.md, references/*.md) against versions.toml — the pack's
@@ -12,6 +12,12 @@
 # name, brand value, or spec reference that reaches a template is shipped to
 # every user of the pack. Run it before and after porting anything out of a
 # real product codebase.
+#
+# `tray-templates` renders assets/templates/tauri-tray/ through the real
+# scaffold and BUILDS the result. Deliberately NOT part of `all`: the Tauri
+# graph takes ~2 minutes, and a two-minute step inside the everyday aggregate
+# audit is a step people learn to skip. Run it on purpose after touching the
+# tray templates or bumping Tauri.
 #
 # `all` audits every surface of a hybrid project from its root, auto-detecting
 # mobile/ (Flutter), desktop/ (Tauri), and rust/gen_ui_core — and verifies the
@@ -28,7 +34,7 @@ ROOT="${2:-.}"
 # "✓ No violations — compliant with TJ-ARCH-MOB-001" with exit 0. That made
 # every caller that invokes `audit.sh <mode>` pass by typo — the failure class
 # this script exists to catch. Validate before doing any work.
-VALID_PLATFORMS=(flutter tauri rust doc-consistency generator-purity all)
+VALID_PLATFORMS=(flutter tauri rust doc-consistency generator-purity tray-templates all)
 _platform_ok=0
 for _candidate in "${VALID_PLATFORMS[@]}"; do
   [[ "$PLATFORM" == "$_candidate" ]] && { _platform_ok=1; break; }
@@ -630,6 +636,11 @@ elif [[ "$PLATFORM" == "doc-consistency" ]]; then
       fi
     done
   fi
+
+elif [[ "$PLATFORM" == "tray-templates" ]]; then
+  # Delegates to the standalone gate; see its header for why this is slow and
+  # why it is not in `all`.
+  exec bash "$(dirname "${BASH_SOURCE[0]}")/verify-tray-templates.sh"
 
 # ── generator-purity: keep product vocabulary out of the generator ───────────
 # This pack scaffolds applications for anyone. Consumer-specific KnowMe

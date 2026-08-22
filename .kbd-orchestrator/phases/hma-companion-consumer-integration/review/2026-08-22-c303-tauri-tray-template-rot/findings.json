@@ -1,0 +1,42 @@
+{
+  "mode": "diff",
+  "target": "2026-08-22-c303-tauri-tray-template-rot",
+  "verdict": "BLOCK",
+  "judge_model": "claude-opus-5 (harness-native subagent, fresh context)",
+  "isolation_mode": "harness-native",
+  "producer_model": "claude-opus-5",
+  "cross_model_check": "same-model-family — JUDGE_MODEL_COLLISION",
+  "gateway_note": "REST dispatch unavailable: HTTP 401 token_expired at http://localhost:8181/v1.",
+  "rounds": 1,
+  "resolution": "All 4 findings reproduced and fixed; 12/12 repo gates green; tray gate PASS; negative suite 4/4.",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/verify-tray-templates.sh",
+      "claim": "With --fast the gate exited 0 printing 'PASS — every rendered template builds' while tray.rs.template did not compile — a green result over the exact defect class the gate exists to catch.",
+      "evidence": "Reproduced: reintroduced E0596 in a scratch copy, ran with --fast → rc=0 and the PASS line. The skip branch printed a prose warning but never set FAILURES, and --fast is a documented first-class mode the negative suite itself invokes.",
+      "status": "REPRODUCED — FIXED. --fast now sets SKIPPED and exits 2 with 'PARTIAL — health-aggregator only; tray.rs was NOT built ... this is not a pass'. A prose warning is not a machine-readable signal; the exit code is. This is the third instance in this phase of a checker that could not fail."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/test-fixtures/tray-templates-negative.sh",
+      "claim": "The --fast negative run reported 'all 3 checks behaved correctly' while its positive control ran in the same blind mode and the only fixture guarding the shipped defect was skipped.",
+      "evidence": "The control asserted rc==0, which --fast always returned; the E0596 fixture is skipped under --fast. A fast run could not distinguish a working gate from one incapable of failing.",
+      "status": "REPRODUCED — FIXED. The control now asserts the mode's real contract (rc==2 PARTIAL in fast mode, rc==0 otherwise), expect_fail rejects a PARTIAL masquerading as a detection, and the closing line reads '(FAST — the tray.rs fixture was NOT run; this is not full coverage)'."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/test-fixtures/tray-templates-negative.sh",
+      "claim": "The suite depended on `timeout`, absent from stock macOS — the documented target platform — so every fixture would fail as a false RED blaming the templates.",
+      "evidence": "`command -v timeout` resolves only to /opt/homebrew/bin/timeout (coreutils). Without it, rc=127 with empty output makes the positive control abort with 'the gate does not pass on the UNBROKEN templates'.",
+      "status": "REPRODUCED — FIXED. Falls back to gtimeout and exits 1 with a named cause when neither exists."
+    },
+    {
+      "severity": "SUGGESTION",
+      "file": "scripts/audit.sh",
+      "claim": "The tray-templates elif was inserted mid-way through the generator-purity explanatory comment, orphaning ~15 lines of prose from the branch they document.",
+      "evidence": "Lines describing generator-purity now precede the tray-templates branch. Behavior unaffected.",
+      "status": "REPRODUCED — FIXED. The branch was moved above the generator-purity banner; routing, the unknown-mode guard (rc=2), generator-purity and `all` all re-verified."
+    }
+  ]
+}
