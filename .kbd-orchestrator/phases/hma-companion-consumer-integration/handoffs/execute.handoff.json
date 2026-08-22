@@ -1,0 +1,12 @@
+{
+  "stage": "execute",
+  "completedAt": "2026-08-22T13:06:23Z",
+  "outputs": [
+    "execution.md",
+    "progress.json"
+  ],
+  "nextStage": "reflect",
+  "summaryForNext": "Backend: openspec (CLI 1.10.0 present; all 6 changes carry spec deltas and pass 'openspec validate'; repo convention is real deltas, not skip_specs). Dispatch via /kbd-apply ONLY — bare /opsx:apply fires no KBD hooks, writes no progress.json, and refreshes no waypoint. First pending change: 2026-08-22-c300-openspec-mirror-repair, a hard barrier. EXECUTION PRECONDITION: two gates are RED before any work starts, both pre-existing — check-skill-contracts.mjs (40 errors, working tree only; HEAD passes) and check-git-url-discovery.sh ('expected 30 public skills, found 46', red on CLEAN HEAD). c300 closes both; until then no other change's acceptance criteria are reachable. RUNTIME: 'prometheus kbd status' reports KBD mode legacy and the control plane at 127.0.0.1:7892 is unreachable, so typed change/stage commands are rejected with 'runtime has not been initialized'; in legacy mode the file-based ledger is canonical and progress.json was written directly. 'prometheus kbd migrate' inventory is clean (journalMigrationRequired=false, uncertainRows=0, invalidFiles=0) but 'migrate --apply' was NOT run — out of scope and unrequested. WARNINGS: (1) the per-change adversarial-review diff gates will run harness-native (judge==producer) until /liter-llm-bridge configure repairs the :8181 HTTP 401 token_expired credential; (2) audit.sh FAILS OPEN — 'audit.sh zzznonsense' prints '✓ No violations' and exits 0, so until c300 task 1.8 lands no criterion invoking audit.sh <mode> is trustworthy, including ones inside this phase's own changes; (3) the working tree is dirty (63 M, 10 D, 16 ??) and that drift IS what c300 resolves — it must not be reverted wholesale per constraints.md. Four blocking decisions open as first tasks: c300/1.2 (.codex managed or dropped), c302/1.0 (define replay or go docs-only), c303/1.1 (gate or delete templates), c304/1.1 (build or drop prom-hook-dispatch).",
+  "skipped": false,
+  "skipReason": null
+}

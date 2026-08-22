@@ -89,23 +89,65 @@ if (JSON.stringify(skillDirectories) !== JSON.stringify(declared)) {
   failures.push("canonical skill directories differ from builder.manifest.json");
 }
 
-const internalNames = new Set();
-for (const harness of [".agents", ".claude", ".codex", ".kimi", ".kimi-code", ".opencode"]) {
+// Vendored internal authoring skills (openspec-*, source-command-opsx-*).
+//
+// These are written by an EXTERNAL generator (`openspec update`), not by this
+// pack. `metadata.internal: true` is a repo-local invariant the OpenSpec CLI has
+// no notion of, so it strips the key on every run; `scripts/normalize-vendored-skills.sh`
+// re-applies it. See openspec/changes/2026-08-22-c300-openspec-mirror-repair/design.md.
+//
+// Each managed harness is asserted INDIVIDUALLY. A union count across harnesses
+// (the previous shape) could be satisfied by `.agents` alone, so a harness
+// losing its entire mirror set passed silently — which is exactly what happened
+// when 1.10.0 migrated `.kimi` to `.kimi-code`.
+//
+// Excluded by design:
+//   .kimi  — migrated to .kimi-code by openspec 1.10.0; the CLI deletes it each run
+//   .codex — reads shared skills from .agents/ (project.json: codex.skill_dir);
+//            its own openspec-* copies were stale duplicates the CLI refuses to
+//            overwrite and asks to have deleted
+export const INTERNAL_SKILL_HARNESSES = {
+  ".agents": { "openspec-": 10, "source-command-opsx-": 10 },
+  ".claude": { "openspec-": 10, "source-command-opsx-": 0 },
+  ".kimi-code": { "openspec-": 10, "source-command-opsx-": 0 },
+  ".opencode": { "openspec-": 10, "source-command-opsx-": 0 },
+};
+
+for (const [harness, expected] of Object.entries(INTERNAL_SKILL_HARNESSES)) {
   const harnessRoot = resolve(root, harness, "skills");
-  for (const entry of await readdir(harnessRoot, { withFileTypes: true })) {
+  const seen = Object.fromEntries(Object.keys(expected).map((prefix) => [prefix, 0]));
+  let entries;
+  try {
+    entries = await readdir(harnessRoot, { withFileTypes: true });
+  } catch {
+    failures.push(`${harness}/skills: managed harness directory is missing`);
+    continue;
+  }
+  for (const entry of entries) {
     if (!entry.isDirectory()) continue;
-    if (!entry.name.startsWith("openspec-") && !entry.name.startsWith("source-command-opsx-")) {
-      continue;
-    }
-    internalNames.add(entry.name);
+    const prefix = Object.keys(expected).find((candidate) => entry.name.startsWith(candidate));
+    if (!prefix) continue;
+    seen[prefix] += 1;
     const markdown = await readFile(resolve(harnessRoot, entry.name, "SKILL.md"), "utf8");
-    if (!/^metadata:\n(?:  .+\n)*  internal: true$/m.test(markdown)) {
+    // Anchor to the YAML frontmatter. An unanchored match would accept a
+    // `metadata:` block appearing anywhere in the body — including a prose
+    // example — while the frontmatter the harnesses actually parse carries no
+    // `internal: true`. These files are rewritten wholesale by an external
+    // generator, so body content is uncontrolled input.
+    const frontmatter = markdown.match(/^---\n([\s\S]*?)\n---(?:\n|$)/);
+    if (!frontmatter) {
+      failures.push(`${harness}/skills/${entry.name}: no YAML frontmatter`);
+    } else if (!/^metadata:\n(?:  .+\n)*  internal: true$/m.test(`${frontmatter[1]}\n`)) {
       failures.push(`${harness}/skills/${entry.name}: missing metadata.internal: true`);
     }
   }
-}
-if (internalNames.size !== 20) {
-  failures.push(`expected 20 unique internal authoring skills, found ${internalNames.size}`);
+  for (const [prefix, count] of Object.entries(expected)) {
+    if (seen[prefix] !== count) {
+      failures.push(
+        `${harness}/skills: expected ${count} ${prefix}* skills, found ${seen[prefix]}`,
+      );
+    }
+  }
 }
 
 for (const failure of failures) process.stderr.write(`error: ${failure}\n`);

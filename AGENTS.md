@@ -67,7 +67,7 @@ One global Tokio runtime per process. CPU-bound work (GGUF loading, inference fo
 | TypeScript | latest (7.x, Go-native compiler — no version pin) |
 | Tauri CLI | 2.10+ |
 | flutter_rust_bridge_codegen | 2.12+ (must match the workspace's frb crate version) |
-| OpenSpec | 1.6.0+ (`@fission-ai/openspec` — NEVER the bare `openspec` npm package, which is squatted) |
+| OpenSpec | 1.10.0+ (`@fission-ai/openspec` — NEVER the bare `openspec` npm package, which is squatted). After any `openspec update`, run `scripts/normalize-vendored-skills.sh` — the CLI strips the repo-local `metadata.internal: true` from vendored mirrors on every run. |
 | Prometheus Skill System | package 1.7.0+ and control-plane contract 2.0.0+ ([canonical repository](https://github.com/Prometheus-AGS/prometheus-skill-system)) — verify with `prometheus --version`, `prometheus doctor --json`, and `pk doctor --json` |
 
 Check or install everything at once:

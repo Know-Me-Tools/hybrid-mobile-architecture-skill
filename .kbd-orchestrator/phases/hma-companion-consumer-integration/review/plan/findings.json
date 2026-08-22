@@ -1,0 +1,24 @@
+{
+  "mode": "artifact",
+  "target": "plan",
+  "verdict": "BLOCK",
+  "judge_model": "claude-opus-5 (harness-native subagent, fresh context)",
+  "isolation_mode": "harness-native",
+  "producer_model": "claude-opus-5",
+  "cross_model_check": "same-model-family — JUDGE_MODEL_COLLISION",
+  "gateway_note": "REST dispatch attempted and failed: HTTP 401 token_expired at http://localhost:8181/v1. Gateway IS listening; credential expired. Repair with /liter-llm-bridge configure.",
+  "rounds": 1,
+  "resolution": "All 10 findings independently reproduced by the producer and applied to plan.md; no unresolved findings.",
+  "findings": [
+    {"severity":"CRITICAL","file":"plan.md","claim":"c300 task 3 orders restoring .kimi/, but openspec 1.10.0 MIGRATES .kimi -> .kimi-code; restoring recreates what the tool deletes each run, making the idempotence criterion unsatisfiable.","evidence":"openspec update --force on a clean git-archive HEAD tree prints 'Migrated 10 skills: .kimi -> .kimi-code'; .kimi openspec dirs -> 0, .kimi-code -> 10.","status":"REPRODUCED — applied. c300 now accepts the migration and drops .kimi from the harness list."},
+    {"severity":"CRITICAL","file":"plan.md","claim":"c300 task 2 ('bring .codex to 1.10.0') has no mechanism: .codex is not in the project's OpenSpec tool set.","evidence":"Same run reports 'Force updating 4 tool(s): claude, kimi, opencode, agents' and touches .codex zero times.","status":"REPRODUCED — applied. c300 task 2 is now a decision (manage via openspec init --tools codex, or drop from the harness list) that blocks task 3."},
+    {"severity":"CRITICAL","file":"plan.md","claim":"c304's grep-based criterion is unsatisfiable: the W6.x sequences are offset by one across W6.6-W6.9, not disagreeing on a single label.","evidence":"docs/03:191 W6.7=prom-hook-dispatch, :222 W6.8=sessionstart matchers; docs/05:596 W6.8=prom-hook-dispatch, :597 W6.9=sessionstart matchers.","status":"REPRODUCED — applied. c304 now renumbers a whole sequence and adds a mechanical mapping check with a negative fixture."},
+    {"severity":"CRITICAL","file":"plan.md","claim":"audit.sh has no layer-contract mode and exits 0 for ANY unrecognised mode, so the gate inventory counts a non-existent check and any criterion invoking audit.sh <mode> can pass by typo.","evidence":"scripts/audit.sh:4 declares flutter|tauri|rust|doc-consistency|generator-purity|all; 'bash scripts/audit.sh zzznonsense' prints '✓ No violations', exit 0.","status":"REPRODUCED — applied. c300 task 8 makes unknown modes fail; the stale warning is corrected."},
+    {"severity":"WARNING","file":"plan.md","claim":"c305 cites the marketplace-metadata constraint but discharges it with no task.","evidence":"Plan §Constraints quotes it; c305's four tasks never validate any manifest or test a clean install.","status":"REPRODUCED — applied. c305 tasks 2-3 added; six manifests enumerated (the judge said five)."},
+    {"severity":"WARNING","file":"plan.md","claim":"'All 10 gates green' is untestable — the gates are never enumerated, and check-git-url-discovery.sh is an eleventh gate omitted from the baseline.","evidence":"check-git-url-discovery.sh exists and asserts 'expected 30 public skills'.","status":"REPRODUCED AND WORSE — applied. The gate FAILS on clean HEAD (found 46). Recorded as B-2, folded into c300 task 9; c305 adds run-all-gates.sh enumerating all 11."},
+    {"severity":"WARNING","file":"plan.md","claim":"c302's 'replay the evidence' is undefined — evidence is free text with no schema, command, or expected outcome.","evidence":"refiner-loop.sh:12 documents --evidence TEXT; :189 enforces only non-emptiness; :211 stores it as an opaque string.","status":"REPRODUCED — applied. c302 gains a blocking task 0 that defines the replay contract or concludes it is infeasible."},
+    {"severity":"WARNING","file":"plan.md","claim":"c303 option B cites render lines 88 and 91, omitting line 87 (Cargo.toml) — removing only 88 and 91 leaves a half-crate.","evidence":"sed -n '87,91p' scripts/scaffold-tauri-tray.sh shows 87=Cargo.toml, 88=lib.rs, 91=tray.rs.","status":"REPRODUCED — applied. Task 2B now cites all three lines."},
+    {"severity":"WARNING","file":"plan.md","claim":"c300's per-harness assertion omits the non-uniform expected counts; a uniform check would fail on .agents.","evidence":".agents holds 20 qualifying dirs (10 openspec-* + 10 source-command-opsx-*); other harnesses hold 10.","status":"REPRODUCED — applied. Task 7 now states the expected per-harness shape."},
+    {"severity":"SUGGESTION","file":"plan.md","claim":"'openspec update strips internal: true every time on any version' is stated more broadly than the evidence supports; .codex is untouched.","evidence":"The run modifies 4 harnesses and touches .codex zero times.","status":"REPRODUCED — applied. Claim scoped to the configured tool set; the normalizer derives that set from the OpenSpec config rather than a hardcoded list."}
+  ]
+}

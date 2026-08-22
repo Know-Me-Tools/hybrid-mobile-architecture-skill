@@ -424,8 +424,50 @@ Enable RLS on every Supabase table. Never expose the service role key to clients
 | TypeScript | latest (7.x, Go-native compiler — no version pin) |
 | Tauri CLI | 2.10+ |
 | flutter_rust_bridge_codegen | 2.12+ (must match the workspace's frb crate version) |
-| OpenSpec | 1.6.0+ (`@fission-ai/openspec` — NEVER the bare `openspec` npm package, which is squatted) |
+| OpenSpec | 1.10.0+ (`@fission-ai/openspec` — NEVER the bare `openspec` npm package, which is squatted). After any `openspec update`, run `scripts/normalize-vendored-skills.sh` — the CLI strips the repo-local `metadata.internal: true` from vendored mirrors on every run. |
 | Prometheus Skill System | package 1.7.0+ and control-plane contract 2.0.0+ ([canonical repository](https://github.com/Prometheus-AGS/prometheus-skill-system)) — verify with `prometheus --version`, `prometheus doctor --json`, and `pk doctor --json` |
+
+---
+
+## Vendored skills: always normalize after `openspec update`
+
+The `openspec-*` and `source-command-opsx-*` skills under `.agents/`, `.claude/`,
+`.kimi-code/`, and `.opencode/` are **vendored** — written by the OpenSpec CLI,
+not by this pack. They are not in `skills/` and not declared in
+`builder.manifest.json`, yet `scripts/check-skill-contracts.mjs` gates them.
+
+`metadata.internal: true` is a **repo-local invariant** the CLI has no notion of
+(it appears nowhere in `openspec/config.yaml` or the CLI's vocabulary), so
+`openspec update` strips it on **every run, on every version**. Bumping the pin
+does not change this.
+
+**The sequence is two commands, never one:**
+
+```bash
+openspec update                            # external generator writes the mirrors
+bash scripts/normalize-vendored-skills.sh  # re-apply this pack's invariants
+node scripts/check-skill-contracts.mjs     # gate should now pass
+```
+
+`normalize-vendored-skills.sh --check` reports what would change and exits 1 if
+anything would, without writing — use it in a pre-commit check.
+
+The managed harness set is derived from `check-skill-contracts.mjs`'s
+`INTERNAL_SKILL_HARNESSES` table, so the normalizer and the gate can never
+disagree about which trees are governed.
+
+**Two harnesses are deliberately excluded:**
+
+- **`.kimi`** — OpenSpec 1.10.0 migrates it to `.kimi-code` (the CLI prints
+  `Migrated 10 skills: .kimi → .kimi-code`). Restoring `.kimi` recreates an
+  artifact the tool deletes on every run.
+- **`.codex`** — Codex reads shared skills from `.agents/`
+  (`project.json` → `agents_config.codex.skill_dir`). Its own `openspec-*` copies
+  were stale duplicates the CLI refuses to overwrite and explicitly asks to have
+  deleted. `.codex/skills` still holds the 35 pack-owned skills that
+  `sync-harness-skills.sh` generates.
+
+Background and the decision record: `openspec/changes/2026-08-22-c300-openspec-mirror-repair/design.md`.
 
 ---
 

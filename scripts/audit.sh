@@ -22,6 +22,24 @@ set -euo pipefail
 PLATFORM="${1:-flutter}"
 ROOT="${2:-.}"
 
+# ── Fail closed on an unrecognised mode ──────────────────────────────────────
+# The dispatch below is an if/elif chain with no else, so an unknown platform
+# used to fall through every branch, run zero checks, and print
+# "✓ No violations — compliant with TJ-ARCH-MOB-001" with exit 0. That made
+# every caller that invokes `audit.sh <mode>` pass by typo — the failure class
+# this script exists to catch. Validate before doing any work.
+VALID_PLATFORMS=(flutter tauri rust doc-consistency generator-purity all)
+_platform_ok=0
+for _candidate in "${VALID_PLATFORMS[@]}"; do
+  [[ "$PLATFORM" == "$_candidate" ]] && { _platform_ok=1; break; }
+done
+if [[ "$_platform_ok" -ne 1 ]]; then
+  echo "audit.sh: unknown platform '$PLATFORM'" >&2
+  echo "audit.sh: expected one of: ${VALID_PLATFORMS[*]}" >&2
+  exit 2
+fi
+unset _platform_ok _candidate
+
 # ── all: fan out over every present surface of a hybrid project ──────────────
 if [[ "$PLATFORM" == "all" ]]; then
   SELF="$0"

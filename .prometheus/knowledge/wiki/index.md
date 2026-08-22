@@ -126,6 +126,7 @@
 * [Full hybrid scaffold executor session completed with unknown change](/full-hybrid-scaffold-executor-session-completed-with-unknown-change.md)
 * [Global harness marketplace and skill installation verified](/karpathy-progress-20260718T044658Z-global-harness-installation.md)
 * [Global multi-harness skill and MCP installation](/karpathy-progress-20260718T044503Z-global-harness-installation.md)
+* [HMA companion consumer integration completed with unknown change](/hma-companion-consumer-integration-completed-with-unknown-change.md)
 * [Hybrid codegen and CI verification assessment readiness](/hybrid-codegen-and-ci-verification-assessment-readiness.md)
 * [Hybrid codegen and CI verification phase opened](/hybrid-codegen-and-ci-verification-phase-opened.md)
 * [Hybrid cross-platform theming phase initialized](/hybrid-cross-platform-theming-phase-initialized.md)
@@ -306,12 +307,18 @@
 
 ## SessionRecord
 
+* [Karpathy session 0283e3344f77](/karpathy-session-0283e3344f77f838.md)
 * [Karpathy session 105b8bed16a9](/karpathy-session-105b8bed16a97283.md)
+* [Karpathy session 55c831181ff3](/karpathy-session-55c831181ff3e1c6.md)
+* [Karpathy session 7df029febe4e](/karpathy-session-7df029febe4e02a9.md)
 * [Karpathy session 8d8ba3c14041](/karpathy-session-8d8ba3c14041c15e.md)
 * [Karpathy session 99ebb733bda1](/karpathy-session-99ebb733bda128d4.md)
+* [Karpathy session ac68f9f42cd5](/karpathy-session-ac68f9f42cd548c9.md)
 * [Karpathy session acb93aeb0dbe](/karpathy-session-acb93aeb0dbe04f6.md)
 * [Karpathy session b1ec578a3db0](/karpathy-session-b1ec578a3db03c93.md)
+* [Karpathy session ca69965b7abd](/karpathy-session-ca69965b7abd0187.md)
 * [Karpathy session d680f36145d4](/karpathy-session-d680f36145d42a0f.md)
+* [Karpathy session d968e30de083](/karpathy-session-d968e30de08378a0.md)
 
 ## Uncategorized
 

@@ -1,0 +1,11 @@
+{
+  "stage": "plan",
+  "completedAt": "2026-08-22T11:29:10Z",
+  "outputs": [
+    "plan.md"
+  ],
+  "nextStage": "execute",
+  "summaryForNext": "6 OpenSpec changes (c300-c305), all validating. c300 is a hard barrier: TWO gates are red going into the phase, both pre-existing — check-skill-contracts.mjs (40 errors, working tree) and check-git-url-discovery.sh ('expected 30 public skills, found 46', red on CLEAN HEAD, missed entirely by the assessment and recorded as B-2). Apply c300 first; c301-c304 are mutually independent afterwards (parallel worktrees available); c305 tags last so the first tag consumers are told to pin points at a green tree. User decision folded in: adopt OpenSpec 1.10.0 (corroborated — the installed CLI is already 1.10.0, so the versions.toml pin of 1.6.0 was stale). WARNINGS for execute: (1) adversarial review corrected two factual errors this plan inherited from assessment.md — '.kimi deleted' is actually an intentional '.kimi -> .kimi-code' MIGRATION the CLI performs, so restoring .kimi would fight the tool every run; and only 4 tools are managed (claude, kimi, opencode, agents) so '.codex' has NO mechanism to reach 1.10.0 and its status is now a blocking decision in c300 task 1.2. (2) audit.sh exits 0 for ANY unrecognised mode ('audit.sh zzznonsense' prints '✓ No violations') — c300 task 1.8 fixes this, and until it lands no acceptance criterion invoking audit.sh <mode> is trustworthy. (3) The W6.x sequences in docs/03 and docs/05 are OFFSET BY ONE across W6.6-W6.9, not disagreeing on one label, so c304 renumbers a whole sequence. (4) Both adversarial reviews ran harness-native (judge == producer) because the :8181 gateway returns HTTP 401 token_expired — repair with /liter-llm-bridge configure for a genuine cross-model review. (5) progress.json assessment_complete remains false: the typed stage transition failed (control plane unreachable, runtime uninitialized) and hand-editing is forbidden. Four decisions remain open as blocking first tasks inside c300/c302/c303/c304.",
+  "skipped": false,
+  "skipReason": null
+}

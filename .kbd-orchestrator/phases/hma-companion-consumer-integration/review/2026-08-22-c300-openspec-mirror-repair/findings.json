@@ -1,0 +1,56 @@
+{
+  "mode": "diff",
+  "target": "2026-08-22-c300-openspec-mirror-repair",
+  "verdict": "BLOCK",
+  "judge_model": "claude-opus-5 (harness-native subagent, fresh context)",
+  "isolation_mode": "harness-native",
+  "producer_model": "claude-opus-5",
+  "cross_model_check": "same-model-family — JUDGE_MODEL_COLLISION",
+  "gateway_note": "REST dispatch unavailable: HTTP 401 token_expired at http://localhost:8181/v1. Repair with /liter-llm-bridge configure.",
+  "rounds": 1,
+  "resolution": "All 6 findings reproduced by the producer and fixed; 12/12 gates green afterwards; idempotence re-proven.",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/normalize-vendored-skills.sh",
+      "claim": "The node derivation parsed only SINGLE-LINE table entries, so a harness written across multiple lines was silently dropped from normalization while the gate still enforced it — exit 0 while leaving 20 mirrors unnormalized.",
+      "evidence": "Reformatting the .agents entry to a multi-line shape made it vanish from the derivation; the normalizer then reported '30 of 30' success with 20 .agents mirrors still broken.",
+      "status": "REPRODUCED — FIXED. Root cause ran deeper than reported: importing check-skill-contracts.mjs is impossible because it calls process.exit(1) at module scope when the gate fails — exactly when normalization is needed. Now parses the exported literal as JSON (multi-line safe, trailing commas tolerated) and hard-errors on any unparseable shape. Fixtures A (multi-line + 20 stripped mirrors -> all repaired, gate green) and D (unparseable table -> exit 1 with a named reason) both pass."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "openspec/changes/2026-08-22-c300-openspec-mirror-repair/design.md",
+      "claim": "D-2 records that .codex was chosen to be MANAGED, but the implementation deleted its mirrors and dropped it from the gate — the decision record contradicts the shipped code.",
+      "evidence": "design.md D-2 marked 'Manage it (chosen)' while .codex/skills/openspec-* was deleted and .codex is absent from INTERNAL_SKILL_HARNESSES.",
+      "status": "REPRODUCED AS A DOC DEFECT — FIXED. The judge's inference that codex was not managed is wrong: .agents/skills/.openspec-target contains 'codex' and the update run prints 'Updating Codex'. But D-2 conflated 'managed' with 'appears in the gate table'. Managing Codex means it reads from .agents/ (project.json agents_config.codex.skill_dir), so the CLI asks for the .codex duplicates to be DELETED ('Left 10 files in .codex/ that differ from the copy in .agents/'). D-2 rewritten to state this; the rejected option's cost does not apply because those skills are still validated at their canonical .agents/ location."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/check-git-url-discovery.sh",
+      "claim": "The anti-vacuity guard covered only expected_public; with expected_internal_only at 0 the internal assertion degenerates and the gate passes green proving nothing.",
+      "evidence": "Removing all .agents vendored mirrors makes both assertions reduce to '== 36', exit 0.",
+      "status": "REPRODUCED — FIXED. Symmetric guard added; deriving 0 internal mirrors now exits 1."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/check-skill-contracts.mjs",
+      "claim": "The internal:true assertion was not anchored to YAML frontmatter, so a metadata: block anywhere in the body satisfied it — and the normalizer wrote to the same wrong place.",
+      "evidence": "A SKILL.md with no frontmatter metadata but a body prose example beginning 'metadata:' satisfied the unanchored regex.",
+      "status": "REPRODUCED — FIXED in BOTH files. Gate and normalizer now extract the frontmatter first. Fixture E: normalizer writes to frontmatter and leaves the body decoy untouched; a body-only decoy is rejected with exit 1."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/normalize-vendored-skills.sh",
+      "claim": "A managed harness whose skills directory is absent was silently skipped and counted as fully normalized — --check exited 0 for a tree that does not exist.",
+      "evidence": "rm -rf .opencode/skills then --check reported 'all 40 already normalized', exit 0.",
+      "status": "REPRODUCED — FIXED. Expected per-prefix counts are now carried through and asserted. Fixture B (missing harness dir) and Fixture C (harness present, mirrors gone) both exit 1 with a named harness."
+    },
+    {
+      "severity": "SUGGESTION",
+      "file": "openspec/changes/2026-08-22-c300-openspec-mirror-repair/design.md",
+      "claim": "design.md said the gate failed with 'found 46' while the script comment said 'found 36'; 36 is correct.",
+      "evidence": "find skills -mindepth 1 -maxdepth 1 -type d | wc -l -> 36; the discovery tool reports 'Found 36 skills'.",
+      "status": "REPRODUCED — FIXED. The 46 originated in the original assessment (misread from the --full-depth internal run, which reports 56). Corrected in design.md, proposal.md, plan.md, assessment.md, execution.md and progress.json. Handoff JSONs left as immutable records of what was known at the time."
+    }
+  ]
+}

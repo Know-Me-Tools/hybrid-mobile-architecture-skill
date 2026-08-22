@@ -1,0 +1,49 @@
+{
+  "mode": "artifact",
+  "target": "assess",
+  "verdict": "BLOCK",
+  "judge_model": "claude-opus-5 (harness-native subagent, fresh context)",
+  "isolation_mode": "harness-native",
+  "producer_model": "claude-opus-5",
+  "cross_model_check": "same-model-family — JUDGE_MODEL_COLLISION",
+  "gateway_note": "REST dispatch attempted and failed: HTTP 401 token_expired at http://localhost:8181/v1. A gateway IS listening; the credential is expired. Repair with /liter-llm-bridge configure, then re-run for a true cross-model review.",
+  "rounds": 1,
+  "resolution": "All 5 findings independently reproduced by the producer and applied to assessment.md; no unresolved findings.",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "assessment.md",
+      "claim": "B-1 root cause wrong: the CLI upgrade hit only 4 of 6 harnesses; .codex was untouched at 1.6.0 and .kimi had its 10 openspec dirs deleted.",
+      "evidence": "grep generatedBy .codex/skills/openspec-*/SKILL.md -> 1.6.0 only; git status -> 10 ' D .kimi/skills/openspec-*'; ls .kimi/skills | grep -c openspec -> 0 vs 10 at HEAD.",
+      "status": "REPRODUCED — applied. B-1 rewritten as three symptoms (a)(b)(c)."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "assessment.md",
+      "claim": "check-skill-contracts.mjs uses a UNION count across harnesses, so it is structurally blind to a harness losing its entire mirror set.",
+      "evidence": "check-skill-contracts.mjs:92-108 accumulates internalNames across 6 harnesses then asserts size !== 20; .agents alone holds 20 (10 openspec-* + 10 source-command-opsx-*). node scripts/check-skill-contracts.mjs 2>&1 | grep -c '^error: .kimi/' -> 0.",
+      "status": "REPRODUCED — applied. c300 now requires a per-harness completeness assertion."
+    },
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "claim": "The 'git stash push -u' transcript did not produce the stated result; the untracked phase directory is still present.",
+      "evidence": "git status --porcelain | grep -c 'hma-companion-consumer-integration' -> 1.",
+      "status": "REPRODUCED — applied. Replaced with non-destructive 'git archive HEAD' repro (conclusion unchanged: HEAD PASSES)."
+    },
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "claim": "The baseline gate table omits check-prometheus-boundary.mjs and check-runtime-security.mjs, understating the un-run surface.",
+      "evidence": "Both present in file_tree; neither in the §3 table.",
+      "status": "REPRODUCED — applied. Both run (PASS) and added; table now 9 of 10."
+    },
+    {
+      "severity": "SUGGESTION",
+      "file": "assessment.md",
+      "claim": "The c300 fork options are incomplete; none addresses the .codex version split or restores .kimi.",
+      "evidence": "§3 open questions list only three options, all treating mirrors as a uniform set.",
+      "status": "REPRODUCED — applied. Fourth option (repo-owned idempotent mirror generation) added."
+    }
+  ]
+}

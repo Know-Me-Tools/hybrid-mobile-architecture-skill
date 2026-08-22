@@ -1,0 +1,11 @@
+{
+  "stage": "assess",
+  "completedAt": "2026-08-22T07:27:44Z",
+  "outputs": [
+    "assessment.md"
+  ],
+  "nextStage": "analyze",
+  "summaryForNext": "BLOCKER B-1 outranks every phase goal: an external OpenSpec CLI upgrade corrupted the vendored skill mirrors in three distinct ways (4 harnesses regenerated to 1.10.0 losing 'internal: true'; .codex left at 1.6.0 so mirrors are internally inconsistent; .kimi's 10 openspec dirs deleted) and check-skill-contracts.mjs is structurally blind to the deletion because its count check unions names across harnesses. HEAD is green (verified via git archive), working tree is red — no change can be verified until c300 lands. Two of six goals did not survive verification: G1 (consumer-side proof) is NOT EXECUTABLE because prometheus-companion is a 2-commit scaffold with no install surface, so it splits into G1' (in-repo simulated consumer, executable now) and G1'' (deferred to the Companion's roadmap); G6 (re-verify the 2026-07-16 assessment) is CLOSED — 6 of 8 recommendations already actioned with evidence, 2 out of scope. G2/G3/G4/G5 confirmed open, with G3's artifact renamed (tray.rs does not exist; it is assets/templates/tauri-tray/tray.rs.template, and the health-aggregator is also an un-re-rendered template). WARNINGS for plan: adversarial review ran harness-native (judge==producer) because the :8181 gateway returned HTTP 401 token_expired — repair with /liter-llm-bridge configure for a true cross-model review; audit.sh layer-contract and all modes are unmeasured; docs/03 and docs/05:596 disagree on whether the hook-dispatch remedy is W6.7 or W6.8. Open scope calls for the user: the B-1 fix fork (only repo-owned idempotent mirror generation closes all three symptoms), build-vs-delete for the tray template, and whether to rename the phase to hma-producer-stabilisation.",
+  "skipped": false,
+  "skipReason": null
+}

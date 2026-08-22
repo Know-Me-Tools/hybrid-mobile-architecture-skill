@@ -1,0 +1,214 @@
+{
+  "phase": "hma-companion-consumer-integration",
+  "status": "executing",
+  "previousPhase": "v0.2.0-hma-companion-skills",
+  "seededFrom": {
+    "manualEntry": true,
+    "createdBy": "/kbd-new-phase",
+    "specs": [
+      "docs/assessment-2026-07-16.md",
+      "docs/01-connected-skill-packages.md",
+      "docs/03-hooks-reliability.md",
+      "docs/04-skill-refiner-loop.md",
+      "docs/05-hma-pmp-companion-architecture.md",
+      "docs/05.1-phase-v0.2.0-launch-prompt.md",
+      "docs/06-tauri-tray-app-spec.md",
+      "docs/07-launchagent-supervisor-spec.md",
+      "docs/08-auto-skill-package-integration.md"
+    ],
+    "priorReflection": ".kbd-orchestrator/phases/v0.2.0-hma-companion-skills/reflection.md",
+    "note": "The 0N-*.md specs were the INPUT to the prior phase and their HMA-side deliverables already shipped. This phase seeds from the RESIDUAL those specs left plus the still-open subset of the 2026-07-16 assessment. Neither document is an open work list; both require re-verification against HEAD during /kbd-assess.",
+    "gitCommit": "e76c29b"
+  },
+  "startedAt": "2026-08-22T07:10:32Z",
+  "startedBy": "travis (via /kbd-new-phase)",
+  "activeChange": "2026-08-22-c300-openspec-mirror-repair",
+  "implementation_total": 6,
+  "implementation_completed": 0,
+  "changes_total": 6,
+  "changes_completed": 0,
+  "completedChanges": 0,
+  "totalChanges": 6,
+  "assessment_complete": true,
+  "plan_complete": true,
+  "execute_complete": false,
+  "reflect_complete": false,
+  "assessmentMethod": {
+    "adversarialReview": true,
+    "sycophancyCorrection": true,
+    "note": "User-directed: /kbd-assess must run with adversarial review and sycophancy-correction applied to every evaluative claim."
+  },
+  "completion": {
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 1,
+      "total": 6,
+      "status": "IN_PROGRESS"
+    },
+    "evidence": {
+      "status": "PENDING",
+      "blockers": [],
+      "gates": []
+    },
+    "certification": {
+      "status": "PENDING",
+      "blockers": [],
+      "note": "Local-only validation. No GitHub Actions."
+    }
+  },
+  "changes": [
+    {
+      "id": "2026-08-22-c300-openspec-mirror-repair",
+      "title": "Repair and defend the vendored openspec mirrors",
+      "sequence": 1,
+      "dependsOn": [],
+      "status": "implemented",
+      "implementation_status": "COMPLETE",
+      "certification_status": "PENDING",
+      "backend": "openspec",
+      "specPath": "openspec/changes/2026-08-22-c300-openspec-mirror-repair/",
+      "note": "Restores the green baseline. Two gates red: check-skill-contracts.mjs (40 errors, working tree) and check-git-url-discovery.sh (red on clean HEAD). Blocks all other changes.",
+      "tasks_done": 18,
+      "tasks_total": 18,
+      "tasks_complete": 18,
+      "gatesGreen": 11,
+      "decisions": {
+        "codex": "MANAGED (user, task 1.2) \u2014 openspec init --tools codex; the 10 stale .codex/skills/openspec-* duplicates removed because Codex reads shared skills from .agents/ (project.json agents_config.codex.skill_dir). The 35 pack-owned .codex skills are retained.",
+        "kimi": "MIGRATION ACCEPTED \u2014 .kimi -> .kimi-code is intentional upstream behavior; .kimi dropped from the contract check harness list."
+      },
+      "scopeAdditions": [
+        "B-2 (check-git-url-discovery.sh red on clean HEAD, 'expected 30 public skills, found 36') was found during assessment review and fixed here; both hardcoded counts (30/50) are now derived from skills/ and .agents/skills.",
+        "audit.sh failed open on any unknown mode; a fail-closed guard was added (exit 2) because every acceptance criterion invoking 'audit.sh <mode>' could otherwise pass by typo.",
+        "AGENTS.md and CLAUDE.md still stated OpenSpec 1.6.0+; aligned with the bumped pin (doc-consistency does not catch floors)."
+      ]
+    },
+    {
+      "id": "2026-08-22-c301-simulated-consumer-proof",
+      "title": "Simulated-consumer install proof",
+      "sequence": 2,
+      "dependsOn": [
+        "2026-08-22-c300-openspec-mirror-repair"
+      ],
+      "status": "pending",
+      "implementation_status": "PENDING",
+      "certification_status": "PENDING",
+      "backend": "openspec",
+      "specPath": "openspec/changes/2026-08-22-c301-simulated-consumer-proof/",
+      "note": "Executable half of G1. Does NOT prove prometheus-companion can consume the package \u2014 that repo is a 2-commit scaffold."
+    },
+    {
+      "id": "2026-08-22-c302-refiner-verify-replay",
+      "title": "Make the refiner's Verify stage honest",
+      "sequence": 3,
+      "dependsOn": [
+        "2026-08-22-c300-openspec-mirror-repair"
+      ],
+      "status": "pending",
+      "implementation_status": "PENDING",
+      "certification_status": "PENDING",
+      "backend": "openspec",
+      "specPath": "openspec/changes/2026-08-22-c302-refiner-verify-replay/",
+      "note": "Blocking task 1.0 defines what replay means; may legitimately become a docs-only change."
+    },
+    {
+      "id": "2026-08-22-c303-tauri-tray-template-rot",
+      "title": "Resolve tauri-tray template rot",
+      "sequence": 4,
+      "dependsOn": [
+        "2026-08-22-c300-openspec-mirror-repair"
+      ],
+      "status": "pending",
+      "implementation_status": "PENDING",
+      "certification_status": "PENDING",
+      "backend": "openspec",
+      "specPath": "openspec/changes/2026-08-22-c303-tauri-tray-template-rot/",
+      "note": "Blocking task 1.1 decides gate-vs-delete. Artifacts are templates, not .rs files."
+    },
+    {
+      "id": "2026-08-22-c304-hook-dispatch-decision",
+      "title": "Decide prom-hook-dispatch and align W6.x numbering",
+      "sequence": 5,
+      "dependsOn": [
+        "2026-08-22-c300-openspec-mirror-repair"
+      ],
+      "status": "pending",
+      "implementation_status": "PENDING",
+      "certification_status": "PENDING",
+      "backend": "openspec",
+      "specPath": "openspec/changes/2026-08-22-c304-hook-dispatch-decision/",
+      "note": "W6.x sequences are offset by one across docs/03 and docs/05; renumber a whole sequence."
+    },
+    {
+      "id": "2026-08-22-c305-first-release-tag",
+      "title": "Cut v2.0.0-alpha.3",
+      "sequence": 6,
+      "dependsOn": [
+        "2026-08-22-c300-openspec-mirror-repair",
+        "2026-08-22-c301-simulated-consumer-proof",
+        "2026-08-22-c302-refiner-verify-replay",
+        "2026-08-22-c303-tauri-tray-template-rot",
+        "2026-08-22-c304-hook-dispatch-decision"
+      ],
+      "status": "pending",
+      "implementation_status": "PENDING",
+      "certification_status": "PENDING",
+      "backend": "openspec",
+      "specPath": "openspec/changes/2026-08-22-c305-first-release-tag/",
+      "note": "Last. The only outward-facing act in the phase; the first tag consumers pin must be green."
+    }
+  ],
+  "deviations": [],
+  "out_of_scope": [],
+  "backend": "openspec",
+  "runtimeMode": {
+    "mode": "legacy",
+    "note": "prometheus kbd status reports 'KBD mode: legacy'; typed commands return 'runtime has not been initialized' and the control plane at 127.0.0.1:7892 is unreachable. In legacy mode the file-based ledger IS canonical, so progress.json is written directly. 'prometheus kbd migrate' (inventory) reports journalMigrationRequired=false, uncertainRows=0, invalidFiles=0. 'migrate --apply' was NOT run \u2014 out of scope for this phase and not requested."
+  },
+  "redBaseline": {
+    "note": "Two gates fail before any work starts; both pre-existing, neither introduced by this phase. c300 closes both.",
+    "gates": [
+      {
+        "gate": "check-skill-contracts.mjs",
+        "state": "RED",
+        "scope": "working tree only (HEAD passes)",
+        "detail": "40 errors: missing metadata.internal: true across 4 harnesses"
+      },
+      {
+        "gate": "check-git-url-discovery.sh",
+        "state": "RED",
+        "scope": "clean HEAD",
+        "detail": "expected 30 public skills, found 36"
+      }
+    ]
+  },
+  "blockingDecisions": [
+    {
+      "change": "2026-08-22-c300-openspec-mirror-repair",
+      "task": "1.2",
+      "question": "Is .codex a managed OpenSpec target, or dropped from the contract check? It is in no tool set today, so nothing brings it to 1.10.0."
+    },
+    {
+      "change": "2026-08-22-c302-refiner-verify-replay",
+      "task": "1.0",
+      "question": "Define 'replay the evidence' mechanically, or conclude infeasible and amend the skill body instead?"
+    },
+    {
+      "change": "2026-08-22-c303-tauri-tray-template-rot",
+      "task": "1.1",
+      "question": "Render-and-build gate (A), or delete the templates (B)?"
+    },
+    {
+      "change": "2026-08-22-c304-hook-dispatch-decision",
+      "task": "1.1",
+      "question": "Build prom-hook-dispatch, or drop it from spec 03's Definition of Done?"
+    }
+  ],
+  "userDecisions": [
+    {
+      "date": "2026-08-22",
+      "question": "B-1 fork: re-pin to 1.6.0, adopt 1.10.0, exclude vendored trees, or repo-owned mirror generation?",
+      "decision": "Adopt 1.10.0",
+      "corroboration": "The installed CLI is already openspec 1.10.0, so the versions.toml pin of 1.6.0 was stale relative to the tool in daily use."
+    }
+  ]
+}

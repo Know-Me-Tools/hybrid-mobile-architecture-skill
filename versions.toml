@@ -40,7 +40,14 @@ riverpod = "3.3.1"
 vite = "8.1.5"
 react = "19.2.7"
 zustand = "5.0.14"
-openspec = "1.6.0"              # @fission-ai/openspec — never the squatted bare package
+openspec = "1.10.0"             # @fission-ai/openspec — never the squatted bare package.
+                                # Adopted 2026-08-22 (c300): the pin sat at 1.6.0 while the
+                                # installed CLI had moved to 1.10.0, so `openspec update` wrote
+                                # 1.10.0 mirrors that the stale pin never saw. The pin now
+                                # follows the tool. NOTE: 1.10.0 migrates .kimi -> .kimi-code
+                                # and strips `metadata.internal: true` on every run, because
+                                # `internal` is a repo-local invariant the CLI has no notion of.
+                                # Always run scripts/normalize-vendored-skills.sh afterwards.
 
 [android_build]
 # Android toolchain moves faster than the Flutter pin; these are the versions
