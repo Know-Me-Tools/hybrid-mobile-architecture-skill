@@ -1,6 +1,8 @@
 # Update Log
 
 ## 2026-08-22
+* **Creation**: [HMA companion consumer integration completed with unknown change](/hma-companion-consumer-integration-completed-with-unknown-change.md)
+* **Ingest**: [Karpathy session d4e96d251a4e](/karpathy-session-d4e96d251a4e3111.md)
 * **Ingest**: [Karpathy session f336cfd71208](/karpathy-session-f336cfd71208af2d.md)
 * **Ingest**: [Karpathy session d6a84a66589b](/karpathy-session-d6a84a66589b3d6a.md)
 * **Ingest**: [Karpathy session c005908a8cc3](/karpathy-session-c005908a8cc309cb.md)

@@ -1,0 +1,63 @@
+{
+  "mode": "diff",
+  "target": "2026-08-22-c302-refiner-verify-replay",
+  "verdict": "BLOCK",
+  "judge_model": "claude-opus-5 (harness-native subagent, fresh context)",
+  "isolation_mode": "harness-native",
+  "producer_model": "claude-opus-5",
+  "cross_model_check": "same-model-family — JUDGE_MODEL_COLLISION",
+  "gateway_note": "REST dispatch unavailable: HTTP 401 token_expired at http://localhost:8181/v1.",
+  "rounds": 1,
+  "resolution": "All 7 findings reproduced and fixed; 13/13 checks green; 4 behavior tests re-run.",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "openspec/changes/2026-08-22-c302-refiner-verify-replay/tasks.md",
+      "claim": "Task 2.3 was checked [x] while asserting the eval-coverage behavior that decision D-1 explicitly did NOT implement — task 1.3 was annotated honestly, 2.3 was not.",
+      "evidence": "2.3 read 'Fixed ticket with NO eval case → non-zero naming the gap'; a ticket with no eval case verifies and exits 0. grep shows no eval-coverage check anywhere in refiner-loop.sh.",
+      "status": "REPRODUCED — FIXED. 2.2 and 2.3 now carry the same strikethrough + 'NOT APPLICABLE, by decision D-1' annotation as 1.3, and 2.3 is restated as the behavior actually shipped and verified (no replay recorded → verifies but prints NOT RECORDED and keeps replayed:false). Annotating 1.3 honestly and leaving its two siblings checked was the inconsistency."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "openspec/changes/2026-08-22-c302-refiner-verify-replay/specs/skill-refiner-loop/spec.md",
+      "claim": "The spec delta ADDED a normative SHALL mandating eval-coverage enforcement that the script does not implement — re-introducing at the spec layer the exact doc-vs-code gap this change exists to close, inside a requirement titled 'The Verify stage keeps every promise its skill body makes'.",
+      "evidence": "Scenario 'A fix with no regression coverage': 'WHEN ... no eval case covers it THEN Verify SHALL exit non-zero'. False on the day it lands.",
+      "status": "REPRODUCED — FIXED. Replaced with 'No reproduction was recorded', which states the shipped behavior. This was the worst finding of the change: a false SHALL in a promoted spec outlives the change that introduced it."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/refiner-loop.sh",
+      "claim": "The gate-failure branch reset status and verifiedAt but not `replayed`, so a ticket could sit at 'approved' still advertising replayed:true from an earlier pass.",
+      "evidence": "Line 140 set_fields lacked replayed=false; the replay-failure branch at :176 had it, showing the field needs resetting on failure paths.",
+      "status": "REPRODUCED — FIXED. The gate-failure branch now resets replayed=false."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/refiner-loop.sh",
+      "claim": "set_fields stringified every value, so `replayed` became the JSON STRING \"false\" — which every consumer reads as TRUTHY. A ticket whose replay never ran would answer 'yes, replayed'.",
+      "evidence": "Ticket creation writes a real boolean; after verify, repr(d['replayed']) was 'true' (str). SKILL.md documents `replayed: false`, which was not what was stored.",
+      "status": "REPRODUCED — FIXED. set_fields now coerces a BOOLEAN_KEYS set back to JSON booleans; re-tested, the field is False/True as a bool."
+    },
+    {
+      "severity": "WARNING",
+      "file": "skills/realtime-skill-refiner/SKILL.md",
+      "claim": "Stage 4 listed 'a drift check' among the gates, but the drift check is print-only — both branches print a checkmark and neither sets rc. A surviving promise the code does not keep, in the change whose purpose is removing those.",
+      "evidence": "The pre-change body listed `git diff --exit-code`, which WAS a gate; the rewrite kept the word while the code only reports.",
+      "status": "REPRODUCED — FIXED. Reworded to 'reports whether skill/eval changes are present (informational, NOT a gate: both outcomes pass)'."
+    },
+    {
+      "severity": "SUGGESTION",
+      "file": "scripts/refiner-loop.sh",
+      "claim": "The replay output file was a fixed path shared by all tickets, so concurrent verifies could attribute one ticket's diagnostics to another.",
+      "evidence": "Constant \"$TICKET_DIR/.replay.out\" with no per-run component; the failure branch could sed a file another run had truncated.",
+      "status": "REPRODUCED — FIXED. Now a per-run mktemp file."
+    },
+    {
+      "severity": "SUGGESTION",
+      "file": "scripts/refiner-loop.sh",
+      "claim": "`eval \"$replay_cmd\"` executes ticket-file content as shell with no warning, so a ticket file is a code-execution surface.",
+      "evidence": "The replay string is interpreted as full shell (embedded newlines execute as separate statements). The subshell cd correctly scopes cwd, so this is a documentation gap rather than a containment bug — the field is by design a command.",
+      "status": "REPRODUCED — FIXED as documentation. Both the script usage and the skill body now state that Verify executes the replay string as shell in the repo root, that ticket files are TRUSTED INPUT, and that one should not verify a ticket one did not create or read."
+    }
+  ]
+}

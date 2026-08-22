@@ -10,6 +10,12 @@
 #
 # Usage:
 #   refiner-loop.sh --skill NAME --evidence TEXT [--source log|sycophancy|user]
+#                                  [--replay 'COMMAND']
+#
+#   --replay records a command that REPRODUCED the failure. `--verify` executes
+#   it with `eval` in the repo root and expects exit 0 once the fix lands.
+#   Ticket files are therefore TRUSTED INPUT: verifying a ticket runs its
+#   replay string as shell.
 #                                       open a ticket and run Detect + Triage
 #   refiner-loop.sh --list              list open tickets
 #   refiner-loop.sh --show TICKET       print one ticket
@@ -28,6 +34,7 @@ TICKET_DIR="$REPO_ROOT/.prometheus/refiner"
 
 SKILL=""
 EVIDENCE=""
+REPLAY=""
 SOURCE="user"
 REASON=""
 ACTION=""
@@ -39,6 +46,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --skill)    SKILL="${2:?--skill needs a value}"; shift 2 ;;
     --evidence) EVIDENCE="${2:?--evidence needs a value}"; shift 2 ;;
+    --replay)   REPLAY="${2:?--replay needs a value}"; shift 2 ;;
     --source)   SOURCE="${2:?--source needs a value}"; shift 2 ;;
     --reason)   REASON="${2:?--reason needs a value}"; shift 2 ;;
     --list)     ACTION="list"; shift ;;
@@ -79,9 +87,16 @@ import json, os, sys
 path = sys.argv[1]
 with open(path, encoding="utf-8") as handle:
     ticket = json.load(handle)
+# Boolean-valued keys must stay JSON booleans. Storing them as strings makes
+# "false" a non-empty string, which every consumer reads as TRUTHY — so a
+# ticket whose replay never ran would answer "yes, replayed".
+BOOLEAN_KEYS = {"replayed"}
 for pair in sys.argv[2:]:
     key, _, value = pair.partition("=")
-    ticket[key] = value
+    if key in BOOLEAN_KEYS:
+        ticket[key] = {"true": True, "false": False}[value]
+    else:
+        ticket[key] = value
 tmp = path + ".tmp"
 with open(tmp, "w", encoding="utf-8") as handle:
     json.dump(ticket, handle, indent=2)
@@ -134,7 +149,9 @@ if [ "$ACTION" = "verify" ]; then
 
   if [ "$rc" -ne 0 ]; then
     echo "  ✗ verification gate failed"
-    set_fields "$path" "status=approved" "verifiedAt=" 
+    # Reset replayed as well: the replay never ran on this pass, and leaving a
+    # stale `true` would advertise a re-execution that did not happen.
+    set_fields "$path" "status=approved" "verifiedAt=" "replayed=false"
     echo "refiner-loop: FAIL — fix the gate before shipping $TICKET" >&2
     exit 1
   fi
@@ -145,6 +162,41 @@ if [ "$ACTION" = "verify" ]; then
   else
     echo "  ✓ gate clean; no skill changes present yet"
   fi
+
+  # ── Replay ────────────────────────────────────────────────────────────────
+  # The recorded command REPRODUCED the failure when the ticket opened, so
+  # after a real fix it must SUCCEED. A non-zero exit means the failure is
+  # still there and no amount of green gates makes the ticket verified.
+  #
+  # Replay is optional: much evidence is a pasted transcript with nothing
+  # runnable. When absent we SAY SO on its own line — a Verify that silently
+  # checks only the gates while the skill body implies it re-ran the failure is
+  # the exact defect this change closes.
+  replay_cmd="$(ticket_field "$path" replay)"
+  if [ -z "$replay_cmd" ]; then
+    echo "  – replay: NOT RECORDED (no --replay on this ticket; the reported"
+    echo "            failure was not re-executed)"
+    set_fields "$path" "replayed=false"
+  else
+    echo "  ── replay: $replay_cmd"
+    # Per-run output file: a fixed path is shared by concurrent verifies, so one
+    # ticket's diagnostics could be attributed to another.
+    replay_out="$(mktemp "$TICKET_DIR/.replay.XXXXXX")"
+    if ( cd "$REPO_ROOT" && eval "$replay_cmd" ) >"$replay_out" 2>&1; then
+      echo "  ✓ replay succeeded — the reported failure no longer reproduces"
+      set_fields "$path" "replayed=true"
+    else
+      rc=$?
+      echo "  ✗ replay FAILED (exit $rc) — the reported failure still reproduces"
+      sed 's/^/      /' "$replay_out" | tail -12
+      rm -f "$replay_out"
+      set_fields "$path" "status=approved" "verifiedAt=" "replayed=false"
+      echo "refiner-loop: FAIL — $TICKET is not fixed; replay still reproduces the failure" >&2
+      exit 1
+    fi
+    rm -f "$replay_out"
+  fi
+
   set_fields "$path" "status=verified" "verifiedAt=$(now)"
   echo "refiner-loop: ticket $TICKET verified"
   exit 0
@@ -201,6 +253,7 @@ TICKET_ID="$(date -u +%Y%m%d-%H%M%S)-$SKILL"
 TICKET_FILE="$(ticket_path "$TICKET_ID")"
 
 REFINER_SKILL="$SKILL" REFINER_SOURCE="$SOURCE" REFINER_EVIDENCE="$EVIDENCE" \
+REFINER_REPLAY="$REPLAY" \
 REFINER_ID="$TICKET_ID" REFINER_TS="$(now)" python3 -c '
 import json, os, sys
 
@@ -209,6 +262,12 @@ ticket = {
     "skill": os.environ["REFINER_SKILL"],
     "source": os.environ["REFINER_SOURCE"],
     "evidence": os.environ["REFINER_EVIDENCE"],
+    # Optional. A command that REPRODUCED the failure when the ticket opened,
+    # and that must therefore SUCCEED once the fix lands. Verify executes it.
+    # Empty means no executable reproduction was recorded — Verify then says so
+    # rather than implying it replayed anything.
+    "replay": os.environ.get("REFINER_REPLAY", ""),
+    "replayed": False,
     "detectedAt": os.environ["REFINER_TS"],
     "status": "new",
 }

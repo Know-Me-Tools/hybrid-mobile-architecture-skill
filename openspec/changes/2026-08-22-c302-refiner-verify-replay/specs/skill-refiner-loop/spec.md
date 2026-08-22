@@ -9,9 +9,11 @@ amended to match the script.
 - **WHEN** a ticket is verified and its recorded failure still reproduces
 - **THEN** Verify SHALL exit non-zero and MUST NOT mark the ticket verified
 
-#### Scenario: A fix with no regression coverage
-- **WHEN** a ticket's failure no longer reproduces but no eval case covers it
-- **THEN** Verify SHALL exit non-zero and name the missing coverage
+#### Scenario: No reproduction was recorded
+- **WHEN** a ticket carries no executable replay command
+- **THEN** Verify SHALL report that no replay was recorded and mark the ticket
+  `replayed: false`, so a reader can distinguish "the failure was re-executed
+  and is gone" from "nobody re-executed anything"
 
 #### Scenario: Replay is infeasible for an evidence class
 - **WHEN** the recorded evidence cannot be mechanically re-executed
