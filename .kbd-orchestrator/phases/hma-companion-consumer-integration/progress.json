@@ -24,10 +24,10 @@
   "startedBy": "travis (via /kbd-new-phase)",
   "activeChange": null,
   "implementation_total": 6,
-  "implementation_completed": 3,
+  "implementation_completed": 4,
   "changes_total": 6,
-  "changes_completed": 3,
-  "completedChanges": 3,
+  "changes_completed": 4,
+  "completedChanges": 4,
   "totalChanges": 6,
   "assessment_complete": true,
   "plan_complete": true,
@@ -190,9 +190,9 @@
       "dependsOn": [
         "2026-08-22-c300-openspec-mirror-repair"
       ],
-      "status": "implemented",
+      "status": "merged",
       "implementation_status": "COMPLETE",
-      "certification_status": "PENDING",
+      "certification_status": "VERIFIED",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c303-tauri-tray-template-rot/",
       "note": "Blocking task 1.1 decides gate-vs-delete. Artifacts are templates, not .rs files.",
@@ -225,7 +225,10 @@
           "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c303-tauri-tray-template-rot/findings.json"
         }
       },
-      "outOfScopeFinding": "43 .rs files across 4 crates under assets/templates/rust/ are ungated by any build \u2014 the same defect class at 15x scale. Recorded as design.md D-3; NOT fixed here."
+      "outOfScopeFinding": "43 .rs files across 4 crates under assets/templates/rust/ are ungated by any build \u2014 the same defect class at 15x scale. Recorded as design.md D-3; NOT fixed here.",
+      "commit": "6087c36",
+      "archived": true,
+      "promotedSpec": "openspec/specs/generator-template-integrity/"
     },
     {
       "id": "2026-08-22-c304-hook-dispatch-decision",
