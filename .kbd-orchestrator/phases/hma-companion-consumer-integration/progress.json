@@ -22,12 +22,12 @@
   },
   "startedAt": "2026-08-22T07:10:32Z",
   "startedBy": "travis (via /kbd-new-phase)",
-  "activeChange": "2026-08-22-c300-openspec-mirror-repair",
+  "activeChange": null,
   "implementation_total": 6,
-  "implementation_completed": 0,
+  "implementation_completed": 1,
   "changes_total": 6,
-  "changes_completed": 0,
-  "completedChanges": 0,
+  "changes_completed": 1,
+  "completedChanges": 1,
   "totalChanges": 6,
   "assessment_complete": true,
   "plan_complete": true,
@@ -62,9 +62,9 @@
       "title": "Repair and defend the vendored openspec mirrors",
       "sequence": 1,
       "dependsOn": [],
-      "status": "implemented",
+      "status": "merged",
       "implementation_status": "COMPLETE",
-      "certification_status": "PENDING",
+      "certification_status": "VERIFIED",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c300-openspec-mirror-repair/",
       "note": "Restores the green baseline. Two gates red: check-skill-contracts.mjs (40 errors, working tree) and check-git-url-discovery.sh (red on clean HEAD). Blocks all other changes.",
@@ -80,7 +80,27 @@
         "B-2 (check-git-url-discovery.sh red on clean HEAD, 'expected 30 public skills, found 36') was found during assessment review and fixed here; both hardcoded counts (30/50) are now derived from skills/ and .agents/skills.",
         "audit.sh failed open on any unknown mode; a fail-closed guard was added (exit 2) because every acceptance criterion invoking 'audit.sh <mode>' could otherwise pass by typo.",
         "AGENTS.md and CLAUDE.md still stated OpenSpec 1.6.0+; aligned with the bumped pin (doc-consistency does not catch floors)."
-      ]
+      ],
+      "commit": "92adb05",
+      "branch": "kbd/c300-openspec-mirror-repair",
+      "archived": true,
+      "promotedSpec": "openspec/specs/vendored-skill-integrity/",
+      "qa": {
+        "gatesGreen": "12/12",
+        "negativeFixtures": 5,
+        "adversarialReview": {
+          "verdict": "BLOCK -> resolved",
+          "isolation": "harness-native (judge == producer; :8181 returns HTTP 401 token_expired)",
+          "findings": {
+            "critical": 2,
+            "warning": 3,
+            "suggestion": 1
+          },
+          "allReproducedAndFixed": true,
+          "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c300-openspec-mirror-repair/findings.json"
+        },
+        "idempotence": "proven across two openspec update --force + normalize cycles; git diff clean"
+      }
     },
     {
       "id": "2026-08-22-c301-simulated-consumer-proof",
@@ -179,7 +199,9 @@
         "scope": "clean HEAD",
         "detail": "expected 30 public skills, found 36"
       }
-    ]
+    ],
+    "resolved": true,
+    "resolvedBy": "2026-08-22-c300-openspec-mirror-repair (commit 92adb05)"
   },
   "blockingDecisions": [
     {
