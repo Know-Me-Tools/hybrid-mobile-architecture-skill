@@ -73,8 +73,8 @@
       "tasks_complete": 18,
       "gatesGreen": 11,
       "decisions": {
-        "codex": "MANAGED (user, task 1.2) \u2014 openspec init --tools codex; the 10 stale .codex/skills/openspec-* duplicates removed because Codex reads shared skills from .agents/ (project.json agents_config.codex.skill_dir). The 35 pack-owned .codex skills are retained.",
-        "kimi": "MIGRATION ACCEPTED \u2014 .kimi -> .kimi-code is intentional upstream behavior; .kimi dropped from the contract check harness list."
+        "codex": "MANAGED (user, task 1.2) — openspec init --tools codex; the 10 stale .codex/skills/openspec-* duplicates removed because Codex reads shared skills from .agents/ (project.json agents_config.codex.skill_dir). The 35 pack-owned .codex skills are retained.",
+        "kimi": "MIGRATION ACCEPTED — .kimi -> .kimi-code is intentional upstream behavior; .kimi dropped from the contract check harness list."
       },
       "scopeAdditions": [
         "B-2 (check-git-url-discovery.sh red on clean HEAD, 'expected 30 public skills, found 36') was found during assessment review and fixed here; both hardcoded counts (30/50) are now derived from skills/ and .agents/skills.",
@@ -114,7 +114,7 @@
       "certification_status": "VERIFIED",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c301-simulated-consumer-proof/",
-      "note": "Executable half of G1. Does NOT prove prometheus-companion can consume the package \u2014 that repo is a 2-commit scaffold.",
+      "note": "Executable half of G1. Does NOT prove prometheus-companion can consume the package — that repo is a 2-commit scaffold.",
       "tasks_done": 9,
       "tasks_total": 9,
       "tasks_complete": 9,
@@ -123,7 +123,7 @@
         "gatesGreen": "12/12",
         "positiveControl": true,
         "negativeFixtures": 5,
-        "pathIsolation": "proven empirically \u2014 source tree deliberately broken (undeclared skill + deleted mirror) made the source's own gate fail while the consumer proof still passed",
+        "pathIsolation": "proven empirically — source tree deliberately broken (undeclared skill + deleted mirror) made the source's own gate fail while the consumer proof still passed",
         "adversarialReview": {
           "verdict": "BLOCK -> resolved",
           "isolation": "harness-native (judge == producer)",
@@ -133,7 +133,7 @@
             "suggestion": 1
           },
           "allReproducedAndFixed": true,
-          "headline": "The negative suite scored 5/5 against a stub that read no input \u2014 it lacked a positive control, the exact defect class it exists to catch.",
+          "headline": "The negative suite scored 5/5 against a stub that read no input — it lacked a positive control, the exact defect class it exists to catch.",
           "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c301-simulated-consumer-proof/findings.json"
         }
       },
@@ -161,7 +161,7 @@
       "branch": "kbd/c302-refiner-verify-replay",
       "decisions": {
         "replay": "STRUCTURED REPLAY + HONEST BODY (user, task 1.0). Optional --replay '<command>' recorded on the ticket; --verify executes it and FAILS when it still reproduces. When absent, Verify prints 'replay: NOT RECORDED' and keeps replayed:false so silence is visible.",
-        "evalCase": "REMOVED, NOT IMPLEMENTED. Evals are generated (3/skill, templated from the description by generate-skill-evals.mjs), the shape asserts skill ACTIVATION not a bug, and no runner executes them \u2014 check-skill-contracts.mjs only counts. A hand-added case is erased on the next regeneration. The promise was deleted from SKILL.md with the reason recorded, rather than faked."
+        "evalCase": "REMOVED, NOT IMPLEMENTED. Evals are generated (3/skill, templated from the description by generate-skill-evals.mjs), the shape asserts skill ACTIVATION not a bug, and no runner executes them — check-skill-contracts.mjs only counts. A hand-added case is erased on the next regeneration. The promise was deleted from SKILL.md with the reason recorded, rather than faked."
       },
       "qa": {
         "gatesGreen": "14/14",
@@ -175,7 +175,7 @@
             "suggestion": 2
           },
           "allReproducedAndFixed": true,
-          "headline": "Task 1.3 was annotated honestly but siblings 2.2/2.3 and the SPEC DELTA still asserted the removed eval-coverage behavior \u2014 a normative SHALL that was false on landing, inside a requirement titled 'the Verify stage keeps every promise its skill body makes'.",
+          "headline": "Task 1.3 was annotated honestly but siblings 2.2/2.3 and the SPEC DELTA still asserted the removed eval-coverage behavior — a normative SHALL that was false on landing, inside a requirement titled 'the Verify stage keeps every promise its skill body makes'.",
           "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c302-refiner-verify-replay/findings.json"
         }
       },
@@ -201,11 +201,11 @@
       "tasks_complete": 11,
       "branch": "kbd/c303-tauri-tray-template-rot",
       "decisions": {
-        "option": "A \u2014 fix + gate both (user, task 1.1)",
+        "option": "A — fix + gate both (user, task 1.1)",
         "why": "Measuring first found tray.rs.template did NOT compile (E0596), so the scaffold had been shipping broken code. Deleting would have removed a broken artifact; the gate is what FOUND it."
       },
       "defectsFound": [
-        "E0596: apply_accessory_policy(app: &App) cannot call set_activation_policy (needs &mut App) \u2014 shipped to every scaffolded project",
+        "E0596: apply_accessory_policy(app: &App) cannot call set_activation_policy (needs &mut App) — shipped to every scaffolded project",
         "clippy::let_unit_value: `let _ =` on a unit-returning call, found by the gate immediately after the E0596 fix",
         "unquoted heredoc in scaffold-tauri-tray.sh command-substituted a backticked `&mut App` out of the printed guidance (introduced and fixed in this change)"
       ],
@@ -221,11 +221,11 @@
             "suggestion": 1
           },
           "allReproducedAndFixed": true,
-          "headline": "--fast printed 'PASS \u2014 every rendered template builds' with a deliberately broken tray.rs, exit 0. Third instance this phase of a checker that could not fail.",
+          "headline": "--fast printed 'PASS — every rendered template builds' with a deliberately broken tray.rs, exit 0. Third instance this phase of a checker that could not fail.",
           "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c303-tauri-tray-template-rot/findings.json"
         }
       },
-      "outOfScopeFinding": "43 .rs files across 4 crates under assets/templates/rust/ are ungated by any build \u2014 the same defect class at 15x scale. Recorded as design.md D-3; NOT fixed here.",
+      "outOfScopeFinding": "43 .rs files across 4 crates under assets/templates/rust/ are ungated by any build — the same defect class at 15x scale. Recorded as design.md D-3; NOT fixed here.",
       "commit": "6087c36",
       "archived": true,
       "promotedSpec": "openspec/specs/generator-template-integrity/"
@@ -249,9 +249,9 @@
       "branch": "kbd/c304-hook-dispatch-decision",
       "decisions": {
         "promHookDispatch": "DROPPED from this repo's DoD (user, task 1.1); owned by prometheus-skill-system. This repo has no crates/, ships no Rust binaries, and every path the remedy names is the skill-system's layout.",
-        "numbering": "ALIGN ALL to the architecture review \u00a76 (user). Scope was larger than planned: FOUR sequences had diverged, not two."
+        "numbering": "ALIGN ALL to the architecture review §6 (user). Scope was larger than planned: FOUR sequences had diverged, not two."
       },
-      "scopeGrowth": "The plan assumed two lists offset by one. Reading the actual source of truth found four: the review, docs/03, the SHIPPED skill, and the docs/05 table. docs/05 turned out to be a REMEDY index mislabelled with W-numbers \u2014 relabelling it R6.x removed the collision at its root.",
+      "scopeGrowth": "The plan assumed two lists offset by one. Reading the actual source of truth found four: the review, docs/03, the SHIPPED skill, and the docs/05 table. docs/05 turned out to be a REMEDY index mislabelled with W-numbers — relabelling it R6.x removed the collision at its root.",
       "qa": {
         "gatesGreen": "15/15",
         "negativeFixtures": 8,
@@ -265,7 +265,7 @@
           },
           "allReproducedAndFixed": false,
           "note": "5 of 6 fixed; 1 WARNING accepted as a limitation and recorded as design.md D-4.",
-          "judgeVerifiedRenumbering": "The judge read the review \u00a76 directly and confirmed the renumbering is correct against it.",
+          "judgeVerifiedRenumbering": "The judge read the review §6 directly and confirmed the renumbering is correct against it.",
           "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c304-hook-dispatch-decision/findings.json"
         }
       },
@@ -290,7 +290,9 @@
       "certification_status": "PENDING",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c305-first-release-tag/",
-      "note": "Last. The only outward-facing act in the phase; the first tag consumers pin must be green."
+      "note": "Last. The only outward-facing act in the phase; the first tag consumers pin must be green.",
+      "tasks_done": 5,
+      "tasks_total": 13
     }
   ],
   "deviations": [],
@@ -298,7 +300,7 @@
   "backend": "openspec",
   "runtimeMode": {
     "mode": "legacy",
-    "note": "prometheus kbd status reports 'KBD mode: legacy'; typed commands return 'runtime has not been initialized' and the control plane at 127.0.0.1:7892 is unreachable. In legacy mode the file-based ledger IS canonical, so progress.json is written directly. 'prometheus kbd migrate' (inventory) reports journalMigrationRequired=false, uncertainRows=0, invalidFiles=0. 'migrate --apply' was NOT run \u2014 out of scope for this phase and not requested."
+    "note": "prometheus kbd status reports 'KBD mode: legacy'; typed commands return 'runtime has not been initialized' and the control plane at 127.0.0.1:7892 is unreachable. In legacy mode the file-based ledger IS canonical, so progress.json is written directly. 'prometheus kbd migrate' (inventory) reports journalMigrationRequired=false, uncertainRows=0, invalidFiles=0. 'migrate --apply' was NOT run — out of scope for this phase and not requested."
   },
   "redBaseline": {
     "note": "Two gates fail before any work starts; both pre-existing, neither introduced by this phase. c300 closes both.",

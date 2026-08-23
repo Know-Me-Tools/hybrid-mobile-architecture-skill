@@ -29,7 +29,22 @@ receipt="$XDG_STATE_HOME/knowme-builder/install.json"
 plugin="$XDG_CONFIG_HOME/opencode/plugins/knowme-builder.mjs"
 activation="$XDG_CONFIG_HOME/opencode/knowme-builder/activation-manifest.json"
 [[ -f "$receipt" && -f "$plugin" && -f "$activation" ]]
-jq -e '.version == "2.0.0-alpha.2" and (.harnesses | length == 3)' "$receipt" >/dev/null
+
+# Derive the expected version from the package under test. A hardcoded literal
+# rots the moment the package is bumped: this assertion sat at "2.0.0-alpha.2"
+# while builder.manifest.json said alpha.3, so the installer worked and the test
+# failed — red on main before anyone noticed, because nothing ran it.
+expected_version="$(jq -r '.package.version' "$repo_root/builder.manifest.json")"
+[[ -n "$expected_version" && "$expected_version" != "null" ]] || {
+  echo "test-harness-installer: cannot read package.version from builder.manifest.json" >&2
+  exit 1
+}
+jq -e --arg v "$expected_version" \
+  '.version == $v and (.harnesses | length == 3)' "$receipt" >/dev/null || {
+  echo "test-harness-installer: receipt version/harness mismatch (expected $expected_version):" >&2
+  jq -c '{version, harnesses}' "$receipt" >&2
+  exit 1
+}
 
 unrelated="$XDG_CONFIG_HOME/opencode/plugins/unrelated.mjs"
 touch "$unrelated"

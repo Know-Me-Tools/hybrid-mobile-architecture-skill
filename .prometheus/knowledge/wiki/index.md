@@ -127,6 +127,7 @@
 * [Global harness marketplace and skill installation verified](/karpathy-progress-20260718T044658Z-global-harness-installation.md)
 * [Global multi-harness skill and MCP installation](/karpathy-progress-20260718T044503Z-global-harness-installation.md)
 * [HMA companion consumer integration completed with unknown change](/hma-companion-consumer-integration-completed-with-unknown-change.md)
+* [HMA companion consumer integration executor complete unknown change](/hma-companion-consumer-integration-executor-complete-unknown-change.md)
 * [HMA companion consumer integration executor completed unknown change](/hma-companion-consumer-integration-executor-completed-unknown-change.md)
 * [HMA companion consumer integration session complete with unknown change](/hma-companion-consumer-integration-session-complete-with-unknown-change.md)
 * [Hybrid codegen and CI verification assessment readiness](/hybrid-codegen-and-ci-verification-assessment-readiness.md)
