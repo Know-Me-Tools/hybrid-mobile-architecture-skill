@@ -637,6 +637,16 @@ elif [[ "$PLATFORM" == "doc-consistency" ]]; then
     done
   fi
 
+  # W6.x / R6.x index integrity. Cheap (no build), so it belongs in the
+  # everyday doc-consistency pass rather than a named mode of its own.
+  if w6_out="$(bash "$(dirname "${BASH_SOURCE[0]}")/check-w6-mapping.sh" 2>&1)"; then
+    pass "W6.x/R6.x mapping agrees across docs/03, the shipped skill, and docs/05"
+  else
+    fail "W6.x/R6.x mapping has drifted:"
+    # Surface the checker's own diagnostics; a generic line forces a second run.
+    printf '%s\n' "$w6_out" | grep '^check-w6-mapping:' | sed 's/^/      /'
+  fi
+
 elif [[ "$PLATFORM" == "tray-templates" ]]; then
   # Delegates to the standalone gate; see its header for why this is slow and
   # why it is not in `all`.

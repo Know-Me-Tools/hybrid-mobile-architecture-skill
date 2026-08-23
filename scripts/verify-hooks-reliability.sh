@@ -12,11 +12,11 @@
 # Fixes checked (see skills/claude-hooks-reliability/SKILL.md):
 #   W6.1 no long inline `bash -c` bodies in hook commands
 #   W6.3 no bare-string subagent matchers (must be anchored regex)
-#   W6.5 hook scripts redirect diagnostics off stdout
-#   W6.8 SessionStart entries are not matched with a bare wildcard
-#   W6.9 every hook entry declares a matcher
+#   W6.4 hook scripts redirect diagnostics off stdout
+#   W6.6 SessionStart entries are not matched with a bare wildcard
+#   W6.8 every hook entry declares a matcher
 #
-# W6.2, W6.4, W6.6 and W6.7 are properties of a hook *runner* binary. A project
+# W6.2, W6.5, W6.7 and W6.9 are properties of a hook *runner* binary. A project
 # that ships no runner has nothing to check; when a runner is present its path
 # is checked for the cache, process-group kill, and NDJSON log markers.
 
@@ -80,14 +80,14 @@ for event, entries in hooks.items():
 while IFS="$(printf '\t')" read -r event matcher command; do
   [ -n "$event" ] || continue
 
-  # W6.9 — every entry declares a matcher, even a wildcard.
+  # W6.8 — every entry declares a matcher, even a wildcard.
   if [ "$matcher" = "@none" ]; then
-    violation "W6.9: $event entry has no matcher field (add \"matcher\": \"*\")"
+    violation "W6.8: $event entry has no matcher field (add \"matcher\": \"*\")"
   fi
 
-  # W6.8 — SessionStart must not fire on a bare wildcard.
+  # W6.6 — SessionStart must not fire on a bare wildcard.
   if [ "$event" = "SessionStart" ] && { [ "$matcher" = "*" ] || [ "$matcher" = "@none" ]; }; then
-    violation "W6.8: SessionStart matcher is a bare wildcard; narrow it to the consuming harness"
+    violation "W6.6: SessionStart matcher is a bare wildcard; narrow it to the consuming harness"
   fi
 
   # W6.3 — subagent matchers must be anchored regex, not a bare name.
@@ -110,7 +110,7 @@ done <<EOF_ENTRIES
 $ENTRIES
 EOF_ENTRIES
 
-# W6.5 — every hook script must send diagnostics somewhere other than stdout,
+# W6.4 — every hook script must send diagnostics somewhere other than stdout,
 # because stdout is parsed as the hook's decision payload.
 if [ -d "$ROOT/.claude/hooks" ]; then
   for script in "$ROOT"/.claude/hooks/*; do
@@ -118,22 +118,22 @@ if [ -d "$ROOT/.claude/hooks" ]; then
     case "$script" in
       *.sh)
         grep -q 'exec 2>' "$script" \
-          || violation "W6.5: $(basename "$script") does not redirect stderr away from stdout (add 'exec 2>>\"\$LOG\"')"
+          || violation "W6.4: $(basename "$script") does not redirect stderr away from stdout (add 'exec 2>>\"\$LOG\"')"
         ;;
       *.py)
-        # W6.5 forbids *diagnostics* on stdout, not the decision payload — a
+        # W6.4 forbids *diagnostics* on stdout, not the decision payload — a
         # hook writing its JSON result to stdout is correct. Flag only bare
         # human-readable prints, i.e. a print() whose argument is a string
         # literal rather than serialized JSON.
         if grep -Eq '^[^#]*print\(\s*(f?["'"'"'])' "$script"; then
-          violation "W6.5: $(basename "$script") prints a plain string to stdout; diagnostics belong on stderr"
+          violation "W6.4: $(basename "$script") prints a plain string to stdout; diagnostics belong on stderr"
         fi
         ;;
     esac
   done
 fi
 
-# W6.2 / W6.4 / W6.6 — runner properties, checked only when a runner exists.
+# W6.2 / W6.5 / W6.7 — runner properties, checked only when a runner exists.
 RUNNER=""
 for candidate in "$ROOT/shared/scripts/run-hook" "$ROOT/scripts/run-hook"; do
   [ -f "$candidate" ] && RUNNER="$candidate" && break
@@ -142,9 +142,9 @@ if [ -n "$RUNNER" ]; then
   grep -q 'shasum\|sha256sum' "$RUNNER" && ! grep -q 'cache\|CACHE' "$RUNNER" \
     && violation "W6.2: $RUNNER re-hashes the dispatcher with no cache window"
   grep -q 'setsid\|setpgid' "$RUNNER" \
-    || violation "W6.4: $RUNNER does not spawn hooks in their own process group; timeouts will leak children"
+    || violation "W6.5: $RUNNER does not spawn hooks in their own process group; timeouts will leak children"
   grep -q 'hooks.ndjson' "$RUNNER" \
-    || violation "W6.6: $RUNNER writes no structured per-invocation hook log"
+    || violation "W6.7: $RUNNER writes no structured per-invocation hook log"
 fi
 
 if [ "$VIOLATIONS" -ne 0 ]; then

@@ -41,7 +41,7 @@
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 4,
+      "completed": 5,
       "total": 6,
       "status": "IN_PROGRESS"
     },
@@ -237,12 +237,39 @@
       "dependsOn": [
         "2026-08-22-c300-openspec-mirror-repair"
       ],
-      "status": "pending",
-      "implementation_status": "PENDING",
+      "status": "implemented",
+      "implementation_status": "COMPLETE",
       "certification_status": "PENDING",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c304-hook-dispatch-decision/",
-      "note": "W6.x sequences are offset by one across docs/03 and docs/05; renumber a whole sequence."
+      "note": "W6.x sequences are offset by one across docs/03 and docs/05; renumber a whole sequence.",
+      "tasks_done": 4,
+      "tasks_total": 10,
+      "tasks_complete": 10,
+      "branch": "kbd/c304-hook-dispatch-decision",
+      "decisions": {
+        "promHookDispatch": "DROPPED from this repo's DoD (user, task 1.1); owned by prometheus-skill-system. This repo has no crates/, ships no Rust binaries, and every path the remedy names is the skill-system's layout.",
+        "numbering": "ALIGN ALL to the architecture review \u00a76 (user). Scope was larger than planned: FOUR sequences had diverged, not two."
+      },
+      "scopeGrowth": "The plan assumed two lists offset by one. Reading the actual source of truth found four: the review, docs/03, the SHIPPED skill, and the docs/05 table. docs/05 turned out to be a REMEDY index mislabelled with W-numbers \u2014 relabelling it R6.x removed the collision at its root.",
+      "qa": {
+        "gatesGreen": "15/15",
+        "negativeFixtures": 8,
+        "adversarialReview": {
+          "verdict": "BLOCK -> resolved",
+          "isolation": "harness-native (judge == producer)",
+          "findings": {
+            "critical": 2,
+            "warning": 3,
+            "suggestion": 1
+          },
+          "allReproducedAndFixed": false,
+          "note": "5 of 6 fixed; 1 WARNING accepted as a limitation and recorded as design.md D-4.",
+          "judgeVerifiedRenumbering": "The judge read the review \u00a76 directly and confirmed the renumbering is correct against it.",
+          "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c304-hook-dispatch-decision/findings.json"
+        }
+      },
+      "acceptedLimitation": "check-w6-mapping.sh freezes agreement between LOCAL artifacts only; it cannot read the external review, so a remap all three shared would pass. Recorded as design.md D-4."
     },
     {
       "id": "2026-08-22-c305-first-release-tag",

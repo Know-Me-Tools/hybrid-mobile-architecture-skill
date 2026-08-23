@@ -10,17 +10,17 @@
 # Verify the result with scripts/verify-hooks-reliability.sh.
 #
 # Applied automatically:
-#   W6.9  add an explicit matcher to every hook entry that lacks one
-#   W6.8  narrow a bare-wildcard SessionStart matcher to the harness
+#   W6.8  add an explicit matcher to every hook entry that lacks one
+#   W6.6  narrow a bare-wildcard SessionStart matcher to the harness
 #   W6.3  anchor bare-string SubagentStop matchers as ^(name)$
 #
 # Reported but NOT auto-applied (each needs a human decision about behavior):
 #   W6.1  extracting an inline shell body to a script file
 #   W6.2  the runner's dispatcher-hash cache window
-#   W6.4  process-group spawn and zombie reaping in the runner
-#   W6.5  moving diagnostics off stdout in a hook script
-#   W6.6  the structured NDJSON hook log
-#   W6.7  replacing the inline bash interpreter with a dispatcher binary
+#   W6.5  process-group spawn and zombie reaping in the runner
+#   W6.4  moving diagnostics off stdout in a hook script
+#   W6.7  the structured NDJSON hook log
+#   W6.9  replacing the inline bash interpreter with a dispatcher binary
 
 set -euo pipefail
 
@@ -80,19 +80,19 @@ for event, entries in (hooks or {}).items():
             continue
         matcher = entry.get("matcher")
 
-        # W6.9 — an entry with no matcher is unconditional and silently
+        # W6.8 — an entry with no matcher is unconditional and silently
         # double-fires the moment a sibling entry is added.
         if matcher is None:
             chosen = "claude-code" if event == "SessionStart" else "*"
             entry["matcher"] = chosen
-            applied.append("W6.9: %s: added matcher %r" % (event, chosen))
+            applied.append("W6.8: %s: added matcher %r" % (event, chosen))
             matcher = chosen
 
-        # W6.8 — a bare wildcard SessionStart pays cold-start cost on every
+        # W6.6 — a bare wildcard SessionStart pays cold-start cost on every
         # session, including ones that never use the hook.
         if event == "SessionStart" and matcher == "*":
             entry["matcher"] = "claude-code"
-            applied.append("W6.8: SessionStart: narrowed matcher \"*\" -> \"claude-code\"")
+            applied.append("W6.6: SessionStart: narrowed matcher \"*\" -> \"claude-code\"")
             matcher = entry["matcher"]
 
         # W6.3 — a bare-string subagent matcher matches exactly one name and
@@ -159,11 +159,11 @@ if [ -d "$ROOT/.claude/hooks" ]; then
     case "$script" in
       *.sh)
         grep -q 'exec 2>' "$script" \
-          || advise "W6.5: $(basename "$script") should redirect stderr before doing work"
+          || advise "W6.4: $(basename "$script") should redirect stderr before doing work"
         ;;
       *.py)
         grep -Eq '^[^#]*print\(\s*(f?["'"'"'])' "$script" \
-          && advise "W6.5: $(basename "$script") prints a plain string to stdout; move diagnostics to stderr"
+          && advise "W6.4: $(basename "$script") prints a plain string to stdout; move diagnostics to stderr"
         ;;
     esac
   done

@@ -584,17 +584,17 @@ metadata:
 documents the fixes and teaches a session to apply them
 when modifying `hooks/hooks.json`. The fixes:
 
-| W | Fix | Where |
+| R | Fix | Where |
 |---|---|---|
-| W6.1 | Replace inline `bash -c` with extracted scripts in `shared/scripts/generated/hooks/` | `hooks/hooks.json` |
-| W6.2 | Compile `run-hook` once and use `exec` instead of `bash -c` | `shared/scripts/bootstrap-hook-runtime.sh` |
-| W6.3 | Cache the dispatcher SHA verification for 60s | `shared/scripts/hook-runtime-v1.sh` |
-| W6.4 | Use process-group kill in the hook runner | `shared/scripts/hook-runtime-v1.sh` |
-| W6.5 | Use regex-anchored subagent matchers + add a per-Prompt matcher | `hooks/hooks.json` |
-| W6.6 | `exec 2>>"$LOG"` first in every generated hook script | `shared/scripts/generated/hook-*.sh` |
-| W6.7 | Add a 1-line structured hook-result log to `hooks.ndjson` | `shared/scripts/hook-runtime-v1.sh` |
-| W6.8 | Replace the `bash -c` with a Rust binary `prom-hook-dispatch` | `crates/prom-hook-dispatch/` |
-| W6.9 | Tighten `sessionstart-*` matchers; add a `claude-code` matcher | `hooks/hooks.json` |
+| R6.1 | Replace inline `bash -c` with extracted scripts in `shared/scripts/generated/hooks/` | `hooks/hooks.json` |
+| R6.2 | Compile `run-hook` once and use `exec` instead of `bash -c` | `shared/scripts/bootstrap-hook-runtime.sh` |
+| R6.3 | Cache the dispatcher SHA verification for 60s | `shared/scripts/hook-runtime-v1.sh` |
+| R6.4 | Use process-group kill in the hook runner | `shared/scripts/hook-runtime-v1.sh` |
+| R6.5 | Use regex-anchored subagent matchers + add a per-Prompt matcher | `hooks/hooks.json` |
+| R6.6 | `exec 2>>"$LOG"` first in every generated hook script | `shared/scripts/generated/hook-*.sh` |
+| R6.7 | Add a 1-line structured hook-result log to `hooks.ndjson` | `shared/scripts/hook-runtime-v1.sh` |
+| R6.8 | Replace the `bash -c` with a Rust binary `prom-hook-dispatch` | `crates/prom-hook-dispatch/` |
+| R6.9 | Tighten `sessionstart-*` matchers; add a `claude-code` matcher | `hooks/hooks.json` |
 
 **Frontmatter:**
 

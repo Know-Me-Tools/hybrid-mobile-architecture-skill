@@ -128,7 +128,28 @@ Prompt matcher to `UserPromptSubmit`.
 matcher fires for unknown subagents and only the
 checkpoint.
 
-### W6.4 — Hook leaks processes on timeout
+### W6.4 — Hook stdout pollutes PreToolUse decisions
+
+**Symptom:** the hook script writes a `WARN: …` line to
+stdout. Claude Code parses it as the decision JSON and
+discards the real decision. The hook "ran but didn't
+block."
+
+**Fix (R6.6):** `exec 2>>"$LOG"` first thing in every
+generated hook script so stdout stays clean for decision
+JSON.
+
+```bash
+#!/usr/bin/env bash
+# shared/scripts/generated/hooks/sessionstart-kbd-control.sh
+exec 2>>"$LOG_DIR/hooks.log"
+# ... real work, all writes go to stderr or the log file ...
+```
+
+**Verify:** a hook that prints a warning still delivers the
+correct decision.
+
+### W6.5 — Hook leaks processes on timeout
 
 **Symptom:** a hook that runs `sleep 60` in the background
 and then `exit 0` returns within the timeout but leaks the
@@ -151,28 +172,27 @@ wait $HOOK_PID  # reap the zombie
 **Verify:** `ps aux | grep <hook-name>` shows nothing after
 a timeout.
 
-### W6.5 — Hook stdout pollutes PreToolUse decisions
+### W6.6 — `sessionstart-*` matchers are too broad
 
-**Symptom:** the hook script writes a `WARN: …` line to
-stdout. Claude Code parses it as the decision JSON and
-discards the real decision. The hook "ran but didn't
-block."
+**Symptom:** every SessionStart hook fires for every new
+session, including read-only "what's in this file?"
+sessions. The cold-start cost is multiplied by 5.
 
-**Fix (R6.6):** `exec 2>>"$LOG"` first thing in every
-generated hook script so stdout stays clean for decision
-JSON.
+**Fix (R6.9):** tighten the matchers, or use a
+`claude-code` matcher to skip non-Code-Code sessions.
 
-```bash
-#!/usr/bin/env bash
-# shared/scripts/generated/hooks/sessionstart-kbd-control.sh
-exec 2>>"$LOG_DIR/hooks.log"
-# ... real work, all writes go to stderr or the log file ...
+```diff
+  {
+-   "matcher": "*"
++   "matcher": "claude-code"
+  }
 ```
 
-**Verify:** a hook that prints a warning still delivers the
-correct decision.
+**Verify:** `/hooks` shows the narrowed matcher; a
+read-only session still has the hooks fire but only for
+the Claude-Code harness.
 
-### W6.6 — No structured hook-result log
+### W6.7 — No structured hook-result log
 
 **Symptom:** when a hook misfires, the operator has no
 observability. The bundle logs to its own file; the hook
@@ -188,7 +208,28 @@ invocation, appended to `~/.prometheus/logs/hooks.ndjson`:
 **Verify:** `tail -f ~/.prometheus/logs/hooks.ndjson |
 jq .` shows the line after every hook fire.
 
-### W6.7 — Inline `bash -c` is unfixable long-term
+### W6.8 — `UserPromptSubmit` has no `matcher` field
+
+**Symptom:** `prompt-karpathy-learning` is the only hook
+in the `UserPromptSubmit` block, with no matcher. If a
+second hook is ever added, both will unconditionally fire
+on every prompt.
+
+**Fix:** add a `matcher: "*"` to every entry in the
+`UserPromptSubmit` block, even if it's the only one. The
+matcher field is required for forward compatibility.
+
+```diff
+  {
++   "matcher": "*",
+    "hooks": [{ "type": "command", "command": "..." }]
+  }
+```
+
+**Verify:** the JSON schema validator accepts the entry;
+`/hooks` shows the matcher.
+
+### W6.9 — Inline `bash -c` is unfixable long-term
 
 **Symptom:** even with the extracted-script fix, every
 hook still has a `bash` interpreter in the loop. A
@@ -219,55 +260,18 @@ fn main() {
 **Verify:** the JSON has `command: "prom-hook-dispatch"`
 instead of `bash -c '…'`. The binary is signed.
 
-### W6.8 — `sessionstart-*` matchers are too broad
-
-**Symptom:** every SessionStart hook fires for every new
-session, including read-only "what's in this file?"
-sessions. The cold-start cost is multiplied by 5.
-
-**Fix (R6.9):** tighten the matchers, or use a
-`claude-code` matcher to skip non-Code-Code sessions.
-
-```diff
-  {
--   "matcher": "*"
-+   "matcher": "claude-code"
-  }
-```
-
-**Verify:** `/hooks` shows the narrowed matcher; a
-read-only session still has the hooks fire but only for
-the Claude-Code harness.
-
-### W6.9 — `UserPromptSubmit` has no `matcher` field
-
-**Symptom:** `prompt-karpathy-learning` is the only hook
-in the `UserPromptSubmit` block, with no matcher. If a
-second hook is ever added, both will unconditionally fire
-on every prompt.
-
-**Fix:** add a `matcher: "*"` to every entry in the
-`UserPromptSubmit` block, even if it's the only one. The
-matcher field is required for forward compatibility.
-
-```diff
-  {
-+   "matcher": "*",
-    "hooks": [{ "type": "command", "command": "..." }]
-  }
-```
-
-**Verify:** the JSON schema validator accepts the entry;
-`/hooks` shows the matcher.
 
 ---
 
 ## §3 · The HMA-side install script
 
 `scripts/install-hooks-reliability.sh` (new in the HMA
-repo) applies all 9 fixes to a target project's
-`hooks/hooks.json`, `shared/scripts/`, and
-`shared/scripts/generated/`. Idempotent.
+repo) auto-applies the three **mechanically safe** fixes —
+W6.3 (anchor bare-string SubagentStop matchers), W6.6
+(narrow a bare-wildcard SessionStart matcher) and W6.8 (add
+a missing `matcher`) — and **reports** the rest, because each
+of those changes runtime behavior and needs a human
+decision. Idempotent.
 
 ```bash
 #!/usr/bin/env bash
@@ -285,10 +289,12 @@ echo "✓ applied 9 hook-reliability fixes to $TARGET"
 ## §4 · The HMA-side verify script
 
 `scripts/verify-hooks-reliability.sh` is the inverse: it
-checks that a project's hook chain satisfies the 9 fixes
-and fails with a per-fix message if not. The Companion's
-`doctor` command runs this against every installed
-package that ships hooks.
+checks the settings-level fixes (W6.1, W6.3, W6.4, W6.6,
+W6.8) and fails with a per-fix message if not. W6.2, W6.5
+and W6.7 are runner properties, checked only when a runner
+binary is present; W6.9 is out of scope here entirely (see
+§7). The Companion's `doctor` command runs this against
+every installed package that ships hooks.
 
 ```bash
 #!/usr/bin/env bash
@@ -348,10 +354,34 @@ Do **not** invoke when:
       executable
 - [ ] `scripts/verify-hooks-reliability.sh` exists and is
       executable
-- [ ] The 9 fixes are applied to the HMA repo's own
-      `.claude/settings.json` (if it has hooks)
+- [ ] The **settings-level** fixes are applied to the HMA repo's own
+      `.claude/settings.json` (if it has hooks) — W6.1, W6.3, W6.4, W6.6, W6.8
 - [ ] `scripts/verify-hooks-reliability.sh` exits 0 on the
       HMA repo
+- [ ] `bash scripts/check-w6-mapping.sh` exits 0 — the W6.x labels agree
+      across this spec and the shipped skill, and every cited R6.x resolves
+      in `docs/05`
+
+### Out of scope for this repository
+
+**W6.9 (`prom-hook-dispatch`) is owned by `prometheus-skill-system`**, not by
+this package, and is deliberately absent from the list above.
+
+This repository ships the *guidance skill*; it does not own the hook runtime the
+guidance describes. It has no `crates/` directory and publishes no Rust
+binaries, and every path the remedy table names — `crates/prom-hook-dispatch/`,
+`shared/scripts/hook-runtime-v1.sh`, `hooks/hooks.json` — belongs to the
+skill-system's layout, not this one. This repo's own hooks live in
+`.claude/settings.json`.
+
+`scripts/verify-hooks-reliability.sh` already encodes this boundary: W6.2, W6.5,
+W6.7 and W6.9 are properties of a hook *runner* binary, so a project shipping no
+runner has nothing to check. It reports no pending item for them.
+
+One caveat for whoever builds it: the sketch in W6.9 still invokes `bash` to run
+the resolved script. A dispatcher narrows the surface — one immutable,
+ABI-versioned, env-cleared entry point instead of inline quoting — but does not
+remove the interpreter its own symptom statement names.
 
 ---
 

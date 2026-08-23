@@ -52,18 +52,7 @@ a real matcher so it does not fire for every subagent.
 { "matcher": "^(planner|plan|planner-v2)$" }
 ```
 
-### W6.4 — Hooks leak processes on timeout
-
-A hook that backgrounds work and exits returns inside the timeout but leaks the
-child. Spawn in a new process group, kill the group on timeout, then reap.
-
-```bash
-setsid bash -c "exec $HOOK_SCRIPT" & hook_pid=$!
-wait "$hook_pid" || kill -KILL -"$hook_pid" 2>/dev/null || true
-wait "$hook_pid" 2>/dev/null || true
-```
-
-### W6.5 — Hook stdout pollutes tool decisions
+### W6.4 — Hook stdout pollutes tool decisions
 
 A `WARN:` line on stdout is parsed as the decision payload and the real
 decision is discarded — the hook "ran but did not block". Redirect diagnostics
@@ -76,7 +65,24 @@ exec 2>>"$LOG_DIR/hooks.log"
 
 Nothing but decision JSON may reach stdout.
 
-### W6.6 — No structured hook-result log
+### W6.5 — Hooks leak processes on timeout
+
+A hook that backgrounds work and exits returns inside the timeout but leaks the
+child. Spawn in a new process group, kill the group on timeout, then reap.
+
+```bash
+setsid bash -c "exec $HOOK_SCRIPT" & hook_pid=$!
+wait "$hook_pid" || kill -KILL -"$hook_pid" 2>/dev/null || true
+wait "$hook_pid" 2>/dev/null || true
+```
+
+### W6.6 — `SessionStart` matchers are too broad
+
+A `*` matcher fires every SessionStart hook for every session, multiplying
+cold-start cost across sessions that will never use them. Narrow the matcher to
+the harness that actually consumes the hook.
+
+### W6.7 — No structured hook-result log
 
 With the bundle, the script, and the dispatcher each logging elsewhere, a
 misfire has no single observable. Append one line per invocation to a single
@@ -86,24 +92,25 @@ NDJSON file.
 {"ts":"2026-08-20T12:34:56Z","hook_id":"sessionstart-control","harness":"claude-code","exit":0,"dur_ms":42}
 ```
 
-### W6.7 — A `bash` interpreter sits in every hook path
-
-Even with extracted scripts, a malformed environment variable or missing binary
-breaks the whole chain. Route hooks through one small bundled dispatcher binary
-that clears the environment, passes only a known-safe set, and is ABI-versioned.
-Until that binary ships, treat W6.1 and W6.5 as the mitigation.
-
-### W6.8 — `SessionStart` matchers are too broad
-
-A `*` matcher fires every SessionStart hook for every session, multiplying
-cold-start cost across sessions that will never use them. Narrow the matcher to
-the harness that actually consumes the hook.
-
-### W6.9 — `UserPromptSubmit` entries omit `matcher`
+### W6.8 — `UserPromptSubmit` entries omit `matcher`
 
 An entry with no matcher is unconditional. It works while it is the only entry
 and silently double-fires the moment a second is added. Give every entry an
 explicit matcher, `"*"` included, so the intent survives the next edit.
+
+### W6.9 — A `bash` interpreter sits in every hook path
+
+Even with extracted scripts, a malformed environment variable or missing binary
+breaks the whole chain. Route hooks through one small bundled dispatcher binary
+that clears the environment, passes only a known-safe set, and is ABI-versioned.
+Until that binary ships, treat W6.1 (extracted scripts) and W6.4 (stdout off
+the decision channel) as the mitigation.
+
+> **Ownership:** the dispatcher binary is **not** built in this package. This
+> repository ships the guidance skill, not the hook runtime — it has no
+> `crates/` and its own hooks live in `.claude/settings.json`. The binary
+> belongs to `prometheus-skill-system`, which owns the runner it would replace.
+
 
 ## Verification
 

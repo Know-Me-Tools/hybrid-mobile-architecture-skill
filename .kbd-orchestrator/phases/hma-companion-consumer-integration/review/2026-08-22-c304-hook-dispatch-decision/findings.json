@@ -1,0 +1,57 @@
+{
+  "mode": "diff",
+  "target": "2026-08-22-c304-hook-dispatch-decision",
+  "verdict": "BLOCK",
+  "judge_model": "claude-opus-5 (harness-native subagent, fresh context)",
+  "isolation_mode": "harness-native",
+  "producer_model": "claude-opus-5",
+  "cross_model_check": "same-model-family — JUDGE_MODEL_COLLISION",
+  "gateway_note": "REST dispatch unavailable: HTTP 401 token_expired at http://localhost:8181/v1.",
+  "rounds": 1,
+  "resolution": "All 6 findings reproduced and fixed; 15/15 checks green; negative suite 8/8.",
+  "judgeVerifiedIndependently": "The judge read the architecture review §6 (lines 973-1045) directly and confirmed the renumbering in docs/03 and the shipped skill is CORRECT against it, plus that the docs/05 W6->R6 relabel matches the review's remedy table, all 7 mirrors are byte-identical, and the W6 remap in the hook scripts is label-only with no behavior change.",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/check-w6-mapping.sh",
+      "claim": "W6.1's bare 'inline' keyword also matched W6.9's heading, so a W6.9-shaped heading placed at slot 1 PASSED — the false-green class the check exists to prevent.",
+      "evidence": "Rewriting docs/03's W6.1 heading to 'Inline `bash -c` is unfixable long-term' yielded PASS, exit 0.",
+      "status": "REPRODUCED — FIXED. W6.1 anchored on 'inline .bash -c[^|]*fragile', plus a NO-MULTI-MATCH assertion that fails when any heading satisfies two topic keywords. That assertion immediately caught a second collision ('Subagent matchers are fragile' vs a candidate 'fragile' keyword), so it is load-bearing rather than decorative. Fixture added."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/check-w6-mapping.sh",
+      "claim": "The R6.x check validated only that a row NUMBER exists in docs/05, never the row's content — so swapping two remedy rows' text left every citation resolving to the wrong remedy, and the check passed.",
+      "evidence": "Swapping the bodies of R6.4 and R6.7 (both numbers still present) yielded PASS, exit 0.",
+      "status": "REPRODUCED — FIXED. Added a remedy_for() keyword table asserting each docs/05 row SAYS the remedy its number denotes. Retested: exits 1 with \"R6.4 should be the 'process-group' remedy\". Fixture added."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/check-w6-mapping.sh",
+      "claim": "The checker never reads the architecture review it calls the source of truth; it compares the two local files to each other, so a remap both share would pass undetected.",
+      "evidence": "No reference to the review anywhere in the script; topic_for is a hand-transcribed snapshot. (The judge separately verified the current mapping IS correct against the review.)",
+      "status": "ACCEPTED AS A LIMITATION, NOT FIXED. The review lives in another repository and is not reachable from this one; vendoring a copy would create a second source of truth that can itself drift. Recorded here and in design.md as a known bound on what the check proves: it freezes agreement between local artifacts, not agreement with the external review."
+    },
+    {
+      "severity": "WARNING",
+      "file": "openspec/changes/2026-08-22-c304-hook-dispatch-decision/design.md",
+      "claim": "design.md quoted the verifier's pre-renumbering labels and called prom-hook-dispatch W6.7 — the design record contradicted the numbering the change establishes.",
+      "evidence": "Quoted 'W6.2, W6.4, W6.6 and W6.7' when the file now reads 'W6.2, W6.5, W6.7 and W6.9'.",
+      "status": "REPRODUCED — FIXED. Quote updated, W6.7 -> W6.9 for the dispatcher, and a numbering note added marking which labels are historical."
+    },
+    {
+      "severity": "WARNING",
+      "file": "docs/03-hooks-reliability.md",
+      "claim": "§3 and §4 still claimed the install/verify scripts handle 'all 9 fixes', contradicting §7's new out-of-scope block and the scripts themselves.",
+      "evidence": "install-hooks-reliability.sh auto-applies only W6.3/W6.6/W6.8 and reports the rest; the verifier never emits a W6.9 violation.",
+      "status": "REPRODUCED — FIXED. §3 now names the three auto-applied fixes and says the rest are reported; §4 names the settings-level set and the runner-gated set."
+    },
+    {
+      "severity": "SUGGESTION",
+      "file": "scripts/audit.sh",
+      "claim": "doc-consistency discarded the checker's diagnostics, forcing a second manual run to learn what drifted.",
+      "evidence": "The invocation redirected to /dev/null; only a generic line reached the operator.",
+      "status": "REPRODUCED — FIXED. Output is captured and the checker's own lines are printed under the failure."
+    }
+  ]
+}
