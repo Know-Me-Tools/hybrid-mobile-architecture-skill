@@ -24,10 +24,10 @@
   "startedBy": "travis (via /kbd-new-phase)",
   "activeChange": null,
   "implementation_total": 6,
-  "implementation_completed": 4,
+  "implementation_completed": 5,
   "changes_total": 6,
-  "changes_completed": 4,
-  "completedChanges": 4,
+  "changes_completed": 5,
+  "completedChanges": 5,
   "totalChanges": 6,
   "assessment_complete": true,
   "plan_complete": true,
@@ -237,9 +237,9 @@
       "dependsOn": [
         "2026-08-22-c300-openspec-mirror-repair"
       ],
-      "status": "implemented",
+      "status": "merged",
       "implementation_status": "COMPLETE",
-      "certification_status": "PENDING",
+      "certification_status": "VERIFIED",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c304-hook-dispatch-decision/",
       "note": "W6.x sequences are offset by one across docs/03 and docs/05; renumber a whole sequence.",
@@ -269,7 +269,10 @@
           "path": ".kbd-orchestrator/phases/hma-companion-consumer-integration/review/2026-08-22-c304-hook-dispatch-decision/findings.json"
         }
       },
-      "acceptedLimitation": "check-w6-mapping.sh freezes agreement between LOCAL artifacts only; it cannot read the external review, so a remap all three shared would pass. Recorded as design.md D-4."
+      "acceptedLimitation": "check-w6-mapping.sh freezes agreement between LOCAL artifacts only; it cannot read the external review, so a remap all three shared would pass. Recorded as design.md D-4.",
+      "commit": "4aac116",
+      "archived": true,
+      "promotedSpec": "openspec/specs/hook-reliability-contract/"
     },
     {
       "id": "2026-08-22-c305-first-release-tag",
