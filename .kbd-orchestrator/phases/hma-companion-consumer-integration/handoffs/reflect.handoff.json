@@ -1,0 +1,11 @@
+{
+  "stage": "reflect",
+  "completedAt": "2026-08-23T09:29:43Z",
+  "outputs": [
+    "reflection.md"
+  ],
+  "nextStage": null,
+  "summaryForNext": "6/6 changes merged; v2.0.0-alpha.3 published at b1934d7. HEADLINE: 19 CRITICAL findings across 8 adversarial reviews, first-pass pass rate 0/8 \u2014 every artifact including the assessment and plan shipped a defect. Two red gates existed at phase start (check-skill-contracts, check-git-url-discovery) and two MORE were found unrun-and-red during c305 (verify-scaffold, test-harness-installer); all four closed and the gate roster grew 12 -> 20, now cross-checked against .github/workflows/. DEBT D-1 (most serious): the tag was published at 23abd02 on a false '16/16 green' claim and force-moved to b1934d7 by user decision; anyone who pinned the first commit has a red tree. DEBT D-2: 43 ungated .rs files under assets/templates/rust/ \u2014 the same class c303 fixed, at 15x scale, and c303 proved the class is live (tray.rs.template had shipped a compile error to every scaffolded project). DEBT D-5: all 8 reviews ran harness-native because the :8181 gateway returns HTTP 401 token_expired \u2014 repair with /liter-llm-bridge configure BEFORE further review-gated work. RECOMMENDED NEXT PHASE: rename this one to hma-producer-stabilisation (nothing consumer-side shipped and nothing could have \u2014 prometheus-companion is a 2-commit scaffold), then run the real consumer-integration phase once that repo has an install surface. Recurring classes for the next phase to watch: checkers that cannot fail (5 instances), hardcoded literals rotting silently (4), documentation outliving code (4).",
+  "skipped": false,
+  "skipReason": null
+}

@@ -1,6 +1,8 @@
 # Update Log
 
 ## 2026-08-23
+* **Creation**: [Empty Source Document](/empty-source-document.md)
+* **Creation**: [HMA companion consumer integration executor session complete unknown change](/hma-companion-consumer-integration-executor-session-complete-unknown-change.md)
 * **Creation**: [HMA companion consumer integration executor complete unknown change](/hma-companion-consumer-integration-executor-complete-unknown-change.md)
 
 ## 2026-08-22

@@ -129,6 +129,7 @@
 * [HMA companion consumer integration completed with unknown change](/hma-companion-consumer-integration-completed-with-unknown-change.md)
 * [HMA companion consumer integration executor complete unknown change](/hma-companion-consumer-integration-executor-complete-unknown-change.md)
 * [HMA companion consumer integration executor completed unknown change](/hma-companion-consumer-integration-executor-completed-unknown-change.md)
+* [HMA companion consumer integration executor session complete unknown change](/hma-companion-consumer-integration-executor-session-complete-unknown-change.md)
 * [HMA companion consumer integration session complete with unknown change](/hma-companion-consumer-integration-session-complete-with-unknown-change.md)
 * [Hybrid codegen and CI verification assessment readiness](/hybrid-codegen-and-ci-verification-assessment-readiness.md)
 * [Hybrid codegen and CI verification phase opened](/hybrid-codegen-and-ci-verification-phase-opened.md)

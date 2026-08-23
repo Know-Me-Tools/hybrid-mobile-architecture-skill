@@ -1,6 +1,6 @@
 {
   "phase": "hma-companion-consumer-integration",
-  "status": "execute_complete",
+  "status": "complete",
   "previousPhase": "v0.2.0-hma-companion-skills",
   "seededFrom": {
     "manualEntry": true,
@@ -32,7 +32,7 @@
   "assessment_complete": true,
   "plan_complete": true,
   "execute_complete": true,
-  "reflect_complete": false,
+  "reflect_complete": true,
   "assessmentMethod": {
     "adversarialReview": true,
     "sycophancyCorrection": true,
@@ -46,14 +46,31 @@
       "status": "COMPLETE"
     },
     "evidence": {
-      "status": "PENDING",
+      "status": "VERIFIED",
       "blockers": [],
-      "gates": []
+      "gates": [
+        "scripts/run-all-gates.sh \u2014 20 gates, all green on main"
+      ],
+      "adversarialReviews": 8,
+      "findings": {
+        "critical": 19,
+        "warning": 24,
+        "suggestion": 8,
+        "reproducedBeforeFixing": "51/51",
+        "acceptedAsLimitations": 3,
+        "firstPassPassRate": "0/8"
+      }
     },
     "certification": {
-      "status": "PENDING",
+      "status": "LOCAL_ONLY",
       "blockers": [],
-      "note": "Local-only validation. No GitHub Actions."
+      "note": "All validation local. No GitHub Actions started or cited. Adversarial review was harness-native (judge == producer) throughout \u2014 the :8181 gateway returns HTTP 401 token_expired."
+    },
+    "publication": {
+      "status": "PUBLISHED",
+      "tag": "v2.0.0-alpha.3",
+      "commit": "b1934d7",
+      "caveat": "Tag was first published at 23abd02 with a red gate and force-moved. See reflection Debt D-1."
     }
   },
   "changes": [
@@ -333,8 +350,18 @@
       "promotedSpec": "openspec/specs/release-tagging/"
     }
   ],
-  "deviations": [],
-  "out_of_scope": [],
+  "deviations": [
+    "G1 downgraded to G1' (simulated consumer) at assessment \u2014 prometheus-companion is a 2-commit scaffold with no install surface.",
+    "G6 retired at assessment \u2014 6 of 8 recommendations already closed with evidence.",
+    "c304 scope grew from 'reconcile two offset lists' to four divergent sequences; docs/05's table was a remedy index mislabelled with weakness numbers.",
+    "c305 scope grew: the gate roster was itself incomplete and one omitted gate was red at the published tag."
+  ],
+  "out_of_scope": [
+    "G1'' \u2014 the genuine cross-repo proof against prometheus-companion; blocked on that repo having an install surface.",
+    "prom-hook-dispatch (W6.9) \u2014 owned by prometheus-skill-system; this repo has no crates/ and ships no Rust binaries.",
+    "43 ungated .rs files under assets/templates/rust/ \u2014 same defect class as c303 at 15x scale; its own change.",
+    "audit.sh all as a direct local gate \u2014 covered indirectly by verify-scaffold."
+  ],
   "backend": "openspec",
   "runtimeMode": {
     "mode": "legacy",
@@ -388,5 +415,9 @@
       "decision": "Adopt 1.10.0",
       "corroboration": "The installed CLI is already openspec 1.10.0, so the versions.toml pin of 1.6.0 was stale relative to the tool in daily use."
     }
-  ]
+  ],
+  "reflectedAt": "2026-08-23T09:30:00Z",
+  "reflection": ".kbd-orchestrator/phases/hma-companion-consumer-integration/reflection.md",
+  "recommendedNextPhase": "hma-companion-consumer-integration (the real one) \u2014 blocked until prometheus-companion has an install surface. Immediate prerequisite: repair the :8181 gateway credential so review is cross-model. Then gate the 43 ungated Rust template files (D-2).",
+  "renameRecommendation": "Rename this phase to hma-producer-stabilisation. Nothing consumer-side shipped and nothing could have."
 }
