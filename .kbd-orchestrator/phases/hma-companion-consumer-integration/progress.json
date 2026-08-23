@@ -1,6 +1,6 @@
 {
   "phase": "hma-companion-consumer-integration",
-  "status": "executing",
+  "status": "execute_complete",
   "previousPhase": "v0.2.0-hma-companion-skills",
   "seededFrom": {
     "manualEntry": true,
@@ -31,7 +31,7 @@
   "totalChanges": 6,
   "assessment_complete": true,
   "plan_complete": true,
-  "execute_complete": false,
+  "execute_complete": true,
   "reflect_complete": false,
   "assessmentMethod": {
     "adversarialReview": true,
@@ -285,9 +285,9 @@
         "2026-08-22-c303-tauri-tray-template-rot",
         "2026-08-22-c304-hook-dispatch-decision"
       ],
-      "status": "implemented",
+      "status": "merged",
       "implementation_status": "COMPLETE",
-      "certification_status": "PENDING",
+      "certification_status": "VERIFIED",
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c305-first-release-tag/",
       "note": "Last. The only outward-facing act in the phase; the first tag consumers pin must be green.",
@@ -328,7 +328,9 @@
         }
       },
       "renameRecommendation": "Rename the phase to hma-producer-stabilisation at reflect. Nothing consumer-side shipped and nothing could have (prometheus-companion is a 2-commit scaffold). See design.md D-4.",
-      "hardcodedLiteralRot": "FOURTH instance this phase: check-git-url-discovery's '30' (B-2), test-harness-installer's '2.0.0-alpha.2' (D-2), verify-scaffold's crate version, and verify-scaffold's 'expected 29 companions'. All now derived."
+      "hardcodedLiteralRot": "FOURTH instance this phase: check-git-url-discovery's '30' (B-2), test-harness-installer's '2.0.0-alpha.2' (D-2), verify-scaffold's crate version, and verify-scaffold's 'expected 29 companions'. All now derived.",
+      "archived": true,
+      "promotedSpec": "openspec/specs/release-tagging/"
     }
   ],
   "deviations": [],
