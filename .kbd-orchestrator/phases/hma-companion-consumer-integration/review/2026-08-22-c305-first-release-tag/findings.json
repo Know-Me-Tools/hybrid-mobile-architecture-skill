@@ -1,0 +1,57 @@
+{
+  "mode": "diff",
+  "target": "2026-08-22-c305-first-release-tag",
+  "verdict": "BLOCK",
+  "judge_model": "claude-opus-5 (harness-native subagent, fresh context)",
+  "isolation_mode": "harness-native",
+  "producer_model": "claude-opus-5",
+  "cross_model_check": "same-model-family — JUDGE_MODEL_COLLISION",
+  "gateway_note": "REST dispatch unavailable: HTTP 401 token_expired at http://localhost:8181/v1.",
+  "rounds": 1,
+  "resolution": "All 6 findings reproduced and fixed. The tag was force-moved to the corrected commit (user decision).",
+  "severity_note": "This review caught a PUBLISHED artifact being wrong. The tag had already been pushed when the red gate was found.",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/run-all-gates.sh",
+      "claim": "The roster omitted scripts/verify-scaffold.sh, which was RED at the published tag — so run-all-gates printed 'PASS — all 16 gates green' at a commit with a broken gate, and a tag was cut on that claim.",
+      "evidence": "At 23abd02: verify-scaffold.sh exits 1 with 'crate version 2.0.0-alpha.2 differs from manifest version 2.0.0-alpha.3'. CI runs it (scaffold-ci.yml:67); the roster did not.",
+      "status": "REPRODUCED — FIXED. Crate + lockfile bumped; ci/expected-tree.txt regenerated (additions only, zero removals); the hardcoded 'expected 29 companions' derived from templates/project-skills. Gate added to the roster. THE TAG WAS MOVED to the corrected commit."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/run-all-gates.sh",
+      "claim": "The roster omitted scripts/test-opencode-plugin.mjs, a CI gate that can go red while all fast roster gates report PASS.",
+      "evidence": "production-convergence.yml:40 runs it; a mutation to the plugin makes it exit 1 while run-all-gates --fast still reported every gate PASS.",
+      "status": "REPRODUCED — FIXED. Added, along with the node --check syntax gate CI runs beside it."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/run-all-gates.sh",
+      "claim": "No gate validated .codex-plugin/plugin.json or .agents/plugins/marketplace.json, so run-all-gates could report all-green with two of six published manifests carrying a bogus version — falsifying the tag message's 'all six manifests agree'.",
+      "evidence": "Setting both to 9.9.9-BOGUS left all 16 gates PASS. verify-skill-manifest.sh reads only three of the six.",
+      "status": "REPRODUCED — FIXED via the generated-drift gate (regenerate all four generators + git diff --exit-code), which covers every generated manifest. It immediately earned its place by catching this commit's own uncommitted Cargo.toml bump."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/run-all-gates.sh",
+      "claim": "The roster omitted CI's generated-artifact drift check, so canonical artifacts could drift from their sources with run-all-gates green.",
+      "evidence": "production-convergence.yml:22-30 regenerates then runs git diff --exit-code; nothing equivalent was in the roster.",
+      "status": "REPRODUCED — FIXED. Added as the generated-drift gate."
+    },
+    {
+      "severity": "WARNING",
+      "file": "openspec/changes/2026-08-22-c305-first-release-tag/design.md",
+      "claim": "D-3 said --fast skips 'the four slow gates' when the roster defined three.",
+      "evidence": "grep -c '|1|' returned 3; --fast printed '3 skipped'.",
+      "status": "REPRODUCED — RESOLVED BY THE FIX. verify-scaffold was the missing fourth slow gate; the roster now has four and the prose is correct."
+    },
+    {
+      "severity": "WARNING",
+      "file": "scripts/run-all-gates.sh",
+      "claim": "The roster covers two of audit.sh's six modes and omits `audit.sh all`, so no local gate exercises scaffolded-project layer contracts.",
+      "evidence": "scaffold-ci.yml:142 runs `audit.sh all` against a freshly scaffolded project; nothing local does.",
+      "status": "ACCEPTED, NOT FIXED. `audit.sh all` needs a scaffolded project to audit; verify-scaffold (now in the roster) builds one and audits it as part of its own run, so the surface is covered indirectly. A dedicated gate would duplicate a multi-minute scaffold. Recorded here rather than silently dropped."
+    }
+  ]
+}

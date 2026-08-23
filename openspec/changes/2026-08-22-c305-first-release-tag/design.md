@@ -60,3 +60,41 @@ first published tag.
 G1″ — the genuine cross-repo proof against the Companion — stays on the
 Companion's roadmap and is the natural next phase, once that repo has an install
 surface to prove against.
+
+## D-5 · The tag was published with a red gate, then moved
+
+**This is the phase's most serious process failure and is recorded plainly.**
+
+`v2.0.0-alpha.3` was first cut at `23abd02` and pushed, on the strength of
+"16/16 gates green". Adversarial review then found the roster **itself
+incomplete** — and one of the four gates it omitted, `scripts/verify-scaffold.sh`
+(which CI runs), was **red at that commit**:
+
+```
+Error: crate version 2.0.0-alpha.2 differs from manifest version 2.0.0-alpha.3
+```
+
+`BUILDER_VERSION` is `CARGO_PKG_VERSION`, so `tools/knowme-builder/Cargo.toml`
+drifts from `builder.manifest.json` structurally whenever one is bumped without
+the other. Fixing it exposed two more stale literals behind it: `ci/expected-tree.txt`
+predated the six v0.2.0 skills (additions only, zero removals — a stale snapshot,
+regenerated), and the companion-projection assertion hardcoded "29" against 35
+actual (now derived from `templates/project-skills`).
+
+That is the **fourth** hardcoded-literal rot this phase, after B-2's `30` and
+D-2's `2.0.0-alpha.2`. The pattern is now unmistakable: this repository's gates
+were written with counts and versions baked in, and they rot silently because
+nothing re-derives them.
+
+**The irony is the point.** c305's thesis is that an unlisted gate is an unrun
+gate. The roster shipped incomplete, declared a commit green that was not, and
+a tag was published on that claim. The roster was right about the failure mode
+and was itself an instance of it.
+
+Resolution (user, 2026-08-23): the tag was **force-moved** to `b1934d7`. Moving
+a published tag is normally wrong; it was chosen because the tag was hours old,
+is the repository's first, and the guidance pointing consumers at it is what
+this very phase shipped. The tag message records the move so anyone who pinned
+`23abd02` learns to re-pin. Roster completed 16 → 20 gates, now cross-checked
+against `.github/workflows/`, and `run-all-gates.sh` carries a note requiring
+that cross-check when a gate is added.
