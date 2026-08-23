@@ -1,6 +1,10 @@
 # Update Log
 
 ## 2026-08-23
+* **Creation**: [HMA companion consumer integration completion with unknown change](/hma-companion-consumer-integration-completion-with-unknown-change.md)
+* **Creation**: [HMA companion consumer integration executor completion metadata](/hma-companion-consumer-integration-executor-completion-metadata.md)
+* **Creation**: [HMA companion consumer integration session complete unknown change](/hma-companion-consumer-integration-session-complete-unknown-change.md)
+* **Creation**: [HMA companion consumer integration executor session complete](/hma-companion-consumer-integration-executor-session-complete.md)
 * **Creation**: [HMA companion consumer integration executor completion unknown change](/hma-companion-consumer-integration-executor-completion-unknown-change.md)
 * **Creation**: [Empty Source Document](/empty-source-document.md)
 * **Creation**: [HMA companion consumer integration executor session complete unknown change](/hma-companion-consumer-integration-executor-session-complete-unknown-change.md)

@@ -1,25 +1,25 @@
 {
-  "status": "no_gateway",
-  "gateway": "",
+  "status": "ok",
+  "gateway": "http://localhost:4000/v1",
   "roles": {
     "judge": {
-      "model": "",
-      "source": ""
+      "model": "k3",
+      "source": "/Users/gqadonis/.prometheus/kbd/models.toml"
     },
     "critic": {
-      "model": "",
-      "source": ""
+      "model": "MiniMax-M3",
+      "source": "/Users/gqadonis/.prometheus/kbd/models.toml"
     },
     "generator": {
-      "model": "",
-      "source": ""
+      "model": "kbd-frontier",
+      "source": "/Users/gqadonis/.prometheus/kbd/models.toml"
     }
   },
   "providers_detected": [],
   "classes_available": [],
-  "distinct_models": 0,
+  "distinct_models": 2,
   "config_path": "/Users/gqadonis/.config/liter-llm/liter-llm-proxy.toml",
   "config_exists": true,
   "config_defects": [],
-  "checked_at": "2026-08-22T07:13:29Z"
+  "checked_at": "2026-08-23T11:54:34Z"
 }
