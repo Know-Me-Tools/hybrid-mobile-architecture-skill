@@ -13,6 +13,8 @@
 .agents/skills/agui-event-contract/agents/openai.yaml
 .agents/skills/anonymized-replica/SKILL.md
 .agents/skills/anonymized-replica/agents/openai.yaml
+.agents/skills/auto-skill-package-integration/SKILL.md
+.agents/skills/auto-skill-package-integration/agents/openai.yaml
 .agents/skills/axum-agent-gateway/SKILL.md
 .agents/skills/axum-agent-gateway/agents/openai.yaml
 .agents/skills/build-branded-docusaurus/SKILL.md
@@ -24,9 +26,13 @@
 .agents/skills/build-branded-docusaurus/assets/sanitize.mjs
 .agents/skills/build-branded-docusaurus/scripts/scaffold.sh
 .agents/skills/build-branded-docusaurus/scripts/verify.sh
+.agents/skills/claude-hooks-reliability/SKILL.md
+.agents/skills/claude-hooks-reliability/agents/openai.yaml
 .agents/skills/client-rag/SKILL.md
 .agents/skills/client-rag/agents/openai.yaml
 .agents/skills/client-rag/references/client-rag.md
+.agents/skills/connected-skill-packages/SKILL.md
+.agents/skills/connected-skill-packages/agents/openai.yaml
 .agents/skills/content-block-ui/SKILL.md
 .agents/skills/content-block-ui/agents/openai.yaml
 .agents/skills/content-block-ui/references/rust/new-block-type.md
@@ -51,6 +57,8 @@
 .agents/skills/karpathy-progress-memory/agents/openai.yaml
 .agents/skills/karpathy-progress-memory/references/record-schema.md
 .agents/skills/karpathy-progress-memory/scripts/record-progress.sh
+.agents/skills/launchagent-supervisor/SKILL.md
+.agents/skills/launchagent-supervisor/agents/openai.yaml
 .agents/skills/legacy-app-embed/SKILL.md
 .agents/skills/legacy-app-embed/agents/openai.yaml
 .agents/skills/local-inference-lanes/SKILL.md
@@ -74,6 +82,8 @@
 .agents/skills/pem-local-first/references/tauri-patterns.md
 .agents/skills/persona-scoped-agent/SKILL.md
 .agents/skills/persona-scoped-agent/agents/openai.yaml
+.agents/skills/realtime-skill-refiner/SKILL.md
+.agents/skills/realtime-skill-refiner/agents/openai.yaml
 .agents/skills/reference-ui-fidelity/SKILL.md
 .agents/skills/reference-ui-fidelity/agents/openai.yaml
 .agents/skills/sync-doctrine/SKILL.md
@@ -83,6 +93,8 @@
 .agents/skills/sync-doctrine/references/partial-replication.md
 .agents/skills/tauri-custom-titlebar/SKILL.md
 .agents/skills/tauri-custom-titlebar/agents/openai.yaml
+.agents/skills/tauri-tray-app/SKILL.md
+.agents/skills/tauri-tray-app/agents/openai.yaml
 .agents/skills/tauri-ui-review/SKILL.md
 .agents/skills/tauri-ui-review/agents/openai.yaml
 .claude/hooks/a11y-reminder.py
@@ -98,6 +110,8 @@
 .claude/skills/agui-event-contract/agents/openai.yaml
 .claude/skills/anonymized-replica/SKILL.md
 .claude/skills/anonymized-replica/agents/openai.yaml
+.claude/skills/auto-skill-package-integration/SKILL.md
+.claude/skills/auto-skill-package-integration/agents/openai.yaml
 .claude/skills/axum-agent-gateway/SKILL.md
 .claude/skills/axum-agent-gateway/agents/openai.yaml
 .claude/skills/build-branded-docusaurus/SKILL.md
@@ -109,9 +123,13 @@
 .claude/skills/build-branded-docusaurus/assets/sanitize.mjs
 .claude/skills/build-branded-docusaurus/scripts/scaffold.sh
 .claude/skills/build-branded-docusaurus/scripts/verify.sh
+.claude/skills/claude-hooks-reliability/SKILL.md
+.claude/skills/claude-hooks-reliability/agents/openai.yaml
 .claude/skills/client-rag/SKILL.md
 .claude/skills/client-rag/agents/openai.yaml
 .claude/skills/client-rag/references/client-rag.md
+.claude/skills/connected-skill-packages/SKILL.md
+.claude/skills/connected-skill-packages/agents/openai.yaml
 .claude/skills/content-block-ui/SKILL.md
 .claude/skills/content-block-ui/agents/openai.yaml
 .claude/skills/content-block-ui/references/rust/new-block-type.md
@@ -136,6 +154,8 @@
 .claude/skills/karpathy-progress-memory/agents/openai.yaml
 .claude/skills/karpathy-progress-memory/references/record-schema.md
 .claude/skills/karpathy-progress-memory/scripts/record-progress.sh
+.claude/skills/launchagent-supervisor/SKILL.md
+.claude/skills/launchagent-supervisor/agents/openai.yaml
 .claude/skills/legacy-app-embed/SKILL.md
 .claude/skills/legacy-app-embed/agents/openai.yaml
 .claude/skills/local-inference-lanes/SKILL.md
@@ -159,6 +179,8 @@
 .claude/skills/pem-local-first/references/tauri-patterns.md
 .claude/skills/persona-scoped-agent/SKILL.md
 .claude/skills/persona-scoped-agent/agents/openai.yaml
+.claude/skills/realtime-skill-refiner/SKILL.md
+.claude/skills/realtime-skill-refiner/agents/openai.yaml
 .claude/skills/reference-ui-fidelity/SKILL.md
 .claude/skills/reference-ui-fidelity/agents/openai.yaml
 .claude/skills/sync-doctrine/SKILL.md
@@ -168,6 +190,8 @@
 .claude/skills/sync-doctrine/references/partial-replication.md
 .claude/skills/tauri-custom-titlebar/SKILL.md
 .claude/skills/tauri-custom-titlebar/agents/openai.yaml
+.claude/skills/tauri-tray-app/SKILL.md
+.claude/skills/tauri-tray-app/agents/openai.yaml
 .claude/skills/tauri-ui-review/SKILL.md
 .claude/skills/tauri-ui-review/agents/openai.yaml
 .codex/skills/a11y-gate/SKILL.md
@@ -180,6 +204,8 @@
 .codex/skills/agui-event-contract/agents/openai.yaml
 .codex/skills/anonymized-replica/SKILL.md
 .codex/skills/anonymized-replica/agents/openai.yaml
+.codex/skills/auto-skill-package-integration/SKILL.md
+.codex/skills/auto-skill-package-integration/agents/openai.yaml
 .codex/skills/axum-agent-gateway/SKILL.md
 .codex/skills/axum-agent-gateway/agents/openai.yaml
 .codex/skills/build-branded-docusaurus/SKILL.md
@@ -191,9 +217,13 @@
 .codex/skills/build-branded-docusaurus/assets/sanitize.mjs
 .codex/skills/build-branded-docusaurus/scripts/scaffold.sh
 .codex/skills/build-branded-docusaurus/scripts/verify.sh
+.codex/skills/claude-hooks-reliability/SKILL.md
+.codex/skills/claude-hooks-reliability/agents/openai.yaml
 .codex/skills/client-rag/SKILL.md
 .codex/skills/client-rag/agents/openai.yaml
 .codex/skills/client-rag/references/client-rag.md
+.codex/skills/connected-skill-packages/SKILL.md
+.codex/skills/connected-skill-packages/agents/openai.yaml
 .codex/skills/content-block-ui/SKILL.md
 .codex/skills/content-block-ui/agents/openai.yaml
 .codex/skills/content-block-ui/references/rust/new-block-type.md
@@ -218,6 +248,8 @@
 .codex/skills/karpathy-progress-memory/agents/openai.yaml
 .codex/skills/karpathy-progress-memory/references/record-schema.md
 .codex/skills/karpathy-progress-memory/scripts/record-progress.sh
+.codex/skills/launchagent-supervisor/SKILL.md
+.codex/skills/launchagent-supervisor/agents/openai.yaml
 .codex/skills/legacy-app-embed/SKILL.md
 .codex/skills/legacy-app-embed/agents/openai.yaml
 .codex/skills/local-inference-lanes/SKILL.md
@@ -241,6 +273,8 @@
 .codex/skills/pem-local-first/references/tauri-patterns.md
 .codex/skills/persona-scoped-agent/SKILL.md
 .codex/skills/persona-scoped-agent/agents/openai.yaml
+.codex/skills/realtime-skill-refiner/SKILL.md
+.codex/skills/realtime-skill-refiner/agents/openai.yaml
 .codex/skills/reference-ui-fidelity/SKILL.md
 .codex/skills/reference-ui-fidelity/agents/openai.yaml
 .codex/skills/sync-doctrine/SKILL.md
@@ -250,6 +284,8 @@
 .codex/skills/sync-doctrine/references/partial-replication.md
 .codex/skills/tauri-custom-titlebar/SKILL.md
 .codex/skills/tauri-custom-titlebar/agents/openai.yaml
+.codex/skills/tauri-tray-app/SKILL.md
+.codex/skills/tauri-tray-app/agents/openai.yaml
 .codex/skills/tauri-ui-review/SKILL.md
 .codex/skills/tauri-ui-review/agents/openai.yaml
 .gitignore
@@ -263,6 +299,8 @@
 .kimi-code/skills/agui-event-contract/agents/openai.yaml
 .kimi-code/skills/anonymized-replica/SKILL.md
 .kimi-code/skills/anonymized-replica/agents/openai.yaml
+.kimi-code/skills/auto-skill-package-integration/SKILL.md
+.kimi-code/skills/auto-skill-package-integration/agents/openai.yaml
 .kimi-code/skills/axum-agent-gateway/SKILL.md
 .kimi-code/skills/axum-agent-gateway/agents/openai.yaml
 .kimi-code/skills/build-branded-docusaurus/SKILL.md
@@ -274,9 +312,13 @@
 .kimi-code/skills/build-branded-docusaurus/assets/sanitize.mjs
 .kimi-code/skills/build-branded-docusaurus/scripts/scaffold.sh
 .kimi-code/skills/build-branded-docusaurus/scripts/verify.sh
+.kimi-code/skills/claude-hooks-reliability/SKILL.md
+.kimi-code/skills/claude-hooks-reliability/agents/openai.yaml
 .kimi-code/skills/client-rag/SKILL.md
 .kimi-code/skills/client-rag/agents/openai.yaml
 .kimi-code/skills/client-rag/references/client-rag.md
+.kimi-code/skills/connected-skill-packages/SKILL.md
+.kimi-code/skills/connected-skill-packages/agents/openai.yaml
 .kimi-code/skills/content-block-ui/SKILL.md
 .kimi-code/skills/content-block-ui/agents/openai.yaml
 .kimi-code/skills/content-block-ui/references/rust/new-block-type.md
@@ -301,6 +343,8 @@
 .kimi-code/skills/karpathy-progress-memory/agents/openai.yaml
 .kimi-code/skills/karpathy-progress-memory/references/record-schema.md
 .kimi-code/skills/karpathy-progress-memory/scripts/record-progress.sh
+.kimi-code/skills/launchagent-supervisor/SKILL.md
+.kimi-code/skills/launchagent-supervisor/agents/openai.yaml
 .kimi-code/skills/legacy-app-embed/SKILL.md
 .kimi-code/skills/legacy-app-embed/agents/openai.yaml
 .kimi-code/skills/local-inference-lanes/SKILL.md
@@ -324,6 +368,8 @@
 .kimi-code/skills/pem-local-first/references/tauri-patterns.md
 .kimi-code/skills/persona-scoped-agent/SKILL.md
 .kimi-code/skills/persona-scoped-agent/agents/openai.yaml
+.kimi-code/skills/realtime-skill-refiner/SKILL.md
+.kimi-code/skills/realtime-skill-refiner/agents/openai.yaml
 .kimi-code/skills/reference-ui-fidelity/SKILL.md
 .kimi-code/skills/reference-ui-fidelity/agents/openai.yaml
 .kimi-code/skills/sync-doctrine/SKILL.md
@@ -333,6 +379,8 @@
 .kimi-code/skills/sync-doctrine/references/partial-replication.md
 .kimi-code/skills/tauri-custom-titlebar/SKILL.md
 .kimi-code/skills/tauri-custom-titlebar/agents/openai.yaml
+.kimi-code/skills/tauri-tray-app/SKILL.md
+.kimi-code/skills/tauri-tray-app/agents/openai.yaml
 .kimi-code/skills/tauri-ui-review/SKILL.md
 .kimi-code/skills/tauri-ui-review/agents/openai.yaml
 .kimi/skills/a11y-gate/SKILL.md
@@ -345,6 +393,8 @@
 .kimi/skills/agui-event-contract/agents/openai.yaml
 .kimi/skills/anonymized-replica/SKILL.md
 .kimi/skills/anonymized-replica/agents/openai.yaml
+.kimi/skills/auto-skill-package-integration/SKILL.md
+.kimi/skills/auto-skill-package-integration/agents/openai.yaml
 .kimi/skills/axum-agent-gateway/SKILL.md
 .kimi/skills/axum-agent-gateway/agents/openai.yaml
 .kimi/skills/build-branded-docusaurus/SKILL.md
@@ -356,9 +406,13 @@
 .kimi/skills/build-branded-docusaurus/assets/sanitize.mjs
 .kimi/skills/build-branded-docusaurus/scripts/scaffold.sh
 .kimi/skills/build-branded-docusaurus/scripts/verify.sh
+.kimi/skills/claude-hooks-reliability/SKILL.md
+.kimi/skills/claude-hooks-reliability/agents/openai.yaml
 .kimi/skills/client-rag/SKILL.md
 .kimi/skills/client-rag/agents/openai.yaml
 .kimi/skills/client-rag/references/client-rag.md
+.kimi/skills/connected-skill-packages/SKILL.md
+.kimi/skills/connected-skill-packages/agents/openai.yaml
 .kimi/skills/content-block-ui/SKILL.md
 .kimi/skills/content-block-ui/agents/openai.yaml
 .kimi/skills/content-block-ui/references/rust/new-block-type.md
@@ -383,6 +437,8 @@
 .kimi/skills/karpathy-progress-memory/agents/openai.yaml
 .kimi/skills/karpathy-progress-memory/references/record-schema.md
 .kimi/skills/karpathy-progress-memory/scripts/record-progress.sh
+.kimi/skills/launchagent-supervisor/SKILL.md
+.kimi/skills/launchagent-supervisor/agents/openai.yaml
 .kimi/skills/legacy-app-embed/SKILL.md
 .kimi/skills/legacy-app-embed/agents/openai.yaml
 .kimi/skills/local-inference-lanes/SKILL.md
@@ -406,6 +462,8 @@
 .kimi/skills/pem-local-first/references/tauri-patterns.md
 .kimi/skills/persona-scoped-agent/SKILL.md
 .kimi/skills/persona-scoped-agent/agents/openai.yaml
+.kimi/skills/realtime-skill-refiner/SKILL.md
+.kimi/skills/realtime-skill-refiner/agents/openai.yaml
 .kimi/skills/reference-ui-fidelity/SKILL.md
 .kimi/skills/reference-ui-fidelity/agents/openai.yaml
 .kimi/skills/sync-doctrine/SKILL.md
@@ -415,6 +473,8 @@
 .kimi/skills/sync-doctrine/references/partial-replication.md
 .kimi/skills/tauri-custom-titlebar/SKILL.md
 .kimi/skills/tauri-custom-titlebar/agents/openai.yaml
+.kimi/skills/tauri-tray-app/SKILL.md
+.kimi/skills/tauri-tray-app/agents/openai.yaml
 .kimi/skills/tauri-ui-review/SKILL.md
 .kimi/skills/tauri-ui-review/agents/openai.yaml
 .knowme-builder/activation-manifest.json
@@ -430,6 +490,8 @@
 .opencode/skills/agui-event-contract/agents/openai.yaml
 .opencode/skills/anonymized-replica/SKILL.md
 .opencode/skills/anonymized-replica/agents/openai.yaml
+.opencode/skills/auto-skill-package-integration/SKILL.md
+.opencode/skills/auto-skill-package-integration/agents/openai.yaml
 .opencode/skills/axum-agent-gateway/SKILL.md
 .opencode/skills/axum-agent-gateway/agents/openai.yaml
 .opencode/skills/build-branded-docusaurus/SKILL.md
@@ -441,9 +503,13 @@
 .opencode/skills/build-branded-docusaurus/assets/sanitize.mjs
 .opencode/skills/build-branded-docusaurus/scripts/scaffold.sh
 .opencode/skills/build-branded-docusaurus/scripts/verify.sh
+.opencode/skills/claude-hooks-reliability/SKILL.md
+.opencode/skills/claude-hooks-reliability/agents/openai.yaml
 .opencode/skills/client-rag/SKILL.md
 .opencode/skills/client-rag/agents/openai.yaml
 .opencode/skills/client-rag/references/client-rag.md
+.opencode/skills/connected-skill-packages/SKILL.md
+.opencode/skills/connected-skill-packages/agents/openai.yaml
 .opencode/skills/content-block-ui/SKILL.md
 .opencode/skills/content-block-ui/agents/openai.yaml
 .opencode/skills/content-block-ui/references/rust/new-block-type.md
@@ -468,6 +534,8 @@
 .opencode/skills/karpathy-progress-memory/agents/openai.yaml
 .opencode/skills/karpathy-progress-memory/references/record-schema.md
 .opencode/skills/karpathy-progress-memory/scripts/record-progress.sh
+.opencode/skills/launchagent-supervisor/SKILL.md
+.opencode/skills/launchagent-supervisor/agents/openai.yaml
 .opencode/skills/legacy-app-embed/SKILL.md
 .opencode/skills/legacy-app-embed/agents/openai.yaml
 .opencode/skills/local-inference-lanes/SKILL.md
@@ -491,6 +559,8 @@
 .opencode/skills/pem-local-first/references/tauri-patterns.md
 .opencode/skills/persona-scoped-agent/SKILL.md
 .opencode/skills/persona-scoped-agent/agents/openai.yaml
+.opencode/skills/realtime-skill-refiner/SKILL.md
+.opencode/skills/realtime-skill-refiner/agents/openai.yaml
 .opencode/skills/reference-ui-fidelity/SKILL.md
 .opencode/skills/reference-ui-fidelity/agents/openai.yaml
 .opencode/skills/sync-doctrine/SKILL.md
@@ -500,6 +570,8 @@
 .opencode/skills/sync-doctrine/references/partial-replication.md
 .opencode/skills/tauri-custom-titlebar/SKILL.md
 .opencode/skills/tauri-custom-titlebar/agents/openai.yaml
+.opencode/skills/tauri-tray-app/SKILL.md
+.opencode/skills/tauri-tray-app/agents/openai.yaml
 .opencode/skills/tauri-ui-review/SKILL.md
 .opencode/skills/tauri-ui-review/agents/openai.yaml
 README.md
@@ -516,7 +588,7 @@ rust/tests/vertical_slice.rs
 skills-lock.json
 
 ## builder metadata
-builderVersion = "2.0.0-alpha.2"
+builderVersion = "2.0.0-alpha.3"
 generationMode = "runnable"
 profile = "sovereign-hybrid"
 requiredPrometheusContract = "2.0.0"

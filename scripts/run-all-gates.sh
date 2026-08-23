@@ -51,7 +51,11 @@ GATES=(
   "verify-skill-manifest|0|bash scripts/verify-skill-manifest.sh"
   "verify-hooks-reliability|0|bash scripts/verify-hooks-reliability.sh"
   "normalize-vendored-skills|0|bash scripts/normalize-vendored-skills.sh --check"
+  "opencode-plugin-syntax|0|node --check .opencode/plugins/knowme-builder.mjs"
+  "test-opencode-plugin|0|node scripts/test-opencode-plugin.mjs"
+  "generated-drift|0|node scripts/generate-builder-manifests.mjs && node scripts/generate-skill-metadata.mjs && node scripts/generate-skill-evals.mjs && node scripts/generate-command-contract.mjs && git diff --exit-code"
   "test-harness-installer|1|bash scripts/test-harness-installer.sh"
+  "verify-scaffold|1|bash scripts/verify-scaffold.sh"
   "verify-tray-templates|1|bash scripts/verify-tray-templates.sh"
   "test-consumer-install|1|bash scripts/test-consumer-install.sh"
 )

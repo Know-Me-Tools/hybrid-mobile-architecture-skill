@@ -121,13 +121,22 @@ ok "no unsubstituted placeholders in emitted code"
 
 # ── Skill projection actually happened ──────────────────────────────────────
 step "Checking companion skill projection"
+# Derive the expected count from templates/project-skills, the source the
+# projection is generated FROM. A hardcoded literal rots the moment a companion
+# skill is added: this read "29" while six v0.2.0 skills had since shipped, and
+# nothing noticed because the gate itself was red for an unrelated reason.
+expected_companions="$(find "$PACK_ROOT/templates/project-skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l | tr -d ' ')"
+[[ "$expected_companions" -gt 0 ]] \
+  || die "derived 0 companion skills from templates/project-skills — refusing a vacuous assertion"
+
 for harness in .claude .codex .opencode .kimi .agents .kimi-code; do
   skill_count="$(find "$WORK/proj/$harness/skills" -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l | tr -d ' ')"
-  [[ "$skill_count" == "29" ]] || die "$harness contains $skill_count skills; expected 29 companions"
+  [[ "$skill_count" == "$expected_companions" ]] \
+    || die "$harness contains $skill_count skills; expected $expected_companions companions (from templates/project-skills)"
   [[ ! -e "$WORK/proj/$harness/skills/hybrid-mobile-architecture" ]] || \
     die "$harness incorrectly contains the repository package-routing skill"
 done
-ok "29 companion skills projected to all six project harnesses"
+ok "$expected_companions companion skills projected to all six project harnesses"
 
 # ── Manifests parse ─────────────────────────────────────────────────────────
 step "Validating emitted manifests"

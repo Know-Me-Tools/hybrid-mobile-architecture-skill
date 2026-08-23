@@ -291,7 +291,7 @@
       "backend": "openspec",
       "specPath": "openspec/changes/2026-08-22-c305-first-release-tag/",
       "note": "Last. The only outward-facing act in the phase; the first tag consumers pin must be green.",
-      "tasks_done": 5,
+      "tasks_done": 9,
       "tasks_total": 13
     }
   ],
