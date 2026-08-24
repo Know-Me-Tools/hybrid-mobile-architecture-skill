@@ -1,7 +1,7 @@
 ---
 type: Reference
-id: hma-companion-consumer-integration-executor-completion-record
-title: HMA companion consumer integration executor completion record
+id: hma-companion-consumer-integration-executor-metadata
+title: HMA companion consumer integration executor metadata
 tags:
 - hybrid-mobile-architecture
 - companion-consumer
@@ -17,10 +17,10 @@ links:
 - hma-companion-consumer-integration-completion-unknown-change
 sources:
 - stdin
-timestamp: 2026-08-24T08:02:24.241336+00:00
-created_at: 2026-08-24T08:02:24.240509+00:00
-updated_at: 2026-08-24T08:02:24.241336+00:00
-revision: 1
+timestamp: 2026-08-24T07:51:29.084814+00:00
+created_at: 2026-08-24T07:51:29.084814+00:00
+updated_at: 2026-08-24T07:51:29.084814+00:00
+revision: 0
 ---
 
 ## Context
@@ -31,7 +31,7 @@ revision: 1
 
 ## Record
 
-The executor session for `hma-companion-consumer-integration` completed. The source record does not identify any concrete engineering change or outcome.
+The executor session for `hma-companion-consumer-integration` completed. The source record does not identify a concrete engineering change or outcome.
 
 No evidence is provided for:
 

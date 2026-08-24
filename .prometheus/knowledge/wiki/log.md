@@ -1,5 +1,16 @@
 # Update Log
 
+## 2026-08-24
+* **Ingest**: [Karpathy session 808e0c7b0567](/karpathy-session-808e0c7b05678e03.md)
+* **Ingest**: [Karpathy session c7ad8cec58f9](/karpathy-session-c7ad8cec58f9a26c.md)
+* **Creation**: [HMA companion consumer integration executor completion record](/hma-companion-consumer-integration-executor-completion-record.md)
+* **Ingest**: [Karpathy session 0c99dc51addd](/karpathy-session-0c99dc51addd0e1d.md)
+* **Ingest**: [Karpathy session 73108a0a59c3](/karpathy-session-73108a0a59c36286.md)
+* **Creation**: [HMA companion consumer integration executor completion record](/hma-companion-consumer-integration-executor-completion-record.md)
+* **Ingest**: [Karpathy session 7358945b05d9](/karpathy-session-7358945b05d91b72.md)
+* **Creation**: [HMA companion consumer integration executor metadata](/hma-companion-consumer-integration-executor-metadata.md)
+* **Ingest**: [Karpathy session db0c279f2cb3](/karpathy-session-db0c279f2cb319a4.md)
+
 ## 2026-08-23
 * **Ingest**: [Karpathy session 4075c8f1d510](/karpathy-session-4075c8f1d510d44d.md)
 * **Ingest**: [Karpathy session 34d94d54e2f2](/karpathy-session-34d94d54e2f2ff01.md)
