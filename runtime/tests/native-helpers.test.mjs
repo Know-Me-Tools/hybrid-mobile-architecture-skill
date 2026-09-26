@@ -38,6 +38,8 @@ test('progress validation fails before creating directories for secrets or inval
     assert.equal(secret.status, 3, secret.stderr);
     args[1] = '../escape'; args[5] = 'safe';
     assert.equal(invoke(script, args, { cwd: root }).status, 2);
+    args[1] = 'valid'; args.push('--status', '../escape');
+    assert.equal(invoke(script, args, { cwd: root }).status, 2);
     assert.ok(!existsSync(join(root, '.prometheus')));
   } finally { rmSync(root, { recursive: true, force: true }); }
 });

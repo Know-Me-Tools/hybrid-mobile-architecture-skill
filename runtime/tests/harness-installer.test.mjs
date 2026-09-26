@@ -65,6 +65,29 @@ test('Kimi Code, MiniMax Code and Zed receive portable skills in native discover
   assert.deepEqual(receipt.harnesses.sort(), ['kimi-code', 'minimax-code', 'zed']);
 });
 
+test('external same-version source owns skills, adapters, activation data and CLI build inputs', t => {
+  const work = mkdtempSync(join(tmpdir(), 'builder-external-source-'));
+  t.after(() => rmSync(work, { recursive: true, force: true }));
+  const staged = join(work, 'staged'), source = join(staged, 'package'), project = join(work, 'project');
+  const stage = spawnSync(process.execPath, [join(root, 'scripts/stage-skill-package.mjs'), '--variant', 'full', '--output', staged], { encoding: 'utf8', shell: false });
+  assert.equal(stage.status, 0, stage.stderr);
+  mkdirSync(project);
+  const marker = '// external-source-marker\n';
+  writeFileSync(join(source, '.opencode/plugins/knowme-builder.mjs'), marker);
+  const result = spawnSync(process.execPath, [
+    join(root, 'scripts/install-harness-package.mjs'),
+    '--harness', 'opencode', '--scope', 'project', '--source', source, '--with-cli', '--check',
+  ], { encoding: 'utf8', shell: false, cwd: project });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, new RegExp(source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  const install = spawnSync(process.execPath, [
+    join(root, 'scripts/install-harness-package.mjs'),
+    '--harness', 'opencode', '--scope', 'project', '--source', source,
+  ], { encoding: 'utf8', shell: false, cwd: project });
+  assert.equal(install.status, 0, install.stderr);
+  assert.equal(readFileSync(join(project, '.opencode/plugins/knowme-builder.mjs'), 'utf8'), marker);
+});
+
 function cliFixture(t, code) {
   const work = mkdtempSync(join(tmpdir(), 'builder-mcp ü-')); t.after(() => rmSync(work, { recursive: true, force: true }));
   const bin = join(work, 'bin'), project = join(work, 'project'); mkdirSync(join(bin, 'node_modules/fixture'), { recursive: true }); mkdirSync(project);

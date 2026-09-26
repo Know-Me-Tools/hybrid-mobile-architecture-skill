@@ -9,6 +9,7 @@ await main(() => {
   for (let i = 0; i < args.length; i += 2) { const field = args[i]!.replace(/^--/, ''); assert(args[i]!.startsWith('--') && fields.includes(field) && args[i + 1], 'usage: node record-progress.mjs --phase SLUG --title TEXT --summary TEXT --evidence TEXT --next TEXT [--status STATUS]', 2); values[field] = args[i + 1]!; }
   for (const field of fields) assert(values[field], `missing --${field}`, 2);
   assert(/^[a-z0-9][a-z0-9-]*$/.test(values.phase!), 'phase must be a lowercase slug', 2);
+  assert(/^[a-z0-9][a-z0-9-]*$/.test(values.status!), 'status must be a lowercase slug', 2);
   const combined = [values.title, values.summary, values.evidence, values.next].join(' ');
   assert(!/(api[_ -]?key|token|password|secret|private[_ -]?key)\s*[:=]\s*[^$<{\[]/i.test(combined), 'refusing to record text that appears to contain a secret value', 3);
   const root = repoRoot(), slug = basename(root).replace(/[^a-zA-Z0-9-]+/g, '-').replace(/-$/, '');

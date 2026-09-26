@@ -259,15 +259,15 @@ await main(async () => {
             else {
                 // Skill files are staged from the verified source and owned individually.
                 if (harness === 'codex')
-                    for (const name of await readdir(join(packageRoot, '.codex/prompts')))
+                    for (const name of await readdir(join(portableRoot, '.codex/prompts')))
                         if (name.startsWith('knowme-builder-') && name.endsWith('.md'))
-                            await copyOwned(join(packageRoot, '.codex/prompts', name), resolve('.codex/prompts', name));
+                            await copyOwned(join(portableRoot, '.codex/prompts', name), resolve('.codex/prompts', name));
                 if (harness === 'opencode') {
-                    await copyOwned(join(packageRoot, '.opencode/plugins/knowme-builder.mjs'), join(opencodeRoot, 'plugins/knowme-builder.mjs'));
-                    await copyOwned(join(packageRoot, 'templates/activation-manifest.json'), join(opencodeRoot, 'knowme-builder/activation-manifest.json'));
-                    for (const name of await readdir(join(packageRoot, '.opencode/commands')))
+                    await copyOwned(join(portableRoot, '.opencode/plugins/knowme-builder.mjs'), join(opencodeRoot, 'plugins/knowme-builder.mjs'));
+                    await copyOwned(join(portableRoot, 'templates/activation-manifest.json'), join(opencodeRoot, 'knowme-builder/activation-manifest.json'));
+                    for (const name of await readdir(join(portableRoot, '.opencode/commands')))
                         if (name.startsWith('knowme-builder-') && name.endsWith('.md'))
-                            await copyOwned(join(packageRoot, '.opencode/commands', name), join(opencodeRoot, 'commands', name));
+                            await copyOwned(join(portableRoot, '.opencode/commands', name), join(opencodeRoot, 'commands', name));
                 }
             }
             if (flags.has('with-mcp') && (key === 'claude' || key === 'codex' && !project))
@@ -303,12 +303,12 @@ await main(async () => {
             await save();
         }
         if (flags.has('with-cli')) {
-            execute('cargo', ['build', '--release', '--locked', '--manifest-path', join(packageRoot, 'tools/knowme-builder/Cargo.toml'), '--target-dir', join(packageRoot, 'tools/knowme-builder/target')]);
+            execute('cargo', ['build', '--release', '--locked', '--manifest-path', join(portableRoot, 'tools/knowme-builder/Cargo.toml'), '--target-dir', join(portableRoot, 'tools/knowme-builder/target')]);
             const name = `knowme-builder${process.platform === 'win32' ? '.exe' : ''}`;
             if (check)
                 process.stdout.write(`install native ${name} to cargo bin\n`);
             else
-                await copyOwned(join(packageRoot, 'tools/knowme-builder/target/release', name), join(process.env.CARGO_HOME ?? join(homedir(), '.cargo'), 'bin', name));
+                await copyOwned(join(portableRoot, 'tools/knowme-builder/target/release', name), join(process.env.CARGO_HOME ?? join(homedir(), '.cargo'), 'bin', name));
         }
         await save();
         process.stdout.write(check ? 'Check complete; no host state changed.\n' : `Installed KnowMe Builder ${pkg.version}; receipt: ${receiptPath}\n`);
