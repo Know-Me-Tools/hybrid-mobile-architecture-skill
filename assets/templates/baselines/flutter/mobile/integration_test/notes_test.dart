@@ -1,4 +1,5 @@
 // TJ-ARCH-MOB-001 compliant
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,9 @@ void main() {
     const title = 'Native note restart proof';
     if (verifyRestart) {
       expect(find.text(title), findsAtLeastNWidgets(1));
+      File(
+        '${Directory.systemTemp.path}/knowme-builder-restart-pass',
+      ).writeAsStringSync('PASS: rendered persisted note after relaunch\n', flush: true);
       return;
     }
     await tester.enterText(find.byKey(const Key('note-title')), title);

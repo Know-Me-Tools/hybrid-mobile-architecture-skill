@@ -2,8 +2,8 @@
 import { createRequire as __createRequire } from 'node:module'; const require = __createRequire(import.meta.url);
 
 // src/native-helpers/verify-flutter-ios-restart.mts
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readFileSync, rmSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 
 // src/native-helpers/common.mts
@@ -34,7 +34,7 @@ async function main(fn) {
 }
 
 // src/native-helpers/verify-flutter-ios-restart.mts
-await main(() => {
+await main(async () => {
   assert(process.argv.length >= 3 && process.argv.length <= 5, "node scripts/verify-flutter-ios-restart.mjs <flutter-project> [--ios-app <application-binary> | <android-device-id> <application-binary>]", 2);
   const project = resolve(process.argv[2]);
   const requestedMode = process.argv[3];
@@ -82,8 +82,18 @@ await main(() => {
       `--use-application-binary=${applicationBinary}`
     ];
     run("flutter", [...base, "--keep-app-running"], { cwd: project });
+    const dataContainer = run("xcrun", ["simctl", "get_app_container", id, bundleId, "data"], { capture: true }).trim();
+    assert(Boolean(dataContainer), "simctl did not return the installed application data container");
+    const marker = join(dataContainer, "tmp", "knowme-builder-restart-pass");
+    rmSync(marker, { force: true });
     run("xcrun", ["simctl", "terminate", id, bundleId]);
-    run("flutter", [...base, "--route=/verify-restart"], { cwd: project });
+    run("xcrun", ["simctl", "launch", id, bundleId, "--route=/verify-restart"]);
+    const deadline = Date.now() + 5 * 60 * 1e3;
+    while (!existsSync(marker) && Date.now() < deadline) {
+      await new Promise((resolveDelay) => setTimeout(resolveDelay, 1e3));
+    }
+    assert(existsSync(marker), "restarted iOS application did not publish its rendered-state marker within five minutes");
+    assert(readFileSync(marker, "utf8") === "PASS: rendered persisted note after relaunch\n", "restarted iOS application published an invalid rendered-state marker");
     process.stdout.write(`PASS: Flutter UI -> Rust FFI -> SQLite -> application relaunch recovery on simulator ${id}
 `);
   } finally {
