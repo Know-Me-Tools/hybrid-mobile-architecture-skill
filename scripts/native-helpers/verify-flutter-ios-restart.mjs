@@ -21,7 +21,7 @@ await main(() => {
         ];
         run('flutter', [...base, '--keep-app-running'], { cwd: project });
         run('adb', ['-s', existingDevice, 'shell', 'am', 'force-stop', applicationId]);
-        run('flutter', base, { cwd: project });
+        run('flutter', [...base, '--route=/verify-restart'], { cwd: project });
         process.stdout.write(`PASS: Flutter UI -> Rust FFI -> SQLite -> application relaunch recovery on device ${existingDevice}\n`);
         return;
     }
@@ -43,7 +43,7 @@ await main(() => {
         run('xcrun', ['simctl', 'bootstatus', id, '-b']);
         const base = ['test', '--no-uninstall', 'integration_test/notes_test.dart', '-d', id];
         run('flutter', base, { cwd: project });
-        run('flutter', base, { cwd: project });
+        run('flutter', [...base, '--dart-define=VERIFY_RESTART=true'], { cwd: project });
         process.stdout.write(`PASS: Flutter UI -> Rust FFI -> SQLite -> application relaunch recovery on simulator ${id}\n`);
     }
     finally {

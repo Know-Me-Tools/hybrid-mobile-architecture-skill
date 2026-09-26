@@ -1,4 +1,6 @@
 // TJ-ARCH-MOB-001 compliant
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -9,10 +11,13 @@ void main() {
   testWidgets('creates a persisted note through the real Rust bridge', (
     tester,
   ) async {
+    final verifyRestart =
+        const bool.fromEnvironment('VERIFY_RESTART') ||
+        PlatformDispatcher.instance.defaultRouteName == '/verify-restart';
     await app.main();
     await tester.pumpAndSettle();
     const title = 'Native note restart proof';
-    if (find.text(title).evaluate().isNotEmpty) {
+    if (verifyRestart) {
       expect(find.text(title), findsAtLeastNWidgets(1));
       return;
     }
