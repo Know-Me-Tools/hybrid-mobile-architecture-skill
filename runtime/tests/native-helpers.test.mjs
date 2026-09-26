@@ -53,6 +53,7 @@ test('Docusaurus refuses an existing destination and platform helpers reject mal
     assert.equal(invoke(join(repo, 'assets/templates/scripts/android/verify-device-runtime-gates.mjs'), []).status, 64);
     assert.equal(invoke(join(repo, 'assets/templates/scripts/android/verify-native-inference-gates.mjs'), ['missing.apk'], { env: { ...process.env, KNOWME_PLATFORM_NATIVE: join(root, 'absent-native-binary') } }).status, 127);
     assert.equal(invoke(join(repo, 'scripts/verify-tauri-ui-restart.mjs'), []).status, 2);
+    assert.equal(invoke(join(repo, 'scripts/verify-flutter-ios-restart.mjs'), [root, 'emulator-5554']).status, 2);
     assert.equal(invoke(join(repo, 'scripts/install-tauri-webdriver.mjs'), ['--check']).status, 0);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });

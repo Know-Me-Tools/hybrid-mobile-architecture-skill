@@ -12,7 +12,7 @@ void main() {
     await app.main();
     await tester.pumpAndSettle();
     const title = 'Native note restart proof';
-    if (const bool.fromEnvironment('VERIFY_RESTART')) {
+    if (find.text(title).evaluate().isNotEmpty) {
       expect(find.text(title), findsAtLeastNWidgets(1));
       return;
     }

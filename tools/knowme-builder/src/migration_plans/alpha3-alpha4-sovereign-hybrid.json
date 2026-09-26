@@ -94,7 +94,7 @@
     {
       "kind": "add",
       "to": "BASELINE-MOBILE.md",
-      "afterSourceDigest": "a31cc6494f964d41f15aedf7262306b317a39822138fed46cea9d5a5059c928b"
+      "afterSourceDigest": "16715af5b05dd996ae4ce68d30bbc72e920705308ae201205193203b8b95ad22"
     },
     {
       "kind": "add",
@@ -409,7 +409,7 @@
     {
       "kind": "add",
       "to": "mobile/integration_test/notes_test.dart",
-      "afterSourceDigest": "ac3d74792dc38dd485338c12703d8d6af8f4d1e1a4eaf00664f06a79219dbb82"
+      "afterSourceDigest": "aa68977e886e351d5fe1b6fd75514515720753d9a6d190209b5495a9cdf6f0be"
     },
     {
       "kind": "add",
@@ -930,6 +930,11 @@
       "kind": "add",
       "to": "mobile/test/note_test.dart",
       "afterSourceDigest": "97c89cccbac4d8846a6331e8ba4f3e93a8c1aba996c75df13fee15873f6c1938"
+    },
+    {
+      "kind": "add",
+      "to": "mobile/test_driver/integration_test.dart",
+      "afterSourceDigest": "23f636e362e0e947b668ea4b87ad9a1293490582418e997b9a1eed33069111bb"
     },
     {
       "kind": "add",

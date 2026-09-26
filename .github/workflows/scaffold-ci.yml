@@ -195,7 +195,9 @@ jobs:
         run: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-flutter/mobile"
       - name: Build Android ARM64 application
         working-directory: ${{ runner.temp }}/cert-flutter/mobile
-        run: flutter build apk --debug --target-platform android-arm64
+        run: flutter build apk --debug --target-platform android-arm64 --target integration_test/notes_test.dart
+      - name: Verify Android APK contains only ARM64 native code
+        run: cargo run --locked --manifest-path tools/platform-native/Cargo.toml -- verify-arm64-apk "${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk"
       - name: Execute Android ARM64 FFI persistence across application relaunch
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -203,4 +205,4 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_5
-          script: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-flutter/mobile" emulator-5554
+          script: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-flutter/mobile" emulator-5554 "${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk"

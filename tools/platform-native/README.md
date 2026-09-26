@@ -7,6 +7,7 @@ It does not compile an application or certify device execution.
 ```text
 cargo install --locked --path tools/platform-native
 knowme-platform-native verify-apk application.apk
+knowme-platform-native verify-arm64-apk application.apk
 ```
 
 Generated `scripts/android/verify-native-inference-gates.mjs` invokes this binary
@@ -37,3 +38,7 @@ cargo test --manifest-path tools/platform-native/Cargo.toml --locked
 These fixtures need no Android SDK. They cover valid APKs with Unicode/spaced
 paths, wrong ABI, missing libraries, bundled vendor libraries, hard-linked vendor
 DT_NEEDED entries, and malformed ELF inspection failures.
+
+`verify-arm64-apk` is the runnable scaffold artifact gate. It verifies that every
+native library is AArch64 and that the generated Rust FFI library is present,
+without requiring the optional LiteRT-LM payload or an external `readelf` tool.

@@ -752,6 +752,7 @@ mobile/rust_builder/pubspec.yaml
 mobile/rust_builder/windows/.gitignore
 mobile/rust_builder/windows/CMakeLists.txt
 mobile/test/note_test.dart
+mobile/test_driver/integration_test.dart
 rust-toolchain.toml
 rust/Cargo.toml
 rust/capabilities/index.json

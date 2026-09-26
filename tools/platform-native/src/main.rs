@@ -20,16 +20,17 @@ fn main() {
 
 fn run() -> Result<()> {
     let args: Vec<_> = env::args_os().skip(1).collect();
-    if args.len() != 2 || args[0] != "verify-apk" {
-        eprintln!("usage: knowme-platform-native verify-apk /path/to/app.apk");
+    if args.len() != 2 || (args[0] != "verify-apk" && args[0] != "verify-arm64-apk") {
+        eprintln!("usage: knowme-platform-native <verify-apk|verify-arm64-apk> /path/to/app.apk");
         std::process::exit(64);
     }
+    let inference_gate = args[0] == "verify-apk";
     let apk = Path::new(&args[1]);
     if !apk.is_file() {
         eprintln!("APK not found: {}", apk.display());
         std::process::exit(66);
     }
-    let readelf = resolve_readelf()?;
+    let readelf = inference_gate.then(resolve_readelf).transpose()?;
     let mut archive = ZipArchive::new(File::open(apk)?).context("invalid APK ZIP archive")?;
     let scratch = tempfile::tempdir().context("create native inspection directory")?;
     let mut libraries = BTreeSet::new();
@@ -85,36 +86,47 @@ fn run() -> Result<()> {
             machine == 183,
             "G2 FAIL: {library} must contain AArch64 machine code, found ELF e_machine={machine}"
         );
-        let output = Command::new(&readelf)
-            .arg("-d")
-            .arg(&extracted)
-            .output()
-            .with_context(|| format!("run {:?}", readelf))?;
-        ensure!(
-            output.status.success(),
-            "readelf failed for {library}: {}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-        for line in String::from_utf8_lossy(&output.stdout).lines() {
+        if let Some(readelf) = &readelf {
+            let output = Command::new(readelf)
+                .arg("-d")
+                .arg(&extracted)
+                .output()
+                .with_context(|| format!("run {readelf:?}"))?;
             ensure!(
-                !(line.contains("NEEDED")
-                    && ["OpenCL", "GLES_mali", "PVROCL", "vndksupport"]
-                        .iter()
-                        .any(|name| line.contains(name))),
-                "G1 FAIL: {library} hard-links a vendor GPU/OpenCL library: {line}"
+                output.status.success(),
+                "readelf failed for {library}: {}",
+                String::from_utf8_lossy(&output.stderr)
             );
+            for line in String::from_utf8_lossy(&output.stdout).lines() {
+                ensure!(
+                    !(line.contains("NEEDED")
+                        && ["OpenCL", "GLES_mali", "PVROCL", "vndksupport"]
+                            .iter()
+                            .any(|name| line.contains(name))),
+                    "G1 FAIL: {library} hard-links a vendor GPU/OpenCL library: {line}"
+                );
+            }
         }
     }
-    for required in ["libgen_ui_ffi.so", "liblitertlm_jni.so"] {
+    let required = if inference_gate {
+        &["libgen_ui_ffi.so", "liblitertlm_jni.so"][..]
+    } else {
+        &["libgen_ui_ffi.so"][..]
+    };
+    for required in required {
         ensure!(
-            libraries.contains(required),
+            libraries.contains(*required),
             "G2 FAIL: missing lib/arm64-v8a/{required}"
         );
     }
-    println!("G1 PASS: APK native libraries have no vendor GPU/OpenCL DT_NEEDED entries");
-    println!("G2 PASS: APK is arm64-only and contains required app/LiteRT-LM native libraries");
+    if inference_gate {
+        println!("G1 PASS: APK native libraries have no vendor GPU/OpenCL DT_NEEDED entries");
+        println!("G2 PASS: APK is arm64-only and contains required app/LiteRT-LM native libraries");
+        println!("G3-G6 require install/launch/logcat/runtime self-test on a physical device");
+    } else {
+        println!("G2 PASS: APK is arm64-only and contains the required app native library");
+    }
     println!("G2 PASS: APK does not bundle vendor GPU/OpenCL libraries");
-    println!("G3-G6 require install/launch/logcat/runtime self-test on a physical device");
     Ok(())
 }
 

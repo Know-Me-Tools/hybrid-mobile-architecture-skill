@@ -31,7 +31,7 @@ fn library(root: &Path, name: &str, flags: &[&str]) -> Vec<u8> {
     );
     fs::read(output).unwrap()
 }
-fn apk(root: &Path, entries: &[(&str, &[u8])]) -> Output {
+fn apk_with_command(root: &Path, command: &str, entries: &[(&str, &[u8])]) -> Output {
     let path = root.join("app space ü.apk");
     let mut zip = ZipWriter::new(File::create(&path).unwrap());
     for (name, bytes) in entries {
@@ -40,10 +40,13 @@ fn apk(root: &Path, entries: &[(&str, &[u8])]) -> Output {
     }
     zip.finish().unwrap();
     Command::new(env!("CARGO_BIN_EXE_knowme-platform-native"))
-        .arg("verify-apk")
+        .arg(command)
         .arg(path)
         .output()
         .unwrap()
+}
+fn apk(root: &Path, entries: &[(&str, &[u8])]) -> Output {
+    apk_with_command(root, "verify-apk", entries)
 }
 #[test]
 fn accepts_real_arm64_libraries_and_spaced_apk_path() {
@@ -62,6 +65,22 @@ fn accepts_real_arm64_libraries_and_spaced_apk_path() {
         String::from_utf8_lossy(&result.stderr)
     );
     assert!(String::from_utf8_lossy(&result.stdout).contains("G1 PASS"));
+}
+#[test]
+fn accepts_scaffold_apk_without_optional_inference_library() {
+    let dir = TempDir::new().unwrap();
+    let lib = library(dir.path(), "fixture.so", &[]);
+    let result = apk_with_command(
+        dir.path(),
+        "verify-arm64-apk",
+        &[("lib/arm64-v8a/libgen_ui_ffi.so", &lib)],
+    );
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert!(String::from_utf8_lossy(&result.stdout).contains("arm64-only"));
 }
 #[test]
 fn rejects_wrong_abi_missing_libraries_and_bundled_vendor_code() {
