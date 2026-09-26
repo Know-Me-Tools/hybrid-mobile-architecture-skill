@@ -70,7 +70,10 @@ await main(() => {
     roots.add(path.replaceAll("\\", "/"));
     roots.add(path.replaceAll("/", "\\"));
   }
-  for (const field of ["title", "summary", "evidence", "next"]) for (const path of [...roots].sort((a, b) => b.length - a.length)) values[field] = values[field].replaceAll(path, "$REPO_ROOT");
+  for (const field of ["title", "summary", "evidence", "next"]) {
+    for (const path of [...roots].sort((a, b) => b.length - a.length)) values[field] = values[field].replaceAll(path, "$REPO_ROOT");
+    values[field] = redactWindowsAlias(values[field], canonicalRoot);
+  }
   const projectWiki = join2(root, ".prometheus/knowledge/wiki"), privateProject = join2(process.env.PROMETHEUS_PRIVATE_ROOT ?? join2(homedir(), ".prometheus"), "knowledge/private", slug), privateWiki = join2(privateProject, "wiki");
   mkdirSync(projectWiki, { recursive: true });
   mkdirSync(privateWiki, { recursive: true });
@@ -114,3 +117,21 @@ ${values.next}
   appendFileSync(join2(root, ".prometheus/events.jsonl"), event);
   appendFileSync(join2(privateProject, "events.jsonl"), event);
 });
+function redactWindowsAlias(value, canonicalRoot) {
+  if (process.platform !== "win32") return value;
+  const rootName = basename(canonicalRoot), lower = value.toLowerCase(), needle = rootName.toLowerCase();
+  let offset = 0;
+  while (offset < value.length) {
+    const match = lower.indexOf(needle, offset);
+    if (match < 0) break;
+    const end = match + rootName.length;
+    for (let start = match; start >= 0; start--) {
+      if (!/^[a-z]$/i.test(value[start] ?? "") || value[start + 1] !== ":" || !/[\\/]/.test(value[start + 2] ?? "")) continue;
+      const candidate = value.slice(start, end);
+      if (existsSync(candidate) && realpathSync(candidate) === canonicalRoot) return `${value.slice(0, start)}$REPO_ROOT${value.slice(end)}`;
+      break;
+    }
+    offset = end;
+  }
+  return value;
+}

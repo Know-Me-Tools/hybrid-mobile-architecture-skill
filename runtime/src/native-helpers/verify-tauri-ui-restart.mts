@@ -1,5 +1,6 @@
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, statSync } from 'node:fs';
+import { copyFileSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { setTimeout } from 'node:timers/promises';
 import { assert, main } from './common.mjs';
@@ -44,13 +45,58 @@ async function waitFor<T>(description: string, deadline: number, operation: () =
   throw new Error(`${description} did not become ready: ${last instanceof Error ? last.message : String(last)}`);
 }
 
-async function createSession(binary: string, deadline: number): Promise<string> {
-  const value = await waitFor('Tauri WebDriver session', deadline, () => request('/session', 'POST', {
-    capabilities: { alwaysMatch: { browserName: 'wry', 'tauri:options': { application: binary } } },
-  }));
-  const id = value?.sessionId;
-  assert(typeof id === 'string' && id.length > 0, 'WebDriver response omitted sessionId');
-  return id;
+function findDevToolsPort(root: string, depth = 3): string | undefined {
+  if (!existsSync(root) || depth < 0) return undefined;
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const path = join(root, entry.name);
+    if (entry.isFile() && entry.name === 'DevToolsActivePort') return path;
+    if (entry.isDirectory()) {
+      const found = findDevToolsPort(path, depth - 1);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+async function mirrorDevToolsPort(userDataFolder: string, active: { value: boolean }): Promise<void> {
+  const expected = join(userDataFolder, 'DevToolsActivePort');
+  while (active.value) {
+    try {
+      if (!existsSync(expected)) {
+        const nested = findDevToolsPort(userDataFolder);
+        if (nested && nested !== expected) copyFileSync(nested, expected);
+      }
+    } catch { /* WebView2 may replace profile files while starting; retry until the session responds. */ }
+    await setTimeout(100);
+  }
+}
+
+async function createSession(binary: string, deadline: number, userDataFolder: string): Promise<string> {
+  mkdirSync(userDataFolder, { recursive: true });
+  const active = { value: process.platform === 'win32' };
+  const mirror = active.value ? mirrorDevToolsPort(userDataFolder, active) : Promise.resolve();
+  try {
+    const value = await waitFor('Tauri WebDriver session', deadline, () => request('/session', 'POST', {
+      capabilities: {
+        alwaysMatch: {
+          browserName: 'wry',
+          'tauri:options': {
+            application: binary,
+            webviewOptions: {
+              userDataFolder,
+              additionalBrowserArguments: ['remote-debugging-port=0'],
+            },
+          },
+        },
+      },
+    }));
+    const id = value?.sessionId;
+    assert(typeof id === 'string' && id.length > 0, 'WebDriver response omitted sessionId');
+    return id;
+  } finally {
+    active.value = false;
+    await mirror;
+  }
 }
 
 async function element(session: string, selector: string, deadline: number): Promise<string> {
@@ -108,7 +154,7 @@ await main(async () => {
       await request('/status');
     });
     const title = `WebDriver persistence ${Date.now()}`;
-    session = await createSession(binary, deadline);
+    session = await createSession(binary, deadline, join(data, `webview-${randomUUID()}`));
     const input = await element(session, '[data-testid="note-input"]', deadline);
     await request(`/session/${session}/element/${input}/value`, 'POST', { text: title, value: [...title] });
     const save = await element(session, '[data-testid="save-note"]', deadline);
@@ -116,7 +162,7 @@ await main(async () => {
     await waitForNote(session, title, deadline);
     await request(`/session/${session}`, 'DELETE');
     session = undefined;
-    session = await createSession(binary, deadline);
+    session = await createSession(binary, deadline, join(data, `webview-${randomUUID()}`));
     await waitForNote(session, title, deadline);
     assert(existsSync(join(data, 'notes.sqlite3')), 'UI workflow did not create the persisted SQLite database');
     process.stdout.write(`PASS: packaged Tauri UI -> invoke -> Rust -> SQLite survived application relaunch\napp_data=${data}\n`);

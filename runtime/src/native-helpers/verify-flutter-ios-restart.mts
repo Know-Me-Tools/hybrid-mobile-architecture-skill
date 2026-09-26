@@ -3,8 +3,13 @@ import { randomUUID } from 'node:crypto';
 import { assert, main, run } from './common.mjs';
 
 interface SimctlList {
-  devicetypes?: Array<{ name?: string; identifier?: string }>;
   runtimes?: Array<{ name?: string; identifier?: string; isAvailable?: boolean }>;
+  devices?: Record<string, Array<{
+    name?: string;
+    udid?: string;
+    isAvailable?: boolean;
+    deviceTypeIdentifier?: string;
+  }>>;
 }
 
 await main(() => {
@@ -20,16 +25,16 @@ await main(() => {
   }
   assert(process.platform === 'darwin', 'managed iOS simulator verification requires macOS', 2);
   const inventory = JSON.parse(run('xcrun', ['simctl', 'list', '--json'], { capture: true })) as SimctlList;
-  const device = inventory.devicetypes
-    ?.filter(item => item.identifier && /^iPhone /.test(item.name ?? ''))
-    .at(-1);
-  const runtime = inventory.runtimes
+  const compatible = inventory.runtimes
     ?.filter(item => item.identifier && item.isAvailable !== false && /^iOS /.test(item.name ?? ''))
+    .flatMap(runtime => (inventory.devices?.[runtime.identifier!] ?? [])
+      .filter(device => device.isAvailable !== false && device.deviceTypeIdentifier && /^iPhone /.test(device.name ?? ''))
+      .map(device => ({ runtime, device })))
     .at(-1);
-  assert(Boolean(device?.identifier), 'No available iPhone simulator device type');
-  assert(Boolean(runtime?.identifier), 'No available iOS simulator runtime');
+  assert(Boolean(compatible?.runtime.identifier), 'No available iOS simulator runtime with a compatible iPhone device');
+  assert(Boolean(compatible?.device.deviceTypeIdentifier), 'Compatible iPhone simulator omitted its device type identifier');
   const name = `knowme-builder-cert-${randomUUID()}`;
-  const id = run('xcrun', ['simctl', 'create', name, device!.identifier!, runtime!.identifier!], { capture: true }).trim();
+  const id = run('xcrun', ['simctl', 'create', name, compatible!.device.deviceTypeIdentifier!, compatible!.runtime.identifier!], { capture: true }).trim();
   assert(Boolean(id), 'simctl did not return a device identifier');
   try {
     run('xcrun', ['simctl', 'boot', id]);
