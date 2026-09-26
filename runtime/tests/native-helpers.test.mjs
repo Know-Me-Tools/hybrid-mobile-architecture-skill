@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -48,6 +48,24 @@ test('Docusaurus refuses an existing destination and platform helpers reject mal
     assert.equal(invoke(join(repo, 'assets/templates/scripts/android/build.mjs'), ['production']).status, 64);
     assert.equal(invoke(join(repo, 'assets/templates/scripts/android/verify-device-runtime-gates.mjs'), []).status, 64);
     assert.equal(invoke(join(repo, 'assets/templates/scripts/android/verify-native-inference-gates.mjs'), ['missing.apk'], { env: { ...process.env, KNOWME_PLATFORM_NATIVE: join(root, 'absent-native-binary') } }).status, 127);
+    assert.equal(invoke(join(repo, 'scripts/verify-tauri-ui-restart.mjs'), []).status, 2);
+    assert.equal(invoke(join(repo, 'scripts/install-tauri-webdriver.mjs'), ['--check']).status, 0);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('generated Flutter and Rust bridge sources receive deterministic architecture markers', () => {
+  const root = mkdtempSync(join(tmpdir(), 'generated markers-'));
+  try {
+    const dart = join(root, 'mobile/lib/bridge/generated/api/notes.dart');
+    const riverpod = join(root, 'mobile/lib/features/notes/providers/notes.g.dart');
+    const rust = join(root, 'rust/gen_ui_ffi/src/frb_generated.rs');
+    for (const path of [dart, riverpod, rust]) { mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, '// generated\n'); }
+    const script = join(repo, 'scripts/mark-generated-sources.mjs');
+    assert.equal(invoke(script, [root]).status, 0);
+    assert.equal(invoke(script, [root, '--check']).status, 0);
+    for (const path of [dart, riverpod, rust]) assert.match(readFileSync(path, 'utf8'), /^\/\/ TJ-ARCH-MOB-001 compliant\n\/\/ generated\n$/);
+    assert.equal(invoke(script, [root]).status, 0);
+    for (const path of [dart, riverpod, rust]) assert.equal(readFileSync(path, 'utf8').match(/TJ-ARCH-MOB-001/g)?.length, 1);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 

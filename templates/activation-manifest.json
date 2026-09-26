@@ -1,12 +1,14 @@
 {
   "schemaVersion": 1,
-  "packageVersion": "2.0.0-alpha.3",
+  "packageVersion": "2.0.0-alpha.4",
   "generatedFrom": "builder.manifest.json",
   "harnesses": [
     "claude-code",
     "codex",
     "opencode",
-    "kimi-code"
+    "kimi-code",
+    "minimax-code",
+    "zed"
   ],
   "skills": [
     {

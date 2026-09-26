@@ -9,6 +9,8 @@ await main(() => {
     if (!existsSync(join(root, 'builder.manifest.json')))
         throw new Error('Not a Builder package root');
     const excluded = new Set(['.git', 'node_modules', 'target', 'vendor', 'compass-out', 'dist', 'build', '.worktrees', 'worktrees']);
+    const thirdPartyScript = (path) => path.startsWith('assets/templates/baselines/flutter/mobile/rust_builder/cargokit/') ||
+        path === 'assets/templates/baselines/flutter/mobile/android/gradlew';
     const violations = [];
     let checked = 0;
     function walk(directory, prefix = '') {
@@ -24,7 +26,7 @@ await main(() => {
             else if (stat.isFile()) {
                 checked++;
                 const header = readFileSync(path).subarray(0, 160).toString('utf8').split('\n')[0];
-                if (/\.(sh|py)$/i.test(name) || /^#!.*\b(?:ba|da|z|k)?sh\b|^#!.*\bpython[\d.]*\b/.test(header))
+                if ((/\.(sh|py)$/i.test(name) || /^#!.*\b(?:ba|da|z|k)?sh\b|^#!.*\bpython[\d.]*\b/.test(header)) && !thirdPartyScript(relative))
                     violations.push(relative);
             }
         }

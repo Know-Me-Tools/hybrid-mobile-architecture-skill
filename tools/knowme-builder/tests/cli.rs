@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, path::Path};
 
 use assert_cmd::Command;
 use predicates::prelude::*;
@@ -6,6 +6,26 @@ use tempfile::tempdir;
 
 fn builder() -> Command {
     assert_cmd::cargo::cargo_bin_cmd!("knowme-builder")
+}
+
+fn copy_tree(source: &Path, destination: &Path) {
+    fs::create_dir_all(destination).expect("create fixture destination");
+    for entry in walkdir::WalkDir::new(source) {
+        let entry = entry.expect("fixture entry");
+        let relative = entry.path().strip_prefix(source).expect("relative fixture");
+        if relative.as_os_str().is_empty() {
+            continue;
+        }
+        let target = destination.join(relative);
+        if entry.file_type().is_dir() {
+            fs::create_dir_all(&target).expect("fixture directory");
+        } else {
+            if let Some(parent) = target.parent() {
+                fs::create_dir_all(parent).expect("fixture parent");
+            }
+            fs::copy(entry.path(), target).expect("copy fixture file");
+        }
+    }
 }
 
 #[test]
@@ -242,14 +262,489 @@ fn runnable_sovereign_profile_generates_atomically() {
         .success()
         .stdout(predicate::str::contains("\"changed\": true"));
 
-    assert!(destination.join("rust/src/lib.rs").is_file());
-    assert!(destination.join("rust/tests/vertical_slice.rs").is_file());
-    assert!(destination.join("desktop/src/uar-facade.mjs").is_file());
-    assert!(destination.join("mobile/lib/uar_facade.dart").is_file());
+    assert!(destination.join("rust/gen_ui_notes/src/lib.rs").is_file());
+    assert!(destination.join("desktop/src-tauri/src/main.rs").is_file());
+    assert!(destination.join("mobile/lib/main.dart").is_file());
     let project = fs::read_to_string(destination.join(".knowme-builder/project.toml"))
         .expect("project manifest");
     assert!(project.contains("profile = \"sovereign-hybrid\""));
     assert!(project.contains("unsupportedSurfaces = []"));
+}
+
+#[test]
+fn tagged_alpha3_output_migrates_atomically_and_is_idempotent() {
+    let temp = tempdir().expect("tempdir");
+    let project = temp.path().join("moved-historical-project");
+    copy_tree(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/upgrades/alpha3-sovereign-hybrid")
+            .as_path(),
+        &project,
+    );
+    let path = project.to_str().expect("path");
+    builder()
+        .args(["--json", "upgrade", path, "--check", "--app-name", "output"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"changed\": false"))
+        .stdout(predicate::str::contains(
+            "rename rust/src/lib.rs -> rust/gen_ui_notes/src/lib.rs",
+        ))
+        .stdout(predicate::str::contains("add mobile/lib/main.dart"));
+    assert!(
+        fs::read_to_string(project.join(".knowme-builder/project.toml"))
+            .expect("state")
+            .contains("2.0.0-alpha.3")
+    );
+
+    builder()
+        .args(["upgrade", path, "--apply", "--app-name", "output"])
+        .assert()
+        .success();
+    let state = fs::read_to_string(project.join(".knowme-builder/project.toml")).expect("state");
+    let lock =
+        fs::read_to_string(project.join(".knowme-builder/generated.lock.json")).expect("lock");
+    assert!(state.contains("2.0.0-alpha.4"));
+    assert!(lock.contains("builder-2.0.0-alpha.3-to-alpha.4"));
+    assert!(!project.join("rust/src/lib.rs").exists());
+    assert!(project.join("rust/gen_ui_notes/src/lib.rs").is_file());
+    assert!(project.join("mobile/lib/main.dart").is_file());
+
+    builder()
+        .args(["--json", "upgrade", path, "--apply"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"changed\": false"));
+    builder()
+        .args(["upgrade", path, "--rollback"])
+        .assert()
+        .success();
+    assert!(
+        fs::read_to_string(project.join(".knowme-builder/project.toml"))
+            .expect("rolled back state")
+            .contains("2.0.0-alpha.3")
+    );
+    assert!(project.join("rust/src/lib.rs").is_file());
+    assert!(!project.join("rust/gen_ui_notes/src/lib.rs").exists());
+}
+
+#[test]
+fn capability_addition_integrates_registered_surfaces_and_survives_upgrade() {
+    let temp = tempdir().expect("tempdir");
+    let project = temp.path().join("capability-app");
+    let path = project.to_str().expect("path");
+    builder()
+        .args([
+            "new",
+            path,
+            "--profile",
+            "sovereign-hybrid",
+            "--mode",
+            "runnable",
+        ])
+        .assert()
+        .success();
+    builder()
+        .args([
+            "--json",
+            "add",
+            "feature",
+            "Meeting \"Notes\"",
+            "--path",
+            path,
+            "--check",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "mobile/assets/capabilities/feature-meeting-notes.json",
+        ));
+    assert!(
+        !project
+            .join("mobile/assets/capabilities/feature-meeting-notes.json")
+            .exists()
+    );
+    builder()
+        .args(["add", "feature", "Meeting \"Notes\"", "--path", path])
+        .assert()
+        .success();
+    for relative in [
+        "mobile/assets/capabilities/feature-meeting-notes.json",
+        "desktop/public/capabilities/feature-meeting-notes.json",
+        "rust/capabilities/feature-meeting-notes.json",
+    ] {
+        assert!(project.join(relative).is_file(), "missing {relative}");
+    }
+    assert!(
+        fs::read_to_string(project.join("rust/capabilities/index.json"))
+            .expect("registry")
+            .contains("Meeting \\\"Notes\\\"")
+    );
+    let descriptor: serde_json::Value = serde_json::from_slice(
+        &fs::read(project.join("rust/capabilities/feature-meeting-notes.json"))
+            .expect("descriptor"),
+    )
+    .expect("valid descriptor JSON");
+    assert_eq!(descriptor["name"], "Meeting \"Notes\"");
+    assert!(
+        fs::read_to_string(project.join(".knowme-builder/project.toml"))
+            .expect("state")
+            .contains("id = \"meeting-notes\"")
+    );
+    builder()
+        .args(["--json", "upgrade", path, "--apply"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"changed\": false"));
+}
+
+#[test]
+fn capability_name_must_contain_an_ascii_alphanumeric_character() {
+    let temp = tempdir().expect("tempdir");
+    let project = temp.path().join("capability-name");
+    let path = project.to_str().expect("path");
+    builder()
+        .args(["new", path, "--profile", "axum-web", "--mode", "runnable"])
+        .assert()
+        .success();
+    builder()
+        .args(["add", "feature", "!!!", "--path", path])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "capability name must contain an alphanumeric character",
+        ));
+    assert!(
+        !project
+            .join("web/public/capabilities/feature-app.json")
+            .exists()
+    );
+}
+
+#[test]
+fn capabilities_added_after_semantic_migration_survive_subsequent_upgrades() {
+    let temp = tempdir().expect("tempdir");
+    let project = temp.path().join("capability-migration");
+    copy_tree(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/upgrades/alpha3-sovereign-hybrid")
+            .as_path(),
+        &project,
+    );
+    let path = project.to_str().expect("path");
+    builder()
+        .args(["upgrade", path, "--apply", "--app-name", "output"])
+        .assert()
+        .success();
+    builder()
+        .args(["add", "feature", "Field Notes", "--path", path])
+        .assert()
+        .success();
+    assert!(
+        project
+            .join("mobile/assets/capabilities/feature-field-notes.json")
+            .is_file()
+    );
+    assert!(
+        fs::read_to_string(project.join("mobile/assets/capabilities/index.json"))
+            .expect("registry")
+            .contains("Field Notes")
+    );
+    builder()
+        .args(["--json", "upgrade", path, "--apply"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"changed\": false"));
+}
+
+#[test]
+fn uncertified_capability_kinds_fail_before_project_writes() {
+    let temp = tempdir().expect("tempdir");
+    let project = temp.path().join("unsupported-capability");
+    let path = project.to_str().expect("path");
+    builder()
+        .args([
+            "new",
+            path,
+            "--profile",
+            "governed-web-shell",
+            "--mode",
+            "runnable",
+        ])
+        .assert()
+        .success();
+    let project_path = project.join(".knowme-builder/project.toml");
+    let lock_path = project.join(".knowme-builder/generated.lock.json");
+    let project_before = fs::read(&project_path).expect("project");
+    let lock_before = fs::read(&lock_path).expect("lock");
+    for kind in ["auth", "module", "legacy-embed"] {
+        builder()
+            .args(["add", kind, "unsupported", "--path", path])
+            .assert()
+            .failure()
+            .stderr(predicate::str::contains(
+                "no certified architecture adapter",
+            ));
+        assert_eq!(fs::read(&project_path).expect("project"), project_before);
+        assert_eq!(fs::read(&lock_path).expect("lock"), lock_before);
+    }
+}
+
+#[test]
+fn compatible_brownfield_adoption_can_add_a_feature_without_replacing_user_code() {
+    let temp = tempdir().expect("tempdir");
+    let project = temp.path().join("brownfield-web");
+    let path = project.to_str().expect("path");
+    builder()
+        .args([
+            "new",
+            path,
+            "--profile",
+            "governed-web-shell",
+            "--mode",
+            "runnable",
+        ])
+        .assert()
+        .success();
+    fs::remove_dir_all(project.join(".knowme-builder")).expect("remove generator metadata");
+    fs::write(
+        project.join("web/src/user-owned.ts"),
+        "export const consumer = true;\n",
+    )
+    .expect("consumer file");
+    builder()
+        .args(["adopt", path, "--profile", "governed-web-shell", "--apply"])
+        .assert()
+        .success();
+    builder()
+        .args(["add", "feature", "Brownfield Notes", "--path", path])
+        .assert()
+        .success();
+    assert_eq!(
+        fs::read_to_string(project.join("web/src/user-owned.ts")).expect("consumer file"),
+        "export const consumer = true;\n"
+    );
+    assert!(
+        project
+            .join("web/public/capabilities/feature-brownfield-notes.json")
+            .is_file()
+    );
+    assert!(
+        fs::read_to_string(project.join("web/public/capabilities/index.json"))
+            .expect("registry")
+            .contains("Brownfield Notes")
+    );
+}
+
+#[test]
+fn semantic_migration_conflict_emits_proposal_without_advancing_version() {
+    let temp = tempdir().expect("tempdir");
+    let project = temp.path().join("migration-conflict");
+    copy_tree(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/upgrades/alpha3-sovereign-hybrid")
+            .as_path(),
+        &project,
+    );
+    fs::write(project.join("rust/src/lib.rs"), "// user-owned change\n")
+        .expect("edit historical output");
+    let path = project.to_str().expect("path");
+    builder()
+        .args(["--json", "upgrade", path, "--apply", "--app-name", "output"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("rust/src/lib.rs"));
+    assert_eq!(
+        fs::read_to_string(project.join("rust/src/lib.rs")).expect("preserved edit"),
+        "// user-owned change\n"
+    );
+    assert!(
+        project
+            .join(".knowme-builder/conflicts/rust/gen_ui_notes/src/lib.rs.proposed")
+            .is_file()
+    );
+    assert!(
+        fs::read_to_string(project.join(".knowme-builder/project.toml"))
+            .expect("version")
+            .contains("2.0.0-alpha.3")
+    );
+}
+
+#[test]
+fn semantic_migration_rejects_unlisted_inventory_before_writes() {
+    let temp = tempdir().expect("tempdir");
+    let project = temp.path().join("invalid-migration-inventory");
+    copy_tree(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/upgrades/alpha3-sovereign-hybrid")
+            .as_path(),
+        &project,
+    );
+    let project_path = project.join(".knowme-builder/project.toml");
+    let lock_path = project.join(".knowme-builder/generated.lock.json");
+    let project_before = fs::read(&project_path).expect("project metadata");
+    let mut lock: serde_json::Value =
+        serde_json::from_slice(&fs::read(&lock_path).expect("generated lock"))
+            .expect("parse generated lock");
+    lock["files"][0]["sourceDigest"] =
+        "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff".into();
+    let forged_lock = serde_json::to_vec_pretty(&lock).expect("serialize forged lock");
+    fs::write(&lock_path, &forged_lock).expect("write forged lock");
+    let historical_source = project.join("rust/src/lib.rs");
+    let source_before = fs::read(&historical_source).expect("historical source");
+
+    builder()
+        .args([
+            "upgrade",
+            project.to_str().expect("path"),
+            "--apply",
+            "--app-name",
+            "output",
+        ])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("migration source digest mismatch"));
+
+    assert_eq!(
+        fs::read(&project_path).expect("project metadata"),
+        project_before
+    );
+    assert_eq!(fs::read(&lock_path).expect("generated lock"), forged_lock);
+    assert_eq!(
+        fs::read(&historical_source).expect("historical source"),
+        source_before
+    );
+    assert!(!project.join("rust/gen_ui_notes/src/lib.rs").exists());
+    assert!(
+        !project
+            .join(".knowme-builder/upgrade-journal.json")
+            .exists()
+    );
+    assert!(!project.join(".knowme-builder/conflicts").exists());
+}
+
+#[test]
+fn empty_rendering_identity_is_rejected_before_same_version_and_semantic_writes() {
+    let temp = tempdir().expect("tempdir");
+    let current = temp.path().join("current");
+    let current_path = current.to_str().expect("path");
+    builder()
+        .args([
+            "new",
+            current_path,
+            "--profile",
+            "axum-web",
+            "--mode",
+            "skeleton",
+        ])
+        .assert()
+        .success();
+    let current_project = current.join(".knowme-builder/project.toml");
+    let current_lock = current.join(".knowme-builder/generated.lock.json");
+    let original_current = fs::read_to_string(&current_project).expect("project metadata");
+    let empty_current = original_current
+        .lines()
+        .map(|line| {
+            if line.starts_with("appName =") {
+                "appName = \"\""
+            } else {
+                line
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    fs::write(&current_project, &empty_current).expect("empty persisted identity");
+    let current_lock_before = fs::read(&current_lock).expect("generated lock");
+    builder()
+        .args(["upgrade", current_path, "--apply"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "persisted rendering identity must contain an alphanumeric character",
+        ));
+    assert_eq!(
+        fs::read_to_string(&current_project).expect("project metadata"),
+        empty_current
+    );
+    assert_eq!(
+        fs::read(&current_lock).expect("generated lock"),
+        current_lock_before
+    );
+    fs::write(&current_project, &original_current).expect("restore persisted identity");
+    builder()
+        .args(["upgrade", current_path, "--apply", "--app-name", "!!!"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "--app-name rendering identity must contain an alphanumeric character",
+        ));
+    assert_eq!(
+        fs::read_to_string(&current_project).expect("project metadata"),
+        original_current
+    );
+    assert_eq!(
+        fs::read(&current_lock).expect("generated lock"),
+        current_lock_before
+    );
+
+    let historical = temp.path().join("historical");
+    copy_tree(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/upgrades/alpha3-sovereign-hybrid")
+            .as_path(),
+        &historical,
+    );
+    let historical_path = historical.to_str().expect("path");
+    let historical_project = historical.join(".knowme-builder/project.toml");
+    let historical_lock = historical.join(".knowme-builder/generated.lock.json");
+    let project_before = fs::read(&historical_project).expect("project metadata");
+    let lock_before = fs::read(&historical_lock).expect("generated lock");
+    builder()
+        .args(["upgrade", historical_path, "--apply", "--app-name", ""])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "--app-name rendering identity must contain an alphanumeric character",
+        ));
+    assert_eq!(
+        fs::read(&historical_project).expect("project metadata"),
+        project_before
+    );
+    assert_eq!(
+        fs::read(&historical_lock).expect("generated lock"),
+        lock_before
+    );
+    assert!(
+        !historical
+            .join(".knowme-builder/upgrade-journal.json")
+            .exists()
+    );
+
+    let empty_historical = format!(
+        "{}\nappName = \"!!!\"\n",
+        std::str::from_utf8(&project_before).expect("UTF-8 project metadata")
+    );
+    fs::write(&historical_project, &empty_historical).expect("empty persisted identity");
+    builder()
+        .args(["upgrade", historical_path, "--apply"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "persisted rendering identity must contain an alphanumeric character",
+        ));
+    assert_eq!(
+        fs::read_to_string(&historical_project).expect("project metadata"),
+        empty_historical
+    );
+    assert_eq!(
+        fs::read(&historical_lock).expect("generated lock"),
+        lock_before
+    );
+    assert!(
+        !historical
+            .join(".knowme-builder/upgrade-journal.json")
+            .exists()
+    );
 }
 
 #[test]
@@ -293,7 +788,7 @@ fn upgrade_preserves_modified_managed_files_and_emits_proposal() {
     let lock_path = destination.join(".knowme-builder/generated.lock.json");
     let original_lock = fs::read(&lock_path).expect("lock");
     // Missing owned files would be restored by upgrade if the whole plan had no conflicts.
-    let missing = destination.join("rust/src/lib.rs");
+    let missing = destination.join("rust/gen_ui_notes/src/lib.rs");
     fs::remove_file(&missing).expect("remove managed file");
 
     builder()
@@ -456,7 +951,7 @@ fn upgrade_journal_restores_missing_files_and_metadata_without_overwriting_later
         ])
         .assert()
         .success();
-    let missing = project.join("rust/src/lib.rs");
+    let missing = project.join("rust/gen_ui_notes/src/lib.rs");
     let expected = fs::read(&missing).expect("generated file");
     fs::remove_file(&missing).expect("simulate missing owned file");
     let metadata = project.join(".knowme-builder/project.toml");
@@ -487,7 +982,7 @@ fn upgrade_journal_restores_missing_files_and_metadata_without_overwriting_later
         .args(["--json", "upgrade", path, "--rollback"])
         .assert()
         .failure()
-        .stdout(predicate::str::contains("rust/src/lib.rs"));
+        .stdout(predicate::str::contains("rust/gen_ui_notes/src/lib.rs"));
     assert_eq!(
         fs::read(&metadata).expect("preserved metadata"),
         applied_metadata
@@ -529,7 +1024,7 @@ fn interrupted_upgrade_requires_recovery_and_restores_partial_application() {
         ])
         .assert()
         .success();
-    let missing = project.join("rust/src/lib.rs");
+    let missing = project.join("rust/gen_ui_notes/src/lib.rs");
     fs::remove_file(&missing).expect("missing");
     builder()
         .args(["upgrade", path, "--apply"])
@@ -583,7 +1078,7 @@ fn upgrade_rejects_duplicate_ownership_and_respects_native_process_lock() {
         ])
         .assert()
         .success();
-    let missing = project.join("rust/src/lib.rs");
+    let missing = project.join("rust/gen_ui_notes/src/lib.rs");
     fs::remove_file(&missing).expect("missing");
     let lock_path = project.join(".knowme-builder/generated.lock.json");
     let original = fs::read(&lock_path).expect("ownership");

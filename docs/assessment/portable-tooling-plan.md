@@ -13,11 +13,13 @@ After tooling conversion, repair baseline profiles. Optional inference, auth, cl
 ## Evidence and research
 
 Implementation status: the first-party language conversion, isolated full/mini
-staging, native target diagnostics, and managed-file recovery journal are
-implemented. All 79 inventoried legacy executables (including extensionless
-fixtures) have replacements. See `docs/portability/converted-tools.md` and the
-verification receipt for tested scope. Baseline application repair and semantic
-version migrations below remain planned; these are not completion claims.
+staging, native target diagnostics, managed-file recovery journal, explicit
+alpha.3-to-alpha.4 migration, integrated feature-addition seam, and runnable
+baseline applications are implemented in the candidate worktree. All 79
+inventoried legacy executables (including extensionless fixtures) have
+replacements. See `docs/portability/converted-tools.md` and the certification
+receipt for tested scope. Native multi-host release evidence remains pending
+until the committed candidate completes the CI matrix.
 
 Record a software-domain evolve-assess `assessment.json` with each user goal, supporting assets, gaps, risks and unknown verification status. Use a documented checklist for alignment scores rather than invented precision. Preserve the two read-only source audits with paths and lines. The research package must retain fetched primary sources, claims, contradictions and provenance; do not label research or platform execution verified merely because the job started.
 

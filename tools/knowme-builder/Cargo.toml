@@ -1,6 +1,6 @@
 [package]
 name = "knowme-builder"
-version = "2.0.0-alpha.3"
+version = "2.0.0-alpha.4"
 edition = "2024"
 rust-version = "1.97.1"
 description = "Non-destructive application generator and instruction pack for governed agentic applications"

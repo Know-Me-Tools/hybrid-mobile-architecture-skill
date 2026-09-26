@@ -1,6 +1,6 @@
 {
   "name": "knowme-builder",
-  "version": "2.0.0-alpha.3",
+  "version": "2.0.0-alpha.4",
   "description": "Versioned, non-destructive application generator and instruction pack for governed agentic applications.",
   "owner": {
     "name": "KnowMe Tools",
@@ -11,7 +11,7 @@
       "name": "hybrid-mobile-architecture",
       "description": "Versioned, non-destructive application generator and instruction pack for governed agentic applications.",
       "source": ".",
-      "version": "2.0.0-alpha.3",
+      "version": "2.0.0-alpha.4",
       "category": "development",
       "tags": [
         "flutter",

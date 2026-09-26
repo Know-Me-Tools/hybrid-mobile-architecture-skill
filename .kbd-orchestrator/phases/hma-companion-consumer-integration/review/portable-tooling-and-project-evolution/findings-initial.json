@@ -1,0 +1,36 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "gpt-6-astra",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "tools/knowme-builder/src/engine.rs",
+      "claim": "Runnable project generation now depends on baseline template directories that are not added by this diff, while the old runnable templates are deleted.",
+      "evidence": "The new `profile_template_dirs` appends `baselines/flutter`, `baselines/tauri`, or `baselines/web` for runnable profiles and fails with `profile template component is not packaged`; the diff deletes the existing runnable template files under `assets/templates/profiles/*/runnable/*` and only adds manifest references to `assets/templates/baselines` without any added `assets/templates/baselines/...` files in the diff.",
+      "suggested_fix": "Commit the complete `assets/templates/baselines/{flutter,tauri,web}` template trees, or keep the existing runnable profile templates until the baseline resources are actually packaged."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "tools/knowme-builder/src/engine.rs",
+      "claim": "Capability names with no alphanumeric characters are no longer rejected because `slug()` now returns `app` instead of an empty string.",
+      "evidence": "`add_capability` still checks `if safe_name.is_empty() { bail!(\"capability name must contain an alphanumeric character\"); }`, but the modified `slug()` returns `\"app\"` when the computed slug is empty, making that validation unreachable.",
+      "suggested_fix": "Keep `slug()` returning an empty string for empty input and add a separate helper for application identifiers, or validate the raw capability name before applying the `app` fallback."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "runtime/src/install-harness-package.mts",
+      "claim": "The new Kimi Code and Zed harness installation does not install into their native discovery roots despite the package claiming native-root support.",
+      "evidence": "README.md was changed to say the installer installs portable skills for `Kimi Code, MiniMax Code CLI, and Zed in their native discovery roots`, and `builder.manifest.json` adds `kimi-code`, `minimax-code`, and `zed`; however `install-harness-package.mts` maps user-scope `kimi-code` and `zed` to only `join(homedir(), '.agents/skills')`, while the repository contains harness-specific roots such as `.kimi-code/skills` and `.zcode/skills`.",
+      "suggested_fix": "Map `kimi-code` and `zed` to their actual harness discovery directories, include those roots in staging/packaging if needed, and update tests to assert the native paths rather than the generic `.agents/skills` fallback."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

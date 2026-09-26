@@ -19,6 +19,35 @@ export function audit(mode: string, root: string): AuditResult {
   const lines = (records: { file: string; content: string }[]) => records.flatMap(record => record.content.split(/\r?\n/).filter(line => !/^\s*\/\//.test(line)).map(content => ({ file: record.file, content })));
   if (mode === 'flutter') {
     present('lib'); present('pubspec.yaml'); const pub = text(join(root, 'pubspec.yaml')), lib = contents(join(root, 'lib')), code = lines(lib.filter(f => !f.file.endsWith('.g.dart')));
+    const cleanNotesBaseline = existsSync(join(root, 'lib/features/notes/domain/note.dart')) && pub.includes('gen_ui_ffi:');
+    if (cleanNotesBaseline) {
+      for (const path of [
+        'lib/main.dart',
+        'lib/features/notes/domain/note.dart',
+        'lib/features/notes/domain/capability.dart',
+        'lib/features/notes/data/rust_note_repository.dart',
+        'lib/features/notes/data/rust_capability_repository.dart',
+        'lib/features/notes/presentation/providers/notes.dart',
+        'lib/features/notes/presentation/screens/notes_screen.dart',
+        'lib/bridge/generated/api/notes.dart',
+        'lib/bridge/generated/frb_generated.dart',
+        'flutter_rust_bridge.yaml',
+      ]) present(path);
+      for (const dependency of ['flutter_riverpod', 'riverpod_annotation', 'flutter_rust_bridge', 'gen_ui_ffi']) check(pub.includes(dependency + ':'), `${dependency} dependency missing`);
+      check(has(lib, /@riverpod|@Riverpod/), 'Riverpod codegen annotations missing');
+      check(lib.some(file => file.file.endsWith('.g.dart')), 'Riverpod generated output missing');
+      check(!has(code, /bridge\/generated|rust_note_repository/, /features\/notes\/domain\//), 'Flutter domain imports data or FFI');
+      check(!has(code, /bridge\/generated/, /features\/notes\/presentation\/screens\//), 'Flutter screen bypasses provider/repository boundary');
+      check(!has(code, /bridge\/generated/, /features\/notes\/presentation\/providers\//), 'Flutter provider bypasses the repository boundary');
+      check(has(lib, /RustNoteRepository/, /features\/notes\/presentation\/providers\//), 'Provider does not bind the Rust repository adapter');
+      check(has(lib, /RustCapabilityRepository/, /features\/notes\/presentation\/providers\/capabilities\.dart$/), 'Capability provider does not bind a repository adapter');
+      check(has(lib, /assets\/capabilities\/index\.json/, /features\/notes\/data\/rust_capability_repository\.dart$/), 'Capability registry is not consumed by the Flutter repository adapter');
+      const generated = lib.filter(file => file.file.startsWith('bridge/generated/') || file.file.endsWith('.g.dart') || file.file.endsWith('.freezed.dart'));
+      check(generated.length > 0 && generated.every(file => file.content.startsWith('// TJ-ARCH-MOB-001 compliant\n')), 'Generated Dart sources lack the architecture marker');
+      const generatedRust = text(join(root, '../rust/gen_ui_ffi/src/frb_generated.rs'));
+      check(generatedRust.startsWith('// TJ-ARCH-MOB-001 compliant\n'), 'Generated Rust bridge source lacks the architecture marker');
+      return result;
+    }
     for (const name of ['flutter_riverpod', 'riverpod_annotation', 'freezed_annotation', 'flutter_rust_bridge', 'shadcn_flutter', 'go_router']) check(pub.includes(name + ':'), `${name} dependency missing`, !['flutter_riverpod', 'riverpod_annotation'].includes(name));
     check(!/^\s+provider:/m.test(pub), 'provider package forbidden; use Riverpod'); check(!/^\s+(flutter_)?bloc:/m.test(pub), 'Bloc package forbidden; use Riverpod');
     present('lib/features'); for (const feature of dirs(join(root, 'lib/features'))) for (const layer of ['data', 'domain', 'presentation']) present(`lib/features/${feature}/${layer}`, layer === 'data');
@@ -34,6 +63,29 @@ export function audit(mode: string, root: string): AuditResult {
   } else if (mode === 'tauri') {
     present('src'); present('package.json'); const packageText = text(join(root, 'package.json')), src = contents(join(root, 'src')), code = lines(src);
     const pkg = existsSync(join(root, 'package.json')) ? json(join(root, 'package.json')) : {}, dependencies = { ...object(pkg.dependencies), ...object(pkg.devDependencies) };
+    const cleanNotesBaseline = existsSync(join(root, 'src/features/notes/api/notes.ts')) && existsSync(join(root, 'src-tauri/src/main.rs'));
+    if (cleanNotesBaseline) {
+      for (const path of [
+        'src/main.tsx',
+        'src/features/notes/api/notes.ts',
+        'src/features/notes/stores/notes.ts',
+        'src/features/notes/hooks/useNotes.ts',
+        'src/features/notes/components/NotesScreen.tsx',
+        'src-tauri/Cargo.toml',
+        'src-tauri/src/main.rs',
+        'src-tauri/tauri.conf.json',
+      ]) present(path);
+      for (const dependency of ['react', 'zustand', '@tauri-apps/api']) check(dependency in dependencies, `${dependency} dependency missing`);
+      check(has(src, /import \{ invoke \}|invoke(?:<|\()/, /features\/notes\/api\/notes\.ts$/), 'Tauri commands are not isolated in the feature API adapter');
+      check(!has(src, /invoke\(/, /features\/notes\/(components|hooks)\/.*\.tsx?$/), 'Tauri IPC bypasses the feature API/store boundary');
+      check(has(src, /useNoteEntities|useNotes/, /features\/notes\/components\/.*\.tsx$/), 'Tauri presentation does not consume a feature hook');
+      check(has(src, /registerEntityTransport<Capability>\(['"]Capability/, /features\/notes\/stores\/notes\.ts$/), 'Tauri capabilities are not registered as PEM async entity state');
+      check(!has(src, /useCapabilities\s*=\s*create/, /features\/notes\/stores\/notes\.ts$/), 'Tauri capabilities are stored in Zustand');
+      const native = text(join(root, 'src-tauri/src/main.rs'));
+      check(/gen_ui_notes::open/.test(native), 'Tauri command adapter does not open the Rust persistence use case');
+      check(/list_capabilities/.test(native), 'Tauri capability registry command is not registered');
+      return result;
+    }
     for (const name of ['zustand', '@prometheus-ags/prometheus-entity-management', '@tanstack/react-router', '@tanstack/react-table', '@tauri-apps/api', '@assistant-ui/react', '@electric-sql/pglite', 'immer']) check(name in dependencies, `${name} dependency missing`, ['immer', '@tanstack/react-table'].includes(name));
     check(/^[~^]*3\./.test(String(dependencies['@prometheus-ags/prometheus-entity-management'] ?? '')), 'PEM must use version3.x');
     check(!Object.keys(dependencies).some(key => /^(?:@tanstack\/react-query|redux|@reduxjs|jotai|recoil|react-router)/.test(key)), 'Forbidden replacement state/router dependency');
@@ -60,6 +112,46 @@ export function audit(mode: string, root: string): AuditResult {
     present('src/bridge/a2ui/types.ts', true); check(has(src, /a2ui_event|onChatEvent/), 'A2UI event listener not wired', true);
     for (const feature of ['chat', 'entities', 'memory', 'startup']) present(`src/features/${feature}`);
     check(has(src, /invoke\(/, /features\/(memory|startup)\/stores\//), 'Memory/startup FFI seam not wired', true);
+  } else if (mode === 'web') {
+    for (const path of [
+      'web/package.json',
+      'web/src/main.tsx',
+      'web/src/features/notes/api/notes.ts',
+      'web/src/features/notes/stores/notes.ts',
+      'web/src/features/notes/hooks/useNotes.ts',
+      'web/src/features/notes/components/NotesScreen.tsx',
+      'web/tests/restart.mjs',
+      'server/Cargo.toml',
+      'server/src/main.rs',
+    ]) present(path);
+    const web = contents(join(root, 'web/src'));
+    check(has(web, /fetch\(/, /features\/notes\/api\/notes\.ts$/), 'Web API calls are not isolated in the feature adapter');
+    check(!has(web, /fetch\(/, /features\/notes\/(components|hooks)\/.*\.tsx?$/), 'Web presentation bypasses the feature API/store boundary');
+    check(has(web, /useNoteEntities|useNotes/, /features\/notes\/components\/.*\.tsx$/), 'Web presentation does not consume a feature hook');
+    check(has(web, /registerEntityTransport<Capability>\(['"]Capability/, /features\/notes\/stores\/notes\.ts$/), 'Web capabilities are not registered as PEM async entity state');
+    check(!has(web, /useCapabilities\s*=\s*create/, /features\/notes\/stores\/notes\.ts$/), 'Web capabilities are stored in Zustand');
+    const server = text(join(root, 'server/src/main.rs'));
+    check(/gen_ui_notes::open/.test(server), 'Axum adapter does not open the Rust persistence use case');
+    check(/SERVICE_UNAVAILABLE/.test(server), 'Unavailable UAR service is not reported explicitly');
+    check(/capabilities/.test(server), 'Axum capability registry endpoint is not registered');
+    const restart = text(join(root, 'web/tests/restart.mjs'));
+    check(/chromium\.launch/.test(restart) && /await stop\(\).*await start\(\)/s.test(restart), 'Browser and process-restart certification is missing');
+  } else if (mode === 'rust-workspace') {
+    present('Cargo.toml');
+    for (const crate of ['gen_ui_types', 'gen_ui_db', 'gen_ui_notes']) {
+      present(`${crate}/Cargo.toml`);
+      present(`${crate}/src/lib.rs`);
+    }
+    const types = text(join(root, 'gen_ui_types/src/lib.rs'));
+    const db = text(join(root, 'gen_ui_db/src/lib.rs'));
+    const notes = text(join(root, 'gen_ui_notes/src/lib.rs'));
+    check(/trait NoteRepository/.test(types), 'Domain repository port missing');
+    check(/impl NoteRepository for SqliteNotes/.test(db), 'SQLite adapter does not implement the domain repository port');
+    check(/struct Notes<R: NoteRepository>/.test(notes), 'Application use case is not generic over the repository port');
+    check(!/rusqlite/.test(types), 'Domain types depend on SQLite');
+    check(!/rusqlite/.test(notes), 'Application use case depends directly on SQLite');
+    present('gen_ui_notes/tests/it.rs');
+    check(/reopen|independent_connections/.test(text(join(root, 'gen_ui_notes/tests/it.rs'))), 'Restart persistence test missing');
   } else if (mode === 'rust') {
     present('src'); const src = contents(join(root, 'src'));
     for (const mod of ['api', 'api_http', 'runtime', 'streaming', 'config', 'protocol', 'agent', 'inference', 'mcp', 'db']) check(existsSync(join(root, `src/${mod}.rs`)) || existsSync(join(root, 'src', mod)), `${mod} module missing`, true);

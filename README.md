@@ -1,6 +1,6 @@
 # KnowMe Builder
 
-**Version 2.0.0-alpha.2 · governed agentic application generator and skill pack**
+**Version 2.0.0-alpha.4 · governed agentic application generator and skill pack**
 
 KnowMe Builder creates and adopts Flutter, Tauri/React, Axum, and Rust
 applications without treating the consumer repository as disposable generator
@@ -10,9 +10,11 @@ output. It combines:
 - explicit application profiles;
 - typed UAR, A2UI, AG-UI, identity, policy, persistence, and native-bridge
   boundaries;
-- 30 public, self-contained Agent Skills (one package skill and 29 companions);
+- 36 public, self-contained Agent Skills (one package skill and 35 companions);
 - generated commands and advisory activation adapters for Claude Code, Codex,
-  OpenCode, and Kimi; and
+  OpenCode, and Kimi Code;
+- receipt-owned skill installation for Claude Code, Codex, OpenCode, Kimi Code,
+  MiniMax Code CLI, and Zed; and
 - conformance, security, documentation, and installation gates.
 
 Public documentation:
@@ -23,7 +25,7 @@ Start with:
 - [Installation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/installation)
 - [CLI reference](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/cli)
 - [Generation profiles](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/architecture/profiles)
-- [All 30 public skills](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/skills)
+- [All 36 public skills](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/skills)
 - [Services and boundaries](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/services)
 - [Utilities and automation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/utilities)
 - [Common use cases](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/use-cases)
@@ -44,19 +46,17 @@ UAR.
 
 ## Install
 
-Build and install the CLI from a trusted checkout:
+Build and install the CLI from a trusted checkout on macOS, Linux, or Windows:
 
 ```bash
-cargo build --release --locked --manifest-path tools/knowme-builder/Cargo.toml
-install -m 0755 tools/knowme-builder/target/release/knowme-builder \
-  "$HOME/.cargo/bin/knowme-builder"
+cargo install --locked --path tools/knowme-builder
 knowme-builder --version
 ```
 
-Install all 30 portable skills directly from the Git repository URL:
+Install all 36 public portable skills from a trusted checkout:
 
 ```bash
-npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill \
+npx skills add ./skills \
   --skill '*' -a claude-code -a codex -a opencode -g -y
 ```
 
@@ -67,9 +67,11 @@ node scripts/install-global-harnesses.mjs
 ```
 
 That registers the Git source through the supported Claude/Codex marketplace
-CLIs, installs OpenCode skills plus its native advisory plugin, and records an
-ownership receipt. CLI compilation, MCP configuration, and the full Prometheus
-runtime are opt-in with `--with-cli`, `--with-mcp`, and `--with-prometheus`.
+CLIs; installs portable skills for OpenCode, Kimi Code, MiniMax Code CLI, and
+Zed in their native discovery roots; installs the OpenCode advisory plugin; and
+records an ownership receipt. CLI compilation and MCP configuration are opt-in
+with `--with-cli` and `--with-mcp`. The installer never invokes shell or Python
+bootstrap scripts.
 
 Verify:
 
@@ -116,10 +118,11 @@ Available profiles:
 | `tauri-desktop` | Tauri/React, Rust, service or in-process UAR facade |
 | `axum-web` | React, Axum, service UAR |
 
-`runnable` is a requested generation mode, not build or runtime certification.
-The current audit found incomplete application entrypoints in several profiles;
-see [the assessment and repair plan](docs/assessment/portable-tooling-plan.md).
-`skeleton` may contain explicitly declared unsupported surfaces and TODOs.
+`runnable` emits complete locked application entrypoints and a persisted Notes
+vertical slice through UI state, repository ports, Rust use cases and SQLite.
+Certification remains target-specific: the generated source is runnable, while
+the receipt or CI job for a host proves its native build and execution.
+`skeleton` records missing surfaces and never receives runnable certification.
 
 ## Adopt an existing application
 
@@ -161,21 +164,25 @@ rendering name across directory moves. Legacy state without that identity needs
 `upgrade --app-name <original-name>`; unsupported schemas/versions require an
 explicit migration. Managed-file upgrades preserve original bytes and output
 hashes in a recovery journal; rollback refuses to overwrite later user edits.
-An interrupted apply requires rollback before retrying. Semantic migrations
-for added, removed or renamed files and arbitrary historical versions remain
-separate work; this journal does not migrate application databases.
+An interrupted apply requires rollback before retrying. Explicit migration IDs
+cover the supported `2.0.0-alpha.3` to `2.0.0-alpha.4` transition, including
+added, removed and renamed files, dependency manifests and regenerated bridge
+outputs. Unsupported histories fail with a migration diagnostic. Application
+database migrations remain a separately reviewed operation.
 
 ## Add capabilities
 
 ```bash
 knowme-builder add feature conversations --path .
-knowme-builder add auth verified-session --path .
-knowme-builder add module reporting --path .
-knowme-builder add legacy-embed frozen-portal --path .
 ```
 
-Additions are emitted under `.knowme-builder/additions` for deliberate
-integration. They do not overwrite feature code.
+Feature additions are written into the capability registries already consumed
+by each generated surface, recorded in ownership state, included in previews,
+and preserved by later upgrades. A compatible adopted project can use this path
+when it exposes the recognized empty registry seam. Auth, module and
+legacy-embed adapters are intentionally rejected before writes in this release;
+they require their own identity, routing or message-boundary implementation and
+runtime evidence.
 
 ## Skill bundle
 

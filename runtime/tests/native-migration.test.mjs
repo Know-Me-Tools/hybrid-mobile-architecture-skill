@@ -9,6 +9,16 @@ const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const invoke=(name,args,opts={})=>spawnSync(process.execPath,[join(root,name),...args],{encoding:'utf8',...opts});
 const fixture=fn=>{const work=mkdtempSync(join(tmpdir(),'hma-native ü-'));try{return fn(work);}finally{rmSync(work,{recursive:true,force:true});}};
 
+test('runnable web and Tauri dependency locks are relocatable and match their manifests',()=>{
+ for(const relative of ['assets/templates/baselines/web/web','assets/templates/baselines/tauri/desktop']){
+  const directory=join(root,relative),manifest=JSON.parse(readFileSync(join(directory,'package.json'),'utf8')),lock=JSON.parse(readFileSync(join(directory,'package-lock.json'),'utf8'));
+  assert.equal(lock.lockfileVersion,3);
+  assert.deepEqual(lock.packages[''].dependencies,manifest.dependencies);
+  assert.deepEqual(lock.packages[''].devDependencies,manifest.devDependencies);
+  for(const key of Object.keys(lock.packages))assert.ok(key===''||key.startsWith('node_modules/'),`non-relocatable lock key in ${relative}: ${key}`);
+ }
+});
+
 test('tray generation preserves edits, force is explicit and malformed identity is rejected',()=>fixture(work=>{
  const result=invoke('scripts/scaffold-tauri-tray.mjs',[work,'--crate-name','health-fixture','--tray-id','test-tray']);assert.equal(result.status,0,result.stderr);
  const tray=join(work,'src-tauri/src/tray.rs');assert.match(readFileSync(tray,'utf8'),/test-tray/);writeFileSync(tray,'user code\n');
@@ -65,6 +75,6 @@ test('Cargokit patch upgrades canonical pin idempotently and refuses unknown sou
  writeFileSync(join(dir,'options.dart'),options);writeFileSync(join(dir,'builder.dart'),'unknown upstream layout');writeFileSync(join(dir,'rustup.dart'),'Pattern nonCustom = RegExp(r"^(stable|beta|nightly)");');writeFileSync(join(dir,'build_pod.dart'),"import 'builder.dart';\n    if (staticLibs.isNotEmpty) {\n    }\n");
  assert.equal(invoke('scripts/patch-cargokit-ios.mjs',[work]).status,1);assert.equal(readFileSync(join(dir,'options.dart'),'utf8'),options);assert.ok(!existsSync(join(dir,'dedup_archive.dart')));
  writeFileSync(join(dir,'builder.dart'),"String get _toolchain => _buildOptions?.toolchain.name ?? 'stable';");
- const result=invoke('scripts/patch-cargokit-ios.mjs',[work]);assert.equal(result.status,0,result.stderr);assert.match(readFileSync(join(dir,'options.dart'),'utf8'),/String toolchain = '1\.97\.1'/);const patched=readFileSync(join(dir,'build_pod.dart'),'utf8');assert.match(patched,/dedupArchiveMembers/);
+ const result=invoke('scripts/patch-cargokit-ios.mjs',[work]);assert.equal(result.status,0,result.stderr);const patchedOptions=readFileSync(join(dir,'options.dart'),'utf8');assert.match(patchedOptions,/String toolchain = '1\.97\.1'/);assert.equal((patchedOptions.match(/static String _toolchainFromNode/g)??[]).length,1);assert.ok(!patchedOptions.includes('old parser'));const patched=readFileSync(join(dir,'build_pod.dart'),'utf8');assert.match(patched,/dedupArchiveMembers/);
  assert.equal(invoke('scripts/patch-cargokit-ios.mjs',[work]).status,0);assert.equal(readFileSync(join(dir,'build_pod.dart'),'utf8'),patched);
 }));

@@ -34,6 +34,37 @@ test('harness installer persists receipt, reinstalls idempotently and uninstalls
   assert.equal(existsSync(join(work, 'commands.jsonl')), false, 'copy installation must not delegate broad npm skill removal');
 });
 
+test('Kimi Code, MiniMax Code and Zed receive portable skills in native discovery roots', t => {
+  const work = mkdtempSync(join(tmpdir(), 'builder-extra-harnesses-'));
+  t.after(() => rmSync(work, { recursive: true, force: true }));
+  const user = join(work, 'user');
+  const minimax = join(work, 'minimax-data');
+  mkdirSync(user, { recursive: true });
+  const env = {
+    ...process.env,
+    HOME: user,
+    USERPROFILE: user,
+    MINIMAX_DATA_DIR: minimax,
+    XDG_STATE_HOME: join(work, 'state'),
+  };
+  const install = harness => spawnSync(process.execPath, [
+    join(root, 'scripts/install-harness-package.mjs'),
+    '--harness',
+    harness,
+    '--scope',
+    'user',
+  ], { encoding: 'utf8', shell: false, env });
+  for (const harness of ['kimi-code', 'zed', 'minimax-code']) {
+    const result = install(harness);
+    assert.equal(result.status, 0, result.stderr);
+  }
+  assert.ok(existsSync(join(user, '.agents/skills/hybrid-mobile-architecture/SKILL.md')));
+  assert.ok(existsSync(join(user, '.kimi-code/skills/hybrid-mobile-architecture/SKILL.md')));
+  assert.ok(existsSync(join(minimax, 'skills/hybrid-mobile-architecture/SKILL.md')));
+  const receipt = JSON.parse(readFileSync(join(work, 'state/knowme-builder/install.json'), 'utf8'));
+  assert.deepEqual(receipt.harnesses.sort(), ['kimi-code', 'minimax-code', 'zed']);
+});
+
 function cliFixture(t, code) {
   const work = mkdtempSync(join(tmpdir(), 'builder-mcp ü-')); t.after(() => rmSync(work, { recursive: true, force: true }));
   const bin = join(work, 'bin'), project = join(work, 'project'); mkdirSync(join(bin, 'node_modules/fixture'), { recursive: true }); mkdirSync(project);

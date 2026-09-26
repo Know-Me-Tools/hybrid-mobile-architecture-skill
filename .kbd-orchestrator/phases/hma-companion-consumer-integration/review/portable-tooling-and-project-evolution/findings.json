@@ -1,0 +1,42 @@
+{
+  "judge_model": "gpt-6-astra-fresh-context",
+  "producer_model": "gpt-6-astra",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "unverified-same-family-fallback",
+  "mode": "diff",
+  "target": "portable-tooling-and-project-evolution",
+  "verdict": "fail",
+  "summary": {
+    "critical": 2,
+    "warning": 1,
+    "suggestion": 0,
+    "total": 3
+  },
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "openspec/changes/portable-tooling-and-project-evolution/tasks.md",
+      "line": 37,
+      "claim": "The candidate does not satisfy the native-runner and generated-application certification acceptance criteria.",
+      "evidence": "The packet leaves both `Build and execute claimed targets on native runners, including both Windows architectures` and `Complete generated-application certification review with native runner evidence` unchecked; docs/assessment/generated-application-certification.md also states that the candidate is not release-certified and lists the GitHub Actions run, both Windows runs, Android persistence, and iOS persistence as pending.",
+      "suggested_fix": "Run the committed matrix on every required native runner, record the immutable run URL and target results in the certification receipt, and mark these criteria complete only after every required job passes."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/verify-tauri-boot.mjs",
+      "line": 84,
+      "claim": "The native Tauri certification gate can pass without exercising the UI-to-Rust persistence flow or a restart.",
+      "evidence": "The helper sets `notesReady` from existence of `notes.sqlite3` and returns success immediately, while assets/templates/baselines/tauri/desktop/src-tauri/src/main.rs creates that file during application setup via `gen_ui_notes::open(&database)` before any invoke command or UI action; .github/workflows/scaffold-ci.yml only launches this helper for both Windows architectures. This does not provide the public-boundary workflow and persistence proof required by the constraint for calling an application working.",
+      "suggested_fix": "Drive the packaged application's public UI or another certified external boundary to create a note, terminate the process, relaunch it, and verify the note through that same boundary on both Windows runners."
+    },
+    {
+      "severity": "WARNING",
+      "file": "assets/templates/baselines/flutter/mobile/lib/bridge/generated/api/notes.dart",
+      "line": 1,
+      "claim": "Committed generated Flutter sources omit the required `TJ-ARCH-MOB-001 compliant` marker.",
+      "evidence": "The constraint says `Generated source files include the TJ-ARCH-MOB-001 compliant marker in the target language's comment syntax`, but this file and the added FRB and Riverpod generated files begin only with their generator headers and contain no required marker.",
+      "suggested_fix": "Make the generation pipeline add and verify the marker deterministically for every FRB and Riverpod output so regeneration cannot remove it."
+    }
+  ],
+  "checked_classes": []
+}

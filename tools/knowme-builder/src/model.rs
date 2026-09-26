@@ -47,6 +47,18 @@ pub struct ProjectManifest {
     /// Stable rendering identity, independent of the destination directory.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_name: Option<String>,
+    /// Typed additions rendered into recognized application surfaces.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub capabilities: Vec<CapabilityInstance>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct CapabilityInstance {
+    pub id: String,
+    pub name: String,
+    pub kind: String,
+    pub version: String,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -55,6 +67,9 @@ pub struct GeneratedLock {
     pub schema_version: u32,
     pub builder_version: String,
     pub files: Vec<GeneratedFile>,
+    /// Semantic migrations committed together with these ownership records.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub applied_migrations: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -66,6 +81,11 @@ pub struct GeneratedFile {
     pub last_installed_digest: String,
     pub ownership: Ownership,
     pub version: String,
+    /// Persisted rendering inputs for capability templates.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub render_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub render_kind: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -100,5 +120,25 @@ impl CommandResult {
             conflicts: Vec::new(),
             warnings: Vec::new(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::GeneratedLock;
+
+    #[test]
+    fn legacy_lock_defaults_migration_ids_and_new_ids_round_trip() {
+        let mut lock: GeneratedLock = serde_json::from_str(
+            r#"{"schemaVersion":1,"builderVersion":"2.0.0-alpha.3","files":[]}"#,
+        )
+        .unwrap();
+        assert!(lock.applied_migrations.is_empty());
+        lock.applied_migrations
+            .push("builder-2.0.0-alpha.3-to-alpha.4".into());
+        let encoded = serde_json::to_string(&lock).unwrap();
+        assert!(encoded.contains("appliedMigrations"));
+        let restored: GeneratedLock = serde_json::from_str(&encoded).unwrap();
+        assert_eq!(restored.applied_migrations, lock.applied_migrations);
     }
 }

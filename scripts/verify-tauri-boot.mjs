@@ -64,7 +64,7 @@ await main(async () => {
   assert(Number.isFinite(seconds) && seconds > 0, "timeout must be positive", 2);
   mkdirSync(data, { recursive: true });
   const log = join(data, "tauri-process.log"), diagnostics = join(data, "diagnostics/desktop.log"), handle = openSync(log, "w");
-  const child = spawn(binary, [], { env: { ...process.env, GEN_UI_APP_DATA_DIR: data, RUST_LOG: "info" }, stdio: ["ignore", handle, handle], detached: process.platform !== "win32", shell: false });
+  const child = spawn(binary, [], { env: { ...process.env, APP_DATA_DIR: data, GEN_UI_APP_DATA_DIR: data, RUST_LOG: "info" }, stdio: ["ignore", handle, handle], detached: process.platform !== "win32", shell: false });
   closeSync(handle);
   let startupError;
   child.on("error", (error) => {
@@ -81,9 +81,12 @@ await main(async () => {
       assert(!startupError, `Tauri launch failed: ${startupError?.message}`);
       assert(child.exitCode === null && child.signalCode === null, "Tauri exited before reaching ready state");
       const output = existsSync2(diagnostics) ? text(diagnostics) : "";
-      if (["desktop migrations ready", "seed load ready", "sync ready in local-only mode"].every((signal) => output.includes(signal)) && ["config-db", "memory-db", "model-cache/fastembed"].every((dir) => existsSync2(join(data, dir)) && statSync2(join(data, dir)).isDirectory())) {
+      const legacyReady = ["desktop migrations ready", "seed load ready", "sync ready in local-only mode"].every((signal) => output.includes(signal)) && ["config-db", "memory-db", "model-cache/fastembed"].every((dir) => existsSync2(join(data, dir)) && statSync2(join(data, dir)).isDirectory());
+      const notesReady = existsSync2(join(data, "notes.sqlite3")) && statSync2(join(data, "notes.sqlite3")).isFile();
+      if (legacyReady || notesReady) {
         console.log(`Tauri boot proof passed
-diagnostics=${diagnostics}
+mode=${notesReady ? "notes-baseline" : "legacy-runtime"}
+diagnostics=${existsSync2(diagnostics) ? diagnostics : "not-emitted"}
 app_data=${data}`);
         return;
       }

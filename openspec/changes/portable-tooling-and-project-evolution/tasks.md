@@ -23,17 +23,17 @@
 - [x] Inventory actual brownfield surfaces and avoid false runnable/surface claims.
 - [x] Preserve user files, rendering identity and ownership across adoption/upgrades.
 - [x] Preflight all upgrade conflicts before application; do not advance version on failure.
-- [ ] Implement explicit versioned migrations for adds/removes/renames/dependencies/codegen.
+- [x] Implement explicit versioned migrations for adds/removes/renames/dependencies/codegen.
 - [x] Provide managed-file journals, guarded rollback and interrupted-state recovery fixtures.
-- [ ] Extend recovery to semantic version migrations and representative historical output fixtures.
-- [ ] Integrate capability additions into existing project architecture, not unconnected snippets.
+- [x] Extend recovery to semantic version migrations and representative historical output fixtures.
+- [x] Integrate capability additions into existing project architecture, not unconnected snippets.
 
 ## 4. Runnable baseline certification
 
-- [ ] Complete web, desktop, Flutter/FFI and hybrid baseline applications with one persisted vertical slice.
-- [ ] Verify bridge/codegen and architectural boundaries on fresh outputs.
+- [x] Complete web, desktop, Flutter/FFI and hybrid baseline applications with one persisted vertical slice.
+- [x] Verify bridge/codegen and architectural boundaries on fresh outputs.
 - [ ] Build and execute claimed targets on native runners, including both Windows architectures.
-- [ ] Rebuild/run migrated historical and brownfield fixtures.
+- [x] Rebuild/run migrated historical and brownfield fixtures.
 - [x] Stage identical full/mini payloads and verify hashes/install behavior.
 - [x] Independently review the converted runtime and managed-file recovery; preserve initial and resolved findings.
 - [ ] Complete generated-application certification review with native runner evidence.

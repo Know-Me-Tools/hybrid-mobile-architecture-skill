@@ -1,13 +1,13 @@
 ---
 sidebar_position: 7
 title: Skills
-description: Complete index and usage model for all 30 public KnowMe Builder Agent Skills.
+description: Complete index and usage model for all 36 public KnowMe Builder Agent Skills.
 ---
 
-# The 30 public Builder skills
+# The 36 public Builder skills
 
 KnowMe Builder publishes one package-level `hybrid-mobile-architecture` skill
-and 29 project companions for Claude Code, Codex, OpenCode, and compatible Agent
+and 35 project companions for Claude Code, Codex, OpenCode, and compatible Agent
 Skills clients. Each skill is deliberately
 narrow: it protects one architectural, security, data, design, delivery, or
 verification boundary.

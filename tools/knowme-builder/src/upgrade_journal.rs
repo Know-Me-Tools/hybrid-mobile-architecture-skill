@@ -27,7 +27,7 @@ enum Status {
 struct Entry {
     path: String,
     before: Option<Vec<u8>>,
-    after_digest: String,
+    after_digest: Option<String>,
 }
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -35,6 +35,8 @@ struct Journal {
     schema_version: u32,
     builder_version: String,
     migration_id: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    migration_ids: Vec<String>,
     status: Status,
     entries: Vec<Entry>,
 }
@@ -70,12 +72,15 @@ fn load(root: &Path) -> Result<Option<Journal>> {
     };
     let journal: Journal =
         serde_json::from_slice(&bytes).context("invalid upgrade recovery journal")?;
-    if journal.schema_version != 1 {
+    if !matches!(journal.schema_version, 1 | 2) {
         bail!("unsupported upgrade journal schema");
     }
     let mut paths = BTreeSet::new();
     for entry in &journal.entries {
         validate_path(root, &entry.path, &mut paths)?;
+        if journal.schema_version == 1 && entry.after_digest.is_none() {
+            bail!("schema-1 upgrade journal cannot contain deletion entries");
+        }
     }
     Ok(Some(journal))
 }
@@ -111,12 +116,40 @@ pub(crate) fn ensure_ready(root: &Path) -> Result<()> {
     Ok(())
 }
 pub(crate) type PlannedWrite = (PathBuf, Option<Vec<u8>>, Vec<u8>);
+#[derive(Debug, Clone)]
+pub(crate) struct PlannedChange {
+    pub path: PathBuf,
+    pub before: Option<Vec<u8>>,
+    /// None deletes the file. Rename is a source deletion plus destination add.
+    pub after: Option<Vec<u8>>,
+}
 pub(crate) fn apply(
     root: &Path,
     writes: Vec<PlannedWrite>,
     guards: &[(&Path, &[u8])],
 ) -> Result<bool> {
-    if writes.is_empty() {
+    apply_changes(
+        root,
+        writes
+            .into_iter()
+            .map(|(path, before, after)| PlannedChange {
+                path,
+                before,
+                after: Some(after),
+            })
+            .collect(),
+        guards,
+        &[],
+    )
+}
+
+pub(crate) fn apply_changes(
+    root: &Path,
+    changes: Vec<PlannedChange>,
+    guards: &[(&Path, &[u8])],
+    migration_ids: &[String],
+) -> Result<bool> {
+    if changes.is_empty() {
         return Ok(false);
     }
     let _guard = lock(root)?;
@@ -132,7 +165,12 @@ pub(crate) fn apply(
     }
     let mut entries = Vec::new();
     let mut paths = BTreeSet::new();
-    for (path, before, bytes) in &writes {
+    for PlannedChange {
+        path,
+        before,
+        after,
+    } in &changes
+    {
         let relative = path
             .strip_prefix(root)?
             .to_str()
@@ -145,21 +183,28 @@ pub(crate) fn apply(
         entries.push(Entry {
             path: relative,
             before: before.clone(),
-            after_digest: hash(bytes),
+            after_digest: after.as_deref().map(hash),
         });
     }
     let identity = hash(&serde_json::to_vec(&entries)?);
     let mut journal = Journal {
-        schema_version: 1,
+        schema_version: 2,
         builder_version: BUILDER_VERSION.to_owned(),
         migration_id: format!("managed-files-{BUILDER_VERSION}-{}", &identity[..16]),
+        migration_ids: migration_ids.to_vec(),
         status: Status::Prepared,
         entries,
     };
     // Record original bytes and expected output before touching any owned file.
     save(root, &journal)?;
-    for (path, _, bytes) in writes {
-        atomic_write(&path, &bytes)?;
+    for change in changes {
+        if change.before == change.after {
+            continue;
+        }
+        match change.after {
+            Some(bytes) => atomic_write(&change.path, &bytes)?,
+            None => fs::remove_file(&change.path)?,
+        }
     }
     journal.status = Status::Committed;
     save(root, &journal)?;
@@ -178,11 +223,7 @@ pub(crate) fn rollback(root: &Path) -> Result<CommandResult> {
     // Preflight the entire recovery before restoring even the first file.
     for entry in &journal.entries {
         let bytes = current(&root.join(&entry.path))?;
-        if bytes != entry.before
-            && !bytes
-                .as_ref()
-                .is_some_and(|value| hash(value) == entry.after_digest)
-        {
+        if bytes != entry.before && bytes.as_deref().map(hash) != entry.after_digest {
             result.conflicts.push(entry.path.clone());
         }
     }
@@ -215,6 +256,163 @@ pub(crate) fn rollback(root: &Path) -> Result<CommandResult> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn fixture() -> tempfile::TempDir {
+        let temp = tempfile::tempdir().unwrap();
+        fs::create_dir(temp.path().join(".knowme-builder")).unwrap();
+        fs::write(
+            temp.path().join(".knowme-builder/project.toml"),
+            b"old state",
+        )
+        .unwrap();
+        fs::write(temp.path().join("old.txt"), b"original").unwrap();
+        temp
+    }
+
+    fn rename_changes(root: &Path) -> Vec<PlannedChange> {
+        vec![
+            PlannedChange {
+                path: root.join("old.txt"),
+                before: Some(b"original".to_vec()),
+                after: None,
+            },
+            PlannedChange {
+                path: root.join("new.txt"),
+                before: None,
+                after: Some(b"original".to_vec()),
+            },
+            PlannedChange {
+                path: root.join(".knowme-builder/project.toml"),
+                before: Some(b"old state".to_vec()),
+                after: Some(b"new state".to_vec()),
+            },
+        ]
+    }
+
+    #[test]
+    fn deletion_rename_and_metadata_rollback_are_one_transaction() {
+        let temp = fixture();
+        let root = temp.path();
+        assert!(
+            apply_changes(
+                root,
+                rename_changes(root),
+                &[],
+                &["migration-example".into()]
+            )
+            .unwrap()
+        );
+        assert!(!root.join("old.txt").exists());
+        assert_eq!(fs::read(root.join("new.txt")).unwrap(), b"original");
+        let journal = load(root).unwrap().unwrap();
+        assert_eq!(journal.schema_version, 2);
+        assert_eq!(journal.migration_ids, ["migration-example"]);
+        assert!(journal.entries[0].after_digest.is_none());
+        assert!(rollback(root).unwrap().ok);
+        assert_eq!(fs::read(root.join("old.txt")).unwrap(), b"original");
+        assert!(!root.join("new.txt").exists());
+        assert_eq!(
+            fs::read(root.join(".knowme-builder/project.toml")).unwrap(),
+            b"old state"
+        );
+        assert!(!rollback(root).unwrap().changed);
+    }
+
+    #[test]
+    fn recreated_deleted_file_blocks_all_rollback_writes() {
+        let temp = fixture();
+        let root = temp.path();
+        apply_changes(root, rename_changes(root), &[], &[]).unwrap();
+        fs::write(root.join("old.txt"), b"later user content").unwrap();
+        let result = rollback(root).unwrap();
+        assert!(!result.ok);
+        assert!(!result.changed);
+        assert_eq!(result.conflicts, ["old.txt"]);
+        assert_eq!(
+            fs::read(root.join("old.txt")).unwrap(),
+            b"later user content"
+        );
+        assert_eq!(fs::read(root.join("new.txt")).unwrap(), b"original");
+        assert_eq!(
+            fs::read(root.join(".knowme-builder/project.toml")).unwrap(),
+            b"new state"
+        );
+    }
+
+    #[test]
+    fn occupied_rename_destination_prevents_source_deletion() {
+        let temp = fixture();
+        let root = temp.path();
+        fs::write(root.join("new.txt"), b"user content").unwrap();
+        assert!(apply_changes(root, rename_changes(root), &[], &[]).is_err());
+        assert_eq!(fs::read(root.join("old.txt")).unwrap(), b"original");
+        assert_eq!(fs::read(root.join("new.txt")).unwrap(), b"user content");
+        assert!(!root.join(JOURNAL).exists());
+    }
+
+    #[test]
+    fn each_interrupted_rename_prefix_can_be_recovered() {
+        for completed in 0..=3 {
+            let temp = fixture();
+            let root = temp.path();
+            let changes = rename_changes(root);
+            let journal = Journal {
+                schema_version: 2,
+                builder_version: BUILDER_VERSION.into(),
+                migration_id: "interrupted-example".into(),
+                migration_ids: vec!["example".into()],
+                status: Status::Prepared,
+                entries: changes
+                    .iter()
+                    .map(|change| Entry {
+                        path: change
+                            .path
+                            .strip_prefix(root)
+                            .unwrap()
+                            .to_str()
+                            .unwrap()
+                            .replace('\\', "/"),
+                        before: change.before.clone(),
+                        after_digest: change.after.as_deref().map(hash),
+                    })
+                    .collect(),
+            };
+            save(root, &journal).unwrap();
+            for change in changes.iter().take(completed) {
+                match &change.after {
+                    Some(bytes) => atomic_write(&change.path, bytes).unwrap(),
+                    None => fs::remove_file(&change.path).unwrap(),
+                }
+            }
+            assert!(ensure_ready(root).is_err());
+            assert!(rollback(root).unwrap().ok);
+            assert_eq!(fs::read(root.join("old.txt")).unwrap(), b"original");
+            assert!(!root.join("new.txt").exists());
+            assert_eq!(
+                fs::read(root.join(".knowme-builder/project.toml")).unwrap(),
+                b"old state"
+            );
+        }
+    }
+
+    #[test]
+    fn schema_one_journal_recovers_but_cannot_claim_deletions() {
+        let temp = fixture();
+        let root = temp.path();
+        fs::write(root.join("old.txt"), b"upgraded").unwrap();
+        let mut value = serde_json::json!({
+            "schemaVersion": 1, "builderVersion": BUILDER_VERSION,
+            "migrationId": "legacy", "status": "committed", "entries": [{
+                "path": "old.txt", "before": b"original".to_vec(), "afterDigest": hash(b"upgraded")
+            }]
+        });
+        fs::write(root.join(JOURNAL), serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(rollback(root).unwrap().ok);
+        assert_eq!(fs::read(root.join("old.txt")).unwrap(), b"original");
+        value["entries"][0]["afterDigest"] = serde_json::Value::Null;
+        fs::write(root.join(JOURNAL), serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(rollback(root).is_err());
+    }
     #[test]
     fn later_control_edit_blocks_all_planned_application_writes() {
         let temp = tempfile::tempdir().expect("temporary project");

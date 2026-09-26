@@ -3,6 +3,7 @@ import { homedir } from 'node:os';
 import { delimiter, dirname, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { assert, executable, main, run, ToolError } from './common.mjs';
+import { versions } from '../portable/versions.mjs';
 // Only Flutter's vendor bootstrap batch files are supported. cmd metacharacters
 // and expansion are rejected; there is no general-purpose shell execution API.
 function vendor(file, args, cwd) {
@@ -18,16 +19,18 @@ function vendor(file, args, cwd) {
         throw new ToolError(`Flutter vendor bootstrap failed: ${result.error?.message ?? result.status}`, result.status ?? 1);
 }
 await main(() => {
+    const pins = versions(), flutterVersion = pins.toolchain?.flutter;
+    assert(flutterVersion && /^\d+\.\d+\.\d+$/.test(flutterVersion), 'toolchain.flutter must be an exact stable x.y.z version');
     assert(process.argv.length <= 3 && (!process.argv[2] || ['--fvm', '--help'].includes(process.argv[2])), 'usage: node scripts/install-flutter.mjs [--fvm]');
     if (process.argv[2] === '--help') {
-        console.log('node scripts/install-flutter.mjs [--fvm]\nInstalls/upgrades Flutter beta. Windows bootstrap uses the vendor flutter.bat with a restricted adapter.');
+        console.log(`node scripts/install-flutter.mjs [--fvm]\nInstalls pinned Flutter ${flutterVersion}. Windows bootstrap uses the vendor flutter.bat with a restricted adapter.`);
         return;
     }
     if (process.argv[2] === '--fvm') {
         const dart = executable('dart') ?? (process.env.PATH ?? '').split(delimiter).map(dir => join(dir, 'dart.bat')).find(existsSync);
         assert(dart, 'Dart is required to install FVM');
         vendor(dart, ['pub', 'global', 'activate', 'fvm']);
-        for (const args of [['install', 'beta'], ['global', 'beta'], ['flutter', '--version']])
+        for (const args of [['install', flutterVersion], ['global', flutterVersion], ['flutter', '--version']])
             vendor(dart, ['pub', 'global', 'run', 'fvm:fvm', ...args]);
         console.log(`Add ${join(homedir(), '.pub-cache/bin')} to PATH. Use fvm flutter <command>.`);
         return;
@@ -35,15 +38,12 @@ await main(() => {
     const sdk = join(homedir(), 'development/flutter'), flutter = join(sdk, 'bin', process.platform === 'win32' ? 'flutter.bat' : 'flutter');
     if (existsSync(sdk)) {
         assert(existsSync(join(sdk, '.git')), `existing Flutter directory is not a Git checkout: ${sdk}`);
-        if (existsSync(join(sdk, '.git/shallow')))
-            run('git', ['fetch', '--unshallow', 'origin'], { cwd: sdk });
-        run('git', ['fetch', 'origin'], { cwd: sdk });
-        vendor(flutter, ['channel', 'beta'], sdk);
-        vendor(flutter, ['upgrade'], sdk);
+        run('git', ['fetch', '--tags', 'origin', flutterVersion], { cwd: sdk });
+        run('git', ['checkout', '--detach', flutterVersion], { cwd: sdk });
     }
     else {
         mkdirSync(dirname(sdk), { recursive: true });
-        run('git', ['clone', 'https://github.com/flutter/flutter.git', '-b', 'beta', sdk]);
+        run('git', ['clone', '--branch', flutterVersion, '--depth', '1', 'https://github.com/flutter/flutter.git', sdk]);
     }
     process.env.PATH = `${join(sdk, 'bin')}${delimiter}${process.env.PATH ?? ''}`;
     vendor(flutter, ['doctor', '--no-color'], sdk);

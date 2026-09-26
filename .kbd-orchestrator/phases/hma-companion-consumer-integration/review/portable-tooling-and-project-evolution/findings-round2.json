@@ -1,0 +1,56 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-6-astra-fresh-context",
+  "producer_model": "gpt-6-astra",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "unverified-same-family-fallback",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "assets/templates/baselines/web/web/package-lock.json",
+      "line": 3,
+      "claim": "The shipped React lockfiles are tied to the producer's temporary filesystem and therefore do not provide a portable dependency lock for generated consumers.",
+      "evidence": "The web lock declares its root version as `file:../../../../private/tmp/hma-runnable-proof/project/web` and records every package under keys such as `../../../../private/private/tmp/hma-runnable-proof/project/web/node_modules/...` (lines 3 and 28); the Tauri lock repeats the defect with `file:../../../../private/tmp/hma-runnable-proof/project/desktop` and package keys rooted under that temporary path (lines 3 and 29). This contradicts the acceptance criterion requiring shipped output to operate with a dependency lock in isolated and clean-clone consumers.",
+      "suggested_fix": "Regenerate both package-lock.json files with each template application as the npm project root, ensure the root version is `0.1.0` and package keys are ordinary `node_modules/...` entries, then exercise `npm ci` after generation in a different absolute directory."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "tools/knowme-builder/src/engine.rs",
+      "line": 1426,
+      "claim": "The alpha.3-to-alpha.4 migration is an implicit whole-template reconciliation rather than the explicit add/remove/rename/dependency/codegen migration required by the acceptance criteria.",
+      "evidence": "`migrations.rs` registers only five broad `OperationKind` labels for the version edge and contains no per-path add/remove/dependency/codegen operations. In `migrate_project`, every builder-owned old path absent from the newly rendered profile is automatically planned for deletion (`remove {old.path}`), and every remaining rendered path is automatically added. The only concrete migration mapping is the four-entry `migration_rename_target` match. Merely requiring that the edge advertise all five labels does not constrain or enumerate the destructive operations it performs.",
+      "suggested_fix": "Define the alpha.3-to-alpha.4 edge as a concrete operation list containing each source/destination path and expected historical digest (plus explicit dependency and codegen actions), reject unlisted template differences, and derive the journal plan only from that registry."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "tools/knowme-builder/src/engine.rs",
+      "line": 2073,
+      "claim": "Upgrade now silently changes an invalid persisted rendering identity to `app` instead of rejecting it, which can rewrite managed identifiers under a different application name.",
+      "evidence": "The upgrade hunk at `@@ -821,16 +1040,8` removes the previous `if slug(&app_name).is_empty() { bail!(...) }` guard. `render_text` now calls `app_slug`, and the new `app_slug` implementation returns `\"app\"` whenever the persisted or supplied name has no alphanumeric slug. This violates the brownfield requirement to preserve rendering identity across upgrades.",
+      "suggested_fix": "Keep the empty-slug rejection for persisted and `--app-name` identities; reserve any fallback only for brand-new projects before identity is persisted."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "assets/templates/baselines/flutter/mobile/lib/features/notes/presentation/providers/capabilities.dart",
+      "line": 22,
+      "claim": "The Flutter capability provider calls generated Rust FFI directly and skips the required Repository/Service layer.",
+      "evidence": "The file imports `../../../../bridge/generated/api/notes.dart` as `rust` and the generated Riverpod provider invokes `await rust.listCapabilities()` directly. The blocking architecture constraint requires `Widget -> generated Riverpod provider -> Repository/Service -> Rust FFI`.",
+      "suggested_fix": "Add a capability repository/service in the feature data layer, inject it through a generated Riverpod provider, and keep the presentation provider dependent on that interface rather than the generated bridge."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "assets/templates/baselines/web/web/src/features/notes/stores/notes.ts",
+      "line": 19,
+      "claim": "Capability server/async state is stored and fetched through Zustand even though the architecture contract reserves Zustand for transient UI state and requires Prometheus Entity Management for async server state.",
+      "evidence": "`useCapabilities` is a Zustand store whose `load` method awaits `listCapabilities()` and persists the returned backend/local capability entities and errors. The constraint states that React uses Prometheus Entity Management 3.x for server, async, and normalized entity state while Zustand owns transient client UI state; the identical store is also shipped in the Tauri baseline.",
+      "suggested_fix": "Register capabilities as a PEM entity transport/query and expose them through the feature hook; retain Zustand only for local transient state such as the note draft."
+    }
+  ],
+  "checked_classes": [],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

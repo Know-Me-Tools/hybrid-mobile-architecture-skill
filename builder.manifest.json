@@ -4,7 +4,7 @@
   "package": {
     "id": "hybrid-mobile-architecture",
     "displayName": "KnowMe Builder",
-    "version": "2.0.0-alpha.3",
+    "version": "2.0.0-alpha.4",
     "description": "Versioned, non-destructive application generator and instruction pack for governed agentic applications.",
     "license": "MIT",
     "homepage": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill",
@@ -157,6 +157,11 @@
       "status": "maintained"
     },
     {
+      "id": "runnable-baselines",
+      "path": "assets/templates/baselines",
+      "status": "maintained"
+    },
+    {
       "id": "command-contract",
       "path": "assets/templates/command-contract",
       "status": "maintained"
@@ -187,6 +192,8 @@
     "claude-code",
     "codex",
     "opencode",
-    "kimi-code"
+    "kimi-code",
+    "minimax-code",
+    "zed"
   ]
 }

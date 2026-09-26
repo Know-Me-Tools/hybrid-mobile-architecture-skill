@@ -8,6 +8,8 @@ import { verifyManifest } from './portable/manifest.mjs';
 // never a switch that silently drops runtime or transitive template resources.
 const roots = ['skills', 'templates', 'assets', 'scripts', 'runtime', 'tools', 'compatibility', 'schemas', 'references', 'deploy', 'ci', '.claude-plugin', '.codex-plugin', '.agents/skills', '.agents/plugins', '.claude/skills', '.claude/hooks', '.claude/commands', '.codex/skills', '.codex/prompts', '.opencode/skills', '.opencode/hooks', '.opencode/plugins', '.opencode/commands', '.kimi/skills', '.kimi-code/skills', '.kimi-code/hooks', '.kimi-code/commands', 'builder.manifest.json', 'plugin.json', 'marketplace.json', 'versions.toml', 'README.md', 'AGENTS.md', 'CLAUDE.md', 'LICENSE'];
 const excluded = new Set(['target', 'node_modules', '.git', 'dist', 'build', '.DS_Store']);
+const thirdPartyScript = (path) => path.startsWith('assets/templates/baselines/flutter/mobile/rust_builder/cargokit/') ||
+    path === 'assets/templates/baselines/flutter/mobile/android/gradlew';
 await main(() => {
     const args = process.argv.slice(2);
     let output = '', variant = '';
@@ -56,7 +58,7 @@ await main(() => {
             if (/[<>:"\\|?*\x00-\x1f]/.test(part) || /[ .]$/.test(part) || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(part))
                 throw new Error(`Windows-incompatible path: ${path}`);
         const bytes = readFileSync(source), header = bytes.subarray(0, 160).toString('utf8').split('\n')[0];
-        if ((/\.(sh|py)$/i.test(path) || /^#!.*\b(?:ba|da|z|k)?sh\b|^#!.*\bpython[\d.]*\b/.test(header)) && !path.split('/').includes('vendor'))
+        if ((/\.(sh|py)$/i.test(path) || /^#!.*\b(?:ba|da|z|k)?sh\b|^#!.*\bpython[\d.]*\b/.test(header)) && !path.split('/').includes('vendor') && !thirdPartyScript(path))
             throw new Error(`First-party shell/Python payload: ${path}`);
         folded.add(key);
         files.set(path, bytes);

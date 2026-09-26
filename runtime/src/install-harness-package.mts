@@ -19,11 +19,12 @@ await main(async () => {
     } else if (['check', 'uninstall', 'with-cli', 'with-mcp', 'with-prometheus', 'help'].includes(key)) flags.add(key);
     else throw new Error(`Unknown option: ${args[index]}`);
   }
-  if (flags.has('help')) { process.stdout.write('node scripts/install-harness-package.mjs [--harness claude-code|codex|opencode|all] [--scope user|project] [--source git-url-or-path] [--ref ref] [--check] [--uninstall] [--with-cli] [--with-mcp]\n'); return; }
-  if (!['all', 'claude-code', 'codex', 'opencode'].includes(values.harness) || !['user', 'project'].includes(values.scope)) throw new Error('Invalid harness or scope');
+  const harnesses = ['claude-code', 'codex', 'opencode', 'kimi-code', 'minimax-code', 'zed'];
+  if (flags.has('help')) { process.stdout.write(`node scripts/install-harness-package.mjs [--harness ${harnesses.join('|')}|all] [--scope user|project] [--source git-url-or-path] [--ref ref] [--check] [--uninstall] [--with-cli] [--with-mcp]\n`); return; }
+  if (!['all', ...harnesses].includes(values.harness) || !['user', 'project'].includes(values.scope)) throw new Error('Invalid harness or scope');
   if (flags.has('with-prometheus')) throw new Error('--with-prometheus is not portable yet. Install the selected full or mini control plane separately; no shell bootstrap is invoked.');
   const check = flags.has('check'), project = values.scope === 'project';
-  const selected = values.harness === 'all' ? ['claude-code', 'codex', 'opencode'] : [values.harness];
+  const selected = values.harness === 'all' ? harnesses : [values.harness];
   if (values.ref && selected.includes('claude-code')) throw new Error('--ref is not supported by the Claude marketplace adapter; choose a pinned source URL or omit Claude.');
   const manifest = json(join(packageRoot, 'builder.manifest.json')), pkg = object(manifest.package);
   const packageId = String(pkg.id), marketplace = 'knowme-builder', identity = `${packageId}@${marketplace}`;
@@ -95,7 +96,10 @@ await main(async () => {
     process.stdout.write(check ? 'Uninstall check complete; no changes.\n' : 'Receipt-owned installation removed.\n'); return;
   }
   let portableRoot = packageRoot, clonedSource: string | undefined;
-  if (selected.some(h => h === 'opencode' || h === 'codex' && project) && resolve(values.source) !== packageRoot) {
+  const copyHarness = (harness: string): boolean =>
+    ['opencode', 'kimi-code', 'minimax-code', 'zed'].includes(harness)
+    || harness === 'codex' && project;
+  if (selected.some(copyHarness) && resolve(values.source) !== packageRoot) {
     if (existsSync(values.source)) portableRoot = resolve(values.source);
     else if (check) process.stdout.write('Remote source content validation will occur on install: ' + values.source + '\n');
     else {
@@ -107,7 +111,7 @@ await main(async () => {
         if (values.ref) run('git', ['-C', portableRoot, 'checkout', '--quiet', values.ref]);
       } catch (error) { await rm(clonedSource, { recursive: true, force: true }); throw error; }
     }
-  } else if (values.ref && selected.some(h => h === 'opencode' || h === 'codex' && project)) throw new Error('--ref requires a remote source for portable skill copies; local working trees are not silently checked out.');
+  } else if (values.ref && selected.some(copyHarness)) throw new Error('--ref requires a remote source for portable skill copies; local working trees are not silently checked out.');
   if (!clonedSource && values.ref && portableRoot !== packageRoot && existsSync(values.source)) throw new Error('--ref cannot mutate a local source checkout; supply a remote source.');
   try {
   const sourceManifest = json(join(portableRoot, 'builder.manifest.json'));
@@ -125,12 +129,23 @@ await main(async () => {
     return files;
   };
   const skillCopies: [string, string][] = [];
-  for (const harness of selected) if (harness === 'opencode' || harness === 'codex' && project) {
-    const roots = [join(project ? process.cwd() : homedir(), '.agents/skills'), ...(harness === 'opencode' ? [join(opencodeRoot, 'skills')] : [])];
+  const minimaxData = process.env.MINIMAX_DATA_DIR ?? process.env.MAVIS_DATA_DIR ?? join(homedir(), '.minimax');
+  for (const harness of selected) if (copyHarness(harness)) {
+    const genericRoot = join(project ? process.cwd() : homedir(), '.agents/skills');
+    const roots = harness === 'kimi-code'
+      ? [genericRoot, join(project ? process.cwd() : homedir(), '.kimi-code/skills')]
+      : project ? [genericRoot] : harness === 'opencode'
+      ? [genericRoot, join(opencodeRoot, 'skills')]
+      : harness === 'minimax-code'
+        ? [join(minimaxData, 'skills')]
+        : [genericRoot];
     for (const name of sourceSkills) {
       if (!/^[a-z0-9-]+$/.test(name)) throw new Error('Unsafe skill name in source package');
       const source = join(portableRoot, skillSourceRoot, name);
-      for (const file of await walk(source)) for (const targetRoot of roots) skillCopies.push([join(source, file), join(targetRoot, name, file)]);
+      for (const file of await walk(source)) for (const targetRoot of roots) {
+        const target = join(targetRoot, name, file);
+        if (!skillCopies.some(([, existing]) => existing === target)) skillCopies.push([join(source, file), target]);
+      }
     }
   }
   // A differing preexisting skill aborts the whole plan before any mutation.

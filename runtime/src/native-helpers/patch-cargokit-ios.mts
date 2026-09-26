@@ -36,7 +36,9 @@ await main(() => {
         'Invalid rustup toolchain. Expected a version, channel, or named toolchain.',
         node.span);
   }`;
-  options = options.replace(oldParser, newParser).replace(/static Toolchain _toolchainFromNode\(YamlNode node\) \{[\s\S]*?node\.span\);\s*\}/, newParser).replace(/(?:Toolchain toolchain = Toolchain\.stable|String toolchain = '[^']+');/, `String toolchain = '${rust}';`);
+  // Replacement callbacks keep `$&`, `$'`, and related sequences inside the
+  // Dart regular expression literal from being interpreted by JavaScript.
+  options = options.replace(oldParser, () => newParser).replace(/static Toolchain _toolchainFromNode\(YamlNode node\) \{[\s\S]*?node\.span\);\s*\}/, () => newParser).replace(/(?:Toolchain toolchain = Toolchain\.stable|String toolchain = '[^']+');/, `String toolchain = '${rust}';`);
   assert(options.includes(`String toolchain = '${rust}';`) && options.includes('static String _toolchainFromNode'), 'failed to pin Cargokit options toolchain; unsupported vendor source');
   const builder = text(join(target, 'builder.dart')).replace(/String get _toolchain => _buildOptions\?\.toolchain(?:\.name)? \?\? '[^']+';/, `String get _toolchain => _buildOptions?.toolchain ?? '${rust}';`);
   assert(builder.includes(`?? '${rust}';`), 'failed to pin Cargokit builder toolchain');
