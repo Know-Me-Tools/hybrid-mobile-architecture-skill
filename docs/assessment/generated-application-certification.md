@@ -36,15 +36,17 @@ for host-specific evidence:
 
 - Windows Server 2025 x64 with `x86_64-pc-windows-msvc`;
 - Windows 11 ARM64 with `aarch64-pc-windows-msvc`;
-- macOS ARM64 with Flutter 3.47.5, Android ARM64, and iOS simulator execution;
+- macOS Intel with Flutter 3.47.5, an Android ARM64 APK executed through the
+  API 35 x86_64 emulator's ABI translation, and iOS simulator execution;
 - Linux web runtime and compatible brownfield alteration.
 
-Both Windows jobs use pinned native Rust utilities (`tauri-driver` and
-`msedgedriver-tool`) to drive the packaged React UI through WebDriver. The gate
-enters a note in the rendered application, invokes the Tauri command boundary,
-terminates the first session, launches a second process against the same
-isolated application-data directory, and reads the persisted note through the
-UI. SQLite-file creation alone is not accepted as runtime proof.
+Both Windows jobs launch the packaged native executable and use WebView2's
+DevTools Protocol from the compiled TypeScript runtime to drive the rendered
+React UI. The gate enters a note, invokes the Tauri command boundary, terminates
+the entire first process tree, launches a second process with a fresh browser
+profile against the same isolated application-data directory, and reads the
+persisted note through the UI. SQLite-file creation alone is not accepted as
+runtime proof.
 
 The candidate is not release-certified until all jobs pass on the committed
 branch and the final run URL is recorded here.

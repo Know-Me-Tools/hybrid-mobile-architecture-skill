@@ -3,7 +3,7 @@ use std::{fs, path::Path, process::Command};
 use crate::model::CommandResult;
 
 const WINDOWS_TARGETS: [&str; 2] = ["x86_64-pc-windows-msvc", "aarch64-pc-windows-msvc"];
-const IOS_SIMULATOR_TARGET: &str = "aarch64-apple-ios-sim";
+const IOS_SIMULATOR_TARGETS: [&str; 2] = ["aarch64-apple-ios-sim", "x86_64-apple-ios"];
 const ANDROID_ARM64_TARGET: &str = "aarch64-linux-android";
 
 /// Preflight explicitly requested runnable capabilities without mutating the destination.
@@ -57,7 +57,7 @@ pub(crate) fn inspect_requested_capabilities(
                     "{target}: MSVC linker, Windows SDK and native execution probe passed"
                 ));
             }
-        } else if target == IOS_SIMULATOR_TARGET {
+        } else if IOS_SIMULATOR_TARGETS.contains(&target.as_str()) {
             if !cfg!(target_os = "macos") {
                 result.ok = false;
                 result.warnings.push(format!(

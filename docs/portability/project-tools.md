@@ -18,14 +18,17 @@ normalization after OpenSpec refreshes.
 
 ## Compass
 
-Compass 0.3.28 initialized `.compass/config.toml` and local `compass-out/` with
+Compass 0.3.30 initialized `.compass/config.toml` and local `compass-out/` with
 structural graph and Program IR. Initial index: 446 extracted files, 16,123
 nodes and 17,603 edges. Vendor and build artifacts are excluded. Refresh the
 graph after code changes with `compass update`.
 
-The refreshed graph includes TypeScript sources: 566 files, 25,401 nodes,
-34,062 edges and 217 Program IR modules. Compass reports **partial** publication
-with 276 omitted edges and zero identity collisions. Retain this limitation;
+The final candidate graph includes TypeScript sources: 699 extracted files,
+27,505 nodes, 37,705 edges and 269 Program IR modules. Compass reports
+**partial** publication with 278 omitted edges and zero identity collisions.
+The SQLite store validates against graph digest
+`978f17d27a0f80a715e4472f827a000a7c40d082fdded6decd9980cbdb781dff`.
+Retain the partial-publication limitation;
 the graph is useful navigation evidence, not a complete dependency proof.
 
 Claude, Codex and OpenCode project MCP configuration adds the `compass` stdio
@@ -60,10 +63,12 @@ targets were installed in the local Rust toolchain. This macOS host has not
 thereby acquired a Windows linker, SDK, native dependencies or native execution.
 Both targets are also installed for the canonical Rust 1.97.1 toolchain.
 
-The new portable-tooling workflow runs on Linux, macOS, Windows x64 and native
-Windows ARM64. It tests the Node runtime and native Builder separately from
-future generated-application certification. Its first successful remote runs
-are still required. GitHub documents the `windows-11-arm` hosted runner in its
+The portable-tooling workflow runs on Linux, macOS, Windows x64 and native
+Windows ARM64. Exact-head run
+[`36239974895`](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36239974895)
+passed all four operating-system jobs at commit `1fc71612`. It tests the Node
+runtime and native Builder separately from generated-application certification.
+GitHub documents the `windows-11-arm` hosted runner in its
 [runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
 Tauri additionally documents MSVC C++ ARM64 components in its
 [Windows build guidance](https://v2.tauri.app/distribute/windows-installer/).

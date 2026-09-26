@@ -1,15 +1,16 @@
 import { spawn, spawnSync } from 'node:child_process';
-import { copyFileSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, statSync } from 'node:fs';
+import { createServer } from 'node:net';
 import { join, resolve } from 'node:path';
-import { setTimeout } from 'node:timers/promises';
+import { setTimeout as delay } from 'node:timers/promises';
 import { assert, main } from './common.mjs';
-const endpoint = 'http://127.0.0.1:4444';
-const elementKey = 'element-6066-11e4-a52e-4f735466cecf';
 async function stopTree(child) {
     if (!child.pid)
         return;
     if (process.platform === 'win32') {
-        spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore', shell: false });
+        spawnSync('taskkill.exe', ['/PID', String(child.pid), '/T', '/F'], {
+            stdio: 'ignore', shell: false,
+        });
         return;
     }
     try {
@@ -19,7 +20,7 @@ async function stopTree(child) {
         return;
     }
     for (let attempt = 0; attempt < 5; attempt++) {
-        await setTimeout(500);
+        await delay(500);
         try {
             process.kill(-child.pid, 0);
         }
@@ -32,19 +33,6 @@ async function stopTree(child) {
     }
     catch { /* already stopped */ }
 }
-async function request(path, method = 'GET', body) {
-    const response = await fetch(`${endpoint}${path}`, {
-        method,
-        headers: body === undefined ? undefined : { 'content-type': 'application/json' },
-        body: body === undefined ? undefined : JSON.stringify(body),
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok || payload?.value?.error) {
-        const detail = payload?.value?.message ?? JSON.stringify(payload);
-        throw new Error(`WebDriver ${method} ${path} failed (${response.status}): ${detail}`);
-    }
-    return payload?.value;
-}
 async function waitFor(description, deadline, operation) {
     let last;
     while (Date.now() < deadline) {
@@ -54,124 +42,162 @@ async function waitFor(description, deadline, operation) {
         catch (error) {
             last = error;
         }
-        await setTimeout(250);
+        await delay(250);
     }
     throw new Error(`${description} did not become ready: ${last instanceof Error ? last.message : String(last)}`);
 }
-function findDevToolsPort(root, depth = 6) {
-    if (!existsSync(root) || depth < 0)
-        return undefined;
-    for (const entry of readdirSync(root, { withFileTypes: true })) {
-        const path = join(root, entry.name);
-        if (entry.isFile() && entry.name === 'DevToolsActivePort')
-            return path;
-        if (entry.isDirectory()) {
-            const found = findDevToolsPort(path, depth - 1);
-            if (found)
-                return found;
-        }
-    }
-    return undefined;
+async function reservePort() {
+    const server = createServer();
+    await new Promise((resolveListen, reject) => {
+        server.once('error', reject);
+        server.listen(0, '127.0.0.1', resolveListen);
+    });
+    const address = server.address();
+    assert(address !== null && typeof address === 'object', 'Unable to reserve a WebView2 debug port');
+    await new Promise((resolveClose, reject) => server.close(error => error ? reject(error) : resolveClose()));
+    return address.port;
 }
-function removeDevToolsPorts(root, depth = 6) {
-    if (!existsSync(root) || depth < 0)
-        return;
-    for (const entry of readdirSync(root, { withFileTypes: true })) {
-        const path = join(root, entry.name);
-        if (entry.isFile() && entry.name === 'DevToolsActivePort')
-            rmSync(path, { force: true });
-        else if (entry.isDirectory())
-            removeDevToolsPorts(path, depth - 1);
-    }
+async function findTarget(port, deadline, app, startupError) {
+    return waitFor('WebView2 DevTools target', deadline, async () => {
+        assert(!startupError(), `Tauri application failed to launch: ${startupError()?.message}`);
+        assert(app.exitCode === null && app.signalCode === null, 'Tauri application exited before exposing its UI');
+        const response = await fetch(`http://127.0.0.1:${port}/json/list`, {
+            signal: AbortSignal.timeout(1_000),
+        });
+        assert(response.ok, `DevTools target discovery failed (${response.status})`);
+        const targets = await response.json();
+        const target = targets.find(candidate => candidate.type === 'page' && candidate.webSocketDebuggerUrl);
+        assert(Boolean(target?.webSocketDebuggerUrl), 'WebView2 has no page target yet');
+        return target.webSocketDebuggerUrl;
+    });
 }
-async function mirrorDevToolsPort(userDataFolder, active) {
-    const expected = join(userDataFolder, 'DevToolsActivePort');
-    while (active.value) {
-        try {
-            if (!existsSync(expected)) {
-                const nested = findDevToolsPort(userDataFolder);
-                if (nested && nested !== expected)
-                    copyFileSync(nested, expected);
+class CdpSession {
+    #socket;
+    #pending = new Map();
+    #nextId = 1;
+    constructor(socket) {
+        this.#socket = socket;
+        socket.addEventListener('message', event => {
+            if (typeof event.data !== 'string')
+                return;
+            const reply = JSON.parse(event.data);
+            if (typeof reply.id !== 'number')
+                return;
+            const pending = this.#pending.get(reply.id);
+            if (!pending)
+                return;
+            this.#pending.delete(reply.id);
+            globalThis.clearTimeout(pending.timer);
+            if (reply.error) {
+                pending.reject(new Error(`CDP request failed: ${reply.error.message ?? 'unknown error'}`));
             }
+            else {
+                pending.resolve(reply.result);
+            }
+        });
+        socket.addEventListener('close', () => {
+            for (const pending of this.#pending.values()) {
+                globalThis.clearTimeout(pending.timer);
+                pending.reject(new Error('WebView2 DevTools connection closed'));
+            }
+            this.#pending.clear();
+        });
+    }
+    static async connect(url, deadline) {
+        const socket = new WebSocket(url);
+        await new Promise((resolveOpen, reject) => {
+            const timer = globalThis.setTimeout(() => reject(new Error('WebView2 DevTools connection timed out')), Math.max(1, deadline - Date.now()));
+            socket.addEventListener('open', () => {
+                globalThis.clearTimeout(timer);
+                resolveOpen();
+            }, { once: true });
+            socket.addEventListener('error', () => {
+                globalThis.clearTimeout(timer);
+                reject(new Error('WebView2 DevTools connection failed'));
+            }, { once: true });
+        });
+        const session = new CdpSession(socket);
+        await session.call('Runtime.enable', {}, deadline);
+        return session;
+    }
+    call(method, params, deadline) {
+        const id = this.#nextId++;
+        return new Promise((resolveCall, reject) => {
+            const timer = globalThis.setTimeout(() => {
+                this.#pending.delete(id);
+                reject(new Error(`CDP ${method} timed out`));
+            }, Math.max(1, deadline - Date.now()));
+            this.#pending.set(id, { resolve: resolveCall, reject, timer });
+            this.#socket.send(JSON.stringify({ id, method, params }));
+        });
+    }
+    async evaluate(expression, deadline) {
+        const response = await this.call('Runtime.evaluate', {
+            expression,
+            awaitPromise: true,
+            returnByValue: true,
+        }, deadline);
+        if (response.exceptionDetails) {
+            throw new Error(response.exceptionDetails.exception?.description
+                ?? response.exceptionDetails.text ?? 'WebView2 evaluation failed');
         }
-        catch { /* WebView2 may replace profile files while starting; retry until the session responds. */ }
-        await setTimeout(100);
+        return response.result?.value;
+    }
+    close() {
+        this.#socket.close();
     }
 }
-async function createSession(binary, deadline, userDataFolder) {
-    mkdirSync(userDataFolder, { recursive: true });
-    removeDevToolsPorts(userDataFolder);
-    const active = { value: process.platform === 'win32' };
-    const mirror = active.value ? mirrorDevToolsPort(userDataFolder, active) : Promise.resolve();
-    try {
-        const value = await waitFor('Tauri WebDriver session', deadline, () => request('/session', 'POST', {
-            capabilities: {
-                alwaysMatch: {
-                    browserName: 'wry',
-                    'tauri:options': {
-                        application: binary,
-                        webviewOptions: {
-                            userDataFolder,
-                            additionalBrowserArguments: ['remote-debugging-port=0'],
-                        },
-                    },
-                },
-            },
-        }));
-        const id = value?.sessionId;
-        assert(typeof id === 'string' && id.length > 0, 'WebDriver response omitted sessionId');
-        return id;
-    }
-    finally {
-        active.value = false;
-        await mirror;
-    }
+async function waitForUi(session, deadline) {
+    await waitFor('rendered notes UI', deadline, async () => {
+        const ready = await session.evaluate(`Boolean(document.querySelector('[data-testid="note-input"]') && document.querySelector('[data-testid="saved-notes"]'))`, deadline);
+        assert(ready, 'notes UI is not rendered');
+    });
 }
-async function element(session, selector, deadline) {
-    const value = await waitFor(`element ${selector}`, deadline, () => request(`/session/${session}/element`, 'POST', {
-        using: 'css selector', value: selector,
-    }));
-    const id = value?.[elementKey];
-    assert(typeof id === 'string' && id.length > 0, `WebDriver response omitted element id for ${selector}`);
-    return id;
-}
-async function texts(session, selector) {
-    const values = await request(`/session/${session}/elements`, 'POST', { using: 'css selector', value: selector });
-    return Promise.all(values.map(value => request(`/session/${session}/element/${value[elementKey]}/text`)));
+async function createNote(session, title, deadline) {
+    const encoded = JSON.stringify(title);
+    const updated = await session.evaluate(`(() => {
+    const input = document.querySelector('[data-testid="note-input"]');
+    if (!(input instanceof HTMLInputElement)) return false;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    if (!setter) return false;
+    setter.call(input, ${encoded});
+    input.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    return true;
+  })()`, deadline);
+    assert(updated, 'Unable to enter a note through the rendered UI');
+    await waitFor('React note state', deadline, async () => {
+        const value = await session.evaluate(`document.querySelector('[data-testid="note-input"]')?.value ?? null`, deadline);
+        assert(value === title, `note input contains ${JSON.stringify(value)}`);
+    });
+    const clicked = await session.evaluate(`(() => {
+    const button = document.querySelector('[data-testid="save-note"]');
+    if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+    button.click();
+    return true;
+  })()`, deadline);
+    assert(clicked, 'Unable to invoke note creation through the rendered UI');
 }
 async function waitForNote(session, title, deadline) {
     await waitFor(`persisted note ${title}`, deadline, async () => {
-        const values = await texts(session, '[data-testid="saved-notes"] li');
-        if (!values.includes(title))
-            throw new Error(`note not visible; found ${JSON.stringify(values)}`);
+        const values = await session.evaluate(`[...document.querySelectorAll('[data-testid="saved-notes"] li')].map(node => node.textContent ?? '')`, deadline);
+        assert(values.includes(title), `note not visible; found ${JSON.stringify(values)}`);
     });
 }
-await main(async () => {
-    assert(process.argv.length >= 4 && process.argv.length <= 5, 'node scripts/verify-tauri-ui-restart.mjs <binary> <empty-app-data-dir> [timeout-seconds]', 2);
-    const binary = resolve(process.argv[2]);
-    const data = resolve(process.argv[3]);
-    const seconds = Number(process.argv[4] ?? 240);
-    assert(existsSync(binary) && statSync(binary).isFile(), `Tauri binary is not a file: ${binary}`, 2);
-    assert(!existsSync(data), `App-data proof directory must not already exist: ${data}`, 2);
-    assert(Number.isFinite(seconds) && seconds > 0, 'timeout must be positive', 2);
-    mkdirSync(data, { recursive: true });
-    const log = join(data, 'tauri-webdriver.log');
-    const webviewData = join(data, 'webview');
-    mkdirSync(webviewData, { recursive: true });
+async function launchAndInspect(binary, data, profile, log, deadline, inspect) {
+    mkdirSync(profile, { recursive: true });
+    const port = await reservePort();
     const handle = openSync(log, 'w');
-    const driver = spawn(process.env.TAURI_DRIVER ?? 'tauri-driver', [], {
+    const app = spawn(binary, [], {
         env: {
             ...process.env,
             APP_DATA_DIR: data,
             GEN_UI_APP_DATA_DIR: data,
-            RUST_LOG: 'info',
-            // EdgeDriver forwards these variables to the launched Tauri process. Setting
-            // them here makes WebView2 and the webviewOptions capability agree on one
-            // writable location, including on native Windows ARM64 runners.
-            WEBVIEW2_USER_DATA_FOLDER: webviewData,
+            TAURI_WEBVIEW_AUTOMATION: 'true',
+            WEBVIEW2_USER_DATA_FOLDER: profile,
             WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: [
                 process.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS,
-                '--remote-debugging-port=0',
+                `--remote-debugging-port=${port}`,
+                '--remote-allow-origins=*',
             ].filter(Boolean).join(' '),
         },
         stdio: ['ignore', handle, handle],
@@ -180,43 +206,43 @@ await main(async () => {
     });
     closeSync(handle);
     let startupError;
-    driver.on('error', error => { startupError = error; });
-    const interrupt = () => { void stopTree(driver).finally(() => process.exit(130)); };
-    process.once('SIGINT', interrupt);
-    process.once('SIGTERM', interrupt);
+    app.on('error', error => { startupError = error; });
     let session;
-    const deadline = Date.now() + seconds * 1000;
     try {
-        await waitFor('tauri-driver', deadline, async () => {
-            assert(!startupError, `tauri-driver failed to launch: ${startupError?.message}`);
-            assert(driver.exitCode === null && driver.signalCode === null, 'tauri-driver exited before accepting a session');
-            await request('/status');
-        });
-        const title = `WebDriver persistence ${Date.now()}`;
-        session = await createSession(binary, deadline, webviewData);
-        const input = await element(session, '[data-testid="note-input"]', deadline);
-        await request(`/session/${session}/element/${input}/value`, 'POST', { text: title, value: [...title] });
-        const save = await element(session, '[data-testid="save-note"]', deadline);
-        await request(`/session/${session}/element/${save}/click`, 'POST', {});
-        await waitForNote(session, title, deadline);
-        await request(`/session/${session}`, 'DELETE');
-        session = undefined;
-        await setTimeout(750);
-        session = await createSession(binary, deadline, webviewData);
-        await waitForNote(session, title, deadline);
-        assert(existsSync(join(data, 'notes.sqlite3')), 'UI workflow did not create the persisted SQLite database');
-        process.stdout.write(`PASS: packaged Tauri UI -> invoke -> Rust -> SQLite survived application relaunch\napp_data=${data}\n`);
+        const target = await findTarget(port, deadline, app, () => startupError);
+        session = await CdpSession.connect(target, deadline);
+        await waitForUi(session, deadline);
+        await inspect(session);
     }
     catch (error) {
-        if (existsSync(log))
+        if (existsSync(log)) {
             console.error(readFileSync(log, 'utf8').split(/\r?\n/).slice(-200).join('\n'));
+        }
         throw error;
     }
     finally {
-        if (session)
-            await request(`/session/${session}`, 'DELETE').catch(() => undefined);
-        process.off('SIGINT', interrupt);
-        process.off('SIGTERM', interrupt);
-        await stopTree(driver);
+        session?.close();
+        await stopTree(app);
     }
+}
+await main(async () => {
+    assert(process.argv.length >= 4 && process.argv.length <= 5, 'node scripts/verify-tauri-ui-restart.mjs <binary> <empty-app-data-dir> [timeout-seconds]', 2);
+    const binary = resolve(process.argv[2]);
+    const data = resolve(process.argv[3]);
+    const seconds = Number(process.argv[4] ?? 240);
+    assert(process.platform === 'win32', 'Packaged Tauri UI relaunch proof requires native Windows', 2);
+    assert(existsSync(binary) && statSync(binary).isFile(), `Tauri binary is not a file: ${binary}`, 2);
+    assert(!existsSync(data), `App-data proof directory must not already exist: ${data}`, 2);
+    assert(Number.isFinite(seconds) && seconds > 0, 'timeout must be positive', 2);
+    mkdirSync(data, { recursive: true });
+    const deadline = Date.now() + seconds * 1000;
+    const title = `WebView2 persistence ${Date.now()}`;
+    await launchAndInspect(binary, data, join(data, 'webview-first'), join(data, 'tauri-first.log'), deadline, async (session) => {
+        await createNote(session, title, deadline);
+        await waitForNote(session, title, deadline);
+    });
+    await delay(750);
+    await launchAndInspect(binary, data, join(data, 'webview-second'), join(data, 'tauri-second.log'), deadline, session => waitForNote(session, title, deadline));
+    assert(existsSync(join(data, 'notes.sqlite3')), 'UI workflow did not create the persisted SQLite database');
+    process.stdout.write(`PASS: packaged Tauri UI -> invoke -> Rust -> SQLite survived application relaunch\napp_data=${data}\n`);
 });
