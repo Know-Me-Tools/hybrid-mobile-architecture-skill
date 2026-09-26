@@ -119,8 +119,6 @@ ${values.next}
 });
 function redactWindowsAlias(value, canonicalRoot) {
   if (process.platform !== "win32") return value;
-  const identity = (path) => path.replace(/^\\\\\?\\/, "").replaceAll("/", "\\").replace(/\\+$/, "").toLowerCase();
-  const rootIdentity = identity(canonicalRoot);
   const rootName = basename(canonicalRoot), lower = value.toLowerCase(), needle = rootName.toLowerCase();
   let offset = 0;
   while (offset < value.length) {
@@ -130,7 +128,7 @@ function redactWindowsAlias(value, canonicalRoot) {
     for (let start = match; start >= 0; start--) {
       if (!/^[a-z]$/i.test(value[start] ?? "") || value[start + 1] !== ":" || !/[\\/]/.test(value[start + 2] ?? "")) continue;
       const candidate = value.slice(start, end);
-      if (existsSync(candidate) && identity(realpathSync(candidate)) === rootIdentity) return `${value.slice(0, start)}$REPO_ROOT${value.slice(end)}`;
+      if (existsSync(candidate) && existsSync(join2(candidate, ".git"))) return `${value.slice(0, start)}$REPO_ROOT${value.slice(end)}`;
       break;
     }
     offset = end;
