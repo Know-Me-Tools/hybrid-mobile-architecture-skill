@@ -85,8 +85,11 @@ test('native mobile workflow prebuilds the integration test entrypoint used by e
 test('iOS restart proof couples the rendered-state marker to the direct relaunch', () => {
   const helper = readFileSync(join(repo, 'runtime/src/native-helpers/verify-flutter-ios-restart.mts'), 'utf8');
   const integrationTest = readFileSync(join(repo, 'assets/templates/baselines/flutter/mobile/integration_test/notes_test.dart'), 'utf8');
+  assert.match(helper, /simctl', 'install', id, applicationBinary!/);
   assert.match(helper, /simctl', 'get_app_container'/);
+  assert.match(helper, /simctl', 'launch', id, bundleId\][\s\S]*waitForIosMarker\(firstMarker/);
   assert.match(helper, /simctl', 'launch'.*--route=\/verify-restart/);
+  assert.match(helper, /first iOS application process did not publish its rendered-state marker within five minutes/);
   assert.match(helper, /restarted iOS application did not publish its rendered-state marker within five minutes/);
   assert.match(integrationTest, /expect\(find\.text\(title\), findsAtLeastNWidgets\(1\)\);[\s\S]*knowme-builder-restart-pass/);
   assert.match(integrationTest, /PASS: rendered persisted note after relaunch/);

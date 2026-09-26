@@ -101,26 +101,26 @@ await main(async () => {
   try {
     run("xcrun", ["simctl", "boot", id]);
     run("xcrun", ["simctl", "bootstatus", id, "-b"]);
-    const base = [
-      "drive",
-      "--driver=test_driver/integration_test.dart",
-      "--target=integration_test/notes_test.dart",
-      `--device-id=${id}`,
-      `--use-application-binary=${applicationBinary}`
-    ];
-    run("flutter", [...base, "--keep-app-running"], { cwd: project });
+    run("xcrun", ["simctl", "install", id, applicationBinary]);
     const dataContainer = run("xcrun", ["simctl", "get_app_container", id, bundleId, "data"], { capture: true }).trim();
     assert(Boolean(dataContainer), "simctl did not return the installed application data container");
+    const firstMarker = join(dataContainer, "tmp", "knowme-builder-first-pass");
     const marker = join(dataContainer, "tmp", "knowme-builder-restart-pass");
+    const waitForIosMarker = async (path, expected, failure) => {
+      const deadline = Date.now() + 5 * 60 * 1e3;
+      while (!existsSync(path) && Date.now() < deadline) {
+        await new Promise((resolveDelay) => setTimeout(resolveDelay, 1e3));
+      }
+      assert(existsSync(path), failure);
+      assert(readFileSync(path, "utf8") === expected, `invalid rendered-state marker: ${path}`);
+    };
+    rmSync(firstMarker, { force: true });
     rmSync(marker, { force: true });
+    run("xcrun", ["simctl", "launch", id, bundleId]);
+    await waitForIosMarker(firstMarker, "PASS: rendered and persisted note after first launch\n", "first iOS application process did not publish its rendered-state marker within five minutes");
     run("xcrun", ["simctl", "terminate", id, bundleId]);
     run("xcrun", ["simctl", "launch", id, bundleId, "--route=/verify-restart"]);
-    const deadline = Date.now() + 5 * 60 * 1e3;
-    while (!existsSync(marker) && Date.now() < deadline) {
-      await new Promise((resolveDelay) => setTimeout(resolveDelay, 1e3));
-    }
-    assert(existsSync(marker), "restarted iOS application did not publish its rendered-state marker within five minutes");
-    assert(readFileSync(marker, "utf8") === "PASS: rendered persisted note after relaunch\n", "restarted iOS application published an invalid rendered-state marker");
+    await waitForIosMarker(marker, "PASS: rendered persisted note after relaunch\n", "restarted iOS application did not publish its rendered-state marker within five minutes");
     process.stdout.write(`PASS: Flutter UI -> Rust FFI -> SQLite -> application relaunch recovery on simulator ${id}
 `);
   } finally {
