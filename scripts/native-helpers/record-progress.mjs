@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { appendFileSync, existsSync, mkdirSync, realpathSync, writeFileSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { basename, join, resolve } from 'node:path';
+import { homedir, tmpdir } from 'node:os';
+import { basename, isAbsolute, join, relative, resolve } from 'node:path';
 import { assert, main, repoRoot } from './common.mjs';
 await main(() => {
     const args = process.argv.slice(2), values = { status: 'in-progress' };
@@ -30,6 +30,14 @@ await main(() => {
     const cwd = resolve();
     if (existsSync(cwd) && realpathSync(cwd) === realpathSync(root))
         roots.add(cwd);
+    const canonicalRoot = realpathSync(root);
+    for (const base of [tmpdir(), homedir(), process.env.TEMP, process.env.TMP, process.env.USERPROFILE]) {
+        if (!base || !existsSync(base))
+            continue;
+        const suffix = relative(realpathSync(base), canonicalRoot);
+        if (!isAbsolute(suffix) && suffix !== '..' && !suffix.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`))
+            roots.add(join(base, suffix));
+    }
     for (const path of [...roots]) {
         roots.add(path.replaceAll('\\', '/'));
         roots.add(path.replaceAll('/', '\\'));

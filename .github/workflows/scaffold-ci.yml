@@ -180,7 +180,7 @@ jobs:
       - name: Generate runnable Flutter application
         run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-flutter" --profile flutter-mobile --mode runnable && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-flutter"
       - name: Install exact bridge code generator
-        run: dart pub global activate flutter_rust_bridge_codegen ${{ steps.versions.outputs.flutter_rust_bridge }}
+        run: cargo install flutter_rust_bridge_codegen --version "=${{ steps.versions.outputs.flutter_rust_bridge }}" --locked
       - name: Generate bridge and Riverpod outputs
         working-directory: ${{ runner.temp }}/cert-flutter/mobile
         run: flutter pub get && flutter_rust_bridge_codegen generate && flutter pub run build_runner build --delete-conflicting-outputs && node "${{ github.workspace }}/scripts/mark-generated-sources.mjs" "${{ runner.temp }}/cert-flutter"

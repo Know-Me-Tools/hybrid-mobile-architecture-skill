@@ -4,8 +4,8 @@ import { createRequire as __createRequire } from 'node:module'; const require = 
 // src/native-helpers/record-progress.mts
 import { randomUUID } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, realpathSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { basename, join as join2, resolve as resolve2 } from "node:path";
+import { homedir, tmpdir } from "node:os";
+import { basename, isAbsolute, join as join2, relative, resolve as resolve2 } from "node:path";
 
 // src/native-helpers/common.mts
 import { spawnSync } from "node:child_process";
@@ -60,6 +60,12 @@ await main(() => {
   if (pwd && existsSync(pwd) && realpathSync(pwd) === realpathSync(root)) roots.add(pwd);
   const cwd = resolve2();
   if (existsSync(cwd) && realpathSync(cwd) === realpathSync(root)) roots.add(cwd);
+  const canonicalRoot = realpathSync(root);
+  for (const base of [tmpdir(), homedir(), process.env.TEMP, process.env.TMP, process.env.USERPROFILE]) {
+    if (!base || !existsSync(base)) continue;
+    const suffix = relative(realpathSync(base), canonicalRoot);
+    if (!isAbsolute(suffix) && suffix !== ".." && !suffix.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`)) roots.add(join2(base, suffix));
+  }
   for (const path of [...roots]) {
     roots.add(path.replaceAll("\\", "/"));
     roots.add(path.replaceAll("/", "\\"));

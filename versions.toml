@@ -31,10 +31,10 @@ pnpm = "11.15.0"
 tauri_cli = "2.11.4"
 tauri_driver = "2.0.5"         # exact stable WebDriver server used for packaged Windows UI certification
 msedgedriver_tool_rev = "8c4b34f51b45f5cf08013366d703de464ab871d1" # pinned Rust installer for matching EdgeDriver
-# The frb CRATE and the Dart PACKAGE must be the same version. 2.12.0 is the
-# latest published on pub.dev; the 2.13.0-beta line is not yet validated here.
-# Do not raise this without bumping rust/Cargo.toml and mobile/pubspec.yaml
-# together and re-running codegen.
+# The runtime crate, Dart package and Cargo-installed codegen CLI must use the
+# same version. The 2.13.0-beta line is not yet validated here. Do not raise
+# this without bumping rust/Cargo.toml and mobile/pubspec.yaml together and
+# re-running codegen.
 flutter_rust_bridge = "2.12.0"
 # Latest coherent set that compiles with Freezed today: flutter_riverpod 3.3.1,
 # riverpod_annotation 4.0.2, riverpod_sqflite 0.4.2, riverpod_generator 4.0.3.
