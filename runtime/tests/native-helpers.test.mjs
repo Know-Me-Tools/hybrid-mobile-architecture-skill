@@ -94,10 +94,16 @@ test('iOS restart proof couples the rendered-state marker to the direct relaunch
 
 test('Android restart proof couples the rendered-state marker to the direct relaunch', () => {
   const helper = readFileSync(join(repo, 'runtime/src/native-helpers/verify-flutter-ios-restart.mts'), 'utf8');
-  assert.match(helper, /shell', 'run-as', applicationId!, 'rm', '-f', androidMarker/);
-  assert.match(helper, /shell', 'am', 'start'[\s\S]*'--es', 'route', '\/verify-restart'/);
-  assert.match(helper, /shell', 'run-as', applicationId!, 'cat', androidMarker/);
+  const integrationTest = readFileSync(join(repo, 'assets/templates/baselines/flutter/mobile/integration_test/notes_test.dart'), 'utf8');
+  assert.match(helper, /'install', '-r', applicationBinary!/);
+  assert.match(helper, /shell', 'pm', 'clear', applicationId!/);
+  assert.match(helper, /launch\(\);[\s\S]*waitForMarker\(firstMarker, 'PASS: rendered and persisted note after first launch/);
+  assert.match(helper, /launch\('\/verify-restart'\);[\s\S]*waitForMarker\(androidMarker, 'PASS: rendered persisted note after relaunch/);
+  assert.match(helper, /shell', 'run-as', applicationId!, 'cat', marker/);
+  assert.match(helper, /first Android application process did not publish its rendered-state marker within five minutes/);
   assert.match(helper, /restarted Android application did not publish its rendered-state marker within five minutes/);
+  assert.match(integrationTest, /knowme-builder-first-pass/);
+  assert.match(integrationTest, /knowme-builder-restart-pass/);
 });
 
 test('standalone canonical and project-template skills have identical portable scripts', () => {

@@ -29,5 +29,8 @@ void main() {
     await tester.tap(find.byKey(const Key('save-note')));
     await tester.pumpAndSettle();
     expect(find.text(title), findsOneWidget);
+    File(
+      '${Directory.systemTemp.path}/knowme-builder-first-pass',
+    ).writeAsStringSync('PASS: rendered and persisted note after first launch\n', flush: true);
   });
 }

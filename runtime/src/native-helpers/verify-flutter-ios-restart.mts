@@ -24,32 +24,37 @@ await main(async () => {
     const buildConfig = readFileSync(resolve(project, 'android/app/build.gradle.kts'), 'utf8');
     const applicationId = /applicationId\s*=\s*"([^"]+)"/.exec(buildConfig)?.[1];
     assert(Boolean(applicationId), 'Android build configuration omitted applicationId');
-    const base = [
-      'drive',
-      '--driver=test_driver/integration_test.dart',
-      '--target=integration_test/notes_test.dart',
-      `--device-id=${existingDevice}`,
-      `--use-application-binary=${applicationBinary}`,
-    ];
-    run('flutter', [...base, '--keep-app-running'], { cwd: project });
+    const launch = (route?: string): void => {
+      const args = [
+        '-s', existingDevice, 'shell', 'am', 'start',
+        '-a', 'android.intent.action.MAIN',
+        '-c', 'android.intent.category.LAUNCHER',
+      ];
+      if (route) args.push('--es', 'route', route);
+      args.push('-n', `${applicationId}/.MainActivity`);
+      run('adb', args);
+    };
+    const waitForMarker = async (marker: string, expected: string, failure: string): Promise<void> => {
+      const deadline = Date.now() + 5 * 60 * 1000;
+      let markerContents = '';
+      while (Date.now() < deadline) {
+        markerContents = run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId!, 'cat', marker], { capture: true, allowFailure: true });
+        if (markerContents === expected) break;
+        await new Promise(resolveDelay => setTimeout(resolveDelay, 1000));
+      }
+      assert(markerContents === expected, failure);
+    };
+    run('adb', ['-s', existingDevice, 'install', '-r', applicationBinary!]);
+    run('adb', ['-s', existingDevice, 'shell', 'pm', 'clear', applicationId!]);
+    const firstMarker = 'cache/knowme-builder-first-pass';
     const androidMarker = 'cache/knowme-builder-restart-pass';
+    run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId!, 'rm', '-f', firstMarker, androidMarker]);
+    launch();
+    await waitForMarker(firstMarker, 'PASS: rendered and persisted note after first launch\n', 'first Android application process did not publish its rendered-state marker within five minutes');
     run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId!, 'rm', '-f', androidMarker]);
     run('adb', ['-s', existingDevice, 'shell', 'am', 'force-stop', applicationId!]);
-    run('adb', [
-      '-s', existingDevice, 'shell', 'am', 'start',
-      '-a', 'android.intent.action.MAIN',
-      '-c', 'android.intent.category.LAUNCHER',
-      '--es', 'route', '/verify-restart',
-      '-n', `${applicationId}/.MainActivity`,
-    ]);
-    const deadline = Date.now() + 5 * 60 * 1000;
-    let markerContents = '';
-    while (Date.now() < deadline) {
-      markerContents = run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId!, 'cat', androidMarker], { capture: true, allowFailure: true });
-      if (markerContents === 'PASS: rendered persisted note after relaunch\n') break;
-      await new Promise(resolveDelay => setTimeout(resolveDelay, 1000));
-    }
-    assert(markerContents === 'PASS: rendered persisted note after relaunch\n', 'restarted Android application did not publish its rendered-state marker within five minutes');
+    launch('/verify-restart');
+    await waitForMarker(androidMarker, 'PASS: rendered persisted note after relaunch\n', 'restarted Android application did not publish its rendered-state marker within five minutes');
     process.stdout.write(`PASS: Flutter UI -> Rust FFI -> SQLite -> application relaunch recovery on device ${existingDevice}\n`);
     return;
   }
