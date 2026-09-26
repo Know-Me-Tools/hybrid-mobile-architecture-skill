@@ -74,6 +74,14 @@ test('generated Flutter and Rust bridge sources receive deterministic architectu
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
+test('native mobile workflow prebuilds the integration test entrypoint used by exact binaries', () => {
+  const workflow = readFileSync(join(repo, '.github/workflows/scaffold-ci.yml'), 'utf8');
+  assert.match(workflow, /flutter build ios --simulator --debug --no-codesign --target integration_test\/notes_test\.dart/);
+  assert.match(workflow, /flutter build apk --debug --target-platform android-arm64 --target integration_test\/notes_test\.dart/);
+  assert.match(workflow, /--ios-app .*Runner\.app/);
+  assert.match(workflow, /emulator-5554 .*app-debug\.apk/);
+});
+
 test('standalone canonical and project-template skills have identical portable scripts', () => {
   for (const [skill, scripts] of [['build-branded-docusaurus', ['scaffold', 'verify', 'build-site']], ['karpathy-progress-memory', ['record-progress']]]) {
     for (const script of scripts) assert.deepEqual(readFileSync(join(repo, 'skills', skill, 'scripts', `${script}.mjs`)), readFileSync(join(repo, 'templates/project-skills', skill, 'scripts', `${script}.mjs`)));
