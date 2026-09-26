@@ -1,0 +1,25 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "same-model-fallback-weaker-guarantee",
+  "scope": "Source re-review of tools/knowme-builder/src/upgrade_journal.rs, engine upgrade integration, rollback CLI and relevant public tests after the two findings in journal-findings.json. Includes confirmation of root staging source corrections. No claim of semantic version migrations, arbitrary external-writer synchronization, power-loss durability, live Windows locking, or completed staged-install smoke.",
+  "findings": [],
+  "checked_classes": [
+    "Stale metadata overwrite: project and generated-lock raw bytes are retained from parsing, supplied as guards even when not rewritten, and checked after the native coordination lock is acquired.",
+    "Changed application inputs: planned original application bytes are compared before journal preparation and managed-file writes.",
+    "Unrecoverable paths: engine rejects duplicate and reserved managed application paths; apply and load share canonical path, case-insensitive duplicate and reserved journal/lock validation.",
+    "Recovery ordering: original bytes and expected result digests are saved before application writes; prepared or rolling-back journals require explicit recovery; rollback checks all entries before restoring files.",
+    "Later edits: rollback refuses mismatches with both original and applied content; repeated completed rollback is a no-op.",
+    "Process coordination: apply and rollback retain a native file-lock guard throughout their writes; the public test exercises rejection while another process holds the lock.",
+    "Compatibility claims: journal implementation explicitly limits itself to one managed-file operation and does not make unsupported historical versions valid.",
+    "Staging dependencies: Codex prompts and OpenCode commands are included; dispatch requiring repository lifecycle state is excluded from consumer payload.",
+    "Windows staging paths: outside-checkout detection distinguishes path components and accepts absolute relative results for cross-drive destinations.",
+    "Evidence limitations: reviewed regression test source; producer-reported execution results are separate and were not independently rerun by this reviewer."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

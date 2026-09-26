@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-printf 'npx %s\n' "$*" >> "$KNOWME_TEST_LOG"

@@ -112,14 +112,20 @@ pub struct AdoptArgs {
 #[command(group(
     ArgGroup::new("operation")
         .required(true)
-        .args(["check", "apply"])
+        .args(["check", "apply", "rollback"])
 ))]
 pub struct UpgradeArgs {
     pub path: PathBuf,
+    /// Original rendering name for legacy state that did not persist identity.
+    #[arg(long)]
+    pub app_name: Option<String>,
     #[arg(long)]
     pub check: bool,
     #[arg(long)]
     pub apply: bool,
+    /// Restore the last managed-file upgrade, preserving files edited afterward.
+    #[arg(long, conflicts_with_all = ["check", "apply", "app_name"])]
+    pub rollback: bool,
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -187,6 +193,12 @@ pub struct AuditArgs {
 pub struct DoctorArgs {
     #[arg(long, default_value = ".")]
     pub path: PathBuf,
+    /// Inspect native tooling without requiring the Prometheus control plane.
+    #[arg(long)]
+    pub native_only: bool,
+    /// Windows MSVC target to inspect (repeat for both architectures).
+    #[arg(long, value_parser = ["x86_64-pc-windows-msvc", "aarch64-pc-windows-msvc"])]
+    pub target: Vec<String>,
 }
 
 #[derive(Debug, Args)]

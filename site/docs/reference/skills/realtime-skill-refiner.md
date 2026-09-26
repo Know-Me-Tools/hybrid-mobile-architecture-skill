@@ -46,7 +46,7 @@ Proactive refinement happens when an author reviews a skill they just wrote.
 This is the reactive counterpart: the same refinement algorithm, triggered by a
 failure that already happened in production.
 
-Run with `scripts/refiner-loop.sh --skill <name>`.
+Run with `scripts/refiner-loop.mjs --skill <name>`.
 
 ## The loop
 
@@ -106,25 +106,51 @@ means triage under-scoped the problem; go back rather than proceeding.
 
 ## Stage 4 — Verify
 
-A fix is unverified until the original failure is replayed:
+Run the gates, then re-execute the failure if a reproduction was recorded:
 
 ```bash
-node scripts/check-skill-contracts.mjs        # contract still holds
-node scripts/generate-skill-metadata.mjs      # regenerate derived artifacts
-node scripts/generate-skill-evals.mjs
-git diff --exit-code                          # no drift left behind
+node scripts/refiner-loop.mjs --verify TICKET
 ```
 
-Then re-run the recorded failing input and confirm the outcome changed. Add an
-eval case covering it, so the regression cannot return silently.
+Verify runs four gates — `check-skill-contracts.mjs`,
+`generate-skill-metadata.mjs`, `generate-skill-evals.mjs`, and
+`sync-harness-skills.mjs --check` — then reports whether skill/eval changes are
+present (informational, **not** a gate: both outcomes pass), then the replay.
+
+**Replay.** A ticket opened with `--replay-argv '["node","path/to/regression.mjs"]'` records an argument array that
+*reproduced* the failure. After a real fix that command must **succeed**:
+
+- exit 0 → the failure no longer reproduces → the ticket verifies
+- non-zero → the failure is still there → Verify fails and the ticket returns
+  to `approved`, no matter how green the gates are
+
+The replay runs directly in the project root, without shell parsing. A ticket
+still requests executable code, so inspect its command and arguments before
+verification. Old tickets containing shell replay strings need a reviewed
+conversion to an argument array; the tool refuses to evaluate them.
+
+A transcript-only ticket may be recorded and triaged, but cannot become
+verified or shipped without a runnable regression. Missing replay returns a
+nonzero outcome and retains an unverified ticket. Metadata gates alone do not
+prove the reported failure is fixed.
 
 If the same fix fails verification twice, stop and report the discrepancy
 rather than trying a third variation.
 
+> **On eval cases.** An earlier version of this skill said Verify should "add
+> an eval case covering it". It cannot, and neither can you by hand:
+> `evals/builder-skills.jsonl` is **generated** — `generate-skill-evals.mjs`
+> templates exactly three cases per skill from that skill's own description, so
+> a hand-added line is erased on the next regeneration. The case shape
+> (`{prompt, expectedSkills}`) asserts skill *activation*, which most refiner
+> tickets are not about, and no runner executes cases at all —
+> `check-skill-contracts.mjs` only counts them. `--replay-argv` is the regression
+> guard this loop actually has.
+
 ## Stage 5 — Ship
 
-Commit the skill change together with its regenerated artifacts and its new eval
-case. Mark the ticket shipped, keeping the evidence attached. Re-register the
+Commit the skill change together with its regenerated artifacts. Mark the ticket
+shipped, keeping the evidence and the replay command attached. Re-register the
 package so the harness picks up the change.
 
 ## Anti-patterns
@@ -132,7 +158,8 @@ package so the harness picks up the change.
 - Skipping the Triage halt because the bug "is obvious".
 - Editing a generated mirror instead of the canonical skill.
 - Broadening a description without checking which neighbors lose prompts.
-- Shipping without an eval case for the reproduced failure.
+- Shipping a ticket whose replay was never recorded when the evidence could
+  have been reduced to a runnable command.
 - Closing a ticket with no record of the evidence that opened it.
 
 ## Installation and verification

@@ -179,10 +179,10 @@ if [[ -f ~/.prometheus/skill-packages/${package_id}/scripts/eval.sh ]]; then
 fi
 
 # Re-run the install contract check
-bash ~/.prometheus/skill-packages/${package_id}/scripts/verify-skill-manifest.sh
+node ~/.prometheus/skill-packages/${package_id}/scripts/verify-skill-manifest.mjs
 
 # Re-run the HMA hooks-reliability check
-bash ~/.prometheus/skill-packages/${package_id}/scripts/verify-hooks-reliability.sh
+node ~/.prometheus/skill-packages/${package_id}/scripts/verify-hooks-reliability.mjs
 ```
 
 If any check fails, the patch is **rejected** and the
@@ -330,7 +330,7 @@ wrote the patch).
       the frontmatter above
 - [ ] The SKILL.md body covers all of §1-§6
 - [ ] Mirrored to the 6 per-harness directories + `templates/project-skills/`
-      via `bash scripts/sync-harness-skills.sh` (verify with `--check`)
+      via `node scripts/sync-harness-skills.mjs` (verify with `--check`)
 - [ ] Declared in `builder.manifest.json` `skills[]` and
       `templates/activation-manifest.json`, then regenerated
       (`plugin.json` is generated and has no `skills` array)

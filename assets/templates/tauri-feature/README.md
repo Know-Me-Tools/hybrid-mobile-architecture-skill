@@ -1,6 +1,6 @@
 # Tauri/React Feature Module Template
 
-Use `scripts/new-feature.sh <n> tauri` to scaffold this structure.
+Use `scripts/new-feature.mjs <n> tauri` to scaffold this structure.
 
 ```
 features/<feature-name>/

@@ -1,0 +1,63 @@
+{
+  "target": "kimi",
+  "verification": {
+    "level": "source-verified",
+    "source": "https://github.com/MoonshotAI/kimi-code/blob/main/docs/en/customization/agents.md",
+    "version": "main documentation inspected 2026-09-24",
+    "live": "unverified"
+  },
+  "diagnostics": [
+    "Source-verified serialization only; installed native validation and live execution are unverified.",
+    "Role overrides are preserved without native schema certification. Skill IDs refer to separately installed skills; prompt mentions do not install or authorize them."
+  ],
+  "instructions": [
+    "Review staged artifacts before installation. Export grants no execution or registration authority.",
+    "Choose project .kimi-code/agents or the staged Kimi v2 marketplace/plugin. Literal ${base_prompt} in supplied prompts remains unchanged."
+  ],
+  "files": [
+    {
+      "file": ".kimi-code/agents/implementer.md",
+      "sha256": "0739ac77d61a9604b9726683eb2ead958e53d71cef78d5c02d1cc5b250e28ade"
+    },
+    {
+      "file": "plugins/hma-maintainers/agents/implementer.md",
+      "sha256": "0739ac77d61a9604b9726683eb2ead958e53d71cef78d5c02d1cc5b250e28ade"
+    },
+    {
+      "file": ".kimi-code/agents/mobile-specialist.md",
+      "sha256": "bd9613b238d4b03cf6ef54b29e889ef1d965bbcbc8a9ffcde24220c565dcb0ee"
+    },
+    {
+      "file": "plugins/hma-maintainers/agents/mobile-specialist.md",
+      "sha256": "bd9613b238d4b03cf6ef54b29e889ef1d965bbcbc8a9ffcde24220c565dcb0ee"
+    },
+    {
+      "file": ".kimi-code/agents/documentation-specialist.md",
+      "sha256": "d47ba7e590dd5084b684ff4510d12672504b4955614197c56c051f776184d4a3"
+    },
+    {
+      "file": "plugins/hma-maintainers/agents/documentation-specialist.md",
+      "sha256": "d47ba7e590dd5084b684ff4510d12672504b4955614197c56c051f776184d4a3"
+    },
+    {
+      "file": ".kimi-code/agents/reviewer.md",
+      "sha256": "92e16c56505900081b6cea1dac8d5e9c913960258b9db7113a105702eb8f3551"
+    },
+    {
+      "file": "plugins/hma-maintainers/agents/reviewer.md",
+      "sha256": "92e16c56505900081b6cea1dac8d5e9c913960258b9db7113a105702eb8f3551"
+    },
+    {
+      "file": "plugins/hma-maintainers/kimi.plugin.json",
+      "sha256": "24960d49821e8707b43400145f9a6a1241a459f4a1e293f7d9718db359129174"
+    },
+    {
+      "file": "marketplace.json",
+      "sha256": "b8b5401e0b124f25cac2ddd2a04dcf9c1dc5a55d9be8538c61a7c405e2ee2718"
+    },
+    {
+      "file": "export-receipt.json",
+      "sha256": "4f1410840b63e5f011d06097f80d076b03d35782fc1b939cea7428ac22ba71d3"
+    }
+  ]
+}

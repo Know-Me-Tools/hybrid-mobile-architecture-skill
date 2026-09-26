@@ -42,9 +42,9 @@ Required whenever a change touches: a platform baseline (Dart, Flutter, Android
 native dependency.
 
 ```bash
-bash scripts/android/build.sh
-bash scripts/android/verify-native-inference-gates.sh   # arm64-only APK, required .so present
-bash scripts/android/verify-device-runtime-gates.sh     # no fatal/JNI/dlopen failure in logcat
+node scripts/android/build.mjs
+node scripts/android/verify-native-inference-gates.mjs   # arm64-only APK, required .so present
+node scripts/android/verify-device-runtime-gates.mjs     # no fatal/JNI/dlopen failure in logcat
 ```
 
 Record the result in `docs/platform-support.md` under **Latest physical-device

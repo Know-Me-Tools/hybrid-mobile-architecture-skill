@@ -42,7 +42,7 @@ Before any generation or adoption, run:
 knowme-builder doctor --json
 ```
 
-The source checkout also provides `scripts/check-env.sh` for maintainers. An
+The source checkout also provides `scripts/check-env.mjs` for maintainers. An
 individually installed skill must use `knowme-builder doctor --json` instead.
 
 ### Required tool matrix
@@ -63,7 +63,9 @@ Do not attempt environment remediation unless the user explicitly requests it.
 
 ## Step 2 — Determine the operation
 
-Ask the user which of these they need. Read the relevant reference file afterward.
+Infer the operation from the request and existing project state; ask only when the
+choice is ambiguous. Read `references/project-evolution.md` for greenfield,
+brownfield and ongoing upgrade workflows.
 
 ### 2a. New project
 
@@ -84,6 +86,28 @@ Never re-scaffold an evolved application. Preview first, then apply:
 knowme-builder adopt <path> --profile <profile> --check
 knowme-builder adopt <path> --profile <profile> --apply
 ```
+
+Inventory actual source roots, entrypoints, dependencies, persistence and native
+bridges first. Adoption metadata is not proof that missing layers or surfaces
+were implemented. Preserve existing application behavior and user-owned files.
+Apply requested architecture changes as bounded migrations with an executable
+feature through the existing layers; do not replace the application with a new
+scaffold or call disconnected generated snippets an integration.
+
+### 2b.1. Continue evolving a previous output
+
+Inspect `.knowme-builder/project.toml` and `generated.lock.json`, then preview:
+
+```text
+knowme-builder upgrade <path> --check
+```
+
+Review the version range, proposed files and conflicts before applying an
+upgrade. Preserve local edits and original project identity. A successful file
+refresh does not prove a dependency, schema or bridge migration is complete.
+Unsupported versions and unresolved conflicts must be reported explicitly.
+Rebuild and exercise the migrated feature on each affected surface; retain
+recovery evidence. See `references/project-evolution.md` for current limitations.
 
 ### 2c. Code generation
 - New feature module (Flutter or Tauri)

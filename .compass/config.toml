@@ -1,0 +1,8 @@
+version = 2
+
+[build]
+include = ["tools/", "runtime/src/", "scripts/", "assets/templates/", "templates/", "skills/", "references/", "openspec/"]
+exclude = ["**/vendor/**", "**/node_modules/**", "**/target/**", "**/.git/**"]
+
+[storage]
+store = "sqlite"

@@ -1,5 +1,5 @@
 # Structural manifest of the scaffold output.
-# Regenerate: bash scripts/verify-scaffold.sh --update
+# Regenerate: node scripts/verify-scaffold.mjs --update
 # Paths and key manifest values only — never file contents.
 
 ## paths
@@ -24,8 +24,9 @@
 .agents/skills/build-branded-docusaurus/assets/flat2.css
 .agents/skills/build-branded-docusaurus/assets/index.jsx
 .agents/skills/build-branded-docusaurus/assets/sanitize.mjs
-.agents/skills/build-branded-docusaurus/scripts/scaffold.sh
-.agents/skills/build-branded-docusaurus/scripts/verify.sh
+.agents/skills/build-branded-docusaurus/scripts/build-site.mjs
+.agents/skills/build-branded-docusaurus/scripts/scaffold.mjs
+.agents/skills/build-branded-docusaurus/scripts/verify.mjs
 .agents/skills/claude-hooks-reliability/SKILL.md
 .agents/skills/claude-hooks-reliability/agents/openai.yaml
 .agents/skills/client-rag/SKILL.md
@@ -56,7 +57,7 @@
 .agents/skills/karpathy-progress-memory/SKILL.md
 .agents/skills/karpathy-progress-memory/agents/openai.yaml
 .agents/skills/karpathy-progress-memory/references/record-schema.md
-.agents/skills/karpathy-progress-memory/scripts/record-progress.sh
+.agents/skills/karpathy-progress-memory/scripts/record-progress.mjs
 .agents/skills/launchagent-supervisor/SKILL.md
 .agents/skills/launchagent-supervisor/agents/openai.yaml
 .agents/skills/legacy-app-embed/SKILL.md
@@ -97,8 +98,8 @@
 .agents/skills/tauri-tray-app/agents/openai.yaml
 .agents/skills/tauri-ui-review/SKILL.md
 .agents/skills/tauri-ui-review/agents/openai.yaml
-.claude/hooks/a11y-reminder.py
-.claude/hooks/skill-activation.py
+.claude/hooks/a11y-reminder.mjs
+.claude/hooks/skill-activation.mjs
 .claude/settings.json
 .claude/skills/a11y-gate/SKILL.md
 .claude/skills/a11y-gate/agents/openai.yaml
@@ -121,8 +122,9 @@
 .claude/skills/build-branded-docusaurus/assets/flat2.css
 .claude/skills/build-branded-docusaurus/assets/index.jsx
 .claude/skills/build-branded-docusaurus/assets/sanitize.mjs
-.claude/skills/build-branded-docusaurus/scripts/scaffold.sh
-.claude/skills/build-branded-docusaurus/scripts/verify.sh
+.claude/skills/build-branded-docusaurus/scripts/build-site.mjs
+.claude/skills/build-branded-docusaurus/scripts/scaffold.mjs
+.claude/skills/build-branded-docusaurus/scripts/verify.mjs
 .claude/skills/claude-hooks-reliability/SKILL.md
 .claude/skills/claude-hooks-reliability/agents/openai.yaml
 .claude/skills/client-rag/SKILL.md
@@ -153,7 +155,7 @@
 .claude/skills/karpathy-progress-memory/SKILL.md
 .claude/skills/karpathy-progress-memory/agents/openai.yaml
 .claude/skills/karpathy-progress-memory/references/record-schema.md
-.claude/skills/karpathy-progress-memory/scripts/record-progress.sh
+.claude/skills/karpathy-progress-memory/scripts/record-progress.mjs
 .claude/skills/launchagent-supervisor/SKILL.md
 .claude/skills/launchagent-supervisor/agents/openai.yaml
 .claude/skills/legacy-app-embed/SKILL.md
@@ -215,8 +217,9 @@
 .codex/skills/build-branded-docusaurus/assets/flat2.css
 .codex/skills/build-branded-docusaurus/assets/index.jsx
 .codex/skills/build-branded-docusaurus/assets/sanitize.mjs
-.codex/skills/build-branded-docusaurus/scripts/scaffold.sh
-.codex/skills/build-branded-docusaurus/scripts/verify.sh
+.codex/skills/build-branded-docusaurus/scripts/build-site.mjs
+.codex/skills/build-branded-docusaurus/scripts/scaffold.mjs
+.codex/skills/build-branded-docusaurus/scripts/verify.mjs
 .codex/skills/claude-hooks-reliability/SKILL.md
 .codex/skills/claude-hooks-reliability/agents/openai.yaml
 .codex/skills/client-rag/SKILL.md
@@ -247,7 +250,7 @@
 .codex/skills/karpathy-progress-memory/SKILL.md
 .codex/skills/karpathy-progress-memory/agents/openai.yaml
 .codex/skills/karpathy-progress-memory/references/record-schema.md
-.codex/skills/karpathy-progress-memory/scripts/record-progress.sh
+.codex/skills/karpathy-progress-memory/scripts/record-progress.mjs
 .codex/skills/launchagent-supervisor/SKILL.md
 .codex/skills/launchagent-supervisor/agents/openai.yaml
 .codex/skills/legacy-app-embed/SKILL.md
@@ -310,8 +313,9 @@
 .kimi-code/skills/build-branded-docusaurus/assets/flat2.css
 .kimi-code/skills/build-branded-docusaurus/assets/index.jsx
 .kimi-code/skills/build-branded-docusaurus/assets/sanitize.mjs
-.kimi-code/skills/build-branded-docusaurus/scripts/scaffold.sh
-.kimi-code/skills/build-branded-docusaurus/scripts/verify.sh
+.kimi-code/skills/build-branded-docusaurus/scripts/build-site.mjs
+.kimi-code/skills/build-branded-docusaurus/scripts/scaffold.mjs
+.kimi-code/skills/build-branded-docusaurus/scripts/verify.mjs
 .kimi-code/skills/claude-hooks-reliability/SKILL.md
 .kimi-code/skills/claude-hooks-reliability/agents/openai.yaml
 .kimi-code/skills/client-rag/SKILL.md
@@ -342,7 +346,7 @@
 .kimi-code/skills/karpathy-progress-memory/SKILL.md
 .kimi-code/skills/karpathy-progress-memory/agents/openai.yaml
 .kimi-code/skills/karpathy-progress-memory/references/record-schema.md
-.kimi-code/skills/karpathy-progress-memory/scripts/record-progress.sh
+.kimi-code/skills/karpathy-progress-memory/scripts/record-progress.mjs
 .kimi-code/skills/launchagent-supervisor/SKILL.md
 .kimi-code/skills/launchagent-supervisor/agents/openai.yaml
 .kimi-code/skills/legacy-app-embed/SKILL.md
@@ -404,8 +408,9 @@
 .kimi/skills/build-branded-docusaurus/assets/flat2.css
 .kimi/skills/build-branded-docusaurus/assets/index.jsx
 .kimi/skills/build-branded-docusaurus/assets/sanitize.mjs
-.kimi/skills/build-branded-docusaurus/scripts/scaffold.sh
-.kimi/skills/build-branded-docusaurus/scripts/verify.sh
+.kimi/skills/build-branded-docusaurus/scripts/build-site.mjs
+.kimi/skills/build-branded-docusaurus/scripts/scaffold.mjs
+.kimi/skills/build-branded-docusaurus/scripts/verify.mjs
 .kimi/skills/claude-hooks-reliability/SKILL.md
 .kimi/skills/claude-hooks-reliability/agents/openai.yaml
 .kimi/skills/client-rag/SKILL.md
@@ -436,7 +441,7 @@
 .kimi/skills/karpathy-progress-memory/SKILL.md
 .kimi/skills/karpathy-progress-memory/agents/openai.yaml
 .kimi/skills/karpathy-progress-memory/references/record-schema.md
-.kimi/skills/karpathy-progress-memory/scripts/record-progress.sh
+.kimi/skills/karpathy-progress-memory/scripts/record-progress.mjs
 .kimi/skills/launchagent-supervisor/SKILL.md
 .kimi/skills/launchagent-supervisor/agents/openai.yaml
 .kimi/skills/legacy-app-embed/SKILL.md
@@ -501,8 +506,9 @@
 .opencode/skills/build-branded-docusaurus/assets/flat2.css
 .opencode/skills/build-branded-docusaurus/assets/index.jsx
 .opencode/skills/build-branded-docusaurus/assets/sanitize.mjs
-.opencode/skills/build-branded-docusaurus/scripts/scaffold.sh
-.opencode/skills/build-branded-docusaurus/scripts/verify.sh
+.opencode/skills/build-branded-docusaurus/scripts/build-site.mjs
+.opencode/skills/build-branded-docusaurus/scripts/scaffold.mjs
+.opencode/skills/build-branded-docusaurus/scripts/verify.mjs
 .opencode/skills/claude-hooks-reliability/SKILL.md
 .opencode/skills/claude-hooks-reliability/agents/openai.yaml
 .opencode/skills/client-rag/SKILL.md
@@ -533,7 +539,7 @@
 .opencode/skills/karpathy-progress-memory/SKILL.md
 .opencode/skills/karpathy-progress-memory/agents/openai.yaml
 .opencode/skills/karpathy-progress-memory/references/record-schema.md
-.opencode/skills/karpathy-progress-memory/scripts/record-progress.sh
+.opencode/skills/karpathy-progress-memory/scripts/record-progress.mjs
 .opencode/skills/launchagent-supervisor/SKILL.md
 .opencode/skills/launchagent-supervisor/agents/openai.yaml
 .opencode/skills/legacy-app-embed/SKILL.md

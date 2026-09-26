@@ -1,0 +1,13 @@
+{
+  "name": "hma-maintainers-marketplace",
+  "owner": {
+    "name": "hma-maintainers"
+  },
+  "plugins": [
+    {
+      "name": "hma-maintainers",
+      "source": "./plugins/hma-maintainers",
+      "description": "Maintain portable hybrid architecture tooling and verifiably runnable greenfield, brownfield and continually upgradeable outputs"
+    }
+  ]
+}

@@ -44,6 +44,9 @@ pub struct ProjectManifest {
     pub generation_mode: GenerationMode,
     pub policy_overlay_path: String,
     pub unsupported_surfaces: Vec<String>,
+    /// Stable rendering identity, independent of the destination directory.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_name: Option<String>,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]

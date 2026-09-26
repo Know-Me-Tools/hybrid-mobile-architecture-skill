@@ -1,0 +1,102 @@
+{
+  "state": ".agent-team/state.json",
+  "team": {
+    "schemaVersion": 1,
+    "id": "hma-maintainers",
+    "outcome": "Maintain portable hybrid architecture tooling and verifiably runnable greenfield, brownfield and continually upgradeable outputs",
+    "scope": "project",
+    "harness": "codex",
+    "roles": [
+      {
+        "id": "implementer",
+        "description": "Maintain TypeScript 7 compiled Node runtime, hooks and portable installation",
+        "prompt": "Deliver: Maintain portable hybrid architecture tooling and verifiably runnable greenfield, brownfield and continually upgradeable outputs. Coordinate ownership before editing. Report evidence and remaining work. You are not alone in this repository. Preserve other contributors edits. Read AGENTS.md and docs/assessment/portable-tooling-plan.md. Inherit the configured native harness model; never claim verification without actual evidence.",
+        "skills": [
+          "agent-runtime-security",
+          "dependency-pin-discipline"
+        ],
+        "owns": [
+          "runtime/**",
+          "scripts/**",
+          "templates/project-skills/hooks/**"
+        ],
+        "inputs": [
+          "Task and acceptance criteria"
+        ],
+        "outputs": [
+          "Portable runtime and consumer integration evidence"
+        ],
+        "dependsOn": []
+      },
+      {
+        "id": "mobile-specialist",
+        "description": "Maintain native Rust builder, bridges, greenfield and brownfield migrations",
+        "prompt": "Resolve platform navigation, accessibility and device constraints. Outcome: Maintain portable hybrid architecture tooling and verifiably runnable greenfield, brownfield and continually upgradeable outputs. Stay within assigned scope and return concrete evidence. You are not alone in this repository. Preserve other contributors edits. Read AGENTS.md and docs/assessment/portable-tooling-plan.md. Inherit the configured native harness model; never claim verification without actual evidence.",
+        "skills": [
+          "hybrid-mobile-architecture",
+          "hybrid-runtime-verification"
+        ],
+        "owns": [
+          "tools/knowme-builder/**",
+          "assets/templates/profiles/**"
+        ],
+        "inputs": [
+          "Task context"
+        ],
+        "outputs": [
+          "Native tooling, runnable profiles and migration evidence"
+        ],
+        "dependsOn": []
+      },
+      {
+        "id": "documentation-specialist",
+        "description": "Coordinate research, specification, integration, release evidence and team ownership",
+        "prompt": "Keep operator and developer instructions consistent with the delivered behavior. Outcome: Maintain portable hybrid architecture tooling and verifiably runnable greenfield, brownfield and continually upgradeable outputs. Stay within assigned scope and return concrete evidence. You are not alone in this repository. Preserve other contributors edits. Read AGENTS.md and docs/assessment/portable-tooling-plan.md. Inherit the configured native harness model; never claim verification without actual evidence.",
+        "skills": [
+          "deep-research",
+          "agent-team-creator"
+        ],
+        "owns": [
+          "docs/assessment/assessment.json",
+          "docs/assessment/portable-tooling-plan.md",
+          "docs/assessment/portable-tooling-audit.md",
+          "docs/assessment/scaffold-audit.md",
+          "docs/portability/**",
+          "openspec/**",
+          ".github/workflows/**",
+          ".agent-team/**"
+        ],
+        "inputs": [
+          "Task context"
+        ],
+        "outputs": [
+          "Updated documentation"
+        ],
+        "dependsOn": []
+      },
+      {
+        "id": "reviewer",
+        "description": "Independently verify acceptance criteria and code quality.",
+        "prompt": "Inspect the delivered diff and actual verification evidence. Report concrete defects; do not rewrite implementation while reviewing. You are not alone in this repository. Preserve other contributors edits. Read AGENTS.md and docs/assessment/portable-tooling-plan.md. Inherit the configured native harness model; never claim verification without actual evidence. Review only in fresh context using the adversarial-review mandate. Record model/isolation limitations. Own findings only.",
+        "skills": [
+          "adversarial-review"
+        ],
+        "owns": [
+          "docs/assessment/review/**"
+        ],
+        "inputs": [
+          "Implementation diff",
+          "Verification evidence"
+        ],
+        "outputs": [
+          "Review findings"
+        ],
+        "dependsOn": [
+          "implementer",
+          "mobile-specialist",
+          "documentation-specialist"
+        ]
+      }
+    ]
+  }
+}

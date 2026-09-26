@@ -10,7 +10,7 @@ Proactive refinement happens when an author reviews a skill they just wrote.
 This is the reactive counterpart: the same refinement algorithm, triggered by a
 failure that already happened in production.
 
-Run with `scripts/refiner-loop.sh --skill <name>`.
+Run with `scripts/refiner-loop.mjs --skill <name>`.
 
 ## The loop
 
@@ -73,32 +73,30 @@ means triage under-scoped the problem; go back rather than proceeding.
 Run the gates, then re-execute the failure if a reproduction was recorded:
 
 ```bash
-refiner-loop.sh --verify TICKET
+node scripts/refiner-loop.mjs --verify TICKET
 ```
 
 Verify runs four gates — `check-skill-contracts.mjs`,
 `generate-skill-metadata.mjs`, `generate-skill-evals.mjs`, and
-`sync-harness-skills.sh --check` — then reports whether skill/eval changes are
+`sync-harness-skills.mjs --check` — then reports whether skill/eval changes are
 present (informational, **not** a gate: both outcomes pass), then the replay.
 
-**Replay.** A ticket opened with `--replay '<command>'` records a command that
+**Replay.** A ticket opened with `--replay-argv '["node","path/to/regression.mjs"]'` records an argument array that
 *reproduced* the failure. After a real fix that command must **succeed**:
 
 - exit 0 → the failure no longer reproduces → the ticket verifies
 - non-zero → the failure is still there → Verify fails and the ticket returns
   to `approved`, no matter how green the gates are
 
-> **The replay string is executed as shell.** Verify runs it with `eval` in the
-> repo root, so a ticket file under `.prometheus/refiner/` is a **trusted
-> input** — anyone who can write one can run code on the next `--verify`. That
-> directory is gitignored scratch. Do not `--verify` a ticket you did not create
-> or read.
+The replay runs directly in the project root, without shell parsing. A ticket
+still requests executable code, so inspect its command and arguments before
+verification. Old tickets containing shell replay strings need a reviewed
+conversion to an argument array; the tool refuses to evaluate them.
 
-Replay is optional, because much evidence is a pasted transcript with nothing
-runnable. When no command was recorded, Verify prints `replay: NOT RECORDED`
-and the ticket keeps `replayed: false`. Read that literally: the gates passed
-and **nobody re-executed the reported failure**. Prefer opening tickets with a
-`--replay` command whenever the evidence can be reduced to one.
+A transcript-only ticket may be recorded and triaged, but cannot become
+verified or shipped without a runnable regression. Missing replay returns a
+nonzero outcome and retains an unverified ticket. Metadata gates alone do not
+prove the reported failure is fixed.
 
 If the same fix fails verification twice, stop and report the discrepancy
 rather than trying a third variation.
@@ -110,7 +108,7 @@ rather than trying a third variation.
 > a hand-added line is erased on the next regeneration. The case shape
 > (`{prompt, expectedSkills}`) asserts skill *activation*, which most refiner
 > tickets are not about, and no runner executes cases at all —
-> `check-skill-contracts.mjs` only counts them. `--replay` is the regression
+> `check-skill-contracts.mjs` only counts them. `--replay-argv` is the regression
 > guard this loop actually has.
 
 ## Stage 5 — Ship

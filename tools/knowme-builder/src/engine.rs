@@ -37,7 +37,14 @@ pub fn execute(cli: Cli) -> Result<()> {
         Command::Manifest(args) => manage_manifest(args),
         Command::Completions(args) => return completions(args),
     }?;
-    print_result(&result, json)
+    print_result(&result, json)?;
+    if !result.ok {
+        bail!(
+            "{} did not complete; inspect conflicts and diagnostics",
+            result.operation
+        );
+    }
+    Ok(())
 }
 
 fn add_capability(args: AddArgs) -> Result<CommandResult> {
@@ -46,6 +53,7 @@ fn add_capability(args: AddArgs) -> Result<CommandResult> {
         &fs::read_to_string(destination.join(".knowme-builder/project.toml"))
             .context("project is not adopted; run `knowme-builder adopt --check` first")?,
     )?;
+    validate_project_state(&project)?;
     let kind = args.kind.as_str();
     let name = args.name.unwrap_or_else(|| kind.to_owned());
     let safe_name = slug(&name);
@@ -245,6 +253,10 @@ fn doctor(args: DoctorArgs) -> Result<CommandResult> {
     let destination = absolute_path(&args.path)?;
     let mut result = CommandResult::new("doctor");
     result.path = Some(destination.display().to_string());
+    crate::native::inspect(&destination, &args.target, &mut result);
+    if args.native_only {
+        return Ok(result);
+    }
     let manifest = bundle::manifest()?;
     let prometheus_contract = bundle::prometheus_contract()?;
     let _uar = bundle::uar_contract()?;
@@ -588,111 +600,263 @@ fn adopt_project(args: AdoptArgs) -> Result<CommandResult> {
     result.path = Some(destination.display().to_string());
     result.profile = Some(args.profile.as_str().to_owned());
 
+    let existing_project = destination.join(".knowme-builder/project.toml");
+    ensure_no_symlinks(&destination, Path::new(".knowme-builder/project.toml"))?;
+    if existing_project.exists() {
+        let existing: ProjectManifest = toml::from_str(&fs::read_to_string(&existing_project)?)?;
+        validate_project_state(&existing)?;
+        ensure_no_symlinks(
+            &destination,
+            Path::new(".knowme-builder/generated.lock.json"),
+        )?;
+        let existing_lock: GeneratedLock = serde_json::from_slice(
+            &fs::read(destination.join(".knowme-builder/generated.lock.json"))
+                .context("incomplete adoption state: generated lock is missing")?,
+        )?;
+        if existing_lock.schema_version != 1
+            || existing_lock.builder_version != existing.builder_version
+        {
+            bail!("unsupported or inconsistent adoption lock; explicit migration required");
+        }
+        if existing.profile.as_str() != args.profile.as_str() {
+            bail!("changing an adopted profile requires an explicit migration");
+        }
+        let proposed_skills = skills_lock_bytes(&manifest.skills)?;
+        let trailing_controls = [
+            (
+                Path::new(&existing.policy_overlay_path),
+                b"# Project-local policy overlay.\n# Consumer-specific roles, tenants, and release gates belong here.\n".as_slice(),
+            ),
+            (
+                Path::new(".knowme-builder/activation-manifest.json"),
+                bundle::activation_manifest(),
+            ),
+            (Path::new("skills-lock.json"), proposed_skills.as_slice()),
+        ];
+        let mut missing = Vec::new();
+        // Validate the entire recovery plan before creating any missing file.
+        // Existing policy and skill-lock contents remain owned by the application.
+        for (relative, bytes) in trailing_controls {
+            ensure_no_symlinks(&destination, relative)?;
+            let path = destination.join(relative);
+            if !path.exists() {
+                result.actions.push(format!(
+                    "restore missing control file {}",
+                    relative.display()
+                ));
+                missing.push((path, bytes));
+            } else if !path.is_file() {
+                bail!(
+                    "adoption control path is not a file: {}",
+                    relative.display()
+                );
+            }
+        }
+        if !missing.is_empty() {
+            if args.check {
+                result.ok = false;
+                result.warnings.push(
+                    "incomplete adoption state; use adopt --apply to restore missing control files"
+                        .to_owned(),
+                );
+            } else {
+                for (path, bytes) in missing {
+                    atomic_write(&path, bytes)?;
+                    result.changed = true;
+                }
+            }
+            return Ok(result);
+        }
+        result.actions.push(
+            "already adopted; use audit to inspect surfaces and upgrade for managed changes"
+                .to_owned(),
+        );
+        return Ok(result);
+    }
+    let (enabled_surfaces, unsupported_surfaces): (Vec<_>, Vec<_>) = profile
+        .surfaces
+        .iter()
+        .cloned()
+        .partition(|surface| surface_present(&destination, surface));
+    result.warnings.push("adoption records detected manifests only; build, runtime and architecture remain unverified".to_owned());
+    for surface in &unsupported_surfaces {
+        result
+            .warnings
+            .push(format!("missing or unmapped surface: {surface}"));
+    }
     let project = ProjectManifest {
         schema_version: 1,
         profile: args.profile,
         builder_version: BUILDER_VERSION.to_owned(),
         required_prometheus_contract: PROMETHEUS_CONTRACT.to_owned(),
         uar_mode: profile.uar_mode.clone(),
-        enabled_surfaces: profile.surfaces.clone(),
-        generation_mode: crate::cli::GenerationMode::Runnable,
+        enabled_surfaces,
+        generation_mode: crate::cli::GenerationMode::Skeleton,
         policy_overlay_path: ".knowme-builder/policy-overlay.toml".to_owned(),
-        unsupported_surfaces: Vec::new(),
+        unsupported_surfaces,
+        app_name: None,
     };
     let state_dir = destination.join(".knowme-builder");
     let project_bytes = toml::to_string_pretty(&project)?;
-    plan_control_file(
-        &state_dir.join("project.toml"),
-        project_bytes.as_bytes(),
-        args.apply,
-        &mut result,
-    )?;
     let lock = GeneratedLock {
         schema_version: 1,
         builder_version: BUILDER_VERSION.to_owned(),
         files: Vec::new(),
     };
     let lock_bytes = format!("{}\n", serde_json::to_string_pretty(&lock)?);
-    plan_control_file(
-        &state_dir.join("generated.lock.json"),
-        lock_bytes.as_bytes(),
-        args.apply,
-        &mut result,
-    )?;
-    let policy = b"# Project-local policy overlay.\n# Consumer-specific roles, tenants, and release gates belong here.\n";
-    plan_control_file(
-        &state_dir.join("policy-overlay.toml"),
-        policy,
-        args.apply,
-        &mut result,
-    )?;
-    plan_control_file(
-        &state_dir.join("activation-manifest.json"),
-        bundle::activation_manifest(),
-        args.apply,
-        &mut result,
-    )?;
-
+    let controls = [
+        (state_dir.join("project.toml"), project_bytes.as_bytes()),
+        (state_dir.join("generated.lock.json"), lock_bytes.as_bytes()),
+        (state_dir.join("policy-overlay.toml"), b"# Project-local policy overlay.\n# Consumer-specific roles, tenants, and release gates belong here.\n".as_slice()),
+        (state_dir.join("activation-manifest.json"), bundle::activation_manifest()),
+    ];
+    for (path, bytes) in &controls {
+        ensure_no_symlinks(&destination, path.strip_prefix(&destination)?)?;
+        plan_control_file(path, bytes, false, &mut result)?;
+    }
+    ensure_no_symlinks(&destination, Path::new("skills-lock.json"))?;
     let proposed_skills = skills_lock_bytes(&manifest.skills)?;
     let skills_lock_path = destination.join("skills-lock.json");
-    if skills_lock_path.exists() {
-        if fs::read(&skills_lock_path)? != proposed_skills {
-            result
-                .warnings
-                .push("existing skills-lock.json is user-owned and was not overwritten".to_owned());
-            result.conflicts.push("skills-lock.json".to_owned());
-            if args.apply {
-                let proposed = state_dir.join("conflicts/skills-lock.json.proposed");
-                atomic_write(&proposed, &proposed_skills)?;
+    if skills_lock_path.exists() && fs::read(&skills_lock_path)? != proposed_skills {
+        result.conflicts.push("skills-lock.json".to_owned());
+    }
+    if !result.conflicts.is_empty() {
+        result.ok = false;
+        return Ok(result);
+    }
+    if args.apply {
+        for (path, bytes) in controls {
+            if !path.exists() {
+                atomic_write(&path, bytes)?;
                 result.changed = true;
             }
         }
-    } else {
-        result.actions.push("create skills-lock.json".to_owned());
-        if args.apply {
-            atomic_write(&skills_lock_path, &proposed_skills)?;
-            result.changed = true;
+    }
+    plan_control_file(&skills_lock_path, &proposed_skills, args.apply, &mut result)?;
+    Ok(result)
+}
+
+fn surface_present(root: &Path, surface: &str) -> bool {
+    let manifest = match surface {
+        "flutter-mobile" => "mobile/pubspec.yaml",
+        "tauri-desktop" => "desktop/src-tauri/Cargo.toml",
+        "rust-core" => "rust/Cargo.toml",
+        "react-web" => "web/package.json",
+        "axum-bff" => "server/Cargo.toml",
+        _ => return false,
+    };
+    root.join(manifest).is_file()
+}
+
+fn validate_project_state(project: &ProjectManifest) -> Result<()> {
+    if project.schema_version != 1 {
+        bail!(
+            "unsupported project schema {}; an explicit migration is required",
+            project.schema_version
+        );
+    }
+    if project.builder_version != BUILDER_VERSION {
+        bail!(
+            "unsupported Builder version {}; no migration to {} is registered",
+            project.builder_version,
+            BUILDER_VERSION
+        );
+    }
+    Ok(())
+}
+
+pub(crate) fn ensure_no_symlinks(root: &Path, relative: &Path) -> Result<()> {
+    bundle::validate_relative_path(relative)?;
+    let mut path = root.to_path_buf();
+    for component in relative.components() {
+        path.push(component);
+        match fs::symlink_metadata(&path) {
+            Ok(metadata) if metadata.is_symlink() => {
+                bail!("managed path contains a symbolic link: {}", path.display())
+            }
+            Ok(_) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(error) => return Err(error.into()),
         }
     }
-    result.ok = result.conflicts.is_empty();
-    Ok(result)
+    Ok(())
 }
 
 fn upgrade_project(args: UpgradeArgs) -> Result<CommandResult> {
     let destination = absolute_path(&args.path)?;
     let state_dir = destination.join(".knowme-builder");
+    if args.rollback {
+        return crate::upgrade_journal::rollback(&destination);
+    }
+    crate::upgrade_journal::ensure_ready(&destination)?;
     let project_path = state_dir.join("project.toml");
     let lock_path = state_dir.join("generated.lock.json");
-    let project: ProjectManifest = toml::from_str(
-        &fs::read_to_string(&project_path)
-            .with_context(|| format!("missing adoption state {}", project_path.display()))?,
-    )
-    .context("invalid .knowme-builder/project.toml")?;
-    let mut lock: GeneratedLock = serde_json::from_str(
-        &fs::read_to_string(&lock_path)
-            .with_context(|| format!("missing generated lock {}", lock_path.display()))?,
-    )
-    .context("invalid .knowme-builder/generated.lock.json")?;
+    let project_before = fs::read(&project_path)
+        .with_context(|| format!("missing adoption state {}", project_path.display()))?;
+    let lock_before = fs::read(&lock_path)
+        .with_context(|| format!("missing generated lock {}", lock_path.display()))?;
+    let mut project: ProjectManifest = toml::from_str(std::str::from_utf8(&project_before)?)
+        .context("invalid .knowme-builder/project.toml")?;
+    let mut lock: GeneratedLock = serde_json::from_slice(&lock_before)
+        .context("invalid .knowme-builder/generated.lock.json")?;
 
+    validate_project_state(&project)?;
+    if lock.schema_version != 1 || lock.builder_version != project.builder_version {
+        bail!(
+            "unsupported or inconsistent generated lock schema/version; explicit migration required"
+        );
+    }
+    ensure_no_symlinks(&destination, Path::new(".knowme-builder"))?;
     let mut result = CommandResult::new("upgrade");
     result.path = Some(destination.display().to_string());
     result.profile = Some(project.profile.as_str().to_owned());
-    let app_name = destination
-        .file_name()
-        .and_then(|name| name.to_str())
-        .context("project path must have a UTF-8 name")?;
+    if lock.files.is_empty() {
+        result.warnings.push("no generated application files are owned; brownfield integration requires an explicit migration".to_owned());
+        return Ok(result);
+    }
+    if let (Some(saved), Some(requested)) = (&project.app_name, &args.app_name)
+        && saved != requested
+    {
+        bail!("--app-name conflicts with persisted rendering identity");
+    }
+    let app_name = project.app_name.clone().or(args.app_name)
+        .context("legacy state has no rendering identity; supply --app-name with the original generation name")?;
+    if slug(&app_name).is_empty() {
+        bail!("application name must contain an alphanumeric character");
+    }
+    let mut writes: Vec<crate::upgrade_journal::PlannedWrite> = Vec::new();
+    let mut proposals: Vec<(PathBuf, Vec<u8>)> = Vec::new();
     let render_context = RenderContext {
-        app_name,
+        app_name: &app_name,
         profile: project.profile.as_str(),
         mode: project.generation_mode.as_str(),
     };
-
+    let mut managed_paths = std::collections::BTreeSet::new();
     for file in &mut lock.files {
         if !matches!(file.ownership, Ownership::Builder) {
             continue;
         }
-        let relative = Path::new(&file.path);
-        bundle::validate_relative_path(relative)?;
+        let portable_path = file.path.replace('\\', "/");
+        let relative = Path::new(&portable_path);
+        ensure_no_symlinks(&destination, relative)?;
+        let canonical = relative
+            .components()
+            .filter_map(|part| match part {
+                std::path::Component::Normal(value) => Some(value.to_string_lossy()),
+                _ => None,
+            })
+            .collect::<Vec<_>>()
+            .join("/")
+            .to_lowercase();
+        if canonical == ".knowme-builder"
+            || canonical.starts_with(".knowme-builder/")
+            || !managed_paths.insert(canonical)
+        {
+            bail!(
+                "duplicate or reserved managed application path: {}",
+                file.path
+            );
+        }
         let target = destination.join(relative);
         let current = if target.exists() {
             Some(fs::read(&target)?)
@@ -703,7 +867,7 @@ fn upgrade_project(args: UpgradeArgs) -> Result<CommandResult> {
             .as_ref()
             .is_none_or(|bytes| digest(bytes) == file.last_installed_digest);
         let template = TEMPLATES
-            .get_file(&file.template_id)
+            .get_file(file.template_id.replace('\\', "/"))
             .with_context(|| format!("missing template {}", file.template_id))?;
         let source = template.contents();
         let proposed = match std::str::from_utf8(source) {
@@ -723,13 +887,10 @@ fn upgrade_project(args: UpgradeArgs) -> Result<CommandResult> {
 
         if unmodified {
             result.actions.push(format!("upgrade {}", file.path));
-            if args.apply {
-                atomic_write(&target, &proposed)?;
-                file.source_digest = digest(source);
-                file.last_installed_digest = proposed_digest;
-                file.version = BUILDER_VERSION.to_owned();
-                result.changed = true;
-            }
+            writes.push((target, current, proposed));
+            file.source_digest = digest(source);
+            file.last_installed_digest = proposed_digest;
+            file.version = BUILDER_VERSION.to_owned();
         } else {
             result.conflicts.push(file.path.clone());
             if args.apply {
@@ -743,20 +904,45 @@ fn upgrade_project(args: UpgradeArgs) -> Result<CommandResult> {
                             .map(|value| format!("{}.", value.to_string_lossy()))
                             .unwrap_or_default()
                     ));
-                atomic_write(&sidecar, &proposed)?;
-                result.changed = true;
+                ensure_no_symlinks(&destination, sidecar.strip_prefix(&destination)?)?;
+                proposals.push((sidecar, proposed));
             }
         }
     }
 
+    result.ok = result.conflicts.is_empty();
+    if !result.ok {
+        for (path, bytes) in proposals {
+            atomic_write(&path, &bytes)?;
+            result.changed = true;
+        }
+        result
+            .warnings
+            .push("conflicts prevented all managed application and version changes".to_owned());
+        return Ok(result);
+    }
     if args.apply {
+        project.app_name = Some(app_name);
         lock.builder_version = BUILDER_VERSION.to_owned();
-        atomic_write(
-            &lock_path,
-            format!("{}\n", serde_json::to_string_pretty(&lock)?).as_bytes(),
+        let lock_bytes = format!("{}\n", serde_json::to_string_pretty(&lock)?);
+        let project_bytes = toml::to_string_pretty(&project)?;
+        for (path, before, bytes) in [
+            (&lock_path, &lock_before, lock_bytes.as_bytes()),
+            (&project_path, &project_before, project_bytes.as_bytes()),
+        ] {
+            if before != bytes {
+                writes.push((path.clone(), Some(before.clone()), bytes.to_vec()));
+            }
+        }
+        result.changed = crate::upgrade_journal::apply(
+            &destination,
+            writes,
+            &[
+                (lock_path.as_path(), lock_before.as_slice()),
+                (project_path.as_path(), project_before.as_slice()),
+            ],
         )?;
     }
-    result.ok = result.conflicts.is_empty();
     Ok(result)
 }
 
@@ -876,6 +1062,7 @@ fn create_project(args: NewArgs) -> Result<CommandResult> {
         enabled_surfaces: profile.surfaces.clone(),
         generation_mode: args.mode,
         policy_overlay_path: ".knowme-builder/policy-overlay.toml".to_owned(),
+        app_name: Some(app_name.to_owned()),
         unsupported_surfaces: if matches!(args.mode, crate::cli::GenerationMode::Skeleton)
             || !profile.runnable_vertical_slice
         {
@@ -993,12 +1180,12 @@ fn render_dir(
                 output_file.write_all(&rendered)?;
                 output_file.sync_all()?;
                 lock.files.push(GeneratedFile {
-                    path: output_relative.to_string_lossy().into_owned(),
+                    path: output_relative.to_string_lossy().replace('\\', "/"),
                     template_id: format!(
                         "profiles/{}/{}/{}",
                         context.profile,
                         context.mode,
-                        relative.display()
+                        relative.to_string_lossy().replace('\\', "/")
                     ),
                     source_digest: digest(source),
                     last_installed_digest: digest(&rendered),
@@ -1167,7 +1354,7 @@ fn validate_generated_project(root: &Path) -> Result<()> {
     Ok(())
 }
 
-fn atomic_write(path: &Path, content: &[u8]) -> Result<()> {
+pub(crate) fn atomic_write(path: &Path, content: &[u8]) -> Result<()> {
     let parent = path.parent().context("output path has no parent")?;
     fs::create_dir_all(parent)?;
     let mut temp = TempBuilder::new().prefix(".write-").tempfile_in(parent)?;

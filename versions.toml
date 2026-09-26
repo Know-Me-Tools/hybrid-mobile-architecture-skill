@@ -4,7 +4,7 @@
 #
 # Rules:
 #   - Versions live HERE and only here. Authority docs must state these same
-#     values; `bash scripts/audit.sh doc-consistency` fails CI on drift.
+#     values; `node scripts/audit.mjs doc-consistency` fails CI on drift.
 #   - When bumping a version: update this file first, then every authority doc,
 #     then re-run the audit. (A generated-docs pipeline can replace the manual
 #     step later; the audit gate is what prevents rot either way.)
@@ -47,7 +47,7 @@ openspec = "1.10.0"             # @fission-ai/openspec — never the squatted ba
                                 # follows the tool. NOTE: 1.10.0 migrates .kimi -> .kimi-code
                                 # and strips `metadata.internal: true` on every run, because
                                 # `internal` is a repo-local invariant the CLI has no notion of.
-                                # Always run scripts/normalize-vendored-skills.sh afterwards.
+                                # Always run scripts/normalize-vendored-skills.mjs afterwards.
 
 [android_build]
 # Android toolchain moves faster than the Flutter pin; these are the versions

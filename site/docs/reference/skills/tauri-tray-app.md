@@ -44,7 +44,7 @@ Do not compute tray state at the call site, let the dashboard close quit the app
 
 A tray app lives in the menu bar, supervises services, and opens a dashboard on
 demand. It does not appear in the app switcher and closing its window does not
-quit it. Scaffold with `scripts/scaffold-tauri-tray.sh <project-root>`.
+quit it. Scaffold with `scripts/scaffold-tauri-tray.mjs <project-root>`.
 
 ## The three surfaces
 

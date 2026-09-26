@@ -1,0 +1,31 @@
+{
+  "mode": "artifact",
+  "target": "plan",
+  "verdict": "PASS WITH NOTES",
+  "isolation_mode": "harness-native",
+  "producer_model": "unknown",
+  "judge_model": "session-default",
+  "cross_model_check": "unverified-producer-unknown",
+  "cross_model_attempt": {
+    "model": "glm-5.3:cloud",
+    "outcome": "unavailable-account-credits"
+  },
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": "portable-tooling-plan.md",
+      "claim": "Compiler installation depends on a disputed TypeScript version without resolution.",
+      "evidence": "Authority documents contradict the pin while step 2 pins 7.0.2.",
+      "suggested_fix": "Verify published compiler package/version before installation.",
+      "resolution": "npm view typescript@7.0.2 version bin returned 7.0.2 with tsc=bin/tsc; plan records registry evidence."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2,
+    "status": "passed",
+    "score": 0.0803571417927742,
+    "strictness": "strict"
+  }
+}

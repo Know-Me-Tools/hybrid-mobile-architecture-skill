@@ -1,0 +1,5 @@
+{
+  "state": ".agent-team/state.json",
+  "target": "codex",
+  "out": ".agent-team/exports/codex"
+}

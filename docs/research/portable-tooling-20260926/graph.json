@@ -1,0 +1,1430 @@
+{
+  "topics": [
+    {
+      "id": "topic-001",
+      "name": "Windows Arm64 Flutter: deployment target vs host SDK",
+      "claims": [
+        "claim-0ac137be07012b6c",
+        "claim-e358e77ef513deb4"
+      ]
+    },
+    {
+      "id": "topic-002",
+      "name": "Rust Tier 1 aarch64-pc-windows-msvc vs dependency toolchain needs",
+      "claims": [
+        "claim-43dc45216c070515",
+        "claim-a6aed02fc549d8f0"
+      ]
+    },
+    {
+      "id": "topic-003",
+      "name": "Meaning of 'Tier 2' across Node.js and Rust",
+      "claims": [
+        "claim-dea93afc635151d8",
+        "claim-1d872d8e2b0e9f0b"
+      ]
+    },
+    {
+      "id": "topic-004",
+      "name": "Invoking .cmd/.bat from Node without a shell",
+      "claims": [
+        "claim-6c82748b44980d97",
+        "claim-db9de6ae1ae89018"
+      ]
+    },
+    {
+      "id": "topic-005",
+      "name": "Minimum Windows version for Tauri 2 apps",
+      "claims": [
+        "claim-3acc04346fa6fca8",
+        "claim-7bfb2199ebb48a68"
+      ]
+    },
+    {
+      "id": "topic-006",
+      "name": "flutter_rust_bridge Windows support vs Windows ARM64 execution evidence",
+      "claims": [
+        "claim-b6a749a455755411",
+        "claim-e358e77ef513deb4"
+      ]
+    },
+    {
+      "id": "topic-007",
+      "name": "src-001",
+      "claims": [
+        "claim-f0ab062add1f9c0b",
+        "claim-cf22f98c8c3c8b78",
+        "claim-07d24b9b6c0d6841",
+        "claim-7d69c7f557b02dcc",
+        "claim-486024c5425af094",
+        "claim-8a6477f93bd7d81b",
+        "claim-fd0e6e1c35e9d997"
+      ]
+    },
+    {
+      "id": "topic-008",
+      "name": "src-002",
+      "claims": [
+        "claim-4526ec31d31266a6"
+      ]
+    },
+    {
+      "id": "topic-009",
+      "name": "src-003",
+      "claims": [
+        "claim-3defbc5b3b072ffa"
+      ]
+    },
+    {
+      "id": "topic-010",
+      "name": "src-004",
+      "claims": [
+        "claim-f4f7496694f14be3",
+        "claim-744c8f0a17b45b0b",
+        "claim-50703d6173137335",
+        "claim-f4dab3c6d02c350b",
+        "claim-99c05aa893bfd8c5"
+      ]
+    },
+    {
+      "id": "topic-011",
+      "name": "src-005",
+      "claims": [
+        "claim-568a3c8f884b24fb",
+        "claim-3a4e02c0d5a997b6"
+      ]
+    },
+    {
+      "id": "topic-012",
+      "name": "src-007",
+      "claims": [
+        "claim-cfa5643050d8dac8"
+      ]
+    },
+    {
+      "id": "topic-013",
+      "name": "src-008",
+      "claims": [
+        "claim-b7e356ef286321c2",
+        "claim-0d543e7a6ac8f822"
+      ]
+    },
+    {
+      "id": "topic-014",
+      "name": "src-009",
+      "claims": [
+        "claim-8a06541ab45d8307",
+        "claim-dfe8df1e465b11f3",
+        "claim-b18485b2ff3d3d5b"
+      ]
+    },
+    {
+      "id": "topic-015",
+      "name": "src-010",
+      "claims": [
+        "claim-e63fc9e9480af5e7"
+      ]
+    },
+    {
+      "id": "topic-016",
+      "name": "src-011",
+      "claims": [
+        "claim-b715cf37653c7dcf",
+        "claim-b8fbfc80ddf9049f"
+      ]
+    },
+    {
+      "id": "topic-017",
+      "name": "src-012",
+      "claims": [
+        "claim-a92563846bac715d"
+      ]
+    },
+    {
+      "id": "topic-018",
+      "name": "src-013",
+      "claims": [
+        "claim-2921cb185791f17b"
+      ]
+    },
+    {
+      "id": "topic-019",
+      "name": "src-014",
+      "claims": [
+        "claim-dbf1c20481595758"
+      ]
+    },
+    {
+      "id": "topic-020",
+      "name": "src-017",
+      "claims": [
+        "claim-49d6e10fe5b28049"
+      ]
+    },
+    {
+      "id": "topic-021",
+      "name": "src-018",
+      "claims": [
+        "claim-e2392df0cbe902b5"
+      ]
+    },
+    {
+      "id": "topic-022",
+      "name": "src-019",
+      "claims": [
+        "claim-803ab8f0e3ebe71b",
+        "claim-04f3b08e624a483e"
+      ]
+    },
+    {
+      "id": "topic-023",
+      "name": "src-020",
+      "claims": [
+        "claim-7c5c96e7d965b972"
+      ]
+    },
+    {
+      "id": "topic-024",
+      "name": "src-021",
+      "claims": [
+        "claim-e40341143e72cd7f"
+      ]
+    },
+    {
+      "id": "topic-025",
+      "name": "src-022",
+      "claims": [
+        "claim-4fb6742df653a77b"
+      ]
+    },
+    {
+      "id": "topic-026",
+      "name": "src-023",
+      "claims": [
+        "claim-506f21f395d1d8f6",
+        "claim-88f9c0c362c3a0d1",
+        "claim-1017ddaf0f5809b4"
+      ]
+    },
+    {
+      "id": "topic-027",
+      "name": "src-024",
+      "claims": [
+        "claim-88b255d05c32a9a7",
+        "claim-9670e88b32f77fbd"
+      ]
+    },
+    {
+      "id": "topic-028",
+      "name": "src-025",
+      "claims": [
+        "claim-94ec377714448bda",
+        "claim-d42b7a1b9ff36786",
+        "claim-03fd02f06536a0f0"
+      ]
+    },
+    {
+      "id": "topic-029",
+      "name": "src-026",
+      "claims": [
+        "claim-5a8b2055b58f88de",
+        "claim-60c992ae39ee62b8"
+      ]
+    },
+    {
+      "id": "topic-030",
+      "name": "src-027",
+      "claims": [
+        "claim-6815c443eda8e99d",
+        "claim-1dd84cdc4fb7c634",
+        "claim-723dba2f965fa1f8"
+      ]
+    },
+    {
+      "id": "topic-031",
+      "name": "src-028",
+      "claims": [
+        "claim-084a838187411d98",
+        "claim-ca615bf4f6915cb4",
+        "claim-f89724f76e939a28"
+      ]
+    },
+    {
+      "id": "topic-032",
+      "name": "src-029",
+      "claims": [
+        "claim-170392ed0a294e71"
+      ]
+    },
+    {
+      "id": "topic-033",
+      "name": "src-030",
+      "claims": [
+        "claim-09220500e5a1bd81",
+        "claim-f63fef0cc1ec4893"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-f0ab062add1f9c0b",
+      "text": "TypeScript 7.0 is generally available as a native port of the TypeScript compiler written in Go.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.75,
+      "sources": [
+        "src-001"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"The mission was a native port of TypeScript built in Go\",\"chunk_ids\":[\"devblogs.microsoft.com-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-cf22f98c8c3c8b78",
+      "text": "TypeScript 7.0 does not ship with a programmatic compiler API; a new, different API is expected in TypeScript 7.1.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.75,
+      "sources": [
+        "src-001"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"While TypeScript 7.0 is here, it does not ship with an API. We expect TypeScript 7.1 to ship with a new (and different) API\",\"chunk_ids\":[\"devblogs.microsoft.com-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-07d24b9b6c0d6841",
+      "text": "Tools needing programmatic compiler access (e.g. typescript-eslint) must run TypeScript 6.0 side-by-side via the @typescript/typescript6 package, which provides a tsc6 executable.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.75,
+      "sources": [
+        "src-001"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"This package provides an executable named `tsc6`\",\"chunk_ids\":[\"devblogs.microsoft.com-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-7d69c7f557b02dcc",
+      "text": "The TypeScript 7.0 announcement shows a side-by-side install aliasing @typescript/native to typescript@^7.0.2.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.75,
+      "sources": [
+        "src-001"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"\\\"@typescript/native\\\": \\\"npm:typescript@^7.0.2\\\"\",\"chunk_ids\":[\"devblogs.microsoft.com-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-486024c5425af094",
+      "text": "TypeScript 7.0 turns TypeScript 6.0 deprecations into hard errors, including removal of moduleResolution node/node10 in favor of nodenext or bundler.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.75,
+      "sources": [
+        "src-001"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"`moduleResolution: node/node10` are no longer supported, with `nodenext` and `bundler` being recommended instead\",\"chunk_ids\":[\"devblogs.microsoft.com-2\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-8a6477f93bd7d81b",
+      "text": "TypeScript 7.0 no longer supports target es5 or module amd/umd/systemjs/none.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.75,
+      "sources": [
+        "src-001"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"`target: es5` is no longer supported\",\"chunk_ids\":[\"devblogs.microsoft.com-2\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-fd0e6e1c35e9d997",
+      "text": "TypeScript 7.0 performs parsing, type-checking, and emitting in parallel.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.75,
+      "sources": [
+        "src-001"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"TypeScript 7.0 now performs many steps in parallel, including parsing, type-checking, and emitting\",\"chunk_ids\":[\"devblogs.microsoft.com-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-4526ec31d31266a6",
+      "text": "Since TypeScript 5.7, --rewriteRelativeImportExtensions rewrites relative .ts/.tsx/.mts/.cts import specifiers to their JavaScript equivalents in output.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.72,
+      "sources": [
+        "src-002"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"which transforms relative module specifiers with `.ts`, `.tsx`, `.mts`, or `.cts` extensions to their JavaScript equivalents in output\",\"chunk_ids\":[\"www.typescriptlang.org-3\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-3defbc5b3b072ffa",
+      "text": ".mts/.mjs/.d.mts files are always treated as ES modules regardless of package.json type.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.73,
+      "sources": [
+        "src-003"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"`.mts`/`.mjs`/`.d.mts` files are always ES modules.\",\"chunk_ids\":[\"www.typescriptlang.org-8\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-f4f7496694f14be3",
+      "text": "Node.js type stripping is stable as of v25.2.0 and v24.12.0.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.47,
+      "sources": [
+        "src-004"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"v25.2.0, v24.12.0 | Type stripping is now stable.\",\"chunk_ids\":[\"nodejs.org-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-744c8f0a17b45b0b",
+      "text": "Node.js type stripping performs no type checking and executes only erasable TypeScript syntax.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.47,
+      "sources": [
+        "src-004"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Node.js will replace TypeScript syntax with whitespace, and no type checking is performed.\",\"chunk_ids\":[\"nodejs.org-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-50703d6173137335",
+      "text": "Node.js ignores tsconfig.json when stripping types, so tsconfig-dependent features such as paths are unsupported.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.47,
+      "sources": [
+        "src-004"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Node.js ignores `tsconfig.json` files and therefore features that depend on settings within `tsconfig.json`, such as paths\",\"chunk_ids\":[\"nodejs.org-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-f4dab3c6d02c350b",
+      "text": ".mts files run by Node.js are always executed as ES modules and file extensions are mandatory in imports.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.47,
+      "sources": [
+        "src-004"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\".mts` files will always be run as ES modules, similar to `.mjs` files.\",\"chunk_ids\":[\"nodejs.org-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-99c05aa893bfd8c5",
+      "text": "Node.js recommends tsconfig options module nodenext, rewriteRelativeImportExtensions, erasableSyntaxOnly and verbatimModuleSyntax for code run via type stripping.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.47,
+      "sources": [
+        "src-004"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"\\\"erasableSyntaxOnly\\\": true\",\"chunk_ids\":[\"nodejs.org-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-568a3c8f884b24fb",
+      "text": "On Windows, .bat and .cmd files cannot be launched with child_process.execFile() because they are not executable without a terminal.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.72,
+      "sources": [
+        "src-005"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\".bat` and `.cmd` files are not executable on their own without a terminal, and therefore cannot be launched using\",\"chunk_ids\":[\"nodejs.org-4\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-6c82748b44980d97",
+      "text": "Node.js documents invoking .bat/.cmd via spawn with the shell option as not recommended (DEP0190), offering exec or spawning cmd.exe with the script as argument instead.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.72,
+      "sources": [
+        "src-005"
+      ],
+      "contradicts": [
+        "claim-db9de6ae1ae89018"
+      ],
+      "evidence": "{\"quote\":\"with the `shell` option set (not recommended, see [DEP0190]\",\"chunk_ids\":[\"nodejs.org-4\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-3a4e02c0d5a997b6",
+      "text": "child_process.execFile() does not spawn a shell by default on Unix-type systems.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.72,
+      "sources": [
+        "src-005"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"can be\\nmore efficient because it does not spawn a shell by default\",\"chunk_ids\":[\"nodejs.org-4\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-db9de6ae1ae89018",
+      "text": "Since the CVE-2024-27980 fix, Node.js errors with EINVAL when a .bat or .cmd file is passed to spawn/spawnSync without the shell option.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.58,
+      "sources": [
+        "src-006"
+      ],
+      "contradicts": [
+        "claim-6c82748b44980d97"
+      ],
+      "evidence": "{\"quote\":\"Node.js will now error with `EINVAL` if a `.bat` or `.cmd` file is passed to `child_process.spawn` and `child_process.spawnSync` without the `shell` option set.\",\"chunk_ids\":[\"nodejs.org-20\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-cfa5643050d8dac8",
+      "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.92,
+      "sources": [
+        "src-007"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"| Windows | arm64 | >= Windows 10 | Tier 2 |\",\"chunk_ids\":[\"github.com-2\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-dea93afc635151d8",
+      "text": "Node.js Tier 2 platforms have full test coverage and test failures block releases, but binary releases may be delayed by infrastructure issues.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.92,
+      "sources": [
+        "src-007"
+      ],
+      "contradicts": [
+        "claim-1d872d8e2b0e9f0b"
+      ],
+      "evidence": "{\"quote\":\"Infrastructure issues may delay the release of binaries for these platforms.\",\"chunk_ids\":[\"github.com-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-b7e356ef286321c2",
+      "text": "The rustc book lists aarch64-pc-windows-msvc and x86_64-pc-windows-msvc among Tier 1 targets.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.84,
+      "sources": [
+        "src-008"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"| [`aarch64-pc-windows-msvc`](https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html) | ARM64 Windows MSVC |\",\"chunk_ids\":[\"doc.rust-lang.org-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-0d543e7a6ac8f822",
+      "text": "Tier 1 with host tools means rustc and cargo run natively on the target and are tested, allowing use as a development platform, not just a compilation target.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.84,
+      "sources": [
+        "src-008"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"This allows the target to be used as a development platform, not just a compilation target.\",\"chunk_ids\":[\"doc.rust-lang.org-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-43dc45216c070515",
+      "text": "aarch64-pc-windows-msvc, i686-pc-windows-msvc and x86_64-pc-windows-msvc are Tier 1 with host tools.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.52,
+      "sources": [
+        "src-009"
+      ],
+      "contradicts": [
+        "claim-a6aed02fc549d8f0"
+      ],
+      "evidence": "{\"quote\":\"- `aarch64-pc-windows-msvc`: Windows on ARM64.\",\"chunk_ids\":[\"doc.rust-lang.org-9\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-8a06541ab45d8307",
+      "text": "Architectural cross-compilation between Windows platforms is natively supported by the MSVC toolchain when appropriate VS Installer components are selected.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.52,
+      "sources": [
+        "src-009"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Architectural cross-compilation from one Windows host to a different Windows platform is natively supported by the MSVC toolchain provided the appropriate components are selected\",\"chunk_ids\":[\"doc.rust-lang.org-9\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-dfe8df1e465b11f3",
+      "text": "Cross-compilation from a non-Windows host to a *-windows-msvc target may be possible but is not supported.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.52,
+      "sources": [
+        "src-009"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Cross-compilation from a non-Windows host to a `*-windows-msvc` target _may_ be possible but is not supported.\",\"chunk_ids\":[\"doc.rust-lang.org-9\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-b18485b2ff3d3d5b",
+      "text": "The minimum supported Visual Studio for windows-msvc targets is 2017 but that is not actively tested in CI.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.52,
+      "sources": [
+        "src-009"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"The minimum supported Visual Studio version is 2017 but this support is not actively tested in CI.\",\"chunk_ids\":[\"doc.rust-lang.org-9\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-7bfb2199ebb48a68",
+      "text": "The Rust windows-msvc targets require Windows 10 or higher for client installs (Windows Server 2016+ for servers).",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.52,
+      "sources": [
+        "src-009"
+      ],
+      "contradicts": [
+        "claim-3acc04346fa6fca8"
+      ],
+      "evidence": "{\"quote\":\"Windows 10 or higher is required for client installs, Windows Server 2016 or higher is required for server installs.\",\"chunk_ids\":[\"doc.rust-lang.org-9\"],\"checked\":\"added in stage 06 review; quote re-read in fetched chunk 2026-09-26\"}"
+    },
+    {
+      "id": "claim-e63fc9e9480af5e7",
+      "text": "Rust 1.91.0 (2025-10-30) promoted aarch64-pc-windows-msvc to Tier 1.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.72,
+      "sources": [
+        "src-010"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Rust 1.91.0 promotes the `aarch64-pc-windows-msvc` target to Tier 1 support\",\"chunk_ids\":[\"blog.rust-lang.org-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-1d872d8e2b0e9f0b",
+      "text": "Rust Tier 2 targets are guaranteed to build but the test suite is not executed, so produced binaries might not work.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.72,
+      "sources": [
+        "src-010"
+      ],
+      "contradicts": [
+        "claim-dea93afc635151d8"
+      ],
+      "evidence": "{\"quote\":\"we don't execute the test suite on those platforms: the produced binaries\\nmight not work or might have bugs\",\"chunk_ids\":[\"blog.rust-lang.org-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-b715cf37653c7dcf",
+      "text": "rust-toolchain.toml can pin channel, components, targets and profile, and is suitable to check into source control.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.43,
+      "sources": [
+        "src-011"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"The `rust-toolchain.toml`/`rust-toolchain` files are suitable to check in to\",\"chunk_ids\":[\"rust-lang.github.io-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-b8fbfc80ddf9049f",
+      "text": "Toolchain selection precedence places rust-toolchain.toml below shorthand, environment and directory overrides.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.43,
+      "sources": [
+        "src-011"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"4. The [`rust-toolchain.toml`](https://rust-lang.github.io/rustup/overrides.html#the-toolchain-file) file.\",\"chunk_ids\":[\"rust-lang.github.io-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-a92563846bac715d",
+      "text": "cargo --locked fails when Cargo.lock is missing or would change, and is intended for deterministic CI builds.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.43,
+      "sources": [
+        "src-012"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"It may be used in environments where deterministic builds are desired, such as in CI pipelines.\",\"chunk_ids\":[\"doc.rust-lang.org-11\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-2921cb185791f17b",
+      "text": "The ring issue requesting that aarch64-pc-windows-msvc not require clang was closed as not planned on Feb 25, 2025.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.76,
+      "sources": [
+        "src-013"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"closed this as [not planned]\",\"chunk_ids\":[\"github.com-10\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-a6aed02fc549d8f0",
+      "text": "ring's BUILDING.md requires both the VS 2022 C++ ARM64 build tools and clang components for aarch64-pc-windows-msvc.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.67,
+      "sources": [
+        "src-014"
+      ],
+      "contradicts": [
+        "claim-43dc45216c070515"
+      ],
+      "evidence": "{\"quote\":\"For Windows ARM64 targets (aarch64-pc-windows-msvc), the Visual Studio Build Tools “VS 2022 C++ ARM64 build tools” and \\\"clang\\\" components must be installed.\",\"chunk_ids\":[\"github.com-11\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-dbf1c20481595758",
+      "text": "ring cross-compilation requires TARGET_CC and TARGET_AR (or equivalents) to be set.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.67,
+      "sources": [
+        "src-014"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"`TARGET_CC` and `TARGET_AR` (or equivalents) must be set.\",\"chunk_ids\":[\"github.com-11\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-0ac137be07012b6c",
+      "text": "Flutter's supported-platforms page lists Windows Arm64 as a deployment target.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.74,
+      "sources": [
+        "src-015"
+      ],
+      "contradicts": [
+        "claim-e358e77ef513deb4"
+      ],
+      "evidence": "{\"quote\":\"x64  Arm64  Supported10, 11CI tested10Unsupported8 and earlier\",\"chunk_ids\":[\"docs.flutter.dev-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-e358e77ef513deb4",
+      "text": "Flutter's only Windows SDK assumes an AMD64 host and runs on Windows Arm64 hosts under emulation; the issue to ship a native Arm64 SDK remains open at P3.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.59,
+      "sources": [
+        "src-016"
+      ],
+      "contradicts": [
+        "claim-0ac137be07012b6c",
+        "claim-b6a749a455755411"
+      ],
+      "evidence": "{\"quote\":\"Currently the only Flutter Windows SDK assumes a Windows AMD64 host. This runs on Windows Arm64 hosts using emulation, which affects performance.\",\"chunk_ids\":[\"github.com-12\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-49d6e10fe5b28049",
+      "text": "Flutter Windows build output paths include the target architecture, e.g. build\\windows\\arm64\\runner\\Release.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.76,
+      "sources": [
+        "src-017"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"build\\\\windows\\\\arm64\\\\runner\\\\Release\\\\hello_world.exe\",\"chunk_ids\":[\"docs.flutter.dev-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-e2392df0cbe902b5",
+      "text": "Dart marks Windows x64 and Arm64 as verified for developing and running Dart code.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.7,
+      "sources": [
+        "src-018"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"| Windows | verified | dangerous | dangerous | verified |\",\"chunk_ids\":[\"dart.dev-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-803ab8f0e3ebe71b",
+      "text": "flutter_rust_bridge recommends a flutter_rust_bridge.yaml config file and running the codegen with no arguments; config may alternatively live in pubspec.yaml.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.43,
+      "sources": [
+        "src-019"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"The suggested mode to run `flutter_rust_bridge_codegen`, is to create `flutter_rust_bridge.yaml` configuration file, and invoke command line without arguments.\",\"chunk_ids\":[\"cjycode.com-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-04f3b08e624a483e",
+      "text": "flutter_rust_bridge config keys include rust_input, rust_root and dart_output.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.43,
+      "sources": [
+        "src-019"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"rust_input: crate::api\",\"chunk_ids\":[\"cjycode.com-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-7c5c96e7d965b972",
+      "text": "flutter_rust_bridge troubleshooting ties Cargokit version compatibility to the Flutter version (e.g. a different Cargokit for Flutter <3.32.0).",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.62,
+      "sources": [
+        "src-020"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"To match Flutter <3.32.0: use Cargokit by copy\",\"chunk_ids\":[\"cjycode.com-2\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-b6a749a455755411",
+      "text": "flutter_rust_bridge v2 claims support for Android, iOS, Windows, Linux, macOS and Web.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.8,
+      "sources": [
+        "src-021"
+      ],
+      "contradicts": [
+        "claim-e358e77ef513deb4"
+      ],
+      "evidence": "{\"quote\":\"**Cross-platform**: Support Android, iOS, Windows, Linux, MacOS, and Web\",\"chunk_ids\":[\"github.com-18\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-e40341143e72cd7f",
+      "text": "flutter_rust_bridge v2 integrates into existing projects with a one-liner integrate command.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.8,
+      "sources": [
+        "src-021"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"**Rapid setup**: Only a one-liner command to integrate into your project.\",\"chunk_ids\":[\"github.com-18\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-4fb6742df653a77b",
+      "text": "Tauri 2 on Windows requires Microsoft C++ Build Tools (Desktop development with C++) and Microsoft Edge WebView2 for development.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.62,
+      "sources": [
+        "src-022"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Tauri uses the Microsoft C++ Build Tools for development as well as Microsoft Edge WebView2. These are both required for development on Windows.\",\"chunk_ids\":[\"v2.tauri.app-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-3acc04346fa6fca8",
+      "text": "Tauri 2 prerequisites list Windows 7 and later as a supported system.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.62,
+      "sources": [
+        "src-022"
+      ],
+      "contradicts": [
+        "claim-7bfb2199ebb48a68"
+      ],
+      "evidence": "{\"quote\":\"[Windows 7 and later](https://v2.tauri.app/start/prerequisites/#windows)\",\"chunk_ids\":[\"v2.tauri.app-0\"],\"checked\":\"added in stage 06 review; quote re-read in fetched chunk 2026-09-26\"}"
+    },
+    {
+      "id": "claim-506f21f395d1d8f6",
+      "text": "Tauri 2 documents building for ARM64 Windows with --target aarch64-pc-windows-msvc after installing the MSVC C++ ARM64 build tools component.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.52,
+      "sources": [
+        "src-023"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"If you need to build for **ARM64** you first need to install additional build tools.\",\"chunk_ids\":[\"v2.tauri.app-3\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-88f9c0c362c3a0d1",
+      "text": "Tauri .msi installers can only be created on Windows because WiX only runs on Windows.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.52,
+      "sources": [
+        "src-023"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"`.msi` installers can **only be created on Windows** as WiX can only run on Windows systems.\",\"chunk_ids\":[\"v2.tauri.app-2\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-1017ddaf0f5809b4",
+      "text": "Cross-compiling Tauri Windows apps from Linux and macOS is possible only with caveats and only for NSIS installers.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.52,
+      "sources": [
+        "src-023"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Cross compiling Windows apps on Linux and macOS hosts is possible with caveats when using [NSIS]\",\"chunk_ids\":[\"v2.tauri.app-2\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-88b255d05c32a9a7",
+      "text": "Tauri 2 capability files live in src-tauri/capabilities as JSON or TOML.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.55,
+      "sources": [
+        "src-024"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Capability files are either defined as a JSON or a TOML file inside the `src-tauri/capabilities` directory.\",\"chunk_ids\":[\"v2.tauri.app-7\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-9670e88b32f77fbd",
+      "text": "All capabilities in the capabilities directory are enabled by default until capabilities are explicitly listed in tauri.conf.json.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.55,
+      "sources": [
+        "src-024"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"All capabilities inside the `capabilities` directory are automatically enabled by default.\",\"chunk_ids\":[\"v2.tauri.app-7\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-94ec377714448bda",
+      "text": "In Claude Code hooks, exit code 2 is the only exit code that blocks through the code alone for most events; exit 1 is a non-blocking error.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.72,
+      "sources": [
+        "src-025"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"For most hook events, exit code 2 is the only exit code that blocks through the code alone.\",\"chunk_ids\":[\"code.claude.com-9\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-d42b7a1b9ff36786",
+      "text": "Claude Code command hooks accept a shell field of bash or powershell, defaulting to powershell on Windows.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.72,
+      "sources": [
+        "src-025"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Accepts `\\\"bash\\\"` or `\\\"powershell\\\"`. Defaults to `\\\"bash\\\"`, or to `\\\"powershell\\\"` on Windows\",\"chunk_ids\":[\"code.claude.com-5\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-03fd02f06536a0f0",
+      "text": "Claude Code hook handlers support an args array, allowing an executable plus arguments form.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.72,
+      "sources": [
+        "src-025"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"\\\"command\\\": \\\"powershell.exe\\\",\",\"chunk_ids\":[\"code.claude.com-1\",\"code.claude.com-16\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-5a8b2055b58f88de",
+      "text": "${CLAUDE_PLUGIN_ROOT} resolves to the installed plugin version path and changes on update; persistent state belongs in ${CLAUDE_PLUGIN_DATA}.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.7,
+      "sources": [
+        "src-026"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Absolute path of the plugin’s installed version\",\"chunk_ids\":[\"code.claude.com-32\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-60c992ae39ee62b8",
+      "text": "Claude plugin bin/ executables are placed on the Bash tool PATH, but claude.ai and Cowork do not install plugins that contain a bin/ directory.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.7,
+      "sources": [
+        "src-026"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"claude.ai and Cowork don’t install a plugin that has this directory\",\"chunk_ids\":[\"code.claude.com-33\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-6815c443eda8e99d",
+      "text": "Codex requires non-managed hooks, including plugin-bundled hooks, to be reviewed and trusted against the hook's current hash before running.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.43,
+      "sources": [
+        "src-027"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Codex records trust against the hook’s current hash, so new or changed hooks are marked for review and skipped until trusted.\",\"chunk_ids\":[\"learn.chatgpt.com-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-1dd84cdc4fb7c634",
+      "text": "Codex hooks support a Windows-only commandWindows override.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.43,
+      "sources": [
+        "src-027"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"`commandWindows` is an optional Windows-only command override.\",\"chunk_ids\":[\"learn.chatgpt.com-1\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-723dba2f965fa1f8",
+      "text": "Codex launches multiple matching command hooks for the same event concurrently.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.43,
+      "sources": [
+        "src-027"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Multiple matching command hooks for the same event are launched concurrently\",\"chunk_ids\":[\"learn.chatgpt.com-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-084a838187411d98",
+      "text": "The Agent Skills specification requires SKILL.md with name (max 64 chars, lowercase/digits/hyphens) and description (max 1024 chars) frontmatter.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.72,
+      "sources": [
+        "src-028"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Max 64 characters. Lowercase letters, numbers, and hyphens only.\",\"chunk_ids\":[\"agentskills.io-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-ca615bf4f6915cb4",
+      "text": "Agent Skills scripts/ language support depends on the agent implementation.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.72,
+      "sources": [
+        "src-028"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Supported languages depend on the agent implementation.\",\"chunk_ids\":[\"agentskills.io-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-f89724f76e939a28",
+      "text": "Agent Skills are loaded progressively: metadata at startup, instructions and resources on demand.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.72,
+      "sources": [
+        "src-028"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Agents load skills _progressively_, pulling in more detail only as a task calls for it.\",\"chunk_ids\":[\"agentskills.io-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-170392ed0a294e71",
+      "text": "GitHub-hosted Windows arm64 runners are available under the labels windows-11-arm and windows-11-vs2026-arm for public and private repositories.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.68,
+      "sources": [
+        "src-029"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"| Windows | 4 | 16 GB | 14 GB | arm64 | `windows-11-arm`,<br> `windows-11-vs2026-arm` |\",\"chunk_ids\":[\"docs.github.com-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-09220500e5a1bd81",
+      "text": "SLSA distinguishes reproducible builds (bit-for-bit identical output) from verified reproducible builds (two or more independent build platforms).",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.43,
+      "sources": [
+        "src-030"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"“Verified reproducible” means using two or more independent build platforms to corroborate the provenance of a build.\",\"chunk_ids\":[\"slsa.dev-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    },
+    {
+      "id": "claim-f63fef0cc1ec4893",
+      "text": "SLSA notes reproducible builds do not address source, dependency, or distribution threats and rebuilders must be truly independent.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.43,
+      "sources": [
+        "src-030"
+      ],
+      "contradicts": [],
+      "evidence": "{\"quote\":\"Reproducible builds do not address source, dependency, or distribution threats.\",\"chunk_ids\":[\"slsa.dev-0\"],\"checked\":\"quote re-read in fetched chunk 2026-09-26; claim text checked against surrounding passage by the stage-05 reviewer\"}"
+    }
+  ],
+  "relations": [
+    {
+      "from": "claim-f0ab062add1f9c0b",
+      "to": "src-001",
+      "type": "cites"
+    },
+    {
+      "from": "claim-cf22f98c8c3c8b78",
+      "to": "src-001",
+      "type": "cites"
+    },
+    {
+      "from": "claim-07d24b9b6c0d6841",
+      "to": "src-001",
+      "type": "cites"
+    },
+    {
+      "from": "claim-7d69c7f557b02dcc",
+      "to": "src-001",
+      "type": "cites"
+    },
+    {
+      "from": "claim-486024c5425af094",
+      "to": "src-001",
+      "type": "cites"
+    },
+    {
+      "from": "claim-8a6477f93bd7d81b",
+      "to": "src-001",
+      "type": "cites"
+    },
+    {
+      "from": "claim-fd0e6e1c35e9d997",
+      "to": "src-001",
+      "type": "cites"
+    },
+    {
+      "from": "claim-4526ec31d31266a6",
+      "to": "src-002",
+      "type": "cites"
+    },
+    {
+      "from": "claim-3defbc5b3b072ffa",
+      "to": "src-003",
+      "type": "cites"
+    },
+    {
+      "from": "claim-f4f7496694f14be3",
+      "to": "src-004",
+      "type": "cites"
+    },
+    {
+      "from": "claim-744c8f0a17b45b0b",
+      "to": "src-004",
+      "type": "cites"
+    },
+    {
+      "from": "claim-50703d6173137335",
+      "to": "src-004",
+      "type": "cites"
+    },
+    {
+      "from": "claim-f4dab3c6d02c350b",
+      "to": "src-004",
+      "type": "cites"
+    },
+    {
+      "from": "claim-99c05aa893bfd8c5",
+      "to": "src-004",
+      "type": "cites"
+    },
+    {
+      "from": "claim-568a3c8f884b24fb",
+      "to": "src-005",
+      "type": "cites"
+    },
+    {
+      "from": "claim-6c82748b44980d97",
+      "to": "src-005",
+      "type": "cites"
+    },
+    {
+      "from": "claim-3a4e02c0d5a997b6",
+      "to": "src-005",
+      "type": "cites"
+    },
+    {
+      "from": "claim-db9de6ae1ae89018",
+      "to": "src-006",
+      "type": "cites"
+    },
+    {
+      "from": "claim-cfa5643050d8dac8",
+      "to": "src-007",
+      "type": "cites"
+    },
+    {
+      "from": "claim-dea93afc635151d8",
+      "to": "src-007",
+      "type": "cites"
+    },
+    {
+      "from": "claim-b7e356ef286321c2",
+      "to": "src-008",
+      "type": "cites"
+    },
+    {
+      "from": "claim-0d543e7a6ac8f822",
+      "to": "src-008",
+      "type": "cites"
+    },
+    {
+      "from": "claim-43dc45216c070515",
+      "to": "src-009",
+      "type": "cites"
+    },
+    {
+      "from": "claim-8a06541ab45d8307",
+      "to": "src-009",
+      "type": "cites"
+    },
+    {
+      "from": "claim-dfe8df1e465b11f3",
+      "to": "src-009",
+      "type": "cites"
+    },
+    {
+      "from": "claim-b18485b2ff3d3d5b",
+      "to": "src-009",
+      "type": "cites"
+    },
+    {
+      "from": "claim-7bfb2199ebb48a68",
+      "to": "src-009",
+      "type": "cites"
+    },
+    {
+      "from": "claim-e63fc9e9480af5e7",
+      "to": "src-010",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1d872d8e2b0e9f0b",
+      "to": "src-010",
+      "type": "cites"
+    },
+    {
+      "from": "claim-b715cf37653c7dcf",
+      "to": "src-011",
+      "type": "cites"
+    },
+    {
+      "from": "claim-b8fbfc80ddf9049f",
+      "to": "src-011",
+      "type": "cites"
+    },
+    {
+      "from": "claim-a92563846bac715d",
+      "to": "src-012",
+      "type": "cites"
+    },
+    {
+      "from": "claim-2921cb185791f17b",
+      "to": "src-013",
+      "type": "cites"
+    },
+    {
+      "from": "claim-a6aed02fc549d8f0",
+      "to": "src-014",
+      "type": "cites"
+    },
+    {
+      "from": "claim-dbf1c20481595758",
+      "to": "src-014",
+      "type": "cites"
+    },
+    {
+      "from": "claim-0ac137be07012b6c",
+      "to": "src-015",
+      "type": "cites"
+    },
+    {
+      "from": "claim-e358e77ef513deb4",
+      "to": "src-016",
+      "type": "cites"
+    },
+    {
+      "from": "claim-49d6e10fe5b28049",
+      "to": "src-017",
+      "type": "cites"
+    },
+    {
+      "from": "claim-e2392df0cbe902b5",
+      "to": "src-018",
+      "type": "cites"
+    },
+    {
+      "from": "claim-803ab8f0e3ebe71b",
+      "to": "src-019",
+      "type": "cites"
+    },
+    {
+      "from": "claim-04f3b08e624a483e",
+      "to": "src-019",
+      "type": "cites"
+    },
+    {
+      "from": "claim-7c5c96e7d965b972",
+      "to": "src-020",
+      "type": "cites"
+    },
+    {
+      "from": "claim-b6a749a455755411",
+      "to": "src-021",
+      "type": "cites"
+    },
+    {
+      "from": "claim-e40341143e72cd7f",
+      "to": "src-021",
+      "type": "cites"
+    },
+    {
+      "from": "claim-4fb6742df653a77b",
+      "to": "src-022",
+      "type": "cites"
+    },
+    {
+      "from": "claim-3acc04346fa6fca8",
+      "to": "src-022",
+      "type": "cites"
+    },
+    {
+      "from": "claim-506f21f395d1d8f6",
+      "to": "src-023",
+      "type": "cites"
+    },
+    {
+      "from": "claim-88f9c0c362c3a0d1",
+      "to": "src-023",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1017ddaf0f5809b4",
+      "to": "src-023",
+      "type": "cites"
+    },
+    {
+      "from": "claim-88b255d05c32a9a7",
+      "to": "src-024",
+      "type": "cites"
+    },
+    {
+      "from": "claim-9670e88b32f77fbd",
+      "to": "src-024",
+      "type": "cites"
+    },
+    {
+      "from": "claim-94ec377714448bda",
+      "to": "src-025",
+      "type": "cites"
+    },
+    {
+      "from": "claim-d42b7a1b9ff36786",
+      "to": "src-025",
+      "type": "cites"
+    },
+    {
+      "from": "claim-03fd02f06536a0f0",
+      "to": "src-025",
+      "type": "cites"
+    },
+    {
+      "from": "claim-5a8b2055b58f88de",
+      "to": "src-026",
+      "type": "cites"
+    },
+    {
+      "from": "claim-60c992ae39ee62b8",
+      "to": "src-026",
+      "type": "cites"
+    },
+    {
+      "from": "claim-6815c443eda8e99d",
+      "to": "src-027",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1dd84cdc4fb7c634",
+      "to": "src-027",
+      "type": "cites"
+    },
+    {
+      "from": "claim-723dba2f965fa1f8",
+      "to": "src-027",
+      "type": "cites"
+    },
+    {
+      "from": "claim-084a838187411d98",
+      "to": "src-028",
+      "type": "cites"
+    },
+    {
+      "from": "claim-ca615bf4f6915cb4",
+      "to": "src-028",
+      "type": "cites"
+    },
+    {
+      "from": "claim-f89724f76e939a28",
+      "to": "src-028",
+      "type": "cites"
+    },
+    {
+      "from": "claim-170392ed0a294e71",
+      "to": "src-029",
+      "type": "cites"
+    },
+    {
+      "from": "claim-09220500e5a1bd81",
+      "to": "src-030",
+      "type": "cites"
+    },
+    {
+      "from": "claim-f63fef0cc1ec4893",
+      "to": "src-030",
+      "type": "cites"
+    },
+    {
+      "from": "claim-0ac137be07012b6c",
+      "to": "claim-e358e77ef513deb4",
+      "type": "contradicts"
+    },
+    {
+      "from": "claim-43dc45216c070515",
+      "to": "claim-a6aed02fc549d8f0",
+      "type": "contradicts"
+    },
+    {
+      "from": "claim-dea93afc635151d8",
+      "to": "claim-1d872d8e2b0e9f0b",
+      "type": "contradicts"
+    },
+    {
+      "from": "claim-6c82748b44980d97",
+      "to": "claim-db9de6ae1ae89018",
+      "type": "contradicts"
+    },
+    {
+      "from": "claim-3acc04346fa6fca8",
+      "to": "claim-7bfb2199ebb48a68",
+      "type": "contradicts"
+    },
+    {
+      "from": "claim-b6a749a455755411",
+      "to": "claim-e358e77ef513deb4",
+      "type": "contradicts"
+    }
+  ]
+}

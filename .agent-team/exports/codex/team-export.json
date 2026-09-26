@@ -1,0 +1,40 @@
+{
+  "target": "codex",
+  "verification": {
+    "level": "source-verified",
+    "source": "https://learn.chatgpt.com/docs/agent-configuration/subagents",
+    "version": "documentation inspected 2026-09-24",
+    "live": "unverified"
+  },
+  "diagnostics": [
+    "Source-verified serialization only; installed native validation and live execution are unverified.",
+    "Standalone agent files are supported. A Codex plugin agents manifest field is not verified; no such field is emitted.",
+    "Role overrides are preserved without native schema certification. Skill IDs refer to separately installed skills; prompt mentions do not install or authorize them."
+  ],
+  "instructions": [
+    "Review staged artifacts before installation. Export grants no execution or registration authority.",
+    "Review and merge .codex/agents and optional .codex/config.toml into the project; config values are native Codex options."
+  ],
+  "files": [
+    {
+      "file": ".codex/agents/implementer.toml",
+      "sha256": "fb91248f05f91b4ccff4698b5a71cf89abca5150670059cf2fab805e40a02368"
+    },
+    {
+      "file": ".codex/agents/mobile-specialist.toml",
+      "sha256": "4edbf5a8b526ab2432ace5a2065a8abd62e26963f3ac39e39b09f814a8337aed"
+    },
+    {
+      "file": ".codex/agents/documentation-specialist.toml",
+      "sha256": "212090c8d6c282e51a633431db9c06567888f7d52cc7a2d112030d081de32141"
+    },
+    {
+      "file": ".codex/agents/reviewer.toml",
+      "sha256": "14bcb4eb64fa1ce3c436c2af370e151d37d0bd90725292943e3555a2aab25fc7"
+    },
+    {
+      "file": "export-receipt.json",
+      "sha256": "45c865b4226dcb18bc82d4542ac6a7a89b59a767870bb9840ec322d02450f777"
+    }
+  ]
+}

@@ -2,11 +2,15 @@
   "hooks": {
     "UserPromptSubmit": [
       {
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/skill-activation.py",
-            "description": "TJ-ARCH-MOB-001: activate project-local UI/UX and runtime-verification skills by prompt-word match"
+            "command": "node",
+            "args": [
+              ".claude/hooks/skill-activation.mjs"
+            ],
+            "description": "Advisory KnowMe Builder skill activation"
           }
         ]
       }
@@ -17,8 +21,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/a11y-reminder.py",
-            "description": "TJ-ARCH-MOB-001: remind to run the a11y-gate after UI edits"
+            "command": "node",
+            "args": [
+              ".claude/hooks/a11y-reminder.mjs"
+            ],
+            "description": "Advisory accessibility review reminder"
           }
         ]
       }

@@ -1,0 +1,28 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "same-model-fallback-weaker-guarantee",
+  "scope": "Source re-review of portable installer/runtime, root staging/dispatch/CI helpers, and APK verifier after corrections. Excludes the newly added knowme-builder upgrade journal, semantic version migrations, live external harness behavior and live Windows/Android platform certification. Initial findings remain in runtime-findings.json.",
+  "findings": [],
+  "checked_classes": [
+    "Skills ownership: broad skills add/remove delegation was replaced by individual file copies and digest receipts; preexisting identical files remain unowned and edited owned files block uninstall.",
+    "MCP preservation: CLI-managed MCP entries are compared against saved get-output snapshots before removal; unverifiable or changed entries block uninstall.",
+    "Requested revisions and source: unsupported Claude revision selection fails before mutation; existing marketplace revisions or unverified explicit origins fail instead of silently changing receipt claims.",
+    "Unknown inventory: live installation requires successful recognized JSON marketplace/plugin inventories before ownership decisions.",
+    "Exit codes: shared ProcessFailure preserves subprocess status through main; native-helper ToolError preserves scoped native failure status.",
+    "APK architecture: ELF magic, class and e_machine are checked before dynamic-library inspection; a regression fixture supplies x86 ELF bytes under ARM64 archive paths.",
+    "Harness schema: current official Claude Code docs support command plus args exec form; no unsupported-schema finding applies.",
+    "Staging resources and paths: command/prompt roots now accompany installer payload; cross-drive Windows paths use absolute-relative-path handling; maintainer dispatch is explicitly excluded from consumer payload.",
+    "Dispatch and CI: dry-run returns before worktree/log mutations; commands use argument arrays; CI version values are validated before output emission.",
+    "Limits: source review does not establish real harness installation, all-platform runnability, or an independent cross-model result; runtime execution receipts remain separate."
+  ],
+  "sources": [
+    "https://code.claude.com/docs/en/hooks#exec-form-and-shell-form"
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

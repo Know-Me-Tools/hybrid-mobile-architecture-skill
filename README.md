@@ -63,7 +63,7 @@ npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 Install the complete native harness package from a trusted checkout:
 
 ```bash
-bash scripts/install-global-harnesses.sh
+node scripts/install-global-harnesses.mjs
 ```
 
 That registers the Git source through the supported Claude/Codex marketplace
@@ -78,6 +78,15 @@ knowme-builder manifest check
 knowme-builder --json doctor --path .
 prometheus doctor --json
 ```
+
+Check native prerequisites independently of the Prometheus control plane:
+
+```text
+knowme-builder doctor --native-only --target x86_64-pc-windows-msvc --target aarch64-pc-windows-msvc --json
+```
+
+This distinguishes Rust target availability from Windows SDK/linker and runtime
+verification. See [portable tooling status](docs/portability/project-tools.md).
 
 See [docs/global-harness-installation.md](docs/global-harness-installation.md)
 for native plugin registration and per-harness verification.
@@ -107,8 +116,10 @@ Available profiles:
 | `tauri-desktop` | Tauri/React, Rust, service or in-process UAR facade |
 | `axum-web` | React, Axum, service UAR |
 
-`runnable` emits a deterministic agentic vertical slice. `skeleton` may contain
-explicitly declared unsupported surfaces and TODOs.
+`runnable` is a requested generation mode, not build or runtime certification.
+The current audit found incomplete application entrypoints in several profiles;
+see [the assessment and repair plan](docs/assessment/portable-tooling-plan.md).
+`skeleton` may contain explicitly declared unsupported surfaces and TODOs.
 
 ## Adopt an existing application
 
@@ -124,21 +135,35 @@ knowme-builder adopt existing-app \
   --apply
 ```
 
-Adoption records profile and package state, installs skills, and creates a
-project policy overlay without claiming ownership of existing application
-files.
+Adoption records profile and package state and creates a project policy overlay
+without claiming ownership of existing application files. Skill installation is
+the separate `knowme-builder skills install --path existing-app` operation.
+Adoption metadata does not implement missing surfaces or integrate new features.
+Follow the [project evolution workflow](skills/hybrid-mobile-architecture/references/project-evolution.md)
+for brownfield changes and continuing upgrades of previous outputs.
 
 ## Ownership-aware upgrades
 
 ```bash
 knowme-builder upgrade existing-app --check
 knowme-builder upgrade existing-app --apply
+knowme-builder upgrade existing-app --rollback
 ```
 
 `.knowme-builder/generated.lock.json` records the generated path, template,
 source digest, last installed digest, ownership, and version. The Builder
 replaces only managed files that still match their last installed digest.
 Modified files produce a conflict report and proposed replacement.
+
+Conflicts are discovered before managed application files are changed; a failed
+JSON result also returns a nonzero process exit. New outputs retain their
+rendering name across directory moves. Legacy state without that identity needs
+`upgrade --app-name <original-name>`; unsupported schemas/versions require an
+explicit migration. Managed-file upgrades preserve original bytes and output
+hashes in a recovery journal; rollback refuses to overwrite later user edits.
+An interrupted apply requires rollback before retrying. Semantic migrations
+for added, removed or renamed files and arbitrary historical versions remain
+separate work; this journal does not migrate application databases.
 
 ## Add capabilities
 
@@ -184,8 +209,8 @@ knowme-builder skills check --path .
 Generated harness trees must not be edited independently:
 
 ```bash
-bash scripts/sync-harness-skills.sh
-bash scripts/sync-harness-skills.sh --check
+node scripts/sync-harness-skills.mjs
+node scripts/sync-harness-skills.mjs --check
 ```
 
 ## Application runtime contract
@@ -226,9 +251,9 @@ node scripts/check-skill-contracts.mjs
 node scripts/check-runtime-security.mjs
 node scripts/check-prometheus-boundary.mjs
 node scripts/sync-skill-resources.mjs --check
-bash scripts/sync-harness-skills.sh --check
-bash scripts/check-git-url-discovery.sh
-bash scripts/test-harness-installer.sh
+node scripts/sync-harness-skills.mjs --check
+node scripts/check-git-url-discovery.mjs
+node scripts/test-harness-installer.mjs
 cargo test --locked --manifest-path tools/knowme-builder/Cargo.toml
 ```
 

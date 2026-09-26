@@ -76,7 +76,7 @@ the unified installer to add the dependency-free advisory plugin and commands:
 ```bash
 git clone https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 cd hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --harness opencode \
+node scripts/install-harness-package.mjs --harness opencode \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 opencode debug skill
 ```
@@ -85,9 +85,9 @@ Update and safely uninstall only the receipt-owned OpenCode payload:
 
 ```bash
 git pull --ff-only
-bash scripts/install-harness-package.sh --harness opencode \
+node scripts/install-harness-package.mjs --harness opencode \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --harness opencode --uninstall
+node scripts/install-harness-package.mjs --harness opencode --uninstall
 ```
 
 ## Unified installer
@@ -95,7 +95,7 @@ bash scripts/install-harness-package.sh --harness opencode --uninstall
 The receipt-based installer can configure all three harnesses:
 
 ```bash
-bash scripts/install-harness-package.sh \
+node scripts/install-harness-package.mjs \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 ```
 
@@ -116,7 +116,7 @@ Supported options are:
 The default installs only skills, native marketplace registrations, commands,
 and advisory adapters. CLI compilation, MCP mutation, and the long Prometheus
 bootstrap require their explicit flags. The compatibility wrapper
-`scripts/install-global-harnesses.sh` delegates to the same installer.
+`scripts/install-global-harnesses.mjs` delegates to the same installer.
 
 The installer preserves unrelated files and records ownership under the XDG
 state directory for user scope or `.knowme-builder/harness-install.json` for
@@ -125,12 +125,12 @@ project scope. Uninstall removes only receipt-owned surfaces.
 For an all-harness install, use this exact check, update, and uninstall cycle:
 
 ```bash
-bash scripts/install-harness-package.sh --check \
+node scripts/install-harness-package.mjs --check \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 git pull --ff-only
-bash scripts/install-harness-package.sh \
+node scripts/install-harness-package.mjs \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --uninstall
+node scripts/install-harness-package.mjs --uninstall
 ```
 
 ## Optional Builder CLI
@@ -138,7 +138,7 @@ bash scripts/install-harness-package.sh --uninstall
 Install from the unified entry point:
 
 ```bash
-bash scripts/install-harness-package.sh --with-cli
+node scripts/install-harness-package.mjs --with-cli
 knowme-builder --version
 ```
 
@@ -197,7 +197,7 @@ Repository maintainers additionally run:
 ```bash
 node scripts/check-skill-contracts.mjs
 node scripts/sync-skill-resources.mjs --check
-bash scripts/sync-harness-skills.sh --check
-bash scripts/check-git-url-discovery.sh
-bash scripts/test-harness-installer.sh
+node scripts/sync-harness-skills.mjs --check
+node scripts/check-git-url-discovery.mjs
+node scripts/test-harness-installer.mjs
 ```

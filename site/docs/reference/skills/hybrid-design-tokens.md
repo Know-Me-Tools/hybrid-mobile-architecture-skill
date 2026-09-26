@@ -54,7 +54,7 @@ Flutter theme and the Tailwind theme drift.
 
 ```
 assets/templates/design-tokens/tokens.toml          ← THE source. Edit only this.
-   │  bash scripts/gen-design-tokens.sh <root>
+   │  node scripts/gen-design-tokens.mjs <root>
    ├── desktop/src/theme.css                        Tailwind 4 @theme (+ light override)
    └── mobile/lib/core/theme/tokens.dart            Dart token class
 ```

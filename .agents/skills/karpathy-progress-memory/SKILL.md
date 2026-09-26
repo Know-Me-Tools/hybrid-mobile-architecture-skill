@@ -24,7 +24,7 @@ evidence exists.
 3. Redact secrets and replace machine-specific project roots with `$REPO_ROOT` in the
    committed record. The private superset may retain useful local/operator context but
    never secret values.
-4. Run `scripts/record-progress.sh` with a phase, title, summary, evidence, and next step.
+4. Run `scripts/record-progress.mjs` with a phase, title, summary, evidence, and next step.
 5. At a phase gate, run `prometheus learn --capture-session --compile --lint`, then
    `pk lint`. Fix malformed newly-authored entries; preserve imported historical variants.
 6. Run `prometheus learning status --json` and record queue, retry, dead-letter, and

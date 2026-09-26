@@ -73,7 +73,7 @@ also installs the dependency-free advisory plugin and namespaced commands:
 ```bash
 git clone https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 cd hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --harness opencode \
+node scripts/install-harness-package.mjs --harness opencode \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 opencode debug skill
 ```
@@ -82,9 +82,9 @@ Update and safely uninstall the receipt-owned OpenCode payload:
 
 ```bash
 git pull --ff-only
-bash scripts/install-harness-package.sh --harness opencode \
+node scripts/install-harness-package.mjs --harness opencode \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --harness opencode --uninstall
+node scripts/install-harness-package.mjs --harness opencode --uninstall
 ```
 
 ## Unified receipt-based installer
@@ -92,14 +92,14 @@ bash scripts/install-harness-package.sh --harness opencode --uninstall
 From a trusted checkout:
 
 ```bash
-bash scripts/install-harness-package.sh \
+node scripts/install-harness-package.mjs \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 ```
 
 The compatibility entry point remains:
 
 ```bash
-bash scripts/install-global-harnesses.sh
+node scripts/install-global-harnesses.mjs
 ```
 
 Options:
@@ -128,12 +128,12 @@ receipt-owned paths and marketplace registrations.
 For an all-harness install, the exact check, update, and uninstall lifecycle is:
 
 ```bash
-bash scripts/install-harness-package.sh --check \
+node scripts/install-harness-package.mjs --check \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 git pull --ff-only
-bash scripts/install-harness-package.sh \
+node scripts/install-harness-package.mjs \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --uninstall
+node scripts/install-harness-package.mjs --uninstall
 ```
 
 Codex native plugins are user-scoped. For `--scope project`, the installer uses
@@ -145,7 +145,7 @@ native plugin scope.
 CLI installation is optional:
 
 ```bash
-bash scripts/install-harness-package.sh --with-cli
+node scripts/install-harness-package.mjs --with-cli
 knowme-builder --version
 ```
 
@@ -178,9 +178,9 @@ Use `--with-prometheus` only when the long, host-mutating bootstrap is intended.
 ```bash
 node scripts/check-skill-contracts.mjs
 node scripts/sync-skill-resources.mjs --check
-bash scripts/sync-harness-skills.sh --check
-bash scripts/check-git-url-discovery.sh
-bash scripts/test-harness-installer.sh
+node scripts/sync-harness-skills.mjs --check
+node scripts/check-git-url-discovery.mjs
+node scripts/test-harness-installer.mjs
 node scripts/test-opencode-plugin.mjs
 knowme-builder --json doctor --path .
 ```

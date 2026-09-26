@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-26",
+  "scope": "Portable tooling and managed-file evolution foundation; no generated-application certification",
+  "branch": "codex/hma-portable-tooling",
+  "baselineCommit": "153f20cfe7642e4f4a647b838206e8b70852f4eb",
+  "host": {
+    "os": "macOS",
+    "architecture": "arm64",
+    "developmentNode": "26.5.0",
+    "testedConsumerNode": "22.23.3",
+    "compiler": "typescript@7.0.2",
+    "nativeRust": "1.97.1"
+  },
+  "checks": [
+    {
+      "name": "first-party language inventory",
+      "result": "pass",
+      "originalFiles": 79,
+      "includesExtensionlessShellFixtures": true,
+      "command": "node scripts/check-portable-runtime.mjs"
+    },
+    {
+      "name": "strict compiler and deterministic bundles",
+      "result": "pass",
+      "commands": [
+        "npm run build --prefix runtime",
+        "node runtime/build.mjs",
+        "node scripts/sync-harness-skills.mjs --check"
+      ]
+    },
+    {
+      "name": "Node behavior suite",
+      "result": "pass",
+      "tests": 22,
+      "command": "npm exec --yes --package=node@22.23.3 -- node --test runtime/tests/*.test.mjs"
+    },
+    {
+      "name": "native Builder",
+      "result": "pass",
+      "tests": 24,
+      "commands": [
+        "cargo +1.97.1 clippy --locked --manifest-path tools/knowme-builder/Cargo.toml --all-targets -- -D warnings",
+        "cargo +1.97.1 test --locked --manifest-path tools/knowme-builder/Cargo.toml"
+      ]
+    },
+    {
+      "name": "native platform helper",
+      "result": "pass",
+      "tests": 4,
+      "includesActualElfArchitectureFixtures": true,
+      "rust": "1.97.1"
+    },
+    {
+      "name": "Windows compile checks",
+      "result": "pass",
+      "crates": [
+        "knowme-builder",
+        "knowme-platform-native"
+      ],
+      "targets": [
+        "x86_64-pc-windows-msvc",
+        "aarch64-pc-windows-msvc"
+      ],
+      "rust": "1.97.1",
+      "nativeExecution": false
+    },
+    {
+      "name": "isolated full/mini payload",
+      "result": "pass",
+      "checks": [
+        "identical file hashes",
+        "manifest contract",
+        "real install/uninstall from both staged roots",
+        "preexisting skill preservation"
+      ]
+    },
+    {
+      "name": "source authority",
+      "result": "pass",
+      "skills": 36,
+      "activationCases": 108,
+      "docConsistencyChecks": 370,
+      "purityChecks": 1357,
+      "command": "node scripts/ci-package.mjs authority",
+      "note": "Activation metadata and static checks are not application execution"
+    },
+    {
+      "name": "generated scaffold structure",
+      "result": "pass",
+      "command": "node scripts/verify-scaffold.mjs",
+      "note": "Reviewed structural fixture changed for mjs helpers and added bundled Docusaurus build helper; this is not full UI build/run proof"
+    },
+    {
+      "name": "full Tauri tray template",
+      "result": "pass",
+      "note": "Rust aggregator and actual Tauri tray compilation; does not certify complete desktop baseline"
+    },
+    {
+      "name": "Docusaurus output",
+      "result": "pass",
+      "note": "Real scaffold and production build;20 moderate transitive dependency advisories remain"
+    },
+    {
+      "name": "deployment catalog and GitOps",
+      "result": "pass",
+      "note": "No deployment or live PostgreSQL verification"
+    },
+    {
+      "name": "OpenSpec",
+      "result": "pass",
+      "command": "openspec validate portable-tooling-and-project-evolution --strict"
+    },
+    {
+      "name": "committed consumer proof",
+      "result": "pending"
+    }
+  ],
+  "reviews": {
+    "mandate": "adversarial-review",
+    "status": "pass-in-bounded-scope",
+    "receipts": [
+      "review/plan-findings.json",
+      "review/native-findings.json",
+      "review/runtime-rereview.json",
+      "review/journal-rereview.json",
+      "review/remaining-runtime-rereview.json"
+    ],
+    "initialFindingsPreserved": true,
+    "crossModelIndependenceVerified": false
+  },
+  "research": {
+    "sources": 30,
+    "claims": 65,
+    "confidence": 0.66,
+    "verification": "partial",
+    "unresolvedContradictions": 1,
+    "receipt": "../research/portable-tooling-20260926/receipt.json"
+  },
+  "compass": {
+    "status": "partial",
+    "files": 566,
+    "nodes": 25401,
+    "edges": 34062,
+    "omittedEdges": 276,
+    "programModules": 217,
+    "mcpWireVerified": true,
+    "allHarnessConnectionsVerified": false
+  },
+  "pending": [
+    "Native Windows execution and generated application UI/runtime matrix",
+    "Complete web/Tauri/Flutter/FFI clean-architecture baselines",
+    "Nonstandard brownfield layout mapping and integrated additions",
+    "Versioned additions/removals/renames/dependency/codegen/schema migrations and historical fixture rebuilds",
+    "Android/iOS device or simulator proof",
+    "Flutter install and live PostgreSQL helper execution",
+    "Publication/integration into full and mini source repositories"
+  ]
+}

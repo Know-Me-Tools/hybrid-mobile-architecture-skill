@@ -122,8 +122,8 @@ They prove nothing about whether a lane works. Local lanes fail at model load,
 on device, after every host check passes:
 
 ```bash
-bash scripts/android/verify-native-inference-gates.sh   # arm64-only APK, required .so
-bash scripts/android/verify-device-runtime-gates.sh     # no JNI/dlopen failure in logcat
+node scripts/android/verify-native-inference-gates.mjs   # arm64-only APK, required .so
+node scripts/android/verify-device-runtime-gates.mjs     # no JNI/dlopen failure in logcat
 ```
 
 Record the result in `docs/platform-support.md`.

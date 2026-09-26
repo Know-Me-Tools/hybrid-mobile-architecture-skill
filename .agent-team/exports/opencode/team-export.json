@@ -1,0 +1,40 @@
+{
+  "target": "opencode",
+  "verification": {
+    "level": "source-verified",
+    "source": "https://opencode.ai/docs/agents/",
+    "version": "deployed singular agent schema inspected 2026-09-24",
+    "live": "unverified"
+  },
+  "diagnostics": [
+    "Source-verified serialization only; installed native validation and live execution are unverified.",
+    "OpenCode JS/TS or npm plugins are separate from agent definitions; no agent marketplace manifest is invented.",
+    "Role overrides are preserved without native schema certification. Skill IDs refer to separately installed skills; prompt mentions do not install or authorize them."
+  ],
+  "instructions": [
+    "Review staged artifacts before installation. Export grants no execution or registration authority.",
+    "Review .opencode/agents/*.md and optional opencode.json. Native configuration uses singular agent and permission keys."
+  ],
+  "files": [
+    {
+      "file": ".opencode/agents/implementer.md",
+      "sha256": "5f33ca286da9e3429d5d4e978d1a15fa26a37ce1834d6a1dc174ccf88d4925a4"
+    },
+    {
+      "file": ".opencode/agents/mobile-specialist.md",
+      "sha256": "e506ca715f9207e87ed215c2ebd3f97d943a620ed8600b79dfaf3e2806e35229"
+    },
+    {
+      "file": ".opencode/agents/documentation-specialist.md",
+      "sha256": "4a07bd0b7f2912ae1617305c0b1d5bf5a411b8edb74fbce624e4c4b96cdff909"
+    },
+    {
+      "file": ".opencode/agents/reviewer.md",
+      "sha256": "69856dec43d097170d73b76093d0b2b0d6e34ec387ecd8fabd160cc8e502792e"
+    },
+    {
+      "file": "export-receipt.json",
+      "sha256": "32ea523652357b0aaedfc9ca169c0089b165d48a6bdbea230d1425ea6d2eb54c"
+    }
+  ]
+}

@@ -89,7 +89,7 @@ the manifests it governs.
 ## One source: versions.toml
 
 Every pin lives in `versions.toml`. Scripts read it through
-`scripts/lib-versions.sh`; authority docs quote it; `audit.sh doc-consistency`
+`scripts/portable/versions.mjs`; authority docs quote it; `audit.mjs doc-consistency`
 fails CI on drift.
 
 **Never inline a version literal in a generator.** A hardcoded copy is invisible
@@ -98,10 +98,10 @@ about the emitted code — the generator and the projects it generated drift apa
 silently. That failure is not hypothetical: it is exactly how this pack fell
 behind the app it produced.
 
-```bash
-# In any scaffolder
-source "$SCRIPT_DIR/lib-versions.sh"
-echo "flutter_rust_bridge: $FRB_VERSION"
+```javascript
+// In a maintainer scaffolder authored under runtime/src.
+import { requireVersion } from './portable/versions.mjs';
+console.log(`flutter_rust_bridge: ${requireVersion('frameworks', 'flutter_rust_bridge')}`);
 ```
 
 Inside a quoted heredoc, use an `@NAME@` placeholder and substitute after — see
@@ -123,7 +123,7 @@ verification. A baseline bump verified only on a simulator is not verified.
 |---|---|
 | `^x.y.z` on a codegen/analyzer package | The set moves together; a caret breaks it on the next `pub get`. |
 | A bare major (`"2"`, `"1"`) in Cargo.toml | Resolves to whatever is newest; not reproducible. |
-| A version literal inside a scaffolder | Invisible to `audit.sh`; drifts from `versions.toml` silently. |
+| A version literal inside a scaffolder | Invisible to `audit.mjs`; drifts from `versions.toml` silently. |
 | A pin with no comment | Nobody can tell if it is forced or arbitrary, so nobody can safely bump it. |
 | `--lts` / "latest" in a toolchain install | The meaning changes under you when the next LTS lands. |
 | Bumping one member of a codegen set | Breaks the other three. Move the set or nothing. |
@@ -132,7 +132,7 @@ verification. A baseline bump verified only on a simulator is not verified.
 ## Verification
 
 ```bash
-bash scripts/audit.sh doc-consistency   # authority docs vs versions.toml
+node scripts/audit.mjs doc-consistency   # authority docs vs versions.toml
 flutter pub get --dry-run               # does the set actually resolve?
 cargo tree -d                           # duplicate transitive versions
 ```

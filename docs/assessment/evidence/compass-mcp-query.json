@@ -1,0 +1,202 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "resultType": "complete",
+    "content": [
+      {
+        "type": "text",
+        "text": "RESULT\nState: candidates\nMatch: fuzzy\nEvidence: exact\nExecution: complete within requested bounds\nCoverage: unknown\n\nANSWER\nFound 2 candidate matches for \"upgrade_project\".\n\nPRIMARY RESULTS\n- knowme_builder::engine::upgrade_project [function] tools/knowme-builder/src/engine.rs:L661:0-L761:1\n  id: sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181\n- knowme_builder::engine::upgrade_project [function] tools/knowme-builder/src/engine.rs:L661:0-L761:1\n  id: sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181\n\nPATHS\n- None retained.\n\nRELATIONSHIPS\n- None retained.\n\nNEXT ACTIONS\n- inspect_target: Inspect the exact retained target with source-grounded context. · MCP task_context {\"intent\":\"explain\",\"target\":\"sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181\"}\n\nDETAILS\n2 primary result(s) · 0 relationship(s) · 0 path(s)\nFull provenance is available in the raw JSON/evidence view."
+      }
+    ],
+    "structuredContent": {
+      "schema": "compass.mcp.tool-result/1",
+      "result": {
+        "schema": "compass.query/1",
+        "operation": "search",
+        "results": [
+          {
+            "nodeId": "sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181",
+            "score": 320000,
+            "matchedFields": [
+              "name",
+              "qualified_name"
+            ]
+          }
+        ],
+        "nodes": [
+          {
+            "id": "sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181",
+            "kind": "function",
+            "roles": [],
+            "name": "upgrade_project()",
+            "qualifiedName": "knowme_builder::engine::upgrade_project",
+            "language": "rust",
+            "framework": null,
+            "source": {
+              "file": "tools/knowme-builder/src/engine.rs",
+              "startByte": 23132,
+              "endByte": 27001,
+              "startLine": 661,
+              "startColumn": 0,
+              "endLine": 761,
+              "endColumn": 1
+            },
+            "details": {
+              "type": "symbol",
+              "data": {
+                "signature": "fn upgrade_project(args: UpgradeArgs) -> Result<CommandResult>",
+                "signatureDigest": "ff61780f8bf0c1525d0b4435b86ab27c47c0b20adf0d2b000d7ed4120957a7a0",
+                "implementationDigest": "9916162d3e5883516ced47f0b98c359f0bb8dc53382b791fea37237ed5a7b1ee",
+                "sourceDigest": "5001d6412e29429cdb6da3d90d1e28ee58e0a1ad82aac28532f286e654a51006"
+              }
+            },
+            "evidence": [
+              {
+                "layer": "structural_graph",
+                "origin": "ast",
+                "extractor": "compass.languages.rust.universal",
+                "confidence": "exact",
+                "anchor": {
+                  "file": "tools/knowme-builder/src/engine.rs",
+                  "startByte": 23135,
+                  "endByte": 23150,
+                  "startLine": 661,
+                  "startColumn": 3,
+                  "endLine": 661,
+                  "endColumn": 18
+                },
+                "rule": null,
+                "wiringSite": null,
+                "resolution": "exact"
+              }
+            ]
+          }
+        ],
+        "edges": [],
+        "files": [],
+        "paths": [],
+        "diagnostics": [],
+        "limits": {
+          "maxDepth": 8,
+          "maxNodes": 500,
+          "maxEdges": 1000,
+          "maxPaths": 100,
+          "maxCandidates": 3,
+          "maxSourceBytes": 1048576,
+          "maxResponseBytes": 20000
+        },
+        "truncated": false
+      },
+      "transportTruncation": {
+        "schema": "compass.mcp.transport-truncation/1",
+        "truncated": false,
+        "requiredBytes": 3859,
+        "limitBytes": 16777216,
+        "omittedBytes": 0
+      },
+      "semanticResultDigest": "sha256:9a9569b620ae2e8b9f19eab3dddab0518217dbec01c5f9de79ff95df39387ca5",
+      "agentView": {
+        "schema": "compass.query.agent-view/1",
+        "request": {
+          "operation": "search",
+          "operands": [
+            {
+              "role": "query",
+              "value": "upgrade_project"
+            }
+          ]
+        },
+        "status": {
+          "resultState": "candidates",
+          "matchState": "fuzzy",
+          "evidenceState": "exact",
+          "sourceExecution": "complete",
+          "projection": "complete",
+          "coverage": "unknown"
+        },
+        "answer": {
+          "headline": "Found 2 candidate matches for \"upgrade_project\".",
+          "basis": [
+            {
+              "kind": "node",
+              "id": "sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181"
+            }
+          ]
+        },
+        "primaryResults": [
+          {
+            "id": "sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181",
+            "label": "knowme_builder::engine::upgrade_project",
+            "kind": "function",
+            "roles": [],
+            "language": "rust",
+            "source": {
+              "file": "tools/knowme-builder/src/engine.rs",
+              "startLine": 661,
+              "startColumn": 0,
+              "endLine": 761,
+              "endColumn": 1
+            }
+          },
+          {
+            "id": "sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181",
+            "label": "knowme_builder::engine::upgrade_project",
+            "kind": "function",
+            "roles": [],
+            "language": "rust",
+            "source": {
+              "file": "tools/knowme-builder/src/engine.rs",
+              "startLine": 661,
+              "startColumn": 0,
+              "endLine": 761,
+              "endColumn": 1
+            }
+          }
+        ],
+        "relationships": [],
+        "paths": [],
+        "caveats": [],
+        "nextActions": [
+          {
+            "kind": "inspect_target",
+            "reason": "Inspect the exact retained target with source-grounded context.",
+            "cli": {
+              "argv": [
+                "compass",
+                "context",
+                "explain",
+                "sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181"
+              ]
+            },
+            "mcp": {
+              "tool": "task_context",
+              "arguments": {
+                "intent": "explain",
+                "target": "sha256:e5bc33fa7950e12585018ecf99d9d30aaee4a7d97b91deaaa6d0a1b8009b7181"
+              }
+            }
+          }
+        ],
+        "omissions": {
+          "primaryResults": 0,
+          "relationships": 0,
+          "paths": 0,
+          "caveats": 0,
+          "nextActions": 0,
+          "total": 0
+        },
+        "identity": {
+          "rawSchema": "compass.query/1",
+          "graphIdentity": "cb2cad10a99e0622b5f34cb950505db05b6b16b5d8f7e14747edab1d9a3a71d1",
+          "buildGenerationIdentity": "sha256:346e7662794ff89791e840a5ec5cd17e1ac441722c1b5c2658af7e9cf768f7ab",
+          "sourceResultDigest": "sha256:9a9569b620ae2e8b9f19eab3dddab0518217dbec01c5f9de79ff95df39387ca5",
+          "viewDigest": "sha256:66187ed7d8867dccee2aefd25503afd7fcf0df5e7033e0d99bd4a28f902582f4"
+        },
+        "sourceTruncated": false,
+        "projectionTruncated": false
+      }
+    },
+    "isError": false
+  }
+}

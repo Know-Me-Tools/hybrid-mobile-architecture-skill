@@ -2,8 +2,9 @@
 
 import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = resolve(new URL("..", import.meta.url).pathname);
+const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const settings = JSON.parse(
   await readFile(join(root, ".claude/settings.json"), "utf8"),
 );
@@ -21,8 +22,8 @@ for (const hook of prohibitedLifecycleHooks) {
   }
 }
 const adapters = [
-  ".claude/hooks/skill-activation.py",
-  ".kimi-code/hooks/skill-activation.py",
+  ".claude/hooks/skill-activation.mjs",
+  ".kimi-code/hooks/skill-activation.mjs",
   ".opencode/hooks/skill-activation.mjs",
 ];
 for (const adapter of adapters) {

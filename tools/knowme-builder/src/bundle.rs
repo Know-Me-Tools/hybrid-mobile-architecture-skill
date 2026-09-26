@@ -83,7 +83,7 @@ mod tests {
     #[test]
     fn embedded_manifest_matches_crate_version() {
         let manifest = manifest().expect("manifest");
-        assert_eq!(manifest.skills.len(), 29);
+        assert_eq!(manifest.skills.len(), 35);
         assert_eq!(manifest.supported_harnesses.len(), 4);
     }
 

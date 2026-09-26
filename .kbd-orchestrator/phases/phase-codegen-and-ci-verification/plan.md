@@ -125,7 +125,7 @@ flutter build ios --simulator). Caches per compile-speed.md.
 ## Harness notes
 
 Prior-phase scorecard applied: claude 8/8, codex 2/2, opencode 0/2 → **no opencode
-lanes**. Dispatch via `.kbd-orchestrator/dispatch/dispatch.sh` (preamble now carries
+lanes**. Dispatch via `node scripts/dispatch.mjs` (preamble now carries
 AGENT_BASE_RULES as authority #0). Sequential app-changes run in the main checkout or
 serialized worktrees off latest main; parallel lanes (C-107, C-110) get worktrees.
 

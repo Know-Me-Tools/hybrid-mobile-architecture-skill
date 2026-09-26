@@ -52,7 +52,7 @@ decision reviewed against payload size and privacy class.
 client entity/server-state layer. TanStack Query (and TanStack DB) are
 prohibited in scaffolded projects — the sync plane owns staleness,
 deduplication, and revalidation, which is precisely the layer a query cache
-would duplicate incorrectly. `audit.sh` enforces this.
+would duplicate incorrectly. `audit.mjs` enforces this.
 
 **Rationale.** Query caches model *requests*; local-first apps model *data*.
 Once a synced local store exists, "is it stale?" is the sync engine's fact,

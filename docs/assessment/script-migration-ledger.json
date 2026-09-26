@@ -1,0 +1,659 @@
+{
+  "baselineCommit": "153f20cfe7642e4f4a647b838206e8b70852f4eb",
+  "count": 79,
+  "exemptions": [
+    "Genuine third-party vendor internals",
+    "Immutable historical evidence, not current executable helpers"
+  ],
+  "entries": [
+    {
+      "path": ".agents/skills/build-branded-docusaurus/scripts/scaffold.sh",
+      "baselineSha256": "4dec916a6649e5aa76747c06c3ba7d39229e71c3bf975bbf15e783642ecaa590",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".agents/skills/build-branded-docusaurus/scripts/scaffold.mjs"
+    },
+    {
+      "path": ".agents/skills/build-branded-docusaurus/scripts/verify.sh",
+      "baselineSha256": "c41dd6affa58cd4c028bdfead01303648872b16f3493902d9d4b85be8ea44b96",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".agents/skills/build-branded-docusaurus/scripts/verify.mjs"
+    },
+    {
+      "path": ".agents/skills/karpathy-progress-memory/scripts/record-progress.sh",
+      "baselineSha256": "f757416a1b70ee84da9360f3e4faaf90ac62dd062d9c29819708efb3a5805981",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".agents/skills/karpathy-progress-memory/scripts/record-progress.mjs"
+    },
+    {
+      "path": ".claude/hooks/a11y-reminder.py",
+      "baselineSha256": "2c89482d5a2872d31a592623501834ee4ef590bca8ada43ea27b38bd65fe8903",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".claude/hooks/a11y-reminder.mjs"
+    },
+    {
+      "path": ".claude/hooks/skill-activation.py",
+      "baselineSha256": "5ed7bfc885082e7759c57f766b073b7b19211c71685d6f50e6a68d0b9c2eb73d",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".claude/hooks/skill-activation.mjs"
+    },
+    {
+      "path": ".claude/skills/build-branded-docusaurus/scripts/scaffold.sh",
+      "baselineSha256": "4dec916a6649e5aa76747c06c3ba7d39229e71c3bf975bbf15e783642ecaa590",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".claude/skills/build-branded-docusaurus/scripts/scaffold.mjs"
+    },
+    {
+      "path": ".claude/skills/build-branded-docusaurus/scripts/verify.sh",
+      "baselineSha256": "c41dd6affa58cd4c028bdfead01303648872b16f3493902d9d4b85be8ea44b96",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".claude/skills/build-branded-docusaurus/scripts/verify.mjs"
+    },
+    {
+      "path": ".claude/skills/karpathy-progress-memory/scripts/record-progress.sh",
+      "baselineSha256": "f757416a1b70ee84da9360f3e4faaf90ac62dd062d9c29819708efb3a5805981",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".claude/skills/karpathy-progress-memory/scripts/record-progress.mjs"
+    },
+    {
+      "path": ".codex/skills/build-branded-docusaurus/scripts/scaffold.sh",
+      "baselineSha256": "4dec916a6649e5aa76747c06c3ba7d39229e71c3bf975bbf15e783642ecaa590",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".codex/skills/build-branded-docusaurus/scripts/scaffold.mjs"
+    },
+    {
+      "path": ".codex/skills/build-branded-docusaurus/scripts/verify.sh",
+      "baselineSha256": "c41dd6affa58cd4c028bdfead01303648872b16f3493902d9d4b85be8ea44b96",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".codex/skills/build-branded-docusaurus/scripts/verify.mjs"
+    },
+    {
+      "path": ".codex/skills/karpathy-progress-memory/scripts/record-progress.sh",
+      "baselineSha256": "f757416a1b70ee84da9360f3e4faaf90ac62dd062d9c29819708efb3a5805981",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".codex/skills/karpathy-progress-memory/scripts/record-progress.mjs"
+    },
+    {
+      "path": ".kbd-orchestrator/dispatch/dispatch.sh",
+      "baselineSha256": "8afbdfd284d84eb024e90268bbe26be5416a9e0b155792f99cbb5ef3d15acf3f",
+      "status": "converted",
+      "owner": "coordinator",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/dispatch.mjs"
+    },
+    {
+      "path": ".kimi-code/hooks/skill-activation.py",
+      "baselineSha256": "ce05ab2b99daf995ebe5894ef19feba974d6873da83279cc5095272b86a7d5ed",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".kimi-code/hooks/skill-activation.mjs"
+    },
+    {
+      "path": ".kimi-code/skills/build-branded-docusaurus/scripts/scaffold.sh",
+      "baselineSha256": "4dec916a6649e5aa76747c06c3ba7d39229e71c3bf975bbf15e783642ecaa590",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".kimi-code/skills/build-branded-docusaurus/scripts/scaffold.mjs"
+    },
+    {
+      "path": ".kimi-code/skills/build-branded-docusaurus/scripts/verify.sh",
+      "baselineSha256": "c41dd6affa58cd4c028bdfead01303648872b16f3493902d9d4b85be8ea44b96",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".kimi-code/skills/build-branded-docusaurus/scripts/verify.mjs"
+    },
+    {
+      "path": ".kimi-code/skills/karpathy-progress-memory/scripts/record-progress.sh",
+      "baselineSha256": "f757416a1b70ee84da9360f3e4faaf90ac62dd062d9c29819708efb3a5805981",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".kimi-code/skills/karpathy-progress-memory/scripts/record-progress.mjs"
+    },
+    {
+      "path": ".kimi/skills/build-branded-docusaurus/scripts/scaffold.sh",
+      "baselineSha256": "4dec916a6649e5aa76747c06c3ba7d39229e71c3bf975bbf15e783642ecaa590",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".kimi/skills/build-branded-docusaurus/scripts/scaffold.mjs"
+    },
+    {
+      "path": ".kimi/skills/build-branded-docusaurus/scripts/verify.sh",
+      "baselineSha256": "c41dd6affa58cd4c028bdfead01303648872b16f3493902d9d4b85be8ea44b96",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".kimi/skills/build-branded-docusaurus/scripts/verify.mjs"
+    },
+    {
+      "path": ".kimi/skills/karpathy-progress-memory/scripts/record-progress.sh",
+      "baselineSha256": "f757416a1b70ee84da9360f3e4faaf90ac62dd062d9c29819708efb3a5805981",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".kimi/skills/karpathy-progress-memory/scripts/record-progress.mjs"
+    },
+    {
+      "path": ".opencode/skills/build-branded-docusaurus/scripts/scaffold.sh",
+      "baselineSha256": "4dec916a6649e5aa76747c06c3ba7d39229e71c3bf975bbf15e783642ecaa590",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".opencode/skills/build-branded-docusaurus/scripts/scaffold.mjs"
+    },
+    {
+      "path": ".opencode/skills/build-branded-docusaurus/scripts/verify.sh",
+      "baselineSha256": "c41dd6affa58cd4c028bdfead01303648872b16f3493902d9d4b85be8ea44b96",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".opencode/skills/build-branded-docusaurus/scripts/verify.mjs"
+    },
+    {
+      "path": ".opencode/skills/karpathy-progress-memory/scripts/record-progress.sh",
+      "baselineSha256": "f757416a1b70ee84da9360f3e4faaf90ac62dd062d9c29819708efb3a5805981",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": ".opencode/skills/karpathy-progress-memory/scripts/record-progress.mjs"
+    },
+    {
+      "path": "assets/templates/scripts/android/build.sh",
+      "baselineSha256": "5c8f13c6cee62715008d341c23b82867849975276547867c4733d47f1272a7f3",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "assets/templates/scripts/android/build.mjs"
+    },
+    {
+      "path": "assets/templates/scripts/android/verify-device-runtime-gates.sh",
+      "baselineSha256": "e663977140e147a453d2e0dec734dd701b414c5c5affe5703cb4ce8dbcddbe82",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "assets/templates/scripts/android/verify-device-runtime-gates.mjs"
+    },
+    {
+      "path": "assets/templates/scripts/android/verify-native-inference-gates.sh",
+      "baselineSha256": "74dd045acdd245b696983fa32f91d9d420f30805ab2eb45bf01e9e24a744cbb4",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "assets/templates/scripts/android/verify-native-inference-gates.mjs"
+    },
+    {
+      "path": "assets/templates/scripts/ios/build-xcframework.sh",
+      "baselineSha256": "61e072cf25f55ce6cd56e039ecd0b64413ecebec40e307e54ca96b60766ad95a",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "assets/templates/scripts/ios/build-xcframework.mjs"
+    },
+    {
+      "path": "cleanup_antigravity_ide_exts.py",
+      "baselineSha256": "a6601e43c81c19fda37dd90755467cdeb310ca5742c3ef84508ae84e53e7fd3b",
+      "status": "converted",
+      "owner": "coordinator",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "cleanup_antigravity_ide_exts.mjs"
+    },
+    {
+      "path": "deploy/scripts/validate-catalog.sh",
+      "baselineSha256": "42f768de4c555447fa3d61de2bec182a4d80ea8dfcece71ab138f16343907323",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "deploy/scripts/validate-catalog.mjs"
+    },
+    {
+      "path": "deploy/scripts/validate-gitops.sh",
+      "baselineSha256": "d4b58c43824b4d7c5ea7193f6836c522fb3714a8016450643d5e56fd789dfced",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "deploy/scripts/validate-gitops.mjs"
+    },
+    {
+      "path": "deploy/scripts/verify-postgres.sh",
+      "baselineSha256": "1c07d10427c068085412ff325ad4ba16e888f6f3c75f3d616eb4f939b57b856e",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "deploy/scripts/verify-postgres.mjs"
+    },
+    {
+      "path": "scripts/add-auth.sh",
+      "baselineSha256": "8fe0b82f9d05237ad6041ed11f5fea5eef9b919fa784675f7992302ce4abfcc3",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/add-auth.mjs"
+    },
+    {
+      "path": "scripts/add-project-skills.sh",
+      "baselineSha256": "7180263642b5a3f4a6d8a11a31c88c42c8043152153b4ef850372a0a5384ead3",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/add-project-skills.mjs"
+    },
+    {
+      "path": "scripts/audit.sh",
+      "baselineSha256": "a248e14d27f3c0860847732d293efe1c287e03a930bbb11d9db077bc740a42e7",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/audit.mjs"
+    },
+    {
+      "path": "scripts/check-env.sh",
+      "baselineSha256": "81f1f1328cfd308bc69ef6dcc80d2333c05be46ed3a8240c817aade0f8d48096",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/check-env.mjs"
+    },
+    {
+      "path": "scripts/check-git-url-discovery.sh",
+      "baselineSha256": "43bd68e5838dbcbbfeda06e0309748542f2a1c9f276791837ae66bbfafd7344e",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/check-git-url-discovery.mjs"
+    },
+    {
+      "path": "scripts/check-w6-mapping.sh",
+      "baselineSha256": "df4f26234711b1b05b42b5527fa5d8224f7e3741a49781b89ec1ef8e19000f3c",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/check-w6-mapping.mjs"
+    },
+    {
+      "path": "scripts/consolidate-prometheus-wikis.py",
+      "baselineSha256": "3d3a60b3699ddd291098b2f1a075031ce1eff019185edb605c14292fa7ab1528",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/consolidate-prometheus-wikis.mjs"
+    },
+    {
+      "path": "scripts/gen-design-tokens.sh",
+      "baselineSha256": "e6260bd459c981f4675b43d0ab75253dd1f13c8934a5df0138d4fca956cacff7",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/gen-design-tokens.mjs"
+    },
+    {
+      "path": "scripts/install-flutter.sh",
+      "baselineSha256": "fb55799c3929ee0789aacc4202be1fa22a10e7c3fe41fd053e1da5e6946f1259",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/install-flutter.mjs"
+    },
+    {
+      "path": "scripts/install-global-harnesses.sh",
+      "baselineSha256": "9ad0f7582965f1cca90a789ea6eb5501fb07a61c6dc3d28fe334bbb4e9698a73",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/install-global-harnesses.mjs"
+    },
+    {
+      "path": "scripts/install-harness-package.sh",
+      "baselineSha256": "2f8fc288bc085ab367d4a0eac17d8cc7b76c6d070995e998bb817a0c6f92aa0a",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/install-harness-package.mjs"
+    },
+    {
+      "path": "scripts/install-hooks-reliability.sh",
+      "baselineSha256": "37bf2e54e87e81edd369962782816139ffd1cb592ed0bb728a2e982a76fe1661",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/install-hooks-reliability.mjs"
+    },
+    {
+      "path": "scripts/lib-knowme-builder.sh",
+      "baselineSha256": "21772652eeeded850372a6beff5d80d7a422fe2d73e5887d9b8a6140338f448b",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/portable/builder.mjs"
+    },
+    {
+      "path": "scripts/lib-versions.sh",
+      "baselineSha256": "e45f648d7310256c789629e035a4b22c1b3c35332dacf4a404d6e9d36b313f4a",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/portable/versions.mjs"
+    },
+    {
+      "path": "scripts/new-feature.sh",
+      "baselineSha256": "24674c3dfcdb803ea2798b385d485cbcbb7ebdc9ffc3ee4f05596ddcbb738e12",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/new-feature.mjs"
+    },
+    {
+      "path": "scripts/normalize-vendored-skills.sh",
+      "baselineSha256": "a299d0d58d65984310787cce315aaf4aa02c2188fc4436677959f5d4951aaee0",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/normalize-vendored-skills.mjs"
+    },
+    {
+      "path": "scripts/patch-cargokit-ios.sh",
+      "baselineSha256": "e50e002a3687e6dc93a4791b3a41d57277c9185a358fd9f76b759078185daa95",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/patch-cargokit-ios.mjs"
+    },
+    {
+      "path": "scripts/refiner-loop.sh",
+      "baselineSha256": "f0afc5d6fcb84bf4952a45658c6f3a0d117cf869792c829a08c4f8a107e15fe0",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/refiner-loop.mjs"
+    },
+    {
+      "path": "scripts/render-supervisor-plist.sh",
+      "baselineSha256": "3351386a5c191262d457422f992faaff4f9148582c4c5ce637b76d3fb4e05ad2",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/render-supervisor-plist.mjs"
+    },
+    {
+      "path": "scripts/run-all-gates.sh",
+      "baselineSha256": "8556200e5b299a69573fdc4d09f76bc8fd1eb6d34a03fd70e2781322112a09f4",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/run-all-gates.mjs"
+    },
+    {
+      "path": "scripts/scaffold-flutter.sh",
+      "baselineSha256": "20064c7c9c630234c5724340407e6fbf96816aafcd4484457a30149260f4b0d1",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/scaffold-flutter.mjs"
+    },
+    {
+      "path": "scripts/scaffold-hybrid.sh",
+      "baselineSha256": "d76593d1d5623259b2a3fef940c9b439977a7c2557f6eb7c4c647a99c16ec19b",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/scaffold-hybrid.mjs"
+    },
+    {
+      "path": "scripts/scaffold-packages.sh",
+      "baselineSha256": "568947a7ecffb797466e56696c3753e2070443fbb57f909018c1bca62b53e6b2",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/scaffold-packages.mjs"
+    },
+    {
+      "path": "scripts/scaffold-rust-core.sh",
+      "baselineSha256": "71794757a0c0b201f473d56ecdeabfa86d9852c68864ca58f7e47f6e89e7a90f",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/scaffold-rust-core.mjs"
+    },
+    {
+      "path": "scripts/scaffold-tauri-tray.sh",
+      "baselineSha256": "75694e8e2ffe7db26b16c6f65bf24cc8acc277c0166922b16fea58ecf2c00974",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/scaffold-tauri-tray.mjs"
+    },
+    {
+      "path": "scripts/scaffold-tauri.sh",
+      "baselineSha256": "a6fe93da55845a40d5a3f4bd03e95f7bee64375f92ed5b02059a27ff5579e7b2",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/scaffold-tauri.mjs"
+    },
+    {
+      "path": "scripts/sync-harness-skills.sh",
+      "baselineSha256": "b9662ca0e58cf49658cb7763c9d02494930c727a883fac8a06e34dfa471e7059",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/sync-harness-skills.mjs"
+    },
+    {
+      "path": "scripts/test-consumer-install.sh",
+      "baselineSha256": "9e77f89ce53671b556fcf207160325dff585b9af51db7448bb929ff7fccae744",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/test-consumer-install.mjs"
+    },
+    {
+      "path": "scripts/test-fixtures/consumer-install-negative.sh",
+      "baselineSha256": "a3570f4b95c2b24cd6cbe7d6a1038dee31c5c40c2ed575dfbd57ab69d2de37bb",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/test-fixtures/consumer-install-negative.mjs"
+    },
+    {
+      "path": "scripts/test-fixtures/tray-templates-negative.sh",
+      "baselineSha256": "4102181fb9d02ff408684d6d8619454a3a98fc06bbfa4e23798e3dc70a1f2108",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/test-fixtures/tray-templates-negative.mjs"
+    },
+    {
+      "path": "scripts/test-fixtures/w6-mapping-negative.sh",
+      "baselineSha256": "e1d98901e64d67184fe376e25f844ac39668ed53ef285031bded5a7f50baf96a",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/test-fixtures/w6-mapping-negative.mjs"
+    },
+    {
+      "path": "scripts/test-harness-installer.sh",
+      "baselineSha256": "d8750f995cbd38b1fe94df6757957bb2d3a3c972816f0805ed4c92f512eeba06",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/test-harness-installer.mjs"
+    },
+    {
+      "path": "scripts/verify-hooks-reliability.sh",
+      "baselineSha256": "b052ade48b6dcd5a14377ab7c48dd7e0e6189364d4a1499ebb34fa9afa4ab624",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/verify-hooks-reliability.mjs"
+    },
+    {
+      "path": "scripts/verify-scaffold.sh",
+      "baselineSha256": "fd2d1765d964592a53ffbe2936d44a1c5b9faa2657b169168d0d0f0cea01c5c4",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/verify-scaffold.mjs"
+    },
+    {
+      "path": "scripts/verify-skill-manifest.sh",
+      "baselineSha256": "7ce6fe07ec5ce316fd36a0c47f6745042441eeef7fd075728b7ebd9219a58139",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/verify-skill-manifest.mjs"
+    },
+    {
+      "path": "scripts/verify-tauri-boot.sh",
+      "baselineSha256": "67995b7709ca1009282316483939ccd838fdaf509d1f7a77c91ed7a173d1468a",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/verify-tauri-boot.mjs"
+    },
+    {
+      "path": "scripts/verify-tray-templates.sh",
+      "baselineSha256": "36e228869143ef1d0442e65a55564211639d622c1a5bf807f6bfd782b5f1af56",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/verify-tray-templates.mjs"
+    },
+    {
+      "path": "scripts/worktree-consolidation-inventory.py",
+      "baselineSha256": "cb6838cad0648067e416d43ce09c79aeedfae0fb0c76009358bed3a97945184b",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "scripts/worktree-consolidation-inventory.mjs"
+    },
+    {
+      "path": "skills/build-branded-docusaurus/scripts/scaffold.sh",
+      "baselineSha256": "4dec916a6649e5aa76747c06c3ba7d39229e71c3bf975bbf15e783642ecaa590",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "skills/build-branded-docusaurus/scripts/scaffold.mjs"
+    },
+    {
+      "path": "skills/build-branded-docusaurus/scripts/verify.sh",
+      "baselineSha256": "c41dd6affa58cd4c028bdfead01303648872b16f3493902d9d4b85be8ea44b96",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "skills/build-branded-docusaurus/scripts/verify.mjs"
+    },
+    {
+      "path": "skills/karpathy-progress-memory/scripts/record-progress.sh",
+      "baselineSha256": "f757416a1b70ee84da9360f3e4faaf90ac62dd062d9c29819708efb3a5805981",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "skills/karpathy-progress-memory/scripts/record-progress.mjs"
+    },
+    {
+      "path": "templates/project-skills/build-branded-docusaurus/scripts/scaffold.sh",
+      "baselineSha256": "4dec916a6649e5aa76747c06c3ba7d39229e71c3bf975bbf15e783642ecaa590",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "templates/project-skills/build-branded-docusaurus/scripts/scaffold.mjs"
+    },
+    {
+      "path": "templates/project-skills/build-branded-docusaurus/scripts/verify.sh",
+      "baselineSha256": "c41dd6affa58cd4c028bdfead01303648872b16f3493902d9d4b85be8ea44b96",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "templates/project-skills/build-branded-docusaurus/scripts/verify.mjs"
+    },
+    {
+      "path": "templates/project-skills/hooks/a11y-reminder.py",
+      "baselineSha256": "2c89482d5a2872d31a592623501834ee4ef590bca8ada43ea27b38bd65fe8903",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "templates/project-skills/hooks/a11y-reminder.mjs"
+    },
+    {
+      "path": "templates/project-skills/hooks/skill-activation.py",
+      "baselineSha256": "0e2af60c834317d6540449d116683fc2fdb6cc9aa20aed61c2347e57da766a73",
+      "status": "converted",
+      "owner": "portable-runtime",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "templates/project-skills/hooks/skill-activation.mjs"
+    },
+    {
+      "path": "templates/project-skills/karpathy-progress-memory/scripts/record-progress.sh",
+      "baselineSha256": "f757416a1b70ee84da9360f3e4faaf90ac62dd062d9c29819708efb3a5805981",
+      "status": "converted",
+      "owner": "native-helpers",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim.",
+      "destination": "templates/project-skills/karpathy-progress-memory/scripts/record-progress.mjs"
+    },
+    {
+      "path": "scripts/test-fixtures/harness-installer/claude",
+      "baselineSha256": "2f1704c09df9cab6f1e298e738c24ce5576af900cf398e967b0f51ea31a5a6c7",
+      "owner": "portable-runtime",
+      "inventoryMethod": "extensionless shell shebang",
+      "destination": "runtime/tests/harness-installer.test.mjs",
+      "status": "converted",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim."
+    },
+    {
+      "path": "scripts/test-fixtures/harness-installer/codex",
+      "baselineSha256": "a8f5c455cc4201ad6b312cc6945a78ebffccf0ce53a2a2e75937d323944ad38c",
+      "owner": "portable-runtime",
+      "inventoryMethod": "extensionless shell shebang",
+      "destination": "runtime/tests/harness-installer.test.mjs",
+      "status": "converted",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim."
+    },
+    {
+      "path": "scripts/test-fixtures/harness-installer/npx",
+      "baselineSha256": "53379c9a43adb0515b068f61aca8b82b2dcdbe7e0783e07a73e0efc44b47f154",
+      "owner": "portable-runtime",
+      "inventoryMethod": "extensionless shell shebang",
+      "destination": "runtime/tests/harness-installer.test.mjs",
+      "status": "converted",
+      "notes": "Language/runtime migration recorded; consult verification receipt for executed behavior and host limitations. No blanket all-platform parity claim."
+    }
+  ],
+  "extensionInventoryCount": 76,
+  "vendorExceptions": [
+    {
+      "path": "assets/templates/rust/vendor/**",
+      "reason": "Genuine third-party native dependencies"
+    },
+    {
+      "path": "Flutter SDK flutter.bat/dart.bat and SDK native build internals",
+      "reason": "External vendor SDK launchers, narrowly scoped adapter; no first-party shell fallback"
+    }
+  ],
+  "summary": {
+    "converted": 79
+  }
+}

@@ -1,6 +1,6 @@
 # tokens.toml — THE design-token source. One file, two surfaces.
 #
-# `scripts/gen-design-tokens.sh` reads this and emits BOTH:
+# `scripts/gen-design-tokens.mjs` reads this and emits BOTH:
 #   desktop/src/index.css        Tailwind 4 @theme block
 #   mobile/lib/core/theme/tokens.dart   Dart token class
 #

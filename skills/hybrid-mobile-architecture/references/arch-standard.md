@@ -98,7 +98,7 @@ process with a human accountable) for:
 
 - the frb + Tauri-plugin bridge surfaces (codegen, type sync, streaming seams)
 - the embedded-engine lifecycle contracts (see `docs/pglite-oxide-tauri-hybrid.md`)
-- `versions.toml` currency and the `audit.sh doc-consistency` gate
+- `versions.toml` currency and the `audit.mjs doc-consistency` gate
 
 If no one owns the bridge, the two-shell strategy silently becomes two
 codebases. (Source: 2026-07-16 independent assessment, rec #10.)

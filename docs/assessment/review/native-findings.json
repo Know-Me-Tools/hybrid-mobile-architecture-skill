@@ -1,0 +1,17 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "same-model-fallback-weaker-guarantee",
+  "scope": "tools/knowme-builder native diagnostics, bounded adoption/upgrade foundation, and public CLI tests after adoption-recovery correction. Excludes tools/platform-native and portable runtime. This is not certification of complete migration transactions, live Windows execution, baseline application runnability, or the full implementation plan.",
+  "findings": [],
+  "checked_classes": [
+    "Adoption recovery regression: existing adoption now checks trailing control files before success; check mode reports missing files without writes and apply restores missing files while preserving existing contents.",
+    "Correctness: recovery validates its path list before writes; public tests cover incomplete state, restoration, preserved metadata, user modifications and repeated no-op execution.",
+    "Data preservation: upgrade preflights semantic conflicts before application writes and leaves application files/version metadata unchanged when conflicts exist; transactional interruption recovery is explicitly outside this bounded implementation.",
+    "Path escape: recovery, managed upgrade and proposal paths are checked for relative-path traversal and symbolic links before writes.",
+    "Compatibility: missing legacy rendering identity requires explicit input; persisted identity survives directory moves; unsupported schemas and versions fail explicitly.",
+    "Platform status: diagnostics distinguish installed Rust targets from Windows prerequisites and leave linking, native dependencies and launch unverified.",
+    "Constraint breaches and silent failure: no additional blocking defect identified within the stated scope; producer-reported test/clippy results were not independently rerun by this reviewer."
+  ]
+}

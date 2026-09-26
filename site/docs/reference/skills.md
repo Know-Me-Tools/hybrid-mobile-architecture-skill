@@ -97,7 +97,7 @@ claims/conflicts, or lifecycle, and cannot force a session to continue.
 Workstation:
 
 ```bash
-bash scripts/install-global-harnesses.sh
+node scripts/install-global-harnesses.mjs
 ```
 
 Project:
@@ -113,7 +113,7 @@ knowme-builder skills check --path <project>
 the 29 detailed companion pages linked above are generated projections.
 
 ```bash
-bash scripts/sync-harness-skills.sh --check
+node scripts/sync-harness-skills.mjs --check
 node site/scripts/generate-skill-reference.mjs --check
 ```
 

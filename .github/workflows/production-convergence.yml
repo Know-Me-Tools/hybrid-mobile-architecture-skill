@@ -1,17 +1,14 @@
 name: production-convergence
-
 on:
   push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
-
+    branches:
+      - main
+  pull_request: null
+  workflow_dispatch: null
 permissions:
   contents: read
-
 env:
   CARGO_TERM_COLOR: always
-
 jobs:
   authority:
     name: Canonical manifests, skills, and security
@@ -19,38 +16,19 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
       - name: Generate canonical artifacts
-        run: |
-          node scripts/generate-builder-manifests.mjs
-          node scripts/generate-skill-metadata.mjs
-          node scripts/generate-skill-evals.mjs
-          node scripts/generate-command-contract.mjs
-          node site/scripts/generate-skill-reference.mjs
+        run: node scripts/ci-package.mjs generate
       - name: Reject generated drift
         run: git diff --exit-code
       - name: Validate package authority
-        run: |
-          node scripts/check-builder-authority.mjs --release
-          node scripts/check-skill-contracts.mjs
-          node scripts/check-runtime-security.mjs
-          node scripts/check-prometheus-boundary.mjs
-          node scripts/sync-skill-resources.mjs --check
-          bash scripts/sync-harness-skills.sh --check
-          node --check .opencode/plugins/knowme-builder.mjs
-          node scripts/test-opencode-plugin.mjs
-          bash scripts/audit.sh doc-consistency
-          bash scripts/audit.sh generator-purity
+        run: node scripts/ci-package.mjs authority
       - name: Reject tracked runtime exhaust
-        run: |
-          if git ls-files | grep -E '(^|/)(node_modules|target|dist|build|site/build|\\.docusaurus|\\.DS_Store)(/|$)|\\.kbd-orchestrator/(dispatch-logs|hook-logs|status)|\\.prometheus/events\\.jsonl'; then
-            echo "tracked runtime exhaust detected" >&2
-            exit 1
-          fi
-      - name: Shell syntax and portability
-        run: |
-          find scripts -type f -name '*.sh' -print0 | xargs -0 bash -n
-          find scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck --severity=warning
-
+        run: node scripts/ci-package.mjs exhaust
+      - name: Portable runtime language gate
+        run: node scripts/check-portable-runtime.mjs
   cli:
     name: CLI and byte-stable profiles (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -58,9 +36,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15]
+        os:
+          - ubuntu-24.04
+          - macos-15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
       - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
         with:
           toolchain: stable
@@ -69,34 +52,24 @@ jobs:
         with:
           workspaces: tools/knowme-builder
       - name: Rust quality gates
-        run: |
-          cargo fmt --manifest-path tools/knowme-builder/Cargo.toml -- --check
-          cargo clippy --manifest-path tools/knowme-builder/Cargo.toml --all-targets -- -D warnings
-          cargo test --manifest-path tools/knowme-builder/Cargo.toml
+        run: node scripts/ci-package.mjs rust-gates
       - name: Generate runnable profiles twice
-        shell: bash
-        run: |
-          cli="cargo run --quiet --manifest-path tools/knowme-builder/Cargo.toml --"
-          for profile in sovereign-hybrid governed-web-shell; do
-            mkdir -p "${RUNNER_TEMP}/first" "${RUNNER_TEMP}/second"
-            $cli new "${RUNNER_TEMP}/first/fixture" --profile "$profile" --mode runnable
-            $cli new "${RUNNER_TEMP}/second/fixture" --profile "$profile" --mode runnable
-            diff -rq "${RUNNER_TEMP}/first/fixture" "${RUNNER_TEMP}/second/fixture"
-            rm -rf "${RUNNER_TEMP}/first/fixture" "${RUNNER_TEMP}/second/fixture"
-          done
+        run: node scripts/ci-package.mjs profiles
       - name: Manifest and command contract checks
-        run: |
-          cargo run --quiet --manifest-path tools/knowme-builder/Cargo.toml -- manifest check
-          node scripts/generate-command-contract.mjs --check
-
+        run: node scripts/ci-package.mjs manifest
   clean-install:
     name: Git URL discovery and isolated harness install
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    needs: [authority, cli]
+    needs:
+      - authority
+      - cli
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
       - name: Verify public and internal discovery counts
-        run: bash scripts/check-git-url-discovery.sh
+        run: node scripts/check-git-url-discovery.mjs
       - name: Verify idempotence, receipts, and safe uninstall
-        run: bash scripts/test-harness-installer.sh
+        run: node scripts/test-harness-installer.mjs
