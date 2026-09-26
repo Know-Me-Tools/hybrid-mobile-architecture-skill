@@ -53,8 +53,33 @@ await main(async () => {
       `--use-application-binary=${applicationBinary}`
     ];
     run("flutter", [...base, "--keep-app-running"], { cwd: project });
+    const androidMarker = "cache/knowme-builder-restart-pass";
+    run("adb", ["-s", existingDevice, "shell", "run-as", applicationId, "rm", "-f", androidMarker]);
     run("adb", ["-s", existingDevice, "shell", "am", "force-stop", applicationId]);
-    run("flutter", [...base, "--route=/verify-restart"], { cwd: project });
+    run("adb", [
+      "-s",
+      existingDevice,
+      "shell",
+      "am",
+      "start",
+      "-a",
+      "android.intent.action.MAIN",
+      "-c",
+      "android.intent.category.LAUNCHER",
+      "--es",
+      "route",
+      "/verify-restart",
+      "-n",
+      `${applicationId}/.MainActivity`
+    ]);
+    const deadline = Date.now() + 5 * 60 * 1e3;
+    let markerContents = "";
+    while (Date.now() < deadline) {
+      markerContents = run("adb", ["-s", existingDevice, "shell", "run-as", applicationId, "cat", androidMarker], { capture: true, allowFailure: true });
+      if (markerContents === "PASS: rendered persisted note after relaunch\n") break;
+      await new Promise((resolveDelay) => setTimeout(resolveDelay, 1e3));
+    }
+    assert(markerContents === "PASS: rendered persisted note after relaunch\n", "restarted Android application did not publish its rendered-state marker within five minutes");
     process.stdout.write(`PASS: Flutter UI -> Rust FFI -> SQLite -> application relaunch recovery on device ${existingDevice}
 `);
     return;

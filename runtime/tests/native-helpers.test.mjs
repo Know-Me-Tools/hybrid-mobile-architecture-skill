@@ -92,6 +92,14 @@ test('iOS restart proof couples the rendered-state marker to the direct relaunch
   assert.match(integrationTest, /PASS: rendered persisted note after relaunch/);
 });
 
+test('Android restart proof couples the rendered-state marker to the direct relaunch', () => {
+  const helper = readFileSync(join(repo, 'runtime/src/native-helpers/verify-flutter-ios-restart.mts'), 'utf8');
+  assert.match(helper, /shell', 'run-as', applicationId!, 'rm', '-f', androidMarker/);
+  assert.match(helper, /shell', 'am', 'start'[\s\S]*'--es', 'route', '\/verify-restart'/);
+  assert.match(helper, /shell', 'run-as', applicationId!, 'cat', androidMarker/);
+  assert.match(helper, /restarted Android application did not publish its rendered-state marker within five minutes/);
+});
+
 test('standalone canonical and project-template skills have identical portable scripts', () => {
   for (const [skill, scripts] of [['build-branded-docusaurus', ['scaffold', 'verify', 'build-site']], ['karpathy-progress-memory', ['record-progress']]]) {
     for (const script of scripts) assert.deepEqual(readFileSync(join(repo, 'skills', skill, 'scripts', `${script}.mjs`)), readFileSync(join(repo, 'templates/project-skills', skill, 'scripts', `${script}.mjs`)));
