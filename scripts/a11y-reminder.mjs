@@ -1,5 +1,5 @@
 // TJ-ARCH-MOB-001 compliant
-import { fstatSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 export function reminder(payload) {
     if (!payload || typeof payload !== 'object')
         return;
@@ -12,8 +12,7 @@ export function reminder(payload) {
     return { hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: `UI file edited (${tool.file_path}). Before marking done, invoke the a11y-gate skill and run the WCAG 2.2 AA checklist (contrast in both themes, keyboard reachability, accessible names, reduced motion, live-region announcements).` } };
 }
 try {
-    const input = fstatSync(0);
-    if (input.isFIFO() || input.isFile() || input.isSocket()) {
+    if (!process.stdin.isTTY) {
         const result = reminder(JSON.parse(readFileSync(0, 'utf8')));
         if (result)
             process.stdout.write(`${JSON.stringify(result)}\n`);

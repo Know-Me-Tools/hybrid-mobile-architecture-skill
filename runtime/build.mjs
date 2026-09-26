@@ -50,4 +50,14 @@ for (const [entry, outputs] of Object.entries(helperOutputs)) {
 }
 await cp(join(root, 'scripts/opencode-skill-activation.mjs'), join(root, '.opencode/hooks/skill-activation.mjs'));
 await cp(join(root, 'scripts/opencode-plugin.mjs'), join(root, '.opencode/plugins/knowme-builder.mjs'));
-await build({ absWorkingDir: runtime, entryPoints: [join(runtime, 'src/ci-deployment.mts')], outfile: join(root, 'scripts/ci-deployment.mjs'), bundle: true, platform: 'node', format: 'esm', target: 'node22', logLevel: 'warning' });
+await build({
+  absWorkingDir: runtime,
+  entryPoints: [join(runtime, 'src/ci-deployment.mts')],
+  outfile: join(root, 'scripts/ci-deployment.mjs'),
+  bundle: true,
+  platform: 'node',
+  format: 'esm',
+  target: 'node22',
+  banner: { js: "// TJ-ARCH-MOB-001 compliant\nimport { createRequire as __createRequire } from 'node:module'; const require = __createRequire(import.meta.url);" },
+  logLevel: 'warning',
+});

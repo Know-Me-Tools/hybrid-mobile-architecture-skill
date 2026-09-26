@@ -13,7 +13,8 @@ without per-package special cases.
 
 ## What a connected skill package is
 
-- A git repository the consumer clones into `~/.prometheus/skill-packages/<id>/`
+- A git repository the consumer clones into the configured
+  `<skill-package-root>/<id>/`
 - A `marketplace.json` at the repo root declaring plugins
 - A `plugin.json` at the repo root declaring the package
 - A skill tree the harness can register
@@ -78,7 +79,7 @@ mirror. This repo already mirrors every registered skill into `.agents/`,
 
 - Auto-pulling a package when a new commit lands. Upgrades are operator-initiated.
 - Installing without running the validation gate first.
-- Installing anywhere other than `~/.prometheus/skill-packages/<id>/`.
+- Installing anywhere other than the configured `<skill-package-root>/<id>/`.
 - Shipping a package with no manifest verifier — the consumer refuses it.
 - Hiding the parsed manifest from the operator.
 - Running the harness install with elevated privileges. It is user-level.

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyPathExact } from './support.mjs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,7 +16,7 @@ test('standalone progress payload records mirrored wiki and valid events with pr
     const app = join(root, 'Existing App'); mkdirSync(app);
     assert.equal(spawnSync('git', ['init', app]).status, 0);
     const script = join(root, 'record-progress.mjs');
-    cpSync(join(repo, 'skills/karpathy-progress-memory/scripts/record-progress.mjs'), script);
+    copyPathExact(join(repo, 'skills/karpathy-progress-memory/scripts/record-progress.mjs'), script);
     const result = invoke(script, ['--phase', 'native', '--title', 'Portable "helpers"', '--summary', `Updated ${app}`, '--evidence', 'Built and exercised', '--next', 'Windows runner'], { cwd: app, env: { ...process.env, PROMETHEUS_PRIVATE_ROOT: join(root, 'private') } });
     assert.equal(result.status, 0, result.stderr);
     const [local, privateCopy] = result.stdout.trim().split(/\r?\n/);

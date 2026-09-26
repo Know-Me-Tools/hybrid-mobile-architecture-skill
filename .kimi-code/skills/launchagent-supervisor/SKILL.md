@@ -60,8 +60,8 @@ bare-`KeepAlive` bug.
 Type=simple
 Restart=on-failure
 RestartSec=15
-StandardOutput=append:%h/.prometheus/logs/<service>.log
-StandardError=append:%h/.prometheus/logs/<service>.err
+StandardOutput=append:%h/Library/Logs/KnowMe/<service>.log
+StandardError=append:%h/Library/Logs/KnowMe/<service>.err
 
 [Install]
 WantedBy=default.target

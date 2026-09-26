@@ -1,9 +1,8 @@
 // TJ-ARCH-MOB-001 compliant
-import { readFileSync, fstatSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 try {
-    const input = fstatSync(0);
-    if (input.isFile() || input.isFIFO() || input.isSocket()) {
+    if (!process.stdin.isTTY) {
         const payload = JSON.parse(readFileSync(0, 'utf8'));
         const manifest = JSON.parse(readFileSync(process.env.KNOWME_BUILDER_ACTIVATION_MANIFEST ?? resolve('.knowme-builder/activation-manifest.json'), 'utf8'));
         const prompt = String(payload.prompt ?? payload.message ?? '').toLowerCase();

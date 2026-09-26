@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync, cpSync } from 'node:fs';
+import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { assert, main, repoRoot } from './common.mjs';
@@ -197,11 +197,15 @@ await main(() => {
         for (const [scope, minimum] of Object.entries({ root: 238, desktop: 20, 'src-tauri': 3, rust: 34 }))
             assert(manifest.scopes[scope].wiki.canonical_page_paths >= minimum, `wiki consolidation proof failed: ${scope}: ${manifest.scopes[scope].wiki.canonical_page_paths} < ${minimum}`);
         for (const [scope, path] of Object.entries(scopes)) {
-            const destination = join(root, path), wiki = join(destination, 'knowledge/wiki');
+            const source = join(staging, scope), destination = join(root, path), wiki = join(destination, 'knowledge/wiki');
             if (existsSync(wiki))
                 for (const file of readdirSync(wiki).filter(file => file.endsWith('.md')))
                     rmSync(join(wiki, file));
-            cpSync(join(staging, scope), destination, { recursive: true });
+            for (const file of scopeFiles(source)) {
+                const target = join(destination, relative(source, file));
+                mkdirSync(dirname(target), { recursive: true });
+                copyFileSync(file, target);
+            }
         }
         const output = resolve(root, args[1] ?? '.prometheus/consolidation/2026-07-17/wiki-consolidation-manifest.json');
         json(output, manifest);

@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, cpSync, readdirSync, readFileSync, existsSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { copyPathExact } from './support.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const run = (script, args = []) => spawnSync(process.execPath, [script, ...args], { encoding: 'utf8', shell: false });
 const temporary = t => { const path = mkdtempSync(join(tmpdir(), 'portable-audit ü-')); t.after(() => rmSync(path, { recursive: true, force: true })); return path; };
@@ -20,7 +21,7 @@ test('architecture audit rejects empty and unknown modes and detects Flutter FFI
 });
 
 test('refiner keeps typed replay data and enforces approval and verification transitions', t => {
-  const work = temporary(t); cpSync(join(root, 'scripts'), join(work, 'scripts'), { recursive: true }); mkdirSync(join(work, 'skills/example'), { recursive: true });
+  const work = temporary(t); copyPathExact(join(root, 'scripts'), join(work, 'scripts')); mkdirSync(join(work, 'skills/example'), { recursive: true });
   writeFileSync(join(work, 'skills/example/SKILL.md'), '---\nname: example\ndescription: Example architecture verification guidance.\n---\n');
   const script = join(work, 'scripts/refiner-loop.mjs');
   let result = run(script, ['--list']); assert.equal(result.status, 0); assert.equal(existsSync(join(work, '.prometheus')), false);
@@ -34,7 +35,7 @@ test('refiner keeps typed replay data and enforces approval and verification tra
 });
 
 test('refiner cannot verify or ship a ticket without replay evidence, including formerly verified tickets', t => {
-  const work = temporary(t); cpSync(join(root, 'scripts'), join(work, 'scripts'), { recursive: true }); mkdirSync(join(work, 'skills/example'), { recursive: true });
+  const work = temporary(t); copyPathExact(join(root, 'scripts'), join(work, 'scripts')); mkdirSync(join(work, 'skills/example'), { recursive: true });
   writeFileSync(join(work, 'skills/example/SKILL.md'), '---\nname: example\ndescription: Example architecture verification guidance.\n---\n');
   const script = join(work, 'scripts/refiner-loop.mjs');
   let result = run(script, ['--skill', 'example', '--evidence', 'Observed failure without replay']); assert.equal(result.status, 0, result.stderr);

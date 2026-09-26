@@ -1,17 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, cpSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { copyPathExact } from './support.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const invoke = (file, args = [], options = {}) => spawnSync(process.execPath, [file, ...args], { encoding: 'utf8', shell: false, ...options });
 function fixture(t) { const directory = mkdtempSync(join(tmpdir(), 'Builder ü space-')); t.after(() => rmSync(directory, { recursive: true, force: true })); return directory; }
 
 test('installed hooks consume real stdin, emit protocol JSON and tolerate malformed payloads', t => {
   const directory = fixture(t); mkdirSync(join(directory, '.claude/hooks'), { recursive: true }); mkdirSync(join(directory, '.knowme-builder'));
-  for (const name of ['skill-activation', 'a11y-reminder']) cpSync(join(root, 'scripts', `${name}.mjs`), join(directory, '.claude/hooks', `${name}.mjs`));
+  for (const name of ['skill-activation', 'a11y-reminder']) copyPathExact(join(root, 'scripts', `${name}.mjs`), join(directory, '.claude/hooks', `${name}.mjs`));
   writeFileSync(join(directory, '.knowme-builder/activation-manifest.json'), JSON.stringify({ skills: [{ name: 'flutter-golden-ui', terms: ['flutter'] }] }));
   let result = invoke(join(directory, '.claude/hooks/skill-activation.mjs'), [], { cwd: directory, input: JSON.stringify({ prompt: 'Build FLUTTER' }) });
   assert.equal(result.status, 0, result.stderr); assert.match(JSON.parse(result.stdout).hookSpecificOutput.additionalContext, /flutter-golden-ui/);
@@ -26,8 +27,8 @@ test('installed hooks consume real stdin, emit protocol JSON and tolerate malfor
 test('copied package installs twice preserving user configuration and rejects modified skills', t => {
   const directory = fixture(t), payload = join(directory, 'payload'), project = join(directory, 'consumer');
   mkdirSync(payload); mkdirSync(join(project, '.claude'), { recursive: true });
-  for (const name of ['scripts', 'skills', 'templates']) cpSync(join(root, name), join(payload, name), { recursive: true });
-  for (const name of ['builder.manifest.json', 'plugin.json', 'marketplace.json', '.claude-plugin']) cpSync(join(root, name), join(payload, name), { recursive: true });
+  for (const name of ['scripts', 'skills', 'templates']) copyPathExact(join(root, name), join(payload, name));
+  for (const name of ['builder.manifest.json', 'plugin.json', 'marketplace.json', '.claude-plugin']) copyPathExact(join(root, name), join(payload, name));
   const verify = () => invoke(join(payload, 'scripts/verify-skill-manifest.mjs'), [payload]);
   let contract = verify(); assert.equal(contract.status, 0, contract.stderr);
   mkdirSync(join(payload, 'skills/undeclared'));

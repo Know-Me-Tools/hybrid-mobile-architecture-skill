@@ -1,5 +1,5 @@
 // TJ-ARCH-MOB-001 compliant
-import { readFileSync, existsSync, fstatSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -17,8 +17,7 @@ export function activate(payload: unknown, manifest: unknown): object | undefine
     ['KnowMe Builder skills relevant to this prompt; invoke only those whose contract actually applies:', ...hits.map(name => `  - ${name}`)].join('\n') } };
 }
 try {
-  const input = fstatSync(0);
-  if (input.isFIFO() || input.isFile() || input.isSocket()) {
+  if (!process.stdin.isTTY) {
     const payload: unknown = JSON.parse(readFileSync(0, 'utf8'));
     const candidates = [process.env.KNOWME_BUILDER_ACTIVATION_MANIFEST, resolve('.knowme-builder/activation-manifest.json')];
     let directory = dirname(fileURLToPath(import.meta.url));

@@ -1,3 +1,8 @@
+## Purpose
+
+Define the package-wide portability contract for first-party execution,
+platform evidence, and byte-identical full and mini payloads.
+
 ## ADDED Requirements
 
 ### Requirement: First-party portable execution

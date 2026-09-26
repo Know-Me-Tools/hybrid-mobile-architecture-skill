@@ -3,7 +3,7 @@ import { createRequire as __createRequire } from 'node:module'; const require = 
 
 // src/native-helpers/consolidate-prometheus-wikis.mts
 import { spawnSync as spawnSync2 } from "node:child_process";
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync as readFileSync2, readdirSync as readdirSync2, rmSync, writeFileSync, cpSync } from "node:fs";
+import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync as readFileSync2, readdirSync as readdirSync2, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname as dirname2, extname, isAbsolute, join as join3, relative, resolve as resolve2 } from "node:path";
 
@@ -282,9 +282,13 @@ await main(() => {
     for (const [scope, path] of Object.entries(scopes)) build(scope, join3(staging, scope), sources.flatMap((source) => variants(root, source, path)), manifest);
     for (const [scope, minimum] of Object.entries({ root: 238, desktop: 20, "src-tauri": 3, rust: 34 })) assert(manifest.scopes[scope].wiki.canonical_page_paths >= minimum, `wiki consolidation proof failed: ${scope}: ${manifest.scopes[scope].wiki.canonical_page_paths} < ${minimum}`);
     for (const [scope, path] of Object.entries(scopes)) {
-      const destination = join3(root, path), wiki = join3(destination, "knowledge/wiki");
+      const source = join3(staging, scope), destination = join3(root, path), wiki = join3(destination, "knowledge/wiki");
       if (existsSync(wiki)) for (const file of readdirSync2(wiki).filter((file2) => file2.endsWith(".md"))) rmSync(join3(wiki, file));
-      cpSync(join3(staging, scope), destination, { recursive: true });
+      for (const file of scopeFiles(source)) {
+        const target = join3(destination, relative(source, file));
+        mkdirSync(dirname2(target), { recursive: true });
+        copyFileSync(file, target);
+      }
     }
     const output = resolve2(root, args[1] ?? ".prometheus/consolidation/2026-07-17/wiki-consolidation-manifest.json");
     json(output, manifest);

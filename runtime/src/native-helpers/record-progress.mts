@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { appendFileSync, existsSync, mkdirSync, realpathSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { basename, join } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { assert, main, repoRoot } from './common.mjs';
 await main(() => {
   const args = process.argv.slice(2), values: Record<string, string> = { status: 'in-progress' };
@@ -20,6 +20,9 @@ await main(() => {
   if (process.platform === 'darwin' && /^\/private\/(?:var|tmp)\//.test(root)) roots.add(root.slice('/private'.length));
   const pwd = process.env.PWD;
   if (pwd && existsSync(pwd) && realpathSync(pwd) === realpathSync(root)) roots.add(pwd);
+  const cwd = resolve();
+  if (existsSync(cwd) && realpathSync(cwd) === realpathSync(root)) roots.add(cwd);
+  for (const path of [...roots]) roots.add(path.replaceAll('\\', '/'));
   for (const field of ['title', 'summary', 'evidence', 'next']) for (const path of [...roots].sort((a, b) => b.length - a.length)) values[field] = values[field]!.replaceAll(path, '$REPO_ROOT');
   const projectWiki = join(root, '.prometheus/knowledge/wiki'), privateProject = join(process.env.PROMETHEUS_PRIVATE_ROOT ?? join(homedir(), '.prometheus'), 'knowledge/private', slug), privateWiki = join(privateProject, 'wiki');
   mkdirSync(projectWiki, { recursive: true }); mkdirSync(privateWiki, { recursive: true });

@@ -1,3 +1,9 @@
+## Purpose
+
+Define how the Builder creates runnable clean-architecture projects, adopts
+brownfield projects without destructive ownership changes, and upgrades prior
+generated outputs through explicit recoverable migrations.
+
 ## ADDED Requirements
 
 ### Requirement: Non-destructive brownfield integration

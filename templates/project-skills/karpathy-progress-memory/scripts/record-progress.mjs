@@ -5,7 +5,7 @@ import { createRequire as __createRequire } from 'node:module'; const require = 
 import { randomUUID } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, realpathSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, join as join2 } from "node:path";
+import { basename, join as join2, resolve as resolve2 } from "node:path";
 
 // src/native-helpers/common.mts
 import { spawnSync } from "node:child_process";
@@ -58,6 +58,9 @@ await main(() => {
   if (process.platform === "darwin" && /^\/private\/(?:var|tmp)\//.test(root)) roots.add(root.slice("/private".length));
   const pwd = process.env.PWD;
   if (pwd && existsSync(pwd) && realpathSync(pwd) === realpathSync(root)) roots.add(pwd);
+  const cwd = resolve2();
+  if (existsSync(cwd) && realpathSync(cwd) === realpathSync(root)) roots.add(cwd);
+  for (const path of [...roots]) roots.add(path.replaceAll("\\", "/"));
   for (const field of ["title", "summary", "evidence", "next"]) for (const path of [...roots].sort((a, b) => b.length - a.length)) values[field] = values[field].replaceAll(path, "$REPO_ROOT");
   const projectWiki = join2(root, ".prometheus/knowledge/wiki"), privateProject = join2(process.env.PROMETHEUS_PRIVATE_ROOT ?? join2(homedir(), ".prometheus"), "knowledge/private", slug), privateWiki = join2(privateProject, "wiki");
   mkdirSync(projectWiki, { recursive: true });

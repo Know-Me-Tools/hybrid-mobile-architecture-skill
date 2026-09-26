@@ -5,6 +5,7 @@ import { dirname, join, resolve, delimiter } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { copyPathExact } from './support.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 test('harness installer persists receipt, reinstalls idempotently and uninstalls only owned files', async t => {
   const work = mkdtempSync(join(tmpdir(), 'builder-install ü-')); t.after(() => rmSync(work, { recursive: true, force: true }));
@@ -19,8 +20,7 @@ test('harness installer persists receipt, reinstalls idempotently and uninstalls
   // A preexisting sibling skill must remain unowned and survive uninstall.
   const preexisting = join(project, '.agents/skills/a11y-gate');
   mkdirSync(preexisting, { recursive: true });
-  const { cpSync } = await import('node:fs');
-  cpSync(join(root, 'skills/a11y-gate'), preexisting, { recursive: true });
+  copyPathExact(join(root, 'skills/a11y-gate'), preexisting);
   let result = run(); assert.equal(result.status, 0, result.stderr);
   const receiptFile = join(project, '.knowme-builder/harness-install.json'), plugin = join(project, '.opencode/plugins/knowme-builder.mjs');
   const receipt = readFileSync(receiptFile, 'utf8'); assert.ok(existsSync(plugin));
