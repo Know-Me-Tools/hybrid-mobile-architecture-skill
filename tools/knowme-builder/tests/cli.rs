@@ -77,6 +77,8 @@ fn adoption_is_non_destructive_and_idempotent() {
     let temp = tempdir().expect("tempdir");
     let user_file = temp.path().join("application.txt");
     fs::write(&user_file, "keep me").expect("write fixture");
+    fs::create_dir_all(temp.path().join("web")).expect("web fixture");
+    fs::write(temp.path().join("web/package.json"), "{}\n").expect("web manifest");
 
     builder()
         .args([
@@ -89,7 +91,14 @@ fn adoption_is_non_destructive_and_idempotent() {
         ])
         .assert()
         .success()
-        .stdout(predicate::str::contains("\"changed\": false"));
+        .stdout(predicate::str::contains("\"changed\": false"))
+        .stdout(predicate::str::contains(
+            "\"detectedSurfaces\": [\n    \"react-web\"",
+        ))
+        .stdout(predicate::str::contains(
+            "\"missingSurfaces\": [\n    \"axum-bff\"",
+        ))
+        .stdout(predicate::str::contains("\"integrationSteps\""));
     assert!(!temp.path().join(".knowme-builder").exists());
 
     builder()
@@ -116,7 +125,7 @@ fn adoption_is_non_destructive_and_idempotent() {
     let state =
         fs::read_to_string(temp.path().join(".knowme-builder/project.toml")).expect("state");
     assert!(state.contains("generationMode = \"skeleton\""));
-    assert!(state.contains("enabledSurfaces = []"));
+    assert!(state.contains("enabledSurfaces = [\"react-web\"]"));
     assert!(state.contains("\"react-web\""));
 
     builder()
@@ -131,6 +140,30 @@ fn adoption_is_non_destructive_and_idempotent() {
         .assert()
         .success()
         .stdout(predicate::str::contains("\"changed\": false"));
+}
+
+#[test]
+fn requested_missing_target_fails_preflight_before_destination_write() {
+    let temp = tempdir().expect("tempdir");
+    let destination = temp.path().join("must-not-exist");
+    builder()
+        .args([
+            "--json",
+            "new",
+            destination.to_str().expect("utf8"),
+            "--profile",
+            "tauri-desktop",
+            "--mode",
+            "runnable",
+            "--target",
+            "unsupported-certification-target",
+        ])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains(
+            "missing Rust target unsupported-certification-target",
+        ));
+    assert!(!destination.exists());
 }
 
 #[test]

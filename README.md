@@ -106,6 +106,14 @@ knowme-builder new my-app \
 knowme-builder new my-app \
   --profile sovereign-hybrid \
   --mode runnable
+
+# Make target/FFI prerequisites a write-blocking preflight when certifying locally.
+knowme-builder new my-mobile-app \
+  --profile flutter-mobile \
+  --mode runnable \
+  --verify-ffi \
+  --target aarch64-apple-ios-sim \
+  --target aarch64-linux-android
 ```
 
 Available profiles:
@@ -122,6 +130,8 @@ Available profiles:
 vertical slice through UI state, repository ports, Rust use cases and SQLite.
 Certification remains target-specific: the generated source is runnable, while
 the receipt or CI job for a host proves its native build and execution.
+`--target` and `--verify-ffi` turn requested host capabilities into a preflight
+that fails before destination writes when a prerequisite is missing.
 `skeleton` records missing surfaces and never receives runnable certification.
 
 ## Adopt an existing application

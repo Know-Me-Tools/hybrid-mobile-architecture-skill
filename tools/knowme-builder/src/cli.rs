@@ -81,6 +81,12 @@ pub struct NewArgs {
     pub profile: Profile,
     #[arg(long, value_enum)]
     pub mode: GenerationMode,
+    /// Native target triples whose installed toolchain and host build support must pass preflight.
+    #[arg(long = "target")]
+    pub targets: Vec<String>,
+    /// Require the Flutter/Rust FFI toolchain to pass preflight before writing.
+    #[arg(long)]
+    pub verify_ffi: bool,
     /// Preview the generated paths without changing the destination.
     #[arg(long)]
     pub check: bool,

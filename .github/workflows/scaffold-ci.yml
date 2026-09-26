@@ -130,7 +130,7 @@ jobs:
       - name: Verify native prerequisites
         run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- doctor --native-only --target ${{ matrix.target }} --json
       - name: Generate runnable Tauri application
-        run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-native" --profile tauri-desktop --mode runnable && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-native"
+        run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-native" --profile tauri-desktop --mode runnable --target ${{ matrix.target }} && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-native"
       - name: Verify shared native persistence
         working-directory: ${{ runner.temp }}/cert-native
         run: cargo test --locked --manifest-path rust/Cargo.toml --workspace && cargo clippy --locked --manifest-path rust/Cargo.toml --workspace --all-targets -- -D warnings
@@ -178,7 +178,7 @@ jobs:
           channel: stable
           cache: true
       - name: Generate runnable Flutter application
-        run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-flutter" --profile flutter-mobile --mode runnable && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-flutter"
+        run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-flutter" --profile flutter-mobile --mode runnable --verify-ffi --target aarch64-apple-ios-sim --target aarch64-linux-android && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-flutter"
       - name: Install exact bridge code generator
         run: cargo install flutter_rust_bridge_codegen --version "=${{ steps.versions.outputs.flutter_rust_bridge }}" --locked
       - name: Generate bridge and Riverpod outputs

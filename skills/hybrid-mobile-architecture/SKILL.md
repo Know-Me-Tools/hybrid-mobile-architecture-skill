@@ -78,6 +78,11 @@ knowme-builder new <path> --profile <profile> --mode runnable|skeleton
 Profiles are `sovereign-hybrid`, `governed-web-shell`, `flutter-mobile`,
 `tauri-desktop`, and `axum-web`.
 
+For a host-certification attempt, repeat `--target <triple>` for every native
+target and add `--verify-ffi` for Flutter/Rust FFI. Missing requested
+prerequisites must fail before the destination is written. Omitting these flags
+generates complete runnable source but does not claim host certification.
+
 ### 2b. Existing application adoption
 
 Never re-scaffold an evolved application. Preview first, then apply:
@@ -86,6 +91,10 @@ Never re-scaffold an evolved application. Preview first, then apply:
 knowme-builder adopt <path> --profile <profile> --check
 knowme-builder adopt <path> --profile <profile> --apply
 ```
+
+The preview result reports `detectedSurfaces`, `missingSurfaces`,
+`integrationSteps`, and conflicts so the architecture inventory remains useful
+without creating adoption metadata.
 
 Inventory actual source roots, entrypoints, dependencies, persistence and native
 bridges first. Adoption metadata is not proof that missing layers or surfaces

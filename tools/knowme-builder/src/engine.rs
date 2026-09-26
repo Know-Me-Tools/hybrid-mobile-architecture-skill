@@ -819,6 +819,12 @@ fn adopt_project(args: AdoptArgs) -> Result<CommandResult> {
         if existing.profile.as_str() != args.profile.as_str() {
             bail!("changing an adopted profile requires an explicit migration");
         }
+        result.detected_surfaces = existing.enabled_surfaces.clone();
+        result.missing_surfaces = existing.unsupported_surfaces.clone();
+        result.integration_steps.push(
+            "preserve user-owned surface files and restore only missing Builder controls"
+                .to_owned(),
+        );
         let proposed_skills = skills_lock_bytes(&manifest.skills)?;
         let trailing_controls = [
             (
@@ -876,6 +882,13 @@ fn adopt_project(args: AdoptArgs) -> Result<CommandResult> {
         .iter()
         .cloned()
         .partition(|surface| surface_present(&destination, surface));
+    result.detected_surfaces = enabled_surfaces.clone();
+    result.missing_surfaces = unsupported_surfaces.clone();
+    result.integration_steps.extend([
+        "record the detected and missing surface inventory".to_owned(),
+        "add Builder control metadata without taking ownership of application files".to_owned(),
+        "run audit and native build/runtime gates before claiming certification".to_owned(),
+    ]);
     result.warnings.push("adoption records detected manifests only; build, runtime and architecture remain unverified".to_owned());
     for surface in &unsupported_surfaces {
         result
@@ -1640,6 +1653,35 @@ fn create_project(args: NewArgs) -> Result<CommandResult> {
     result.path = Some(destination.display().to_string());
     result.profile = Some(args.profile.as_str().to_owned());
 
+    if matches!(args.mode, crate::cli::GenerationMode::Skeleton)
+        && (!args.targets.is_empty() || args.verify_ffi)
+    {
+        bail!("native/FFI preflight applies only to --mode runnable");
+    }
+    if args.verify_ffi
+        && !profile
+            .surfaces
+            .iter()
+            .any(|surface| surface == "flutter-mobile")
+    {
+        bail!("--verify-ffi requires a profile with the flutter-mobile surface");
+    }
+    if matches!(args.mode, crate::cli::GenerationMode::Runnable) {
+        if args.targets.is_empty() && !args.verify_ffi {
+            result.warnings.push("runnable source generation is not host certification; pass --target and/or --verify-ffi, then execute the emitted build/runtime gates".to_owned());
+        } else {
+            crate::native::inspect_requested_capabilities(
+                &std::env::current_dir()?,
+                &args.targets,
+                args.verify_ffi,
+                &mut result,
+            );
+            if !result.ok {
+                return Ok(result);
+            }
+        }
+    }
+
     if args.adopt {
         bail!("use `knowme-builder adopt` for non-destructive adoption");
     }
@@ -2159,6 +2201,15 @@ fn print_result(result: &CommandResult, json: bool) -> Result<()> {
     }
     for action in &result.actions {
         println!("  {action}");
+    }
+    for surface in &result.detected_surfaces {
+        println!("  detected surface: {surface}");
+    }
+    for surface in &result.missing_surfaces {
+        println!("  missing surface: {surface}");
+    }
+    for step in &result.integration_steps {
+        println!("  integration step: {step}");
     }
     for warning in &result.warnings {
         eprintln!("warning: {warning}");

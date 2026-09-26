@@ -73,6 +73,12 @@ checks; repeat `--target` for the two MSVC architectures. A missing prerequisite
 returns a failed result. This is a diagnostic command, not a claim that it has
 run a Windows application.
 
+`knowme-builder new --mode runnable` accepts the same repeatable `--target`
+preflight and `--verify-ffi`. When either is requested, missing Rust targets,
+host-native Windows support, Flutter, Xcode, or Android SDK state fails before
+the destination is written. Without those flags, runnable describes the emitted
+source contract; native certification still comes from build and runtime gates.
+
 ## Research and review
 
 The source audit and evolve-assess baseline are in `docs/assessment`. Read

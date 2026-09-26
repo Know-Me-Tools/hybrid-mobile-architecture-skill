@@ -2,6 +2,102 @@ use std::{fs, path::Path, process::Command};
 
 use crate::model::CommandResult;
 
+const WINDOWS_TARGETS: [&str; 2] = ["x86_64-pc-windows-msvc", "aarch64-pc-windows-msvc"];
+const IOS_SIMULATOR_TARGET: &str = "aarch64-apple-ios-sim";
+const ANDROID_ARM64_TARGET: &str = "aarch64-linux-android";
+
+/// Preflight explicitly requested runnable capabilities without mutating the destination.
+pub(crate) fn inspect_requested_capabilities(
+    root: &Path,
+    targets: &[String],
+    verify_ffi: bool,
+    result: &mut CommandResult,
+) {
+    for (tool, args) in [("rustc", vec!["-vV"]), ("cargo", vec!["--version"])] {
+        inspect_command(root, tool, &args, result);
+    }
+    if verify_ffi {
+        inspect_command(root, "flutter", &["--version"], result);
+    }
+
+    let installed = Command::new("rustup")
+        .args(["target", "list", "--installed"])
+        .current_dir(root)
+        .output()
+        .ok()
+        .filter(|output| output.status.success())
+        .map(|output| String::from_utf8_lossy(&output.stdout).into_owned())
+        .unwrap_or_default();
+    for target in targets {
+        if !installed.lines().any(|line| line.trim() == target) {
+            result.ok = false;
+            result.warnings.push(format!(
+                "missing Rust target {target}; install explicitly with rustup target add {target}"
+            ));
+            continue;
+        }
+        result
+            .actions
+            .push(format!("Rust standard library installed: {target}"));
+        if WINDOWS_TARGETS.contains(&target.as_str()) {
+            if !cfg!(windows)
+                || native_windows_target(std::env::consts::ARCH) != Some(target.as_str())
+            {
+                result.ok = false;
+                result.warnings.push(format!(
+                    "{target}: native MSVC linking and execution require a matching Windows host"
+                ));
+            } else if let Err(error) = compile_and_execute_probe(root, target) {
+                result.ok = false;
+                result.warnings.push(format!(
+                    "{target}: native Rust compile/execute probe failed: {error}"
+                ));
+            } else {
+                result.actions.push(format!(
+                    "{target}: MSVC linker, Windows SDK and native execution probe passed"
+                ));
+            }
+        } else if target == IOS_SIMULATOR_TARGET {
+            if !cfg!(target_os = "macos") {
+                result.ok = false;
+                result.warnings.push(format!(
+                    "{target}: iOS simulator builds require a macOS host"
+                ));
+            } else {
+                inspect_command(root, "xcodebuild", &["-version"], result);
+            }
+        } else if target == ANDROID_ARM64_TARGET {
+            if std::env::var_os("ANDROID_HOME").is_none()
+                && std::env::var_os("ANDROID_SDK_ROOT").is_none()
+            {
+                result.ok = false;
+                result.warnings.push(
+                    "Android ARM64 preflight requires ANDROID_HOME or ANDROID_SDK_ROOT".to_owned(),
+                );
+            }
+        } else {
+            result.ok = false;
+            result
+                .warnings
+                .push(format!("unsupported certification target: {target}"));
+        }
+    }
+}
+
+fn inspect_command(root: &Path, tool: &str, args: &[&str], result: &mut CommandResult) {
+    match Command::new(tool).args(args).current_dir(root).output() {
+        Ok(output) if output.status.success() => result
+            .actions
+            .push(String::from_utf8_lossy(&output.stdout).trim().to_owned()),
+        _ => {
+            result.ok = false;
+            result
+                .warnings
+                .push(format!("required runnable tool unavailable: {tool}"));
+        }
+    }
+}
+
 /// Inspect prerequisites without installing tools or claiming application certification.
 pub(crate) fn inspect(root: &Path, targets: &[String], result: &mut CommandResult) {
     for (tool, args) in [("rustc", vec!["-vV"]), ("cargo", vec!["--version"])] {

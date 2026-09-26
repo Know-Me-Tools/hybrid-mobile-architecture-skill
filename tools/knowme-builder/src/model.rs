@@ -106,6 +106,12 @@ pub struct CommandResult {
     pub actions: Vec<String>,
     pub conflicts: Vec<String>,
     pub warnings: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub detected_surfaces: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub missing_surfaces: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub integration_steps: Vec<String>,
 }
 
 impl CommandResult {
@@ -119,6 +125,9 @@ impl CommandResult {
             actions: Vec::new(),
             conflicts: Vec::new(),
             warnings: Vec::new(),
+            detected_surfaces: Vec::new(),
+            missing_surfaces: Vec::new(),
+            integration_steps: Vec::new(),
         }
     }
 }
