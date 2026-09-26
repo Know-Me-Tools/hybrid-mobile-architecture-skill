@@ -21,7 +21,8 @@ test('standalone progress payload records mirrored wiki and valid events with pr
     assert.equal(result.status, 0, result.stderr);
     const [local, privateCopy] = result.stdout.trim().split(/\r?\n/);
     assert.equal(readFileSync(local, 'utf8'), readFileSync(privateCopy, 'utf8'));
-    assert.ok(readFileSync(local, 'utf8').includes('Updated $REPO_ROOT'));
+    const progress = readFileSync(local, 'utf8');
+    assert.ok(progress.includes('Updated $REPO_ROOT'), `progress entry retained an absolute repository alias:\n${progress}`);
     const event = JSON.parse(readFileSync(join(app, '.prometheus/events.jsonl'), 'utf8'));
     assert.equal(event.project_root, '$REPO_ROOT');
     assert.equal(event.payload.title, 'Portable "helpers"');
