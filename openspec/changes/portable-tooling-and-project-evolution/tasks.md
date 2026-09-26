@@ -16,7 +16,7 @@
 - [x] Add native Windows x64/ARM64 toolchain diagnostics and explicit prerequisite outcomes.
 - [x] Complete the enumerated first-party shell/Python conversion, including maintenance, CI and emitted helpers.
 - [x] Prove isolated staged consumer package operation and mirror integrity.
-- [ ] Verify a committed release candidate using the clean-clone consumer gate.
+- [x] Verify the committed candidate using the clean-clone consumer gate.
 
 ## 3. Brownfield and upgrades
 

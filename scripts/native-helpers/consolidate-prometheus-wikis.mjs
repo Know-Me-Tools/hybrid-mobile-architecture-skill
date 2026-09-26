@@ -114,7 +114,7 @@ function build(scope, output, input, manifest) {
                 if (variant.hash !== selected.hash) {
                     const end = redacted.text.startsWith('---\n') ? redacted.text.indexOf('\n---\n', 4) : -1;
                     const body = end >= 0 ? redacted.text.slice(end + 5).trimStart() : redacted.text;
-                    canonical += `\n### Variant from \`${variant.source.name}\`\n\nOriginal path: \`${variant.path}\`  \nOriginal SHA-256: \`${variant.hash}\`\n\n${body.trimEnd()}\n`;
+                    canonical += `\n### Variant from \`${variant.source.name}\`\n\nOriginal path: \`${variant.path}\`<br>\nOriginal SHA-256: \`${variant.hash}\`\n\n${body.trimEnd()}\n`;
                 }
                 for (const item of redacted.records)
                     manifest.redactions.push({ scope, source: variant.source.name, path: variant.path, original_sha256: variant.hash, ...item });

@@ -113,7 +113,12 @@
     },
     {
       "name": "committed consumer proof",
-      "result": "pending"
+      "result": "pass",
+      "commit": "0bb71dd",
+      "command": "node scripts/test-consumer-install.mjs --ref 0bb71dd",
+      "note": "Clean clone uses the shipped Node verifier and installs 35 skills for 6 harnesses",
+      "negativeFixtures": 5,
+      "negativeCommand": "node scripts/test-fixtures/consumer-install-negative.mjs"
     }
   ],
   "reviews": {

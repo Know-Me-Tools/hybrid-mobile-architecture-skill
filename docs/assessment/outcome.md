@@ -19,6 +19,7 @@ requires the baseline repair and native execution work in the
 - Initialized OpenSpec for all supported tools, configured and exercised Compass
   MCP, and exported a four-role maintenance team for four native harnesses.
 - Staged identical full/mini payloads and exercised isolated install/uninstall.
+  A clean clone of the committed candidate also passes consumer installation.
   Source-pack publication has not been performed.
 
 ## Verification

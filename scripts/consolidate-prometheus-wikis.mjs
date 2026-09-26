@@ -201,7 +201,7 @@ ${redacted.text}`);
           canonical += `
 ### Variant from \`${variant.source.name}\`
 
-Original path: \`${variant.path}\`  
+Original path: \`${variant.path}\`<br>
 Original SHA-256: \`${variant.hash}\`
 
 ${body.trimEnd()}
