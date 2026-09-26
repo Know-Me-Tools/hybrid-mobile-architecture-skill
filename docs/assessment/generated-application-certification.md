@@ -42,11 +42,13 @@ for host-specific evidence:
 
 Both Windows jobs launch the packaged native executable and use WebView2's
 DevTools Protocol from the compiled TypeScript runtime to drive the rendered
-React UI. The gate enters a note, invokes the Tauri command boundary, terminates
-the entire first process tree, launches a second process with a fresh browser
-profile against the same isolated application-data directory, and reads the
-persisted note through the UI. SQLite-file creation alone is not accepted as
-runtime proof.
+React UI. A certification-only environment setting is passed through Tauri's
+Rust-side `additional_browser_args` API; the web frontend cannot supply browser
+arguments. The gate enters a note, invokes the Tauri command boundary,
+terminates the entire first process tree, launches a second process with a fresh
+browser profile against the same isolated application-data directory, and reads
+the persisted note through the UI. SQLite-file creation alone is not accepted
+as runtime proof.
 
 The candidate is not release-certified until all jobs pass on the committed
 branch and the final run URL is recorded here.

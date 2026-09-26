@@ -224,12 +224,12 @@
     {
       "kind": "add",
       "to": "desktop/src-tauri/src/main.rs",
-      "afterSourceDigest": "134826abb0023c98698ef599a5c0e72d254b59ce166cc97541edd3dd3df4bd47"
+      "afterSourceDigest": "e86adc1d0c9960abdfbf7f8012b2321864e23f48baa6bdcde93419339cb4514e"
     },
     {
       "kind": "add",
       "to": "desktop/src-tauri/tauri.conf.json",
-      "afterSourceDigest": "a253e319ab9058de2dcaee3e91cf743143568f9e625778b85a922fa93bb15676"
+      "afterSourceDigest": "2b9a5bc63bafa88e856912236b6236f501af1928ff3c6b00fc62416ca2f4fd99"
     },
     {
       "kind": "add",

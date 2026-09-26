@@ -224,13 +224,12 @@ async function launchAndInspect(binary, data, profile, log, deadline, inspect) {
       ...process.env,
       APP_DATA_DIR: data,
       GEN_UI_APP_DATA_DIR: data,
-      TAURI_WEBVIEW_AUTOMATION: "true",
-      WEBVIEW2_USER_DATA_FOLDER: profile,
-      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: [
-        process.env.WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS,
+      TAURI_WEBVIEW_DATA_DIRECTORY: profile,
+      TAURI_WEBVIEW_BROWSER_ARGS: [
+        "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection",
         `--remote-debugging-port=${port}`,
         "--remote-allow-origins=*"
-      ].filter(Boolean).join(" ")
+      ].join(" ")
     },
     stdio: ["ignore", handle, handle],
     detached: process.platform !== "win32",

@@ -40,6 +40,24 @@ fn main() {
             let database = data.join("notes.sqlite3");
             gen_ui_notes::open(&database)?;
             app.manage(NotesState { database });
+            let main_window = tauri::WebviewWindowBuilder::from_config(
+                app.handle(),
+                &app.config().app.windows[0],
+            )?;
+            #[cfg(target_os = "windows")]
+            let main_window = if let Ok(arguments) = std::env::var("TAURI_WEBVIEW_BROWSER_ARGS") {
+                main_window.additional_browser_args(&arguments)
+            } else {
+                main_window
+            };
+            #[cfg(target_os = "windows")]
+            let main_window =
+                if let Some(directory) = std::env::var_os("TAURI_WEBVIEW_DATA_DIRECTORY") {
+                    main_window.data_directory(PathBuf::from(directory))
+                } else {
+                    main_window
+                };
+            main_window.build()?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
