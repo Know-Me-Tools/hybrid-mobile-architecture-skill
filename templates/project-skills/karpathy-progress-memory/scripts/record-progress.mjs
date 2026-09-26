@@ -60,7 +60,10 @@ await main(() => {
   if (pwd && existsSync(pwd) && realpathSync(pwd) === realpathSync(root)) roots.add(pwd);
   const cwd = resolve2();
   if (existsSync(cwd) && realpathSync(cwd) === realpathSync(root)) roots.add(cwd);
-  for (const path of [...roots]) roots.add(path.replaceAll("\\", "/"));
+  for (const path of [...roots]) {
+    roots.add(path.replaceAll("\\", "/"));
+    roots.add(path.replaceAll("/", "\\"));
+  }
   for (const field of ["title", "summary", "evidence", "next"]) for (const path of [...roots].sort((a, b) => b.length - a.length)) values[field] = values[field].replaceAll(path, "$REPO_ROOT");
   const projectWiki = join2(root, ".prometheus/knowledge/wiki"), privateProject = join2(process.env.PROMETHEUS_PRIVATE_ROOT ?? join2(homedir(), ".prometheus"), "knowledge/private", slug), privateWiki = join2(privateProject, "wiki");
   mkdirSync(projectWiki, { recursive: true });

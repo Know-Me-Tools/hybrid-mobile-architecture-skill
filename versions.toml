@@ -23,6 +23,7 @@ rust = "1.97.1"
 node = "26.5.0"         # Current release — latest phones/tools over LTS conservatism
 flutter = "3.47.5"      # current stable; ships Dart 3.13.4
 typescript = "7.0.2"    # Go-native compiler; latest stable dist-tag, never a nightly dev build
+skills_cli = "1.7.0"     # exact agentskills.io discovery/install CLI used by package CI
 bun = "1.3.14"
 pnpm = "11.15.0"
 

@@ -30,8 +30,10 @@ await main(() => {
     const cwd = resolve();
     if (existsSync(cwd) && realpathSync(cwd) === realpathSync(root))
         roots.add(cwd);
-    for (const path of [...roots])
+    for (const path of [...roots]) {
         roots.add(path.replaceAll('\\', '/'));
+        roots.add(path.replaceAll('/', '\\'));
+    }
     for (const field of ['title', 'summary', 'evidence', 'next'])
         for (const path of [...roots].sort((a, b) => b.length - a.length))
             values[field] = values[field].replaceAll(path, '$REPO_ROOT');
