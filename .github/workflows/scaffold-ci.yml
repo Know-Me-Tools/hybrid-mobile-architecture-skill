@@ -192,7 +192,7 @@ jobs:
         working-directory: ${{ runner.temp }}/cert-flutter/mobile
         run: flutter build ios --simulator --no-codesign
       - name: Execute iOS FFI persistence across application relaunch
-        run: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-flutter/mobile"
+        run: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-flutter/mobile" --ios-app "${{ runner.temp }}/cert-flutter/mobile/build/ios/iphonesimulator/Runner.app"
       - name: Build Android ARM64 application
         working-directory: ${{ runner.temp }}/cert-flutter/mobile
         run: flutter build apk --debug --target-platform android-arm64 --target integration_test/notes_test.dart
