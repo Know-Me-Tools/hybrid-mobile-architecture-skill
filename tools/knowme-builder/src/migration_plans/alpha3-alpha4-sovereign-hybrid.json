@@ -294,7 +294,7 @@
     {
       "kind": "add",
       "to": "mobile/android/app/build.gradle.kts",
-      "afterSourceDigest": "227c7bfde337fef907c8ff0053213d3f87c8927af151a2502294e82cd9a790e6"
+      "afterSourceDigest": "4d061198e210b1dc27df1fc035f18c4ce6c6130d6a70eedb49e2d57591589fac"
     },
     {
       "kind": "add",
