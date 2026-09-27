@@ -168,7 +168,7 @@ jobs:
         with:
           toolchain: ${{ steps.versions.outputs.rust }}
           components: clippy
-          targets: aarch64-apple-ios-sim,aarch64-linux-android
+          targets: aarch64-apple-ios-sim,aarch64-linux-android,x86_64-linux-android
       - uses: Swatinem/rust-cache@v2
       - uses: subosito/flutter-action@v2
         with:
@@ -176,7 +176,7 @@ jobs:
           channel: stable
           cache: true
       - name: Generate runnable Flutter application
-        run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-flutter" --profile flutter-mobile --mode runnable --verify-ffi --target aarch64-apple-ios-sim --target aarch64-linux-android && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-flutter"
+        run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-flutter" --profile flutter-mobile --mode runnable --verify-ffi --target aarch64-apple-ios-sim --target aarch64-linux-android --target x86_64-linux-android && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-flutter"
       - name: Install exact bridge code generator
         run: cargo install flutter_rust_bridge_codegen --version "=${{ steps.versions.outputs.flutter_rust_bridge }}" --locked
       - name: Generate bridge and Riverpod outputs
@@ -195,22 +195,25 @@ jobs:
         run: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-flutter/mobile" --ios-app "${{ runner.temp }}/cert-flutter/mobile/build/ios/iphonesimulator/Runner.app"
       - name: Build Android ARM64 application
         working-directory: ${{ runner.temp }}/cert-flutter/mobile
-        run: flutter build apk --debug --target-platform android-arm64 --target integration_test/notes_test.dart
+        run: flutter build apk --debug --split-per-abi --target-platform android-arm64 --target integration_test/notes_test.dart
       - name: Verify Android APK contains only ARM64 native code
-        run: cargo run --locked --manifest-path tools/platform-native/Cargo.toml -- verify-arm64-apk "${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk"
-      - name: Publish exact Android execution bundle
+        run: cargo run --locked --manifest-path tools/platform-native/Cargo.toml -- verify-arm64-apk "${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk"
+      - name: Build Android x86_64 emulator companion
+        working-directory: ${{ runner.temp }}/cert-flutter/mobile
+        run: flutter build apk --debug --split-per-abi --target-platform android-x64 --target integration_test/notes_test.dart
+      - name: Publish Android emulator execution bundle
         uses: actions/upload-artifact@v4
         with:
-          name: android-arm64-execution
+          name: android-x86-64-execution
           retention-days: 1
           if-no-files-found: error
           path: |
             ${{ runner.temp }}/cert-flutter/mobile/android/app/build.gradle.kts
-            ${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk
+            ${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-x86_64-debug.apk
 
-  android-arm64-runtime:
-    name: Android ARM64 native execution
-    runs-on: ubuntu-24.04-arm
+  android-emulator-runtime:
+    name: Android x86_64 emulator execution for ARM64 release source
+    runs-on: ubuntu-24.04
     needs: flutter-native
     timeout-minutes: 45
     steps:
@@ -218,22 +221,18 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - name: Install Android SDK and ARM64 emulator host
-        uses: android-actions/setup-android@v4
-        with:
-          packages: platform-tools emulator
-      - name: Download exact Android execution bundle
+      - name: Download Android emulator execution bundle
         uses: actions/download-artifact@v5
         with:
-          name: android-arm64-execution
+          name: android-x86-64-execution
           path: ${{ runner.temp }}/cert-android/mobile
       - name: Enable native Android virtualization
         run: sudo chmod 666 /dev/kvm
-      - name: Execute Android ARM64 FFI persistence across application relaunch
+      - name: Execute Android FFI persistence across application relaunch
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
+          api-level: 35
           target: default
-          arch: arm64-v8a
+          arch: x86_64
           profile: pixel_5
-          script: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-android/mobile" emulator-5554 "${{ runner.temp }}/cert-android/mobile/build/app/outputs/flutter-apk/app-debug.apk"
+          script: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-android/mobile" emulator-5554 "${{ runner.temp }}/cert-android/mobile/build/app/outputs/flutter-apk/app-x86_64-debug.apk"

@@ -77,17 +77,17 @@ test('generated Flutter and Rust bridge sources receive deterministic architectu
 test('native mobile workflow prebuilds the integration test entrypoint used by exact binaries', () => {
   const workflow = readFileSync(join(repo, '.github/workflows/scaffold-ci.yml'), 'utf8');
   assert.match(workflow, /flutter build ios --simulator --debug --no-codesign --target integration_test\/notes_test\.dart/);
-  assert.match(workflow, /flutter build apk --debug --target-platform android-arm64 --target integration_test\/notes_test\.dart/);
+  assert.match(workflow, /flutter build apk --debug --split-per-abi --target-platform android-arm64 --target integration_test\/notes_test\.dart/);
+  assert.match(workflow, /flutter build apk --debug --split-per-abi --target-platform android-x64 --target integration_test\/notes_test\.dart/);
   assert.match(workflow, /runs-on: macos-15\b/);
-  assert.match(workflow, /name: Android ARM64 native execution[\s\S]*runs-on: ubuntu-24\.04-arm/);
-  assert.match(workflow, /uses: android-actions\/setup-android@v4[\s\S]*packages: platform-tools emulator/);
-  assert.match(workflow, /targets: aarch64-apple-ios-sim,aarch64-linux-android/);
-  assert.match(workflow, /uses: actions\/upload-artifact@v4[\s\S]*name: android-arm64-execution/);
-  assert.match(workflow, /uses: actions\/download-artifact@v5[\s\S]*name: android-arm64-execution/);
-  assert.match(workflow, /api-level: 30[\s\S]*arch: arm64-v8a/);
-  assert.doesNotMatch(workflow, /API 35 x86_64|arch: x86_64/);
+  assert.match(workflow, /name: Android x86_64 emulator execution for ARM64 release source[\s\S]*runs-on: ubuntu-24\.04/);
+  assert.match(workflow, /targets: aarch64-apple-ios-sim,aarch64-linux-android,x86_64-linux-android/);
+  assert.match(workflow, /uses: actions\/upload-artifact@v4[\s\S]*name: android-x86-64-execution/);
+  assert.match(workflow, /uses: actions\/download-artifact@v5[\s\S]*name: android-x86-64-execution/);
+  assert.match(workflow, /api-level: 35[\s\S]*arch: x86_64/);
+  assert.match(workflow, /verify-arm64-apk .*app-arm64-v8a-debug\.apk/);
   assert.match(workflow, /--ios-app .*Runner\.app/);
-  assert.match(workflow, /emulator-5554 .*app-debug\.apk/);
+  assert.match(workflow, /emulator-5554 .*app-x86_64-debug\.apk/);
 });
 
 test('iOS restart proof couples the rendered-state marker to the direct relaunch', () => {
