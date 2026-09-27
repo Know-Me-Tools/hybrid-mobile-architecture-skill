@@ -82,7 +82,7 @@ test('native mobile workflow prebuilds the integration test entrypoint used by e
   assert.match(workflow, /flutter build apk --debug --target-platform android-x64 --target integration_test\/notes_test\.dart/);
   assert.match(workflow, /node scripts\/build-flutter-android-test\.mjs/);
   assert.match(workflow, /runs-on: macos-15\b/);
-  assert.match(workflow, /name: Android x86_64 emulator execution for ARM64 release source[\s\S]*runs-on: ubuntu-24\.04/);
+  assert.match(workflow, /name: Android x86_64 emulator execution for ARM64 build source[\s\S]*runs-on: ubuntu-24\.04/);
   assert.match(workflow, /targets: aarch64-apple-ios-sim,aarch64-linux-android,x86_64-linux-android/);
   assert.match(workflow, /uses: actions\/upload-artifact@v4[\s\S]*name: android-x86-64-execution/);
   assert.match(workflow, /uses: actions\/download-artifact@v5[\s\S]*name: android-x86-64-execution/);
@@ -106,7 +106,7 @@ test('iOS restart proof couples the rendered-state marker to the direct relaunch
   assert.match(integrationTest, /PASS: rendered persisted note after relaunch/);
 });
 
-test('Android restart proof requires two passing instrumentation runs around a force-stop', () => {
+test('Android restart proof puts the second instrumentation run in strict restart mode', () => {
   const helper = readFileSync(join(repo, 'runtime/src/native-helpers/verify-flutter-ios-restart.mts'), 'utf8');
   const integrationTest = readFileSync(join(repo, 'assets/templates/baselines/flutter/mobile/integration_test/notes_test.dart'), 'utf8');
   assert.match(helper, /'install', '-r', applicationBinary!/);
@@ -114,11 +114,13 @@ test('Android restart proof requires two passing instrumentation runs around a f
   assert.match(helper, /shell', 'pm', 'clear', applicationId!/);
   assert.match(helper, /'pm', 'list', 'instrumentation'/);
   assert.match(helper, /Android instrumentation did not report a passing test suite/);
-  assert.match(helper, /executeInstrumentation\(\);[\s\S]*'am', 'force-stop', applicationId![\s\S]*executeInstrumentation\(\);/);
+  assert.match(helper, /executeInstrumentation\(false\);[\s\S]*'am', 'force-stop', applicationId![\s\S]*executeInstrumentation\(true\);/);
+  assert.match(helper, /verifyRestart \? \['-e', 'verifyRestart', 'true'\] : \[\]/);
   assert.doesNotMatch(helper, /shell', 'run-as'/);
   assert.match(integrationTest, /knowme-builder-first-pass/);
   assert.match(integrationTest, /knowme-builder-restart-pass/);
-  assert.match(integrationTest, /persistedNoteIsVisible/);
+  assert.match(integrationTest, /if \(verifyRestart\) \{[\s\S]*expect\(find\.text\(title\), findsAtLeastNWidgets\(1\)\)/);
+  assert.doesNotMatch(integrationTest, /persistedNoteIsVisible/);
 });
 
 test('standalone canonical and project-template skills have identical portable scripts', () => {

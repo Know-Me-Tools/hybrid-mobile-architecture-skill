@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 1,
-  "date": "2026-09-26",
-  "scope": "Portable tooling and managed-file evolution foundation; no generated-application certification",
-  "branch": "codex/hma-portable-tooling",
-  "baselineCommit": "153f20cfe7642e4f4a647b838206e8b70852f4eb",
+  "schemaVersion": 2,
+  "date": "2026-09-27",
+  "scope": "Portable tooling, greenfield and brownfield project evolution, runnable baseline certification, and full/mini distribution readiness",
+  "branch": "codex/hma-final-certification",
+  "baselineCommit": "e7ce27b0790bf2f3dc30a460c7474b649e8e1e96",
   "host": {
     "os": "macOS",
     "architecture": "arm64",
@@ -32,27 +32,29 @@
     {
       "name": "Node behavior suite",
       "result": "pass",
-      "tests": 22,
+      "tests": 30,
       "command": "npm exec --yes --package=node@22.23.3 -- node --test runtime/tests/*.test.mjs"
     },
     {
       "name": "native Builder",
       "result": "pass",
-      "tests": 24,
+      "tests": 45,
       "commands": [
         "cargo +1.97.1 clippy --locked --manifest-path tools/knowme-builder/Cargo.toml --all-targets -- -D warnings",
         "cargo +1.97.1 test --locked --manifest-path tools/knowme-builder/Cargo.toml"
-      ]
+      ],
+      "unitTests": 18,
+      "cliTests": 27
     },
     {
       "name": "native platform helper",
       "result": "pass",
-      "tests": 4,
+      "tests": 5,
       "includesActualElfArchitectureFixtures": true,
       "rust": "1.97.1"
     },
     {
-      "name": "Windows compile checks",
+      "name": "Windows native build and execution",
       "result": "pass",
       "crates": [
         "knowme-builder",
@@ -63,7 +65,12 @@
         "aarch64-pc-windows-msvc"
       ],
       "rust": "1.97.1",
-      "nativeExecution": false
+      "nativeExecution": true,
+      "run": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747",
+      "jobs": {
+        "x64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964646",
+        "arm64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964696"
+      }
     },
     {
       "name": "isolated full/mini payload",
@@ -109,30 +116,74 @@
     {
       "name": "OpenSpec",
       "result": "pass",
-      "command": "openspec validate portable-tooling-and-project-evolution --strict"
+      "command": "openspec validate portable-tool-runtime --type spec --strict && openspec validate project-evolution --type spec --strict",
+      "note": "Change archived after 28/28 tasks; both affected main specifications pass strict validation"
     },
     {
       "name": "committed consumer proof",
       "result": "pass",
-      "commit": "0bb71dd",
+      "commit": "87584fe630d856ebe7f07a577b13159e4e25b49e",
       "command": "node scripts/test-consumer-install.mjs --ref 0bb71dd",
-      "note": "Clean clone uses the shipped Node verifier and installs 35 skills for 6 harnesses",
+      "note": "Exact-head production-convergence jobs verify Git URL discovery, isolated installation, canonical manifests, security, and byte-stable profiles",
       "negativeFixtures": 5,
-      "negativeCommand": "node scripts/test-fixtures/consumer-install-negative.mjs"
+      "negativeCommand": "node scripts/test-fixtures/consumer-install-negative.mjs",
+      "run": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36252986828"
+    },
+    {
+      "name": "generated application native matrix",
+      "result": "pass",
+      "commit": "e7ce27b0790bf2f3dc30a460c7474b649e8e1e96",
+      "run": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747",
+      "passed": [
+        "package and migration gates",
+        "web Axum/SQLite browser restart",
+        "compatible brownfield build/run and byte preservation",
+        "Windows x64 packaged UI restart",
+        "Windows x64 alpha.3 migration and packaged UI restart",
+        "Windows ARM64 packaged UI restart",
+        "iOS simulator exact-prebuilt UI/FFI/SQLite relaunch",
+        "Android ARM64 debug APK architecture verification",
+        "Android x86_64 instrumentation and application relaunch"
+      ],
+      "pending": [],
+      "attempt": 3,
+      "jobs": {
+        "package": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628798469",
+        "webBrownfield": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964680",
+        "windowsX64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964646",
+        "windowsArm64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964696",
+        "flutterIosAndroidBuild": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964715",
+        "androidRuntime": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108631592998"
+      }
     }
   ],
   "reviews": {
     "mandate": "adversarial-review",
-    "status": "pass-in-bounded-scope",
+    "status": "pass",
     "receipts": [
       "review/plan-findings.json",
       "review/native-findings.json",
       "review/runtime-rereview.json",
       "review/journal-rereview.json",
-      "review/remaining-runtime-rereview.json"
+      "review/remaining-runtime-rereview.json",
+      ".kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-round-1.json",
+      ".kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-final.json",
+      ".kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-final-rereview.json",
+      ".kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-final-rereview-2.json"
     ],
     "initialFindingsPreserved": true,
-    "crossModelIndependenceVerified": false
+    "crossModelIndependenceVerified": true,
+    "finalFindingCounts": {
+      "critical": 0,
+      "warning": 0,
+      "suggestion": 0
+    },
+    "remediation": "strict Android restart correction and corrected exact-head receipt passed independent rereview",
+    "antiTheater": {
+      "result": "pass",
+      "score": 0,
+      "strictness": "strict"
+    }
   },
   "research": {
     "sources": 30,
@@ -144,21 +195,18 @@
   },
   "compass": {
     "status": "partial",
-    "files": 566,
-    "nodes": 25401,
-    "edges": 34062,
-    "omittedEdges": 276,
-    "programModules": 217,
+    "version": "0.3.30",
+    "files": 699,
+    "nodes": 27505,
+    "edges": 37705,
+    "omittedEdges": 278,
+    "programModules": 269,
+    "graphIdentity": "sha256:978f17d27a0f80a715e4472f827a000a7c40d082fdded6decd9980cbdb781dff",
     "mcpWireVerified": true,
     "allHarnessConnectionsVerified": false
   },
   "pending": [
-    "Native Windows execution and generated application UI/runtime matrix",
-    "Complete web/Tauri/Flutter/FFI clean-architecture baselines",
-    "Nonstandard brownfield layout mapping and integrated additions",
-    "Versioned additions/removals/renames/dependency/codegen/schema migrations and historical fixture rebuilds",
-    "Android/iOS device or simulator proof",
-    "Flutter install and live PostgreSQL helper execution",
-    "Publication/integration into full and mini source repositories"
+    "Publication into full and mini source repositories (outside this change)",
+    "User-scope installation verification for all six harnesses (outside this change)"
   ]
 }

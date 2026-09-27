@@ -1,0 +1,7 @@
+# Portable tooling and project evolution reflection
+
+The phase converted the package-owned runtime surface to TypeScript 7 sources compiled to portable Node `.mjs` entrypoints and kept native inspection, generation, adoption, migration, and platform handling in Rust. The Builder now produces runnable clean-architecture web, Tauri desktop, and Flutter/Rust FFI baselines, can adopt compatible brownfield projects without taking ownership of user files, and upgrades prior output through explicit journaled migrations.
+
+Native certification mattered more than generated-file inspection. The final cross-model review caught an Android restart test that could recreate its note on the second run and a receipt that called a debug APK a release artifact. The corrected second instrumentation pass enters a strict verification route after force-stop and fails unless the prior Rust FFI/SQLite note is visible before any write. Exact-head CI passed Windows x64 and ARM64, iOS relaunch, Android ARM64 debug build, Android x86_64 strict relaunch, web, historical migration, and brownfield execution.
+
+Future evolution should add a named migration for every released template change, keep capability adapters fail-closed until their generated application path has runtime evidence, and preserve initial BLOCK findings beside their resolved rereviews. Arbitrary legacy layouts, optional auth/inference/UAR/module/legacy-embed combinations, source-pack publication, and user-scope verification across all harnesses remain explicit separate scopes.

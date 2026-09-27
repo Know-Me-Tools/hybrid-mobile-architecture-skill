@@ -1,0 +1,26 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "gpt-6-astra",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "assets/templates/baselines/flutter/mobile/integration_test/notes_test.dart",
+      "line": 18,
+      "claim": "The Android relaunch gate can pass even when restart persistence is broken because the second instrumentation run creates the note again instead of requiring it to already exist.",
+      "evidence": "The Android helper in `runtime/src/native-helpers/verify-flutter-ios-restart.mts` runs `executeInstrumentation();`, then `am force-stop`, then `executeInstrumentation();` without passing `VERIFY_RESTART` or a restart route, while `notes_test.dart` only asserts preexisting content when `verifyRestart || persistedNoteIsVisible`; otherwise it enters text, taps save, and passes. This contradicts the receipt's Android relaunch proof claim and the project-evolution requirement that runnable certification require runtime evidence for each claimed surface/architecture.",
+      "suggested_fix": "Make the second Android run a strict restart-verification mode, e.g. pass an instrumentation argument or launch route that sets `VERIFY_RESTART`, and fail unless the persisted note is visible before any create action; also have the helper verify the restart marker or equivalent external evidence."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".github/workflows/scaffold-ci.yml",
+      "line": 195,
+      "claim": "The receipt overclaims Android release-APK architecture evidence even though the workflow builds and verifies a debug APK.",
+      "evidence": "The certification receipt says the Android release APK retained ARM64-only native code, but the workflow hunk builds `flutter build apk --debug --target-platform android-arm64 --target integration_test/notes_test.dart` and verifies `build/app/outputs/flutter-apk/app-debug.apk` with `verify-arm64-apk`; no release APK is built or inspected.",
+      "suggested_fix": "Either build and inspect the release APK artifact (`--release` and the release output path) for the claimed ARM64 architecture evidence, or downgrade the receipt to explicitly claim only debug APK architecture verification."
+    }
+  ]
+}

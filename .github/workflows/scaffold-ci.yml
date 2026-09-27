@@ -217,7 +217,7 @@ jobs:
             ${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 
   android-emulator-runtime:
-    name: Android x86_64 emulator execution for ARM64 release source
+    name: Android x86_64 emulator execution for ARM64 build source
     runs-on: ubuntu-24.04
     needs: flutter-native
     timeout-minutes: 45

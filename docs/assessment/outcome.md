@@ -1,19 +1,22 @@
 # Conversion and suitability assessment
 
-The conversion, migration engine, and runnable baseline implementation are
-complete in the candidate worktree. Local macOS ARM64 evidence covers the web,
-Tauri, Flutter bridge/codegen, Android package, and iOS simulator build paths.
-Release certification remains open until the committed candidate passes the
-native CI matrix, including Windows x64 and Windows ARM64 execution and the
-pinned Flutter two-launch persistence checks.
+The conversion, migration engine, and runnable baseline implementation are complete at corrective candidate commit
+`e7ce27b0790bf2f3dc30a460c7474b649e8e1e96`. Local macOS ARM64 evidence covers
+the web, Tauri, Flutter bridge/codegen, Android package, and iOS simulator build
+paths. The exact-head native matrix passes web/brownfield, Windows x64, Windows
+ARM64, Flutter iOS/Android, package, migration, and portability gates. The final
+independent review found two Android evidence defects. Both are corrected, the
+exact-head native matrix passes, and the independent cross-model rereview
+passes with zero findings.
 
 ## Delivered
 
 - Replaced all 79 inventoried first-party shell/Python executables, including
   hooks, emitted helpers, maintenance commands and extensionless test fixtures.
   TypeScript 7.0.2 emits Node `.mjs`; native APK/ELF work uses Rust.
-- Added both Windows MSVC targets to pinned Rust 1.97.1 and compiled both native
-  crates for x64 and ARM64. Native Windows execution is a separate pending gate.
+- Added both Windows MSVC targets to pinned Rust 1.97.1, compiled both native
+  crates for x64 and ARM64, and executed packaged Tauri UI/IPC/SQLite restart
+  tests on both native Windows runners.
 - Added ownership-safe installer behavior, explicit argument handling, brownfield
   manifest inventory and stable rendering identity for moved projects.
 - Added managed-file upgrade journals, conflict preflight, guarded rollback,
@@ -35,10 +38,11 @@ pinned Flutter two-launch persistence checks.
 
 ## Verification
 
-- Node: 25 behavioral tests pass, including staged package consumers and the
+- Node: 30 behavioral tests pass, including staged package consumers and the
   Kimi Code, MiniMax Code, and Zed discovery roots.
-- Rust 1.97.1: Builder clippy and 43 tests pass; native platform helper clippy
-  and four real ELF tests pass. Both crates pass checks for both Windows targets.
+- Rust 1.97.1: Builder clippy and 45 tests pass; native platform helper clippy
+  and five real ELF/APK tests pass. Both crates pass checks for both Windows
+  targets.
 - A real Chromium flow invokes Axum, writes SQLite, restarts the server, and
   reads the persisted note. Tauri builds and launches on macOS ARM64 and creates
   its SQLite state. Flutter Rust Bridge and Riverpod generation, Flutter
@@ -70,13 +74,17 @@ migrations remain outside this release.
 
 Research exported 30 sources and 65 claims with confidence 0.66 and partial
 verification. One contradiction remains unresolved; review-model independence
-was not verified. Compass's refreshed graph is partial (276 omitted edges).
+is pending final certification. Compass's refreshed graph is partial (278
+omitted edges).
 Read these limitations with the [research receipt](../research/portable-tooling-20260926/receipt.json)
 and [tool setup record](../portability/project-tools.md).
 
-The release-blocking evidence is the committed GitHub Actions matrix: native
-Windows x64 and ARM64 packaged-UI create/relaunch/read proof, the pinned Flutter
-3.47.5 Android ARM64 and iOS
-simulator two-launch persistence checks, and rebuild/run of the historical and
-brownfield fixtures. Physical-device-only inference and live PostgreSQL remain
-separate capability claims and are not implied by baseline certification.
+The exact-head corrective GitHub Actions matrix is
+[run 36322460747](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747).
+All jobs pass, including the pinned Flutter 3.47.5 iOS relaunch proof, Android
+ARM64 package inspection, Android x86_64 instrumentation relaunch proof, and
+packaged Windows UI restart proofs on x64 and ARM64. Final certification still
+is retained with the independent adversarial receipt and passing strict
+anti-theater result. The corrected strict Android restart flow passes exact-head CI.
+Physical-device-only inference and live PostgreSQL remain separate capability
+claims and are not implied by baseline certification.

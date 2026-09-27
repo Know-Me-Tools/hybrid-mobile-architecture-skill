@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "gpt-6-astra",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [],
+  "checked_classes": [
+    "Spec violations \u2014 acceptance criteria and OpenSpec requirements in the packet are either marked intentionally pending for this final rereview gate or have matching corrected evidence; no unmet blocking requirement is proven by the supplied diff.",
+    "Correctness \u2014 the Android helper now runs instrumentation once normally, force-stops, then runs with `-e verifyRestart true`, and the Dart test's strict branch no longer creates the note; no remaining logic defect is evident from the packet.",
+    "Regressions \u2014 APK evidence wording was downgraded to debug APK plus separate x86_64 companion, matching the workflow artifacts described in the diff; no conflicting release-APK claim remains in the supplied receipt diffs.",
+    "Security \u2014 the reviewed changes are CI/test/documentation and instrumentation-argument plumbing; no new unvalidated external input, secret exposure, or unsafe deserialization boundary is evident in the packet.",
+    "Constraint breaches \u2014 the packet states source-pack publication and user-scope all-harness verification are outside this change, and the remaining OpenSpec task is this final review gate; no project-level blocking rule is violated by the supplied diff.",
+    "Silent failure \u2014 Android instrumentation output is still asserted for failure markers and OK status, and the strict restart mode is externally passed on the second run; no swallowed failure path is proven by the packet."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}
