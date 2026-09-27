@@ -195,12 +195,14 @@ jobs:
         run: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-flutter/mobile" --ios-app "${{ runner.temp }}/cert-flutter/mobile/build/ios/iphonesimulator/Runner.app"
       - name: Build Android ARM64 application
         working-directory: ${{ runner.temp }}/cert-flutter/mobile
-        run: flutter build apk --debug --split-per-abi --target-platform android-arm64 --target integration_test/notes_test.dart
+        run: flutter build apk --debug --target-platform android-arm64 --target integration_test/notes_test.dart
       - name: Verify Android APK contains only ARM64 native code
-        run: cargo run --locked --manifest-path tools/platform-native/Cargo.toml -- verify-arm64-apk "${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk"
+        run: cargo run --locked --manifest-path tools/platform-native/Cargo.toml -- verify-arm64-apk "${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk"
+      - name: Retarget disposable project copy for x86_64 emulator
+        run: node -e "const fs=require('node:fs');const path=process.argv[1];const source=fs.readFileSync(path,'utf8');const output=source.replace('abiFilters.add(\"arm64-v8a\")','abiFilters.add(\"x86_64\")');if(output===source)process.exit(1);fs.writeFileSync(path,output)" "${{ runner.temp }}/cert-flutter/mobile/android/app/build.gradle.kts"
       - name: Build Android x86_64 emulator companion
         working-directory: ${{ runner.temp }}/cert-flutter/mobile
-        run: flutter build apk --debug --split-per-abi --target-platform android-x64 --target integration_test/notes_test.dart
+        run: flutter build apk --debug --target-platform android-x64 --target integration_test/notes_test.dart
       - name: Publish Android emulator execution bundle
         uses: actions/upload-artifact@v4
         with:
@@ -209,7 +211,7 @@ jobs:
           if-no-files-found: error
           path: |
             ${{ runner.temp }}/cert-flutter/mobile/android/app/build.gradle.kts
-            ${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-x86_64-debug.apk
+            ${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk
 
   android-emulator-runtime:
     name: Android x86_64 emulator execution for ARM64 release source
@@ -235,4 +237,4 @@ jobs:
           target: default
           arch: x86_64
           profile: pixel_5
-          script: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-android/mobile" emulator-5554 "${{ runner.temp }}/cert-android/mobile/build/app/outputs/flutter-apk/app-x86_64-debug.apk"
+          script: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-android/mobile" emulator-5554 "${{ runner.temp }}/cert-android/mobile/build/app/outputs/flutter-apk/app-debug.apk"
