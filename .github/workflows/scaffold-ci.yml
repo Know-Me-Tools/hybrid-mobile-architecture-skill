@@ -198,46 +198,31 @@ jobs:
         run: flutter build apk --debug --target-platform android-arm64 --target integration_test/notes_test.dart
       - name: Verify Android APK contains only ARM64 native code
         run: cargo run --locked --manifest-path tools/platform-native/Cargo.toml -- verify-arm64-apk "${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk"
+      - name: Publish exact Android execution bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-arm64-execution
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/cert-flutter/mobile/android/app/build.gradle.kts
+            ${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk
 
   android-arm64-runtime:
     name: Android ARM64 native execution
     runs-on: ubuntu-24.04-arm
-    needs: package-gates
-    timeout-minutes: 120
+    needs: flutter-native
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - name: Read exact toolchain pins
-        id: versions
-        run: node scripts/ci-versions.mjs
-      - uses: actions/setup-node@v6
+      - name: Download exact Android execution bundle
+        uses: actions/download-artifact@v5
         with:
-          node-version: ${{ steps.versions.outputs.node }}
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ steps.versions.outputs.rust }}
-          components: clippy
-          targets: aarch64-linux-android
-      - uses: Swatinem/rust-cache@v2
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ steps.versions.outputs.flutter }}
-          channel: stable
-          cache: true
-      - name: Generate runnable Android application
-        run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-android" --profile flutter-mobile --mode runnable --verify-ffi --target aarch64-linux-android && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-android"
-      - name: Install exact bridge code generator
-        run: cargo install flutter_rust_bridge_codegen --version "=${{ steps.versions.outputs.flutter_rust_bridge }}" --locked
-      - name: Generate bridge and Riverpod outputs
-        working-directory: ${{ runner.temp }}/cert-android/mobile
-        run: flutter pub get && flutter_rust_bridge_codegen generate && flutter pub run build_runner build --delete-conflicting-outputs && node "${{ github.workspace }}/scripts/mark-generated-sources.mjs" "${{ runner.temp }}/cert-android"
-      - name: Build Android ARM64 application
-        working-directory: ${{ runner.temp }}/cert-android/mobile
-        run: flutter build apk --debug --target-platform android-arm64 --target integration_test/notes_test.dart
-      - name: Verify Android APK contains only ARM64 native code
-        run: cargo run --locked --manifest-path tools/platform-native/Cargo.toml -- verify-arm64-apk "${{ runner.temp }}/cert-android/mobile/build/app/outputs/flutter-apk/app-debug.apk"
+          name: android-arm64-execution
+          path: ${{ runner.temp }}/cert-android/mobile
       - name: Enable native Android virtualization
         run: sudo chmod 666 /dev/kvm
       - name: Execute Android ARM64 FFI persistence across application relaunch
