@@ -14,28 +14,19 @@ interface SimctlList {
 }
 
 await main(async () => {
-  assert(process.argv.length >= 3 && process.argv.length <= 5, 'node scripts/verify-flutter-ios-restart.mjs <flutter-project> [--ios-app <application-binary> | <android-device-id> <application-binary>]', 2);
+  assert(process.argv.length >= 3 && process.argv.length <= 6, 'node scripts/verify-flutter-ios-restart.mjs <flutter-project> [--ios-app <application-binary> | <android-device-id> <application-apk> <test-apk>]', 2);
   const project = resolve(process.argv[2]!);
   const requestedMode = process.argv[3];
   const applicationBinary = process.argv[4] ? resolve(process.argv[4]) : undefined;
   if (requestedMode && requestedMode !== '--ios-app') {
     const existingDevice = requestedMode;
-    assert(Boolean(applicationBinary), 'existing-device verification requires a prebuilt application binary', 2);
+    const testBinary = process.argv[5] ? resolve(process.argv[5]) : undefined;
+    assert(Boolean(applicationBinary) && Boolean(testBinary), 'existing-device verification requires prebuilt application and instrumentation APKs', 2);
     const buildConfig = readFileSync(resolve(project, 'android/app/build.gradle.kts'), 'utf8');
     const applicationId = /applicationId\s*=\s*"([^"]+)"/.exec(buildConfig)?.[1];
     assert(Boolean(applicationId), 'Android build configuration omitted applicationId');
-    const launch = (route?: string): void => {
-      const args = [
-        '-s', existingDevice, 'shell', 'am', 'start',
-        '-a', 'android.intent.action.MAIN',
-        '-c', 'android.intent.category.LAUNCHER',
-      ];
-      if (route) args.push('--es', 'route', route);
-      args.push('-n', `${applicationId}/.MainActivity`);
-      run('adb', args);
-    };
     const waitForMarker = async (marker: string, expected: string, failure: string): Promise<void> => {
-      const deadline = Date.now() + 5 * 60 * 1000;
+      const deadline = Date.now() + 60 * 1000;
       let markerContents = '';
       while (Date.now() < deadline) {
         markerContents = run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId!, 'cat', marker], { capture: true, allowFailure: true });
@@ -45,16 +36,28 @@ await main(async () => {
       assert(markerContents === expected, failure);
     };
     run('adb', ['-s', existingDevice, 'install', '-r', applicationBinary!]);
+    run('adb', ['-s', existingDevice, 'install', '-r', testBinary!]);
     run('adb', ['-s', existingDevice, 'shell', 'pm', 'clear', applicationId!]);
+    const instrumentationInventory = run('adb', ['-s', existingDevice, 'shell', 'pm', 'list', 'instrumentation'], { capture: true });
+    const instrumentation = instrumentationInventory
+      .split(/\r?\n/)
+      .map(line => /^instrumentation:([^\s]+)\s+\(target=([^\)]+)\)$/.exec(line.trim()))
+      .find(match => match?.[2] === applicationId)?.[1];
+    assert(Boolean(instrumentation), `No installed Android instrumentation targets ${applicationId}`);
+    const executeInstrumentation = (): void => {
+      const output = run('adb', ['-s', existingDevice, 'shell', 'am', 'instrument', '-w', '-r', instrumentation!], { capture: true });
+      process.stdout.write(output);
+      assert(!/(?:FAILURES!!!|INSTRUMENTATION_FAILED|Process crashed)/.test(output), 'Android instrumentation reported a test failure');
+    };
     const firstMarker = 'cache/knowme-builder-first-pass';
     const androidMarker = 'cache/knowme-builder-restart-pass';
     run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId!, 'rm', '-f', firstMarker, androidMarker]);
-    launch();
-    await waitForMarker(firstMarker, 'PASS: rendered and persisted note after first launch\n', 'first Android application process did not publish its rendered-state marker within five minutes');
+    executeInstrumentation();
+    await waitForMarker(firstMarker, 'PASS: rendered and persisted note after first launch\n', 'first Android instrumentation run did not publish its rendered-state marker');
     run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId!, 'rm', '-f', androidMarker]);
     run('adb', ['-s', existingDevice, 'shell', 'am', 'force-stop', applicationId!]);
-    launch('/verify-restart');
-    await waitForMarker(androidMarker, 'PASS: rendered persisted note after relaunch\n', 'restarted Android application did not publish its rendered-state marker within five minutes');
+    executeInstrumentation();
+    await waitForMarker(androidMarker, 'PASS: rendered persisted note after relaunch\n', 'second Android instrumentation run did not recover the persisted note');
     process.stdout.write(`PASS: Flutter UI -> Rust FFI -> SQLite -> application relaunch recovery on device ${existingDevice}\n`);
     return;
   }

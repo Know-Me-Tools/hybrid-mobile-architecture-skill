@@ -625,6 +625,7 @@ desktop/vite.config.ts
 mobile/analysis_options.yaml
 mobile/android/.gitignore
 mobile/android/app/build.gradle.kts
+mobile/android/app/src/androidTest/kotlin/org/example/baseline_mobile/MainActivityTest.kt
 mobile/android/app/src/debug/AndroidManifest.xml
 mobile/android/app/src/main/AndroidManifest.xml
 mobile/android/app/src/main/kotlin/org/example/baseline_mobile/MainActivity.kt

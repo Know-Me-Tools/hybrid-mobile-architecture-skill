@@ -203,6 +203,8 @@ jobs:
       - name: Build Android x86_64 emulator companion
         working-directory: ${{ runner.temp }}/cert-flutter/mobile
         run: flutter build apk --debug --target-platform android-x64 --target integration_test/notes_test.dart
+      - name: Build Android instrumentation runner
+        run: node scripts/build-flutter-android-test.mjs "${{ runner.temp }}/cert-flutter/mobile"
       - name: Publish Android emulator execution bundle
         uses: actions/upload-artifact@v4
         with:
@@ -212,6 +214,7 @@ jobs:
           path: |
             ${{ runner.temp }}/cert-flutter/mobile/android/app/build.gradle.kts
             ${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk
+            ${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 
   android-emulator-runtime:
     name: Android x86_64 emulator execution for ARM64 release source
@@ -237,4 +240,4 @@ jobs:
           target: default
           arch: x86_64
           profile: pixel_5
-          script: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-android/mobile" emulator-5554 "${{ runner.temp }}/cert-android/mobile/build/app/outputs/flutter-apk/app-debug.apk"
+          script: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-android/mobile" emulator-5554 "${{ runner.temp }}/cert-android/mobile/build/app/outputs/flutter-apk/app-debug.apk" "${{ runner.temp }}/cert-android/mobile/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk"

@@ -80,6 +80,7 @@ test('native mobile workflow prebuilds the integration test entrypoint used by e
   assert.match(workflow, /flutter build apk --debug --target-platform android-arm64 --target integration_test\/notes_test\.dart/);
   assert.match(workflow, /abiFilters\.add\(\\"x86_64\\"\)/);
   assert.match(workflow, /flutter build apk --debug --target-platform android-x64 --target integration_test\/notes_test\.dart/);
+  assert.match(workflow, /node scripts\/build-flutter-android-test\.mjs/);
   assert.match(workflow, /runs-on: macos-15\b/);
   assert.match(workflow, /name: Android x86_64 emulator execution for ARM64 release source[\s\S]*runs-on: ubuntu-24\.04/);
   assert.match(workflow, /targets: aarch64-apple-ios-sim,aarch64-linux-android,x86_64-linux-android/);
@@ -89,6 +90,7 @@ test('native mobile workflow prebuilds the integration test entrypoint used by e
   assert.match(workflow, /verify-arm64-apk .*app-debug\.apk/);
   assert.match(workflow, /--ios-app .*Runner\.app/);
   assert.match(workflow, /emulator-5554 .*app-debug\.apk/);
+  assert.match(workflow, /app-debug-androidTest\.apk/);
 });
 
 test('iOS restart proof couples the rendered-state marker to the direct relaunch', () => {
@@ -104,18 +106,21 @@ test('iOS restart proof couples the rendered-state marker to the direct relaunch
   assert.match(integrationTest, /PASS: rendered persisted note after relaunch/);
 });
 
-test('Android restart proof couples the rendered-state marker to the direct relaunch', () => {
+test('Android restart proof couples rendered-state markers to separate instrumentation runs', () => {
   const helper = readFileSync(join(repo, 'runtime/src/native-helpers/verify-flutter-ios-restart.mts'), 'utf8');
   const integrationTest = readFileSync(join(repo, 'assets/templates/baselines/flutter/mobile/integration_test/notes_test.dart'), 'utf8');
   assert.match(helper, /'install', '-r', applicationBinary!/);
+  assert.match(helper, /'install', '-r', testBinary!/);
   assert.match(helper, /shell', 'pm', 'clear', applicationId!/);
-  assert.match(helper, /launch\(\);[\s\S]*waitForMarker\(firstMarker, 'PASS: rendered and persisted note after first launch/);
-  assert.match(helper, /launch\('\/verify-restart'\);[\s\S]*waitForMarker\(androidMarker, 'PASS: rendered persisted note after relaunch/);
+  assert.match(helper, /'pm', 'list', 'instrumentation'/);
+  assert.match(helper, /executeInstrumentation\(\);[\s\S]*waitForMarker\(firstMarker, 'PASS: rendered and persisted note after first launch/);
+  assert.match(helper, /'am', 'force-stop', applicationId![\s\S]*executeInstrumentation\(\);[\s\S]*waitForMarker\(androidMarker, 'PASS: rendered persisted note after relaunch/);
   assert.match(helper, /shell', 'run-as', applicationId!, 'cat', marker/);
-  assert.match(helper, /first Android application process did not publish its rendered-state marker within five minutes/);
-  assert.match(helper, /restarted Android application did not publish its rendered-state marker within five minutes/);
+  assert.match(helper, /first Android instrumentation run did not publish its rendered-state marker/);
+  assert.match(helper, /second Android instrumentation run did not recover the persisted note/);
   assert.match(integrationTest, /knowme-builder-first-pass/);
   assert.match(integrationTest, /knowme-builder-restart-pass/);
+  assert.match(integrationTest, /persistedNoteIsVisible/);
 });
 
 test('standalone canonical and project-template skills have identical portable scripts', () => {

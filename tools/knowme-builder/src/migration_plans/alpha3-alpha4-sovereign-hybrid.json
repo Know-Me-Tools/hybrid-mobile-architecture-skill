@@ -294,7 +294,12 @@
     {
       "kind": "add",
       "to": "mobile/android/app/build.gradle.kts",
-      "afterSourceDigest": "b416a81cec4bde41abcfd67b80ee7aa300bb061427b70eeb49cbab9e59285947"
+      "afterSourceDigest": "227c7bfde337fef907c8ff0053213d3f87c8927af151a2502294e82cd9a790e6"
+    },
+    {
+      "kind": "add",
+      "to": "mobile/android/app/src/androidTest/kotlin/org/example/baseline_mobile/MainActivityTest.kt",
+      "afterSourceDigest": "3bc5c277da032e2f498398d40673a870d83cffef2d523f3cd5e6487d24c6e423"
     },
     {
       "kind": "add",
@@ -409,7 +414,7 @@
     {
       "kind": "add",
       "to": "mobile/integration_test/notes_test.dart",
-      "afterSourceDigest": "7f41a07b5b03a4aac817ddf8df00fdbf623a889e79f6f427e716908c5e1a1c2d"
+      "afterSourceDigest": "775c0d4573bca05ed31891ad2e194fc8a7600164712f2316f662da9c6da12ccd"
     },
     {
       "kind": "add",

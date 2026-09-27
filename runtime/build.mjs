@@ -32,6 +32,7 @@ const helperOutputs = {
   'verify-tray-templates': ['scripts/verify-tray-templates.mjs'],
   'patch-cargokit-ios': ['scripts/patch-cargokit-ios.mjs'],
   'verify-flutter-ios-restart': ['scripts/verify-flutter-ios-restart.mjs'],
+  'build-flutter-android-test': ['scripts/build-flutter-android-test.mjs'],
   'render-supervisor-plist': ['scripts/render-supervisor-plist.mjs'],
   'validate-catalog': ['deploy/scripts/validate-catalog.mjs'],
   'validate-gitops': ['deploy/scripts/validate-gitops.mjs'],

@@ -25,6 +25,7 @@ android {
             abiFilters.add("arm64-v8a")
         }
         targetSdk = flutter.targetSdkVersion
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
         // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
@@ -50,4 +51,10 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }
