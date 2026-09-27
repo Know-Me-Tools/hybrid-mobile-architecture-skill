@@ -4,7 +4,7 @@ use crate::model::CommandResult;
 
 const WINDOWS_TARGETS: [&str; 2] = ["x86_64-pc-windows-msvc", "aarch64-pc-windows-msvc"];
 const IOS_SIMULATOR_TARGETS: [&str; 2] = ["aarch64-apple-ios-sim", "x86_64-apple-ios"];
-const ANDROID_ARM64_TARGET: &str = "aarch64-linux-android";
+const ANDROID_TARGETS: [&str; 2] = ["aarch64-linux-android", "x86_64-linux-android"];
 
 /// Preflight explicitly requested runnable capabilities without mutating the destination.
 pub(crate) fn inspect_requested_capabilities(
@@ -66,14 +66,14 @@ pub(crate) fn inspect_requested_capabilities(
             } else {
                 inspect_command(root, "xcodebuild", &["-version"], result);
             }
-        } else if target == ANDROID_ARM64_TARGET {
+        } else if ANDROID_TARGETS.contains(&target.as_str()) {
             if std::env::var_os("ANDROID_HOME").is_none()
                 && std::env::var_os("ANDROID_SDK_ROOT").is_none()
             {
                 result.ok = false;
-                result.warnings.push(
-                    "Android ARM64 preflight requires ANDROID_HOME or ANDROID_SDK_ROOT".to_owned(),
-                );
+                result
+                    .warnings
+                    .push("Android preflight requires ANDROID_HOME or ANDROID_SDK_ROOT".to_owned());
             }
         } else {
             result.ok = false;
