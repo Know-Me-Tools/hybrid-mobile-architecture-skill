@@ -218,6 +218,10 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
+      - name: Install Android SDK and ARM64 emulator host
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools emulator
       - name: Download exact Android execution bundle
         uses: actions/download-artifact@v5
         with:
