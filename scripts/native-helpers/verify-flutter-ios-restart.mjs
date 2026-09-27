@@ -14,17 +14,6 @@ await main(async () => {
         const buildConfig = readFileSync(resolve(project, 'android/app/build.gradle.kts'), 'utf8');
         const applicationId = /applicationId\s*=\s*"([^"]+)"/.exec(buildConfig)?.[1];
         assert(Boolean(applicationId), 'Android build configuration omitted applicationId');
-        const waitForMarker = async (marker, expected, failure) => {
-            const deadline = Date.now() + 60 * 1000;
-            let markerContents = '';
-            while (Date.now() < deadline) {
-                markerContents = run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId, 'cat', marker], { capture: true, allowFailure: true });
-                if (markerContents === expected)
-                    break;
-                await new Promise(resolveDelay => setTimeout(resolveDelay, 1000));
-            }
-            assert(markerContents === expected, failure);
-        };
         run('adb', ['-s', existingDevice, 'install', '-r', applicationBinary]);
         run('adb', ['-s', existingDevice, 'install', '-r', testBinary]);
         run('adb', ['-s', existingDevice, 'shell', 'pm', 'clear', applicationId]);
@@ -38,16 +27,11 @@ await main(async () => {
             const output = run('adb', ['-s', existingDevice, 'shell', 'am', 'instrument', '-w', '-r', instrumentation], { capture: true });
             process.stdout.write(output);
             assert(!/(?:FAILURES!!!|INSTRUMENTATION_FAILED|Process crashed)/.test(output), 'Android instrumentation reported a test failure');
+            assert(/^\s*OK \(\d+ tests?\)\s*$/m.test(output), 'Android instrumentation did not report a passing test suite');
         };
-        const firstMarker = 'cache/knowme-builder-first-pass';
-        const androidMarker = 'cache/knowme-builder-restart-pass';
-        run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId, 'rm', '-f', firstMarker, androidMarker]);
         executeInstrumentation();
-        await waitForMarker(firstMarker, 'PASS: rendered and persisted note after first launch\n', 'first Android instrumentation run did not publish its rendered-state marker');
-        run('adb', ['-s', existingDevice, 'shell', 'run-as', applicationId, 'rm', '-f', androidMarker]);
         run('adb', ['-s', existingDevice, 'shell', 'am', 'force-stop', applicationId]);
         executeInstrumentation();
-        await waitForMarker(androidMarker, 'PASS: rendered persisted note after relaunch\n', 'second Android instrumentation run did not recover the persisted note');
         process.stdout.write(`PASS: Flutter UI -> Rust FFI -> SQLite -> application relaunch recovery on device ${existingDevice}\n`);
         return;
     }

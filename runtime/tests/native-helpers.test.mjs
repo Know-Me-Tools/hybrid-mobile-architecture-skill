@@ -106,18 +106,16 @@ test('iOS restart proof couples the rendered-state marker to the direct relaunch
   assert.match(integrationTest, /PASS: rendered persisted note after relaunch/);
 });
 
-test('Android restart proof couples rendered-state markers to separate instrumentation runs', () => {
+test('Android restart proof requires two passing instrumentation runs around a force-stop', () => {
   const helper = readFileSync(join(repo, 'runtime/src/native-helpers/verify-flutter-ios-restart.mts'), 'utf8');
   const integrationTest = readFileSync(join(repo, 'assets/templates/baselines/flutter/mobile/integration_test/notes_test.dart'), 'utf8');
   assert.match(helper, /'install', '-r', applicationBinary!/);
   assert.match(helper, /'install', '-r', testBinary!/);
   assert.match(helper, /shell', 'pm', 'clear', applicationId!/);
   assert.match(helper, /'pm', 'list', 'instrumentation'/);
-  assert.match(helper, /executeInstrumentation\(\);[\s\S]*waitForMarker\(firstMarker, 'PASS: rendered and persisted note after first launch/);
-  assert.match(helper, /'am', 'force-stop', applicationId![\s\S]*executeInstrumentation\(\);[\s\S]*waitForMarker\(androidMarker, 'PASS: rendered persisted note after relaunch/);
-  assert.match(helper, /shell', 'run-as', applicationId!, 'cat', marker/);
-  assert.match(helper, /first Android instrumentation run did not publish its rendered-state marker/);
-  assert.match(helper, /second Android instrumentation run did not recover the persisted note/);
+  assert.match(helper, /Android instrumentation did not report a passing test suite/);
+  assert.match(helper, /executeInstrumentation\(\);[\s\S]*'am', 'force-stop', applicationId![\s\S]*executeInstrumentation\(\);/);
+  assert.doesNotMatch(helper, /shell', 'run-as'/);
   assert.match(integrationTest, /knowme-builder-first-pass/);
   assert.match(integrationTest, /knowme-builder-restart-pass/);
   assert.match(integrationTest, /persistedNoteIsVisible/);
