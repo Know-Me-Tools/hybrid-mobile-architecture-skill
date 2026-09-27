@@ -32,7 +32,7 @@
 
 - [x] Complete web, desktop, Flutter/FFI and hybrid baseline applications with one persisted vertical slice.
 - [x] Verify bridge/codegen and architectural boundaries on fresh outputs.
-- [ ] Build and execute claimed targets on native runners, including both Windows architectures.
+- [x] Build and execute claimed targets on native runners, including both Windows architectures.
 - [x] Rebuild/run migrated historical and brownfield fixtures.
 - [x] Stage identical full/mini payloads and verify hashes/install behavior.
 - [x] Independently review the converted runtime and managed-file recovery; preserve initial and resolved findings.

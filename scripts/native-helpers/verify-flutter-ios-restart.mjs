@@ -23,15 +23,16 @@ await main(async () => {
             .map(line => /^instrumentation:([^\s]+)\s+\(target=([^\)]+)\)$/.exec(line.trim()))
             .find(match => match?.[2] === applicationId)?.[1];
         assert(Boolean(instrumentation), `No installed Android instrumentation targets ${applicationId}`);
-        const executeInstrumentation = () => {
-            const output = run('adb', ['-s', existingDevice, 'shell', 'am', 'instrument', '-w', '-r', instrumentation], { capture: true });
+        const executeInstrumentation = (verifyRestart = false) => {
+            const restartArguments = verifyRestart ? ['-e', 'verifyRestart', 'true'] : [];
+            const output = run('adb', ['-s', existingDevice, 'shell', 'am', 'instrument', '-w', '-r', ...restartArguments, instrumentation], { capture: true });
             process.stdout.write(output);
             assert(!/(?:FAILURES!!!|INSTRUMENTATION_FAILED|Process crashed)/.test(output), 'Android instrumentation reported a test failure');
             assert(/^\s*OK \(\d+ tests?\)\s*$/m.test(output), 'Android instrumentation did not report a passing test suite');
         };
-        executeInstrumentation();
+        executeInstrumentation(false);
         run('adb', ['-s', existingDevice, 'shell', 'am', 'force-stop', applicationId]);
-        executeInstrumentation();
+        executeInstrumentation(true);
         process.stdout.write(`PASS: Flutter UI -> Rust FFI -> SQLite -> application relaunch recovery on device ${existingDevice}\n`);
         return;
     }

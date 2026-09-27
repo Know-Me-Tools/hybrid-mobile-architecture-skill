@@ -18,8 +18,7 @@ void main() {
     await app.main();
     await tester.pumpAndSettle();
     const title = 'Native note restart proof';
-    final persistedNoteIsVisible = find.text(title).evaluate().isNotEmpty;
-    if (verifyRestart || persistedNoteIsVisible) {
+    if (verifyRestart) {
       expect(find.text(title), findsAtLeastNWidgets(1));
       File(
         '${Directory.systemTemp.path}/knowme-builder-restart-pass',

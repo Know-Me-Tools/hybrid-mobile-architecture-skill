@@ -94,7 +94,7 @@
     {
       "kind": "add",
       "to": "BASELINE-MOBILE.md",
-      "afterSourceDigest": "16715af5b05dd996ae4ce68d30bbc72e920705308ae201205193203b8b95ad22"
+      "afterSourceDigest": "0120ecdd391ad2b66d1d5e74e62a79af3b3f03491c1558dfdc493034764bb630"
     },
     {
       "kind": "add",
@@ -299,7 +299,7 @@
     {
       "kind": "add",
       "to": "mobile/android/app/src/androidTest/kotlin/org/example/baseline_mobile/MainActivityTest.kt",
-      "afterSourceDigest": "3bc5c277da032e2f498398d40673a870d83cffef2d523f3cd5e6487d24c6e423"
+      "afterSourceDigest": "0c1aba07afa334770e1fab1977a423cdddfa80084a87167aa7dc4d8e32d1cba8"
     },
     {
       "kind": "add",
@@ -414,7 +414,7 @@
     {
       "kind": "add",
       "to": "mobile/integration_test/notes_test.dart",
-      "afterSourceDigest": "775c0d4573bca05ed31891ad2e194fc8a7600164712f2316f662da9c6da12ccd"
+      "afterSourceDigest": "7f41a07b5b03a4aac817ddf8df00fdbf623a889e79f6f427e716908c5e1a1c2d"
     },
     {
       "kind": "add",
