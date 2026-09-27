@@ -79,7 +79,9 @@ test('native mobile workflow prebuilds the integration test entrypoint used by e
   assert.match(workflow, /flutter build ios --simulator --debug --no-codesign --target integration_test\/notes_test\.dart/);
   assert.match(workflow, /flutter build apk --debug --target-platform android-arm64 --target integration_test\/notes_test\.dart/);
   assert.match(workflow, /runs-on: macos-15\b/);
+  assert.match(workflow, /name: Android ARM64 native execution[\s\S]*runs-on: ubuntu-24\.04-arm/);
   assert.match(workflow, /targets: aarch64-apple-ios-sim,aarch64-linux-android/);
+  assert.match(workflow, /targets: aarch64-linux-android/);
   assert.match(workflow, /api-level: 30[\s\S]*arch: arm64-v8a/);
   assert.doesNotMatch(workflow, /API 35 x86_64|arch: x86_64/);
   assert.match(workflow, /--ios-app .*Runner\.app/);
