@@ -10,8 +10,8 @@ Hooks fail silently. A hook that does not fire produces no error — the rule
 simply never reaches the model, and the system "feels broken" with nothing in
 any log. Every fix below converts a silent failure into a loud one.
 
-Apply with `scripts/install-hooks-reliability.sh <target>`; check with
-`scripts/verify-hooks-reliability.sh <target>`. The verifier is the inverse of
+Apply with `scripts/install-hooks-reliability.mjs <target>`; check with
+`scripts/verify-hooks-reliability.mjs <target>`. The verifier is the inverse of
 the installer and is what a consumer's `doctor` command runs.
 
 ## The 9 fixes
@@ -115,7 +115,7 @@ the decision channel) as the mitigation.
 ## Verification
 
 ```bash
-bash scripts/verify-hooks-reliability.sh .
+node scripts/verify-hooks-reliability.mjs .
 ```
 
 Exits 0 when all nine hold, and names the violated fix otherwise.

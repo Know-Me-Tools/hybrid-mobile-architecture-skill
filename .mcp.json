@@ -2,11 +2,24 @@
   "mcpServers": {
     "dart": {
       "command": "dart",
-      "args": ["mcp-server"]
+      "args": [
+        "mcp-server"
+      ]
     },
     "shadcn": {
       "command": "npx",
-      "args": ["shadcn@latest", "mcp"]
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    },
+    "compass": {
+      "command": "compass",
+      "args": [
+        "serve",
+        "--transport",
+        "stdio"
+      ]
     }
   }
 }

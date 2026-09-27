@@ -3,7 +3,9 @@
 import { readFile, readdir } from "node:fs/promises";
 import { extname, join, relative, resolve } from "node:path";
 
-const root = resolve(new URL("..", import.meta.url).pathname);
+import { fileURLToPath } from "node:url";
+
+const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const scanRoots = [
   "assets/templates",
   "references",

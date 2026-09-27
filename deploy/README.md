@@ -24,7 +24,7 @@ KnowMe reference stack. It follows TJ-CICD-001:
 ## Build
 
 ```bash
-bash deploy/scripts/validate-catalog.sh
+node deploy/scripts/validate-catalog.mjs
 docker buildx bake -f deploy/docker-bake.hcl --print
 docker buildx bake -f deploy/docker-bake.hcl validate
 ```
@@ -65,8 +65,8 @@ Wildcard issuance always uses DNS-01. HTTP-01 cannot issue wildcard certificates
 ## Validation
 
 ```bash
-bash deploy/scripts/validate-catalog.sh
-bash deploy/scripts/validate-gitops.sh
+node deploy/scripts/validate-catalog.mjs
+node deploy/scripts/validate-gitops.mjs
 docker compose -f deploy/compose.yaml config
 ```
 

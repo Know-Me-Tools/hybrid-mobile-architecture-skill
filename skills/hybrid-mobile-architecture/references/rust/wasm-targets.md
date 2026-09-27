@@ -2,7 +2,7 @@
 # wasm32 targets — validation spike findings (C-002)
 
 > Spike run 2026-07-15 against the C-001 layered workspace
-> (`scripts/scaffold-rust-core.sh`). Time-boxed compile probe on
+> (`scripts/scaffold-rust-core.mjs`). Time-boxed compile probe on
 > `wasm32-unknown-unknown`. Findings feed **C-004** (graph-RAG store), **C-005**
 > (sync engine), and **C-007** (FFI/wasm leaves).
 >
@@ -150,7 +150,7 @@ exercised in this spike (compile-only); C-007 owns that pipeline per plan.
 
 ```bash
 # 1. generate the workspace
-bash scripts/scaffold-rust-core.sh /tmp/spike-core
+node scripts/scaffold-rust-core.mjs /tmp/spike-core
 
 # 2. add the two throwaway probe crates (see this spike's completion log for the
 #    exact files) OR consult git history; then, with a >=1.96 toolchain + wasm target:

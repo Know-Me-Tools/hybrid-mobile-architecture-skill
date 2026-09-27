@@ -11,7 +11,7 @@ The failure this prevents is **crash-loop amnesia**: `KeepAlive: true` with no
 silently remove it. The port goes quiet, no error is logged, and an installer
 that only checks "did the file get written" reports healthy.
 
-Render templates with `scripts/render-supervisor-plist.sh`; never hand-write a
+Render templates with `scripts/render-supervisor-plist.mjs`; never hand-write a
 plist. Templates live in `assets/templates/launchagent-supervisor/`.
 
 ## The 9 fixes
@@ -60,8 +60,8 @@ bare-`KeepAlive` bug.
 Type=simple
 Restart=on-failure
 RestartSec=15
-StandardOutput=append:%h/.prometheus/logs/<service>.log
-StandardError=append:%h/.prometheus/logs/<service>.err
+StandardOutput=append:%h/Library/Logs/KnowMe/<service>.log
+StandardError=append:%h/Library/Logs/KnowMe/<service>.err
 
 [Install]
 WantedBy=default.target
@@ -76,7 +76,7 @@ health reporting as unreliable and lean harder on the R1.6 watchdog.
 ## Verification
 
 ```bash
-bash scripts/render-supervisor-plist.sh --label ai.prometheus.demo \
+node scripts/render-supervisor-plist.mjs --label ai.prometheus.demo \
   --program /usr/local/bin/demo --out /tmp/demo.plist
 plutil -lint /tmp/demo.plist
 launchctl print gui/"$(id -u)"/ai.prometheus.demo    # after bootstrap

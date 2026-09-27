@@ -3,7 +3,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 
-const root = resolve(new URL("..", import.meta.url).pathname);
+import { fileURLToPath } from "node:url";
+
+const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const activation = JSON.parse(
   await readFile(join(root, "templates/activation-manifest.json"), "utf8"),
 );

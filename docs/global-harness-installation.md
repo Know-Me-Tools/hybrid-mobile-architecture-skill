@@ -1,8 +1,8 @@
 # Global harness installation
 
-KnowMe Builder `2.0.0-alpha.2` exposes exactly 30 public Agent Skills from the
-Git repository URL. The package contains the `hybrid-mobile-architecture`
-routing skill and 29 independently installable companion skills.
+KnowMe Builder `2.0.0-alpha.4` exposes 36 public Agent Skills. The package
+contains the `hybrid-mobile-architecture` routing skill and 35 independently
+installable companion skills.
 
 Repository URL:
 
@@ -12,22 +12,22 @@ https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 
 ## Portable Agent Skills installation
 
-Install the same public set into Claude Code, Codex, and OpenCode:
+From a trusted checkout, list or install only the public skill source:
 
 ```bash
-npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill \
+npx skills add ./skills \
   --skill '*' -a claude-code -a codex -a opencode -g -y
 ```
 
 List without installing:
 
 ```bash
-npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill --list
+npx skills add ./skills --list
 ```
 
-Normal discovery returns 30 skills. The 20 OpenSpec/OPSX repository-authoring
-helpers are marked internal and are visible only with
-`INSTALL_INTERNAL_SKILLS=1` plus full-depth discovery.
+Public-source discovery returns 36 skills. The 22 OpenSpec/OPSX
+repository-authoring helpers live outside that source and are available to
+maintainers only through explicit full-depth repository discovery.
 
 ## Native Claude Code marketplace
 
@@ -67,13 +67,13 @@ OpenCode has no native Git marketplace. It discovers Agent Skills through its
 standard skill directories and loads JavaScript/TypeScript plugins from
 `.opencode/plugins` or `~/.config/opencode/plugins`.
 
-The portable command above installs its 30 skills. The repository installer
+The portable command above installs its 36 skills. The repository installer
 also installs the dependency-free advisory plugin and namespaced commands:
 
 ```bash
 git clone https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 cd hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --harness opencode \
+node scripts/install-harness-package.mjs --harness opencode \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 opencode debug skill
 ```
@@ -82,9 +82,9 @@ Update and safely uninstall the receipt-owned OpenCode payload:
 
 ```bash
 git pull --ff-only
-bash scripts/install-harness-package.sh --harness opencode \
+node scripts/install-harness-package.mjs --harness opencode \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --harness opencode --uninstall
+node scripts/install-harness-package.mjs --harness opencode --uninstall
 ```
 
 ## Unified receipt-based installer
@@ -92,20 +92,20 @@ bash scripts/install-harness-package.sh --harness opencode --uninstall
 From a trusted checkout:
 
 ```bash
-bash scripts/install-harness-package.sh \
+node scripts/install-harness-package.mjs \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 ```
 
 The compatibility entry point remains:
 
 ```bash
-bash scripts/install-global-harnesses.sh
+node scripts/install-global-harnesses.mjs
 ```
 
 Options:
 
 ```text
---harness claude-code|codex|opencode|all
+--harness claude-code|codex|opencode|kimi-code|minimax-code|zed|all
 --scope user|project
 --source <git-url-or-path>
 --ref <git-ref>
@@ -120,6 +120,14 @@ The default installs skills, native marketplace registrations, commands, and
 advisory adapters. It does not compile the CLI, mutate MCP configuration, or
 bootstrap Prometheus unless the corresponding explicit flag is present.
 
+Portable skill copies use each harness discovery contract:
+
+- OpenCode: `~/.agents/skills` and `~/.config/opencode/skills`;
+- Kimi Code: `~/.agents/skills` and `~/.kimi-code/skills`;
+- MiniMax Code: `$MINIMAX_DATA_DIR/skills`, `$MAVIS_DATA_DIR/skills`, or
+  `~/.minimax/skills`;
+- Zed: `~/.agents/skills`.
+
 User-scope ownership is recorded under
 `${XDG_STATE_HOME:-$HOME/.local/state}/knowme-builder/install.json`. Project
 scope uses `.knowme-builder/harness-install.json`. Uninstall removes only
@@ -128,12 +136,12 @@ receipt-owned paths and marketplace registrations.
 For an all-harness install, the exact check, update, and uninstall lifecycle is:
 
 ```bash
-bash scripts/install-harness-package.sh --check \
+node scripts/install-harness-package.mjs --check \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 git pull --ff-only
-bash scripts/install-harness-package.sh \
+node scripts/install-harness-package.mjs \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --uninstall
+node scripts/install-harness-package.mjs --uninstall
 ```
 
 Codex native plugins are user-scoped. For `--scope project`, the installer uses
@@ -145,11 +153,11 @@ native plugin scope.
 CLI installation is optional:
 
 ```bash
-bash scripts/install-harness-package.sh --with-cli
+node scripts/install-harness-package.mjs --with-cli
 knowme-builder --version
 ```
 
-Generated or adopted applications receive only the 29 companion skills:
+Generated or adopted applications receive only the 35 companion skills:
 
 ```bash
 knowme-builder skills install --path <project>
@@ -178,9 +186,9 @@ Use `--with-prometheus` only when the long, host-mutating bootstrap is intended.
 ```bash
 node scripts/check-skill-contracts.mjs
 node scripts/sync-skill-resources.mjs --check
-bash scripts/sync-harness-skills.sh --check
-bash scripts/check-git-url-discovery.sh
-bash scripts/test-harness-installer.sh
+node scripts/sync-harness-skills.mjs --check
+node scripts/check-git-url-discovery.mjs
+node scripts/test-harness-installer.mjs
 node scripts/test-opencode-plugin.mjs
 knowme-builder --json doctor --path .
 ```

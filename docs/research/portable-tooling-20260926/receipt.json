@@ -1,0 +1,11 @@
+{
+  "kind": "research-summary-copy",
+  "fullPackage": "/Users/gqadonis/.prometheus/research/assess-cross-platform-hybrid-mobile-20260926-e157",
+  "jobId": "job-1790401427-aa9039ab",
+  "verification": "partial",
+  "confidence": 0.66,
+  "sources": 30,
+  "export": "local stage-contract driver completed and package validator passed; MCP job server retains stale pre-repair blocked status",
+  "repair": "Graph evidence objects serialized as JSON strings; originals retained in full package repairs/",
+  "review": "PASS with one provenance-placement warning; producer unknown so cross-model distinction unverified"
+}

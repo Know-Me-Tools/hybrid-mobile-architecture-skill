@@ -18,7 +18,7 @@ model **data**: a synced local store already knows freshness — the sync engine
 owns staleness, dedup, and revalidation. A query cache on top re-answers that
 question in the wrong layer, with a second source of truth that drifts. PEM's
 normalized entity graph sits AT the data layer, over the local store. This is
-enforced: `audit.sh` fails a scaffolded project that depends on TanStack Query.
+enforced: `audit.mjs` fails a scaffolded project that depends on TanStack Query.
 
 ## The stack (per surface)
 

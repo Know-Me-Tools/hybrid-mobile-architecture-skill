@@ -1,6 +1,6 @@
 # KnowMe Builder
 
-**Version 2.0.0-alpha.2 · governed agentic application generator and skill pack**
+**Version 2.0.0-alpha.4 · governed agentic application generator and skill pack**
 
 KnowMe Builder creates and adopts Flutter, Tauri/React, Axum, and Rust
 applications without treating the consumer repository as disposable generator
@@ -10,9 +10,11 @@ output. It combines:
 - explicit application profiles;
 - typed UAR, A2UI, AG-UI, identity, policy, persistence, and native-bridge
   boundaries;
-- 30 public, self-contained Agent Skills (one package skill and 29 companions);
+- 36 public, self-contained Agent Skills (one package skill and 35 companions);
 - generated commands and advisory activation adapters for Claude Code, Codex,
-  OpenCode, and Kimi; and
+  OpenCode, and Kimi Code;
+- receipt-owned skill installation for Claude Code, Codex, OpenCode, Kimi Code,
+  MiniMax Code CLI, and Zed; and
 - conformance, security, documentation, and installation gates.
 
 Public documentation:
@@ -23,7 +25,7 @@ Start with:
 - [Installation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/installation)
 - [CLI reference](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/cli)
 - [Generation profiles](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/architecture/profiles)
-- [All 30 public skills](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/skills)
+- [All 36 public skills](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/skills)
 - [Services and boundaries](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/services)
 - [Utilities and automation](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/utilities)
 - [Common use cases](https://know-me-tools.github.io/hybrid-mobile-architecture-skill/reference/use-cases)
@@ -44,32 +46,32 @@ UAR.
 
 ## Install
 
-Build and install the CLI from a trusted checkout:
+Build and install the CLI from a trusted checkout on macOS, Linux, or Windows:
 
 ```bash
-cargo build --release --locked --manifest-path tools/knowme-builder/Cargo.toml
-install -m 0755 tools/knowme-builder/target/release/knowme-builder \
-  "$HOME/.cargo/bin/knowme-builder"
+cargo install --locked --path tools/knowme-builder
 knowme-builder --version
 ```
 
-Install all 30 portable skills directly from the Git repository URL:
+Install all 36 public portable skills from a trusted checkout:
 
 ```bash
-npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill \
+npx skills add ./skills \
   --skill '*' -a claude-code -a codex -a opencode -g -y
 ```
 
 Install the complete native harness package from a trusted checkout:
 
 ```bash
-bash scripts/install-global-harnesses.sh
+node scripts/install-global-harnesses.mjs
 ```
 
 That registers the Git source through the supported Claude/Codex marketplace
-CLIs, installs OpenCode skills plus its native advisory plugin, and records an
-ownership receipt. CLI compilation, MCP configuration, and the full Prometheus
-runtime are opt-in with `--with-cli`, `--with-mcp`, and `--with-prometheus`.
+CLIs; installs portable skills for OpenCode, Kimi Code, MiniMax Code CLI, and
+Zed in their native discovery roots; installs the OpenCode advisory plugin; and
+records an ownership receipt. CLI compilation and MCP configuration are opt-in
+with `--with-cli` and `--with-mcp`. The installer never invokes shell or Python
+bootstrap scripts.
 
 Verify:
 
@@ -78,6 +80,15 @@ knowme-builder manifest check
 knowme-builder --json doctor --path .
 prometheus doctor --json
 ```
+
+Check native prerequisites independently of the Prometheus control plane:
+
+```text
+knowme-builder doctor --native-only --target x86_64-pc-windows-msvc --target aarch64-pc-windows-msvc --json
+```
+
+This distinguishes Rust target availability from Windows SDK/linker and runtime
+verification. See [portable tooling status](docs/portability/project-tools.md).
 
 See [docs/global-harness-installation.md](docs/global-harness-installation.md)
 for native plugin registration and per-harness verification.
@@ -95,6 +106,14 @@ knowme-builder new my-app \
 knowme-builder new my-app \
   --profile sovereign-hybrid \
   --mode runnable
+
+# Make target/FFI prerequisites a write-blocking preflight when certifying locally.
+knowme-builder new my-mobile-app \
+  --profile flutter-mobile \
+  --mode runnable \
+  --verify-ffi \
+  --target aarch64-apple-ios-sim \
+  --target aarch64-linux-android
 ```
 
 Available profiles:
@@ -107,8 +126,13 @@ Available profiles:
 | `tauri-desktop` | Tauri/React, Rust, service or in-process UAR facade |
 | `axum-web` | React, Axum, service UAR |
 
-`runnable` emits a deterministic agentic vertical slice. `skeleton` may contain
-explicitly declared unsupported surfaces and TODOs.
+`runnable` emits complete locked application entrypoints and a persisted Notes
+vertical slice through UI state, repository ports, Rust use cases and SQLite.
+Certification remains target-specific: the generated source is runnable, while
+the receipt or CI job for a host proves its native build and execution.
+`--target` and `--verify-ffi` turn requested host capabilities into a preflight
+that fails before destination writes when a prerequisite is missing.
+`skeleton` records missing surfaces and never receives runnable certification.
 
 ## Adopt an existing application
 
@@ -124,15 +148,19 @@ knowme-builder adopt existing-app \
   --apply
 ```
 
-Adoption records profile and package state, installs skills, and creates a
-project policy overlay without claiming ownership of existing application
-files.
+Adoption records profile and package state and creates a project policy overlay
+without claiming ownership of existing application files. Skill installation is
+the separate `knowme-builder skills install --path existing-app` operation.
+Adoption metadata does not implement missing surfaces or integrate new features.
+Follow the [project evolution workflow](skills/hybrid-mobile-architecture/references/project-evolution.md)
+for brownfield changes and continuing upgrades of previous outputs.
 
 ## Ownership-aware upgrades
 
 ```bash
 knowme-builder upgrade existing-app --check
 knowme-builder upgrade existing-app --apply
+knowme-builder upgrade existing-app --rollback
 ```
 
 `.knowme-builder/generated.lock.json` records the generated path, template,
@@ -140,17 +168,31 @@ source digest, last installed digest, ownership, and version. The Builder
 replaces only managed files that still match their last installed digest.
 Modified files produce a conflict report and proposed replacement.
 
+Conflicts are discovered before managed application files are changed; a failed
+JSON result also returns a nonzero process exit. New outputs retain their
+rendering name across directory moves. Legacy state without that identity needs
+`upgrade --app-name <original-name>`; unsupported schemas/versions require an
+explicit migration. Managed-file upgrades preserve original bytes and output
+hashes in a recovery journal; rollback refuses to overwrite later user edits.
+An interrupted apply requires rollback before retrying. Explicit migration IDs
+cover the supported `2.0.0-alpha.3` to `2.0.0-alpha.4` transition, including
+added, removed and renamed files, dependency manifests and regenerated bridge
+outputs. Unsupported histories fail with a migration diagnostic. Application
+database migrations remain a separately reviewed operation.
+
 ## Add capabilities
 
 ```bash
 knowme-builder add feature conversations --path .
-knowme-builder add auth verified-session --path .
-knowme-builder add module reporting --path .
-knowme-builder add legacy-embed frozen-portal --path .
 ```
 
-Additions are emitted under `.knowme-builder/additions` for deliberate
-integration. They do not overwrite feature code.
+Feature additions are written into the capability registries already consumed
+by each generated surface, recorded in ownership state, included in previews,
+and preserved by later upgrades. A compatible adopted project can use this path
+when it exposes the recognized empty registry seam. Auth, module and
+legacy-embed adapters are intentionally rejected before writes in this release;
+they require their own identity, routing or message-boundary implementation and
+runtime evidence.
 
 ## Skill bundle
 
@@ -184,8 +226,8 @@ knowme-builder skills check --path .
 Generated harness trees must not be edited independently:
 
 ```bash
-bash scripts/sync-harness-skills.sh
-bash scripts/sync-harness-skills.sh --check
+node scripts/sync-harness-skills.mjs
+node scripts/sync-harness-skills.mjs --check
 ```
 
 ## Application runtime contract
@@ -226,9 +268,9 @@ node scripts/check-skill-contracts.mjs
 node scripts/check-runtime-security.mjs
 node scripts/check-prometheus-boundary.mjs
 node scripts/sync-skill-resources.mjs --check
-bash scripts/sync-harness-skills.sh --check
-bash scripts/check-git-url-discovery.sh
-bash scripts/test-harness-installer.sh
+node scripts/sync-harness-skills.mjs --check
+node scripts/check-git-url-discovery.mjs
+node scripts/test-harness-installer.mjs
 cargo test --locked --manifest-path tools/knowme-builder/Cargo.toml
 ```
 

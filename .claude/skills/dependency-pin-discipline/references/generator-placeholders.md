@@ -1,7 +1,7 @@
 # Generator placeholders
 
 > Contract for porting code out of a real product codebase into this generator.
-> Enforced by `bash scripts/audit.sh generator-purity`.
+> Enforced by `node scripts/audit.mjs generator-purity`.
 
 ## Why this exists
 
@@ -56,12 +56,12 @@ no version literal is ever inlined in an emitted file.**
 - **`__NAME__`** — product identity, substituted from the app name at scaffold time.
   Used in files copied wholesale out of `assets/templates/`.
 - **`@NAME@`** — version pins, substituted from `versions.toml` via
-  `scripts/lib-versions.sh`. Used inside quoted heredocs, where `${...}` would not
-  interpolate and unquoting would break the Rust/markdown backticks in the payload.
+  `scripts/portable/versions.mjs`. Keep template text literal and apply explicit
+  substitutions; never interpolate template contents through a shell.
 
-Both are checked. `scaffold-rust-core.sh` hard-fails on any surviving `@NAME@`, because
-an unsubstituted token in a `Cargo.toml` is a manifest that cannot parse — far cheaper
-to catch at scaffold time than in a user's first `cargo check`.
+`scaffold-rust-core.mjs` delegates to the native Builder. The structural
+`verify-scaffold.mjs` gate scans emitted Rust/scripts for known placeholder
+patterns and parses emitted TOML. This check is separate from build/run proof.
 
 ## Naming rule for design tokens
 
@@ -71,12 +71,12 @@ brand changes, and renaming it then touches every call site.
 
 ## The allowlist
 
-`scripts/audit.sh` carries a short allowlist of paths exempt from the scan. It is
+`scripts/audit.mjs` carries a short allowlist of paths exempt from the scan. It is
 deliberately short, and every entry states its reason:
 
 - `assets/templates/rust/vendor/` — third-party source vendored verbatim. Patching it to
   strip strings would defeat the point of pinning a known-good copy.
-- `scripts/audit.sh` — this file names the patterns it searches for.
+- `scripts/audit.mjs` — this file names the patterns it searches for.
 - The three Python/mjs maintenance utilities — they operate on this repo's own wiki,
   worktrees, and editor config, and never emit a line of user code.
 

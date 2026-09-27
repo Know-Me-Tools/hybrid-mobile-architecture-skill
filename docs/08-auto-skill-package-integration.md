@@ -206,7 +206,7 @@ to each sub-package:
    from the `SKILL.md` frontmatter.
 3. **Every `SKILL.md` exists** AND has a valid `name` in
    its YAML frontmatter that matches its directory name.
-   Enforced by `scripts/verify-skill-manifest.sh` from
+   Enforced by `scripts/verify-skill-manifest.mjs` from
    the HMA.
 4. **Idempotent install** — a re-detection of the same
    `SKILL.md` is a no-op (the Companion re-registers with
@@ -566,7 +566,7 @@ Do **not** invoke when:
       exists with the frontmatter above
 - [ ] The SKILL.md body covers all of §1-§12
 - [ ] Mirrored to the 6 per-harness directories + `templates/project-skills/`
-      via `bash scripts/sync-harness-skills.sh` (verify with `--check`)
+      via `node scripts/sync-harness-skills.mjs` (verify with `--check`)
 - [ ] Declared in `builder.manifest.json` `skills[]` and
       `templates/activation-manifest.json`, then regenerated
       (`plugin.json` is generated and has no `skills` array)

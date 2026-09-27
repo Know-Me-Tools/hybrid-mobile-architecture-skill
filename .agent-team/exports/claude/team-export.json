@@ -1,0 +1,64 @@
+{
+  "target": "claude",
+  "verification": {
+    "level": "source-verified",
+    "source": "https://code.claude.com/docs/en/sub-agents",
+    "version": "documentation inspected 2026-09-24",
+    "live": "unverified"
+  },
+  "diagnostics": [
+    "Source-verified serialization only; installed native validation and live execution are unverified.",
+    "These are native subagents; installing them does not create an experimental Claude agent team or enable that feature.",
+    "Role overrides are preserved without native schema certification. Skill IDs refer to separately installed skills; prompt mentions do not install or authorize them."
+  ],
+  "instructions": [
+    "Review staged artifacts before installation. Export grants no execution or registration authority.",
+    "Choose project .claude/agents or the staged local marketplace/plugin. Do not install both copies. Settings options are a proposed project .claude/settings.json."
+  ],
+  "files": [
+    {
+      "file": ".claude/agents/implementer.md",
+      "sha256": "5dec32c3894c8d33b5d86733fdba47a8f157388d9ff8c91c9729ab9f9cfe1627"
+    },
+    {
+      "file": "plugins/hma-maintainers/agents/implementer.md",
+      "sha256": "5dec32c3894c8d33b5d86733fdba47a8f157388d9ff8c91c9729ab9f9cfe1627"
+    },
+    {
+      "file": ".claude/agents/mobile-specialist.md",
+      "sha256": "6e7203e0d6fa1aa15d43c90b454aa665eff16e45cb56327db94ca44188d8dcfc"
+    },
+    {
+      "file": "plugins/hma-maintainers/agents/mobile-specialist.md",
+      "sha256": "6e7203e0d6fa1aa15d43c90b454aa665eff16e45cb56327db94ca44188d8dcfc"
+    },
+    {
+      "file": ".claude/agents/documentation-specialist.md",
+      "sha256": "5538f621a02f9ca2e2584a35975efd8023283298e2d29ed38fff0b873f63ec8f"
+    },
+    {
+      "file": "plugins/hma-maintainers/agents/documentation-specialist.md",
+      "sha256": "5538f621a02f9ca2e2584a35975efd8023283298e2d29ed38fff0b873f63ec8f"
+    },
+    {
+      "file": ".claude/agents/reviewer.md",
+      "sha256": "43dc3555a2ee5d74be7734a3776447b78b1a3e89221168ba1a4b6133c93bd1d5"
+    },
+    {
+      "file": "plugins/hma-maintainers/agents/reviewer.md",
+      "sha256": "43dc3555a2ee5d74be7734a3776447b78b1a3e89221168ba1a4b6133c93bd1d5"
+    },
+    {
+      "file": "plugins/hma-maintainers/.claude-plugin/plugin.json",
+      "sha256": "2cc4c4ec1a6c5f34c23bb6f71a10fffe54368065f4db9aeb3652f1a483de31f6"
+    },
+    {
+      "file": ".claude-plugin/marketplace.json",
+      "sha256": "accd4cd2c7cffa6b7fd3e95fd7bf86bbe855d23c9ce376a02ea53efcb0f3c4b7"
+    },
+    {
+      "file": "export-receipt.json",
+      "sha256": "7bd8155546cf8b78f516b5a644e405a7116742af9219b1df1a606955c2deb761"
+    }
+  ]
+}

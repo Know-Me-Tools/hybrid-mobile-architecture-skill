@@ -22,7 +22,7 @@ credentials, personal data, and machine-local paths never enter public output.
 8. Add a sanitizer that rejects private paths, secrets, and raw wiki content.
 9. Run frozen install, production build, link checks, representative route checks, responsive light/dark screenshots, and accessibility checks.
 
-Use `scripts/scaffold.sh <site-dir> <site-name> <site-url> <base-url>` for a new
+Use `scripts/scaffold.mjs <site-dir> <site-name> <site-url> <base-url>` for a new
 site, then replace the starter copy with reviewed project documentation and brand
-assets. Use `scripts/verify.sh <site-dir>` as the minimum repeatable gate. A site
+assets. Use `scripts/verify.mjs <site-dir>` as the minimum repeatable gate. A site
 is not complete merely because the development server opens.

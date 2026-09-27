@@ -1,0 +1,522 @@
+{
+  "style": "APA",
+  "citation_count": 30,
+  "citations": [
+    {
+      "id": "cite-001",
+      "source_id": "src-028",
+      "formatted": "Agent Skills project. (n.d.). *Specification*. Agent Skills. Retrieved September 26, 2026, from https://agentskills.io/specification",
+      "url": "https://agentskills.io/specification",
+      "title": "Specification",
+      "author": "Agent Skills project",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 72,
+      "confidence": 0.77,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-084a838187411d98",
+        "claim-ca615bf4f6915cb4",
+        "claim-f89724f76e939a28"
+      ]
+    },
+    {
+      "id": "cite-002",
+      "source_id": "src-025",
+      "formatted": "Anthropic. (n.d.). *Hooks reference*. Claude Code Docs. Retrieved September 26, 2026, from https://code.claude.com/docs/en/hooks",
+      "url": "https://code.claude.com/docs/en/hooks",
+      "title": "Hooks reference",
+      "author": "Anthropic",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 72,
+      "confidence": 0.77,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-94ec377714448bda",
+        "claim-d42b7a1b9ff36786",
+        "claim-03fd02f06536a0f0"
+      ]
+    },
+    {
+      "id": "cite-003",
+      "source_id": "src-026",
+      "formatted": "Anthropic. (n.d.). *Plugins reference*. Claude Code Docs. Retrieved September 26, 2026, from https://code.claude.com/docs/en/plugins-reference",
+      "url": "https://code.claude.com/docs/en/plugins-reference",
+      "title": "Plugins reference",
+      "author": "Anthropic",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 70,
+      "confidence": 0.75,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-5a8b2055b58f88de",
+        "claim-60c992ae39ee62b8"
+      ]
+    },
+    {
+      "id": "cite-004",
+      "source_id": "src-021",
+      "formatted": "flutter_rust_bridge maintainers. (2026, September 12). *flutter_rust_bridge: Flutter/Dart <-> Rust binding generator [Computer software]*. GitHub. https://github.com/fzyzcjy/flutter_rust_bridge",
+      "url": "https://github.com/fzyzcjy/flutter_rust_bridge",
+      "title": "flutter_rust_bridge: Flutter/Dart <-> Rust binding generator [Computer software]",
+      "author": "flutter_rust_bridge maintainers",
+      "date": "2026, September 12",
+      "accessed": "2026-09-26",
+      "credibility_score": 80,
+      "confidence": 0.85,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-b6a749a455755411",
+        "claim-e40341143e72cd7f"
+      ]
+    },
+    {
+      "id": "cite-005",
+      "source_id": "src-019",
+      "formatted": "flutter_rust_bridge maintainers. (n.d.). *Provide parameters*. flutter_rust_bridge documentation. Retrieved September 26, 2026, from https://cjycode.com/flutter_rust_bridge/guides/custom/codegen/inputs",
+      "url": "https://cjycode.com/flutter_rust_bridge/guides/custom/codegen/inputs",
+      "title": "Provide parameters",
+      "author": "flutter_rust_bridge maintainers",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 43,
+      "confidence": 0.44,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-803ab8f0e3ebe71b",
+        "claim-04f3b08e624a483e"
+      ]
+    },
+    {
+      "id": "cite-006",
+      "source_id": "src-020",
+      "formatted": "flutter_rust_bridge maintainers. (n.d.). *Troubleshooting*. flutter_rust_bridge documentation. Retrieved September 26, 2026, from https://cjycode.com/flutter_rust_bridge/manual/troubleshooting",
+      "url": "https://cjycode.com/flutter_rust_bridge/manual/troubleshooting",
+      "title": "Troubleshooting",
+      "author": "flutter_rust_bridge maintainers",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 62,
+      "confidence": 0.67,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-7c5c96e7d965b972"
+      ]
+    },
+    {
+      "id": "cite-007",
+      "source_id": "src-029",
+      "formatted": "GitHub, Inc.. (n.d.). *GitHub-hosted runners reference*. GitHub Docs. Retrieved September 26, 2026, from https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+      "url": "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+      "title": "GitHub-hosted runners reference",
+      "author": "GitHub, Inc.",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 68,
+      "confidence": 0.73,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-170392ed0a294e71"
+      ]
+    },
+    {
+      "id": "cite-008",
+      "source_id": "src-018",
+      "formatted": "Google, Dart team. (2025, October 27). *Get the Dart SDK*. Dart. https://dart.dev/get-dart",
+      "url": "https://dart.dev/get-dart",
+      "title": "Get the Dart SDK",
+      "author": "Google, Dart team",
+      "date": "2025, October 27",
+      "accessed": "2026-09-26",
+      "credibility_score": 70,
+      "confidence": 0.75,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-e2392df0cbe902b5"
+      ]
+    },
+    {
+      "id": "cite-009",
+      "source_id": "src-015",
+      "formatted": "Google, Flutter team. (2026, September 22). *Supported deployment platforms*. Flutter Documentation. https://docs.flutter.dev/reference/supported-platforms",
+      "url": "https://docs.flutter.dev/reference/supported-platforms",
+      "title": "Supported deployment platforms",
+      "author": "Google, Flutter team",
+      "date": "2026, September 22",
+      "accessed": "2026-09-26",
+      "credibility_score": 74,
+      "confidence": 0.79,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-0ac137be07012b6c"
+      ]
+    },
+    {
+      "id": "cite-010",
+      "source_id": "src-017",
+      "formatted": "Google, Flutter team. (n.d.). *Windows build path changed to add the target architecture*. Flutter Documentation. Retrieved September 26, 2026, from https://docs.flutter.dev/release/breaking-changes/windows-build-architecture",
+      "url": "https://docs.flutter.dev/release/breaking-changes/windows-build-architecture",
+      "title": "Windows build path changed to add the target architecture",
+      "author": "Google, Flutter team",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 76,
+      "confidence": 0.81,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-49d6e10fe5b28049"
+      ]
+    },
+    {
+      "id": "cite-011",
+      "source_id": "src-013",
+      "formatted": "Jasper-Bekkers. (n.d.). *`aarch64-pc-windows-msvc` requires `clang`* (Issue #2117) [GitHub issue]. briansmith/ring. Retrieved September 26, 2026, from https://github.com/briansmith/ring/issues/2117",
+      "url": "https://github.com/briansmith/ring/issues/2117",
+      "title": "aarch64-pc-windows-msvc requires clang (Issue #2117)",
+      "author": "Jasper-Bekkers",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 76,
+      "confidence": 0.81,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-2921cb185791f17b"
+      ]
+    },
+    {
+      "id": "cite-012",
+      "source_id": "src-016",
+      "formatted": "loic-sharma. (2023, October 11). *[Windows Arm64] Create Flutter SDK for Windows Arm64* (Issue #136417) [GitHub issue]. flutter/flutter. https://github.com/flutter/flutter/issues/136417",
+      "url": "https://github.com/flutter/flutter/issues/136417",
+      "title": "[Windows Arm64] Create Flutter SDK for Windows Arm64 (Issue #136417)",
+      "author": "loic-sharma",
+      "date": "2023, October 11",
+      "accessed": "2026-09-26",
+      "credibility_score": 59,
+      "confidence": 0.64,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-e358e77ef513deb4"
+      ]
+    },
+    {
+      "id": "cite-013",
+      "source_id": "src-003",
+      "formatted": "Microsoft TypeScript Team. (2026, September 22). *Modules - Reference*. www.typescriptlang.org. https://www.typescriptlang.org/docs/handbook/modules/reference.html",
+      "url": "https://www.typescriptlang.org/docs/handbook/modules/reference.html",
+      "title": "Modules - Reference",
+      "author": "Microsoft TypeScript Team",
+      "date": "2026, September 22",
+      "accessed": "2026-09-26",
+      "credibility_score": 73,
+      "confidence": 0.78,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-3defbc5b3b072ffa"
+      ]
+    },
+    {
+      "id": "cite-014",
+      "source_id": "src-002",
+      "formatted": "Microsoft TypeScript Team. (2026, September 22). *Modules - Theory*. www.typescriptlang.org. https://www.typescriptlang.org/docs/handbook/modules/theory.html",
+      "url": "https://www.typescriptlang.org/docs/handbook/modules/theory.html",
+      "title": "Modules - Theory",
+      "author": "Microsoft TypeScript Team",
+      "date": "2026, September 22",
+      "accessed": "2026-09-26",
+      "credibility_score": 72,
+      "confidence": 0.77,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-4526ec31d31266a6"
+      ]
+    },
+    {
+      "id": "cite-015",
+      "source_id": "src-027",
+      "formatted": "OpenAI. (n.d.). *Hooks*. ChatGPT Learn (Codex). Retrieved September 26, 2026, from https://learn.chatgpt.com/docs/hooks",
+      "url": "https://learn.chatgpt.com/docs/hooks",
+      "title": "Hooks",
+      "author": "OpenAI",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 43,
+      "confidence": 0.44,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-6815c443eda8e99d",
+        "claim-1dd84cdc4fb7c634",
+        "claim-723dba2f965fa1f8"
+      ]
+    },
+    {
+      "id": "cite-016",
+      "source_id": "src-006",
+      "formatted": "OpenJS Foundation, Node.js Project. (2024, April 10). *Wednesday, April 10, 2024 security releases*. Node.js. https://nodejs.org/en/blog/vulnerability/april-2024-security-releases-2",
+      "url": "https://nodejs.org/en/blog/vulnerability/april-2024-security-releases-2",
+      "title": "Wednesday, April 10, 2024 security releases",
+      "author": "OpenJS Foundation, Node.js Project",
+      "date": "2024, April 10",
+      "accessed": "2026-09-26",
+      "credibility_score": 58,
+      "confidence": 0.63,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-db9de6ae1ae89018"
+      ]
+    },
+    {
+      "id": "cite-017",
+      "source_id": "src-007",
+      "formatted": "OpenJS Foundation, Node.js Project. (2026, September 24). *Building Node.js (BUILDING.md)*. GitHub. https://github.com/nodejs/node/blob/main/BUILDING.md",
+      "url": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+      "title": "Building Node.js (BUILDING.md)",
+      "author": "OpenJS Foundation, Node.js Project",
+      "date": "2026, September 24",
+      "accessed": "2026-09-26",
+      "credibility_score": 92,
+      "confidence": 0.94,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-cfa5643050d8dac8",
+        "claim-dea93afc635151d8"
+      ]
+    },
+    {
+      "id": "cite-018",
+      "source_id": "src-005",
+      "formatted": "OpenJS Foundation, Node.js Project. (n.d.). *Child process (Node.js v26.10.0 documentation)*. Node.js. Retrieved September 26, 2026, from https://nodejs.org/api/child_process.html",
+      "url": "https://nodejs.org/api/child_process.html",
+      "title": "Child process (Node.js v26.10.0 documentation)",
+      "author": "OpenJS Foundation, Node.js Project",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 72,
+      "confidence": 0.77,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-568a3c8f884b24fb",
+        "claim-6c82748b44980d97",
+        "claim-3a4e02c0d5a997b6"
+      ]
+    },
+    {
+      "id": "cite-019",
+      "source_id": "src-004",
+      "formatted": "OpenJS Foundation, Node.js Project. (n.d.). *Modules: TypeScript (Node.js v26.10.0 documentation)*. Node.js. Retrieved September 26, 2026, from https://nodejs.org/api/typescript.html",
+      "url": "https://nodejs.org/api/typescript.html",
+      "title": "Modules: TypeScript (Node.js v26.10.0 documentation)",
+      "author": "OpenJS Foundation, Node.js Project",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 47,
+      "confidence": 0.49,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-f4f7496694f14be3",
+        "claim-744c8f0a17b45b0b",
+        "claim-50703d6173137335",
+        "claim-f4dab3c6d02c350b",
+        "claim-99c05aa893bfd8c5"
+      ]
+    },
+    {
+      "id": "cite-020",
+      "source_id": "src-030",
+      "formatted": "OpenSSF SLSA project. (n.d.). *Frequently asked questions (SLSA v1.0)*. SLSA. Retrieved September 26, 2026, from https://slsa.dev/spec/v1.0/faq",
+      "url": "https://slsa.dev/spec/v1.0/faq",
+      "title": "Frequently asked questions (SLSA v1.0)",
+      "author": "OpenSSF SLSA project",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 43,
+      "confidence": 0.44,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-09220500e5a1bd81",
+        "claim-f63fef0cc1ec4893"
+      ]
+    },
+    {
+      "id": "cite-021",
+      "source_id": "src-014",
+      "formatted": "ring maintainers (B. Smith). (2026, March 16). *BUILDING.md (ring)*. GitHub. https://github.com/briansmith/ring/blob/main/BUILDING.md",
+      "url": "https://github.com/briansmith/ring/blob/main/BUILDING.md",
+      "title": "BUILDING.md (ring)",
+      "author": "ring maintainers (B. Smith)",
+      "date": "2026, March 16",
+      "accessed": "2026-09-26",
+      "credibility_score": 67,
+      "confidence": 0.72,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-a6aed02fc549d8f0",
+        "claim-dbf1c20481595758"
+      ]
+    },
+    {
+      "id": "cite-022",
+      "source_id": "src-001",
+      "formatted": "Rosenwasser, D.. (2026, July 8). *Announcing TypeScript 7.0*. TypeScript Blog, Microsoft. https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/",
+      "url": "https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/",
+      "title": "Announcing TypeScript 7.0",
+      "author": "Rosenwasser, D.",
+      "date": "2026, July 8",
+      "accessed": "2026-09-26",
+      "credibility_score": 75,
+      "confidence": 0.8,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-f0ab062add1f9c0b",
+        "claim-cf22f98c8c3c8b78",
+        "claim-07d24b9b6c0d6841",
+        "claim-7d69c7f557b02dcc",
+        "claim-486024c5425af094",
+        "claim-8a6477f93bd7d81b",
+        "claim-fd0e6e1c35e9d997"
+      ]
+    },
+    {
+      "id": "cite-023",
+      "source_id": "src-009",
+      "formatted": "Rust Project. (n.d.). **-pc-windows-msvc. In The rustc book*. Rust Documentation. Retrieved September 26, 2026, from https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+      "url": "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+      "title": "*-pc-windows-msvc. In The rustc book",
+      "author": "Rust Project",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 52,
+      "confidence": 0.55,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-43dc45216c070515",
+        "claim-8a06541ab45d8307",
+        "claim-dfe8df1e465b11f3",
+        "claim-b18485b2ff3d3d5b",
+        "claim-7bfb2199ebb48a68"
+      ]
+    },
+    {
+      "id": "cite-024",
+      "source_id": "src-012",
+      "formatted": "Rust Project. (n.d.). *cargo build. In The Cargo book*. Rust Documentation. Retrieved September 26, 2026, from https://doc.rust-lang.org/cargo/commands/cargo-build.html",
+      "url": "https://doc.rust-lang.org/cargo/commands/cargo-build.html",
+      "title": "cargo build. In The Cargo book",
+      "author": "Rust Project",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 43,
+      "confidence": 0.44,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-a92563846bac715d"
+      ]
+    },
+    {
+      "id": "cite-025",
+      "source_id": "src-011",
+      "formatted": "Rust Project. (n.d.). *Overrides. In The rustup book*. Rust Documentation. Retrieved September 26, 2026, from https://rust-lang.github.io/rustup/overrides.html",
+      "url": "https://rust-lang.github.io/rustup/overrides.html",
+      "title": "Overrides. In The rustup book",
+      "author": "Rust Project",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 43,
+      "confidence": 0.44,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-b715cf37653c7dcf",
+        "claim-b8fbfc80ddf9049f"
+      ]
+    },
+    {
+      "id": "cite-026",
+      "source_id": "src-008",
+      "formatted": "Rust Project. (n.d.). *Platform support. In The rustc book*. Rust Documentation. Retrieved September 26, 2026, from https://doc.rust-lang.org/rustc/platform-support.html",
+      "url": "https://doc.rust-lang.org/rustc/platform-support.html",
+      "title": "Platform support. In The rustc book",
+      "author": "Rust Project",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 84,
+      "confidence": 0.88,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-b7e356ef286321c2",
+        "claim-0d543e7a6ac8f822"
+      ]
+    },
+    {
+      "id": "cite-027",
+      "source_id": "src-024",
+      "formatted": "Tauri Programme (Commons Conservancy). (n.d.). *Capabilities*. Tauri. Retrieved September 26, 2026, from https://v2.tauri.app/security/capabilities/",
+      "url": "https://v2.tauri.app/security/capabilities/",
+      "title": "Capabilities",
+      "author": "Tauri Programme (Commons Conservancy)",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 55,
+      "confidence": 0.59,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-88b255d05c32a9a7",
+        "claim-9670e88b32f77fbd"
+      ]
+    },
+    {
+      "id": "cite-028",
+      "source_id": "src-022",
+      "formatted": "Tauri Programme (Commons Conservancy). (n.d.). *Prerequisites*. Tauri. Retrieved September 26, 2026, from https://v2.tauri.app/start/prerequisites/",
+      "url": "https://v2.tauri.app/start/prerequisites/",
+      "title": "Prerequisites",
+      "author": "Tauri Programme (Commons Conservancy)",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 62,
+      "confidence": 0.67,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-4fb6742df653a77b",
+        "claim-3acc04346fa6fca8"
+      ]
+    },
+    {
+      "id": "cite-029",
+      "source_id": "src-023",
+      "formatted": "Tauri Programme (Commons Conservancy). (n.d.). *Windows installer*. Tauri. Retrieved September 26, 2026, from https://v2.tauri.app/distribute/windows-installer/",
+      "url": "https://v2.tauri.app/distribute/windows-installer/",
+      "title": "Windows installer",
+      "author": "Tauri Programme (Commons Conservancy)",
+      "date": "n.d.",
+      "accessed": "2026-09-26",
+      "credibility_score": 52,
+      "confidence": 0.55,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-506f21f395d1d8f6",
+        "claim-88f9c0c362c3a0d1",
+        "claim-1017ddaf0f5809b4"
+      ]
+    },
+    {
+      "id": "cite-030",
+      "source_id": "src-010",
+      "formatted": "The Rust Release Team. (2025, October 30). *Announcing Rust 1.91.0*. Rust Blog. https://blog.rust-lang.org/2025/10/30/Rust-1.91.0/",
+      "url": "https://blog.rust-lang.org/2025/10/30/Rust-1.91.0/",
+      "title": "Announcing Rust 1.91.0",
+      "author": "The Rust Release Team",
+      "date": "2025, October 30",
+      "accessed": "2026-09-26",
+      "credibility_score": 72,
+      "confidence": 0.77,
+      "label": "verified",
+      "used_in_claims": [
+        "claim-e63fc9e9480af5e7",
+        "claim-1d872d8e2b0e9f0b"
+      ]
+    }
+  ],
+  "surreal_memory": "unavailable (ECONNREFUSED); not stored"
+}

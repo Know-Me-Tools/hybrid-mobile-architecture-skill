@@ -1,0 +1,39 @@
+{
+  "id": "hma-maintainers",
+  "outcome": "Maintain portable hybrid architecture tooling and verifiably runnable greenfield, brownfield and continually upgradeable outputs",
+  "complexity": "complex",
+  "areas": [
+    "code",
+    "mobile",
+    "docs"
+  ],
+  "deliverables": [
+    "Portable hooks and tools",
+    "Native scaffold and migration contracts",
+    "Build and runtime evidence",
+    "Independent findings"
+  ],
+  "budget": "balanced",
+  "review": true,
+  "harness": "codex",
+  "scope": "project",
+  "ownership": {
+    "implementer": [
+      "runtime/**",
+      "scripts/**",
+      "templates/project-skills/hooks/**"
+    ],
+    "mobile-specialist": [
+      "tools/knowme-builder/**",
+      "assets/templates/profiles/**"
+    ],
+    "documentation-specialist": [
+      "docs/**",
+      "openspec/**",
+      ".github/workflows/**"
+    ],
+    "reviewer": [
+      "docs/assessment/review/**"
+    ]
+  }
+}

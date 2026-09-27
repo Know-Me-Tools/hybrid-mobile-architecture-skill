@@ -1,35 +1,35 @@
 ---
 sidebar_position: 1
 title: Installation
-description: Install KnowMe Builder Agent Skills and native plugins from one Git repository URL for Claude Code, Codex, and OpenCode.
+description: Install KnowMe Builder skills and native plugins for Claude Code, Codex, OpenCode, Kimi Code, MiniMax Code CLI, and Zed.
 ---
 
 # Install KnowMe Builder
 
-KnowMe Builder `2.0.0-alpha.2` publishes exactly 30 public, self-contained Agent
+KnowMe Builder `2.0.0-alpha.4` publishes exactly 36 public, self-contained Agent
 Skills from:
 
 ```text
 https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 ```
 
-The public set is the package-level `hybrid-mobile-architecture` skill plus 29
+The public set is the package-level `hybrid-mobile-architecture` skill plus 35
 project companions. Repository-only OpenSpec/OPSX authoring helpers are hidden
 from normal discovery.
 
 ## Portable Git URL installation
 
-Install all public skills into Claude Code, Codex, and OpenCode:
+From a trusted checkout, install the public skill source:
 
 ```bash
-npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill \
+npx skills add ./skills \
   --skill '*' -a claude-code -a codex -a opencode -g -y
 ```
 
 List the catalog without writing:
 
 ```bash
-npx skills add https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill --list
+npx skills add ./skills --list
 ```
 
 ## Claude Code marketplace
@@ -76,7 +76,7 @@ the unified installer to add the dependency-free advisory plugin and commands:
 ```bash
 git clone https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 cd hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --harness opencode \
+node scripts/install-harness-package.mjs --harness opencode \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 opencode debug skill
 ```
@@ -85,24 +85,24 @@ Update and safely uninstall only the receipt-owned OpenCode payload:
 
 ```bash
 git pull --ff-only
-bash scripts/install-harness-package.sh --harness opencode \
+node scripts/install-harness-package.mjs --harness opencode \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --harness opencode --uninstall
+node scripts/install-harness-package.mjs --harness opencode --uninstall
 ```
 
 ## Unified installer
 
-The receipt-based installer can configure all three harnesses:
+The receipt-based installer can configure all six harnesses:
 
 ```bash
-bash scripts/install-harness-package.sh \
+node scripts/install-harness-package.mjs \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 ```
 
 Supported options are:
 
 ```text
---harness claude-code|codex|opencode|all
+--harness claude-code|codex|opencode|kimi-code|minimax-code|zed|all
 --scope user|project
 --source <git-url-or-path>
 --ref <git-ref>
@@ -116,21 +116,25 @@ Supported options are:
 The default installs only skills, native marketplace registrations, commands,
 and advisory adapters. CLI compilation, MCP mutation, and the long Prometheus
 bootstrap require their explicit flags. The compatibility wrapper
-`scripts/install-global-harnesses.sh` delegates to the same installer.
+`scripts/install-global-harnesses.mjs` delegates to the same installer.
 
 The installer preserves unrelated files and records ownership under the XDG
 state directory for user scope or `.knowme-builder/harness-install.json` for
 project scope. Uninstall removes only receipt-owned surfaces.
 
+Kimi Code receives both `~/.kimi-code/skills` and the shared
+`~/.agents/skills`; Zed uses `~/.agents/skills`; MiniMax Code uses its resolved
+data directory (`$MINIMAX_DATA_DIR`, `$MAVIS_DATA_DIR`, or `~/.minimax`).
+
 For an all-harness install, use this exact check, update, and uninstall cycle:
 
 ```bash
-bash scripts/install-harness-package.sh --check \
+node scripts/install-harness-package.mjs --check \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
 git pull --ff-only
-bash scripts/install-harness-package.sh \
+node scripts/install-harness-package.mjs \
   --source https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill
-bash scripts/install-harness-package.sh --uninstall
+node scripts/install-harness-package.mjs --uninstall
 ```
 
 ## Optional Builder CLI
@@ -138,23 +142,19 @@ bash scripts/install-harness-package.sh --uninstall
 Install from the unified entry point:
 
 ```bash
-bash scripts/install-harness-package.sh --with-cli
+node scripts/install-harness-package.mjs --with-cli
 knowme-builder --version
 ```
 
 Or build explicitly from a trusted checkout:
 
 ```bash
-cargo build --release --locked \
-  --manifest-path tools/knowme-builder/Cargo.toml \
-  --target-dir tools/knowme-builder/target
-install -m 0755 tools/knowme-builder/target/release/knowme-builder \
-  "$HOME/.cargo/bin/knowme-builder"
+cargo install --locked --path tools/knowme-builder
 ```
 
 ## Project-local skills
 
-Generated and adopted applications receive the 29 companion skills, not the
+Generated and adopted applications receive the 35 companion skills, not the
 package-level distribution skill:
 
 ```bash
@@ -197,7 +197,7 @@ Repository maintainers additionally run:
 ```bash
 node scripts/check-skill-contracts.mjs
 node scripts/sync-skill-resources.mjs --check
-bash scripts/sync-harness-skills.sh --check
-bash scripts/check-git-url-discovery.sh
-bash scripts/test-harness-installer.sh
+node scripts/sync-harness-skills.mjs --check
+node scripts/check-git-url-discovery.mjs
+node scripts/test-harness-installer.mjs
 ```

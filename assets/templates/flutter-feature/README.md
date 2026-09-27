@@ -1,6 +1,6 @@
 # Flutter Feature Module Template
 
-Use `scripts/new-feature.sh <name> flutter` to scaffold this structure.
+Use `scripts/new-feature.mjs <name> <adopted-project-root>` to scaffold this structure.
 
 ```
 features/<feature-name>/

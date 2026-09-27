@@ -5,8 +5,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/skill-activation.py",
-            "description": "Advisory activation from the canonical KnowMe Builder manifest; owns no lifecycle state"
+            "command": "node",
+            "description": "Advisory activation from the canonical KnowMe Builder manifest; owns no lifecycle state",
+            "args": [
+              ".claude/hooks/skill-activation.mjs"
+            ]
           }
         ],
         "matcher": "*"
@@ -18,8 +21,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/a11y-reminder.py",
-            "description": "TJ-ARCH-MOB-001: remind to run the a11y-gate after UI edits"
+            "command": "node",
+            "description": "TJ-ARCH-MOB-001: remind to run the a11y-gate after UI edits",
+            "args": [
+              ".claude/hooks/a11y-reminder.mjs"
+            ]
           }
         ]
       }

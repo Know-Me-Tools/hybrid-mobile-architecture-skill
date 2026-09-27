@@ -117,7 +117,7 @@ installable:**
   `.claude-plugin/marketplace.json`
 - Have a valid `plugin.json` at the repo root, agreeing with
   the marketplace version
-- Pass `scripts/verify-skill-manifest.sh` (the install
+- Pass `scripts/verify-skill-manifest.mjs` (the install
   contract check)
 - Be reachable via the `git_url` (HTTPS or SSH)
 
@@ -162,7 +162,7 @@ pub async fn validate_skill_package(
 
 The Companion runs four checks:
 
-1. **`scripts/verify-skill-manifest.sh`** — does the
+1. **`scripts/verify-skill-manifest.mjs`** — does the
    `plugin.json` match the actual `skills/<name>/SKILL.md`
    tree?
 2. **Schema check** — every `SKILL.md` has valid YAML
@@ -175,7 +175,7 @@ The Companion runs four checks:
    `pmpCompatibility` matches the installed PMP version
 
 **HMA (producer side):** the package must ship
-`scripts/verify-skill-manifest.sh` and ensure it returns
+`scripts/verify-skill-manifest.mjs` and ensure it returns
 0 on a clean tree.
 
 ### §3.4 Remove
@@ -220,13 +220,13 @@ The HMA repo must satisfy 4 conditions to be installable:
    exists and its frontmatter `name` equals its directory
    name. No skill directory may be left undeclared — an
    undeclared directory ships to nobody. Verified by
-   `scripts/verify-skill-manifest.sh`.
+   `scripts/verify-skill-manifest.mjs`.
 4. **Idempotent install.** The install path is
    `git clone` (idempotent) or
    `git pull --ff-only --reset-hard <sha>` (idempotent).
    No global state outside the install path.
 
-`scripts/verify-skill-manifest.sh` checks conditions 1-3
+`scripts/verify-skill-manifest.mjs` checks conditions 1-3
 mechanically and asserts condition 4's structural
 precondition: no shipped manifest may pin an absolute or
 home-relative path outside the package root. Condition 4 is
@@ -331,7 +331,7 @@ git SHA is the natural conflict-resolution key.
 - ❌ Mixing the install path with the user's other
   repositories. Always install to
   `~/.prometheus/skill-packages/<id>/`.
-- ❌ Shipping a package without `scripts/verify-skill-manifest.sh`.
+- ❌ Shipping a package without `scripts/verify-skill-manifest.mjs`.
   The Companion will refuse to install it.
 - ❌ Hiding the manifest from the operator. The Companion
   always shows the parsed `marketplace.json` and the
@@ -371,7 +371,7 @@ git SHA is the natural conflict-resolution key.
 - [ ] The Companion's "Discover" page lists HMA
 - [ ] The HMA's `marketplace.json` summary mentions
       "Connected Skill Packages" integration
-- [ ] `scripts/verify-skill-manifest.sh` exits 0 on the
+- [ ] `scripts/verify-skill-manifest.mjs` exits 0 on the
       HMA repo with this skill present
 - [ ] A roundtrip test (install HMA → install Companion →
       verify HMA shows as connected) exits 0

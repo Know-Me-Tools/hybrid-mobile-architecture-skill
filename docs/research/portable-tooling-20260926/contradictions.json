@@ -1,0 +1,659 @@
+{
+  "contradictions": [
+    {
+      "id": "contra-021",
+      "topic": "Windows Arm64 Flutter: deployment target vs host SDK",
+      "claim_a": {
+        "id": "claim-0ac137be07012b6c",
+        "text": "Flutter's supported-platforms page lists Windows Arm64 as a deployment target.",
+        "source": "https://docs.flutter.dev/reference/supported-platforms",
+        "credibility": 74
+      },
+      "claim_b": {
+        "id": "claim-e358e77ef513deb4",
+        "text": "Flutter's only Windows SDK assumes an AMD64 host and runs on Windows Arm64 hosts under emulation; the issue to ship a native Arm64 SDK remains open at P3.",
+        "source": "https://github.com/flutter/flutter/issues/136417",
+        "credibility": 59
+      },
+      "strategy_tried": "scope distinction (host tooling vs deployment target)",
+      "resolved": true,
+      "resolution": "Both hold: Windows Arm64 is a supported Flutter *target*, but no native Windows Arm64 *host* SDK ships; on an Arm64 Windows machine the Flutter tool runs under x64 emulation. A scaffold contract must record 'Flutter host on win-arm64 = emulated x64 tooling' and must not claim native host support.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "curated": true,
+      "audit_trail": "curated by stage-06 agent from verified stage-05 claims"
+    },
+    {
+      "id": "contra-022",
+      "topic": "Rust Tier 1 aarch64-pc-windows-msvc vs dependency toolchain needs",
+      "claim_a": {
+        "id": "claim-43dc45216c070515",
+        "text": "aarch64-pc-windows-msvc, i686-pc-windows-msvc and x86_64-pc-windows-msvc are Tier 1 with host tools.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+        "credibility": 52
+      },
+      "claim_b": {
+        "id": "claim-a6aed02fc549d8f0",
+        "text": "ring's BUILDING.md requires both the VS 2022 C++ ARM64 build tools and clang components for aarch64-pc-windows-msvc.",
+        "source": "https://github.com/briansmith/ring/blob/main/BUILDING.md",
+        "credibility": 67
+      },
+      "strategy_tried": "scope distinction (compiler/std guarantee vs C-dependency build requirements)",
+      "resolved": true,
+      "resolution": "Rust's Tier 1 guarantee covers rustc, cargo and std; it does not cover crates with C/assembly build scripts. ring (used via rustls/reqwest in Axum/Tauri stacks) additionally needs clang on aarch64-pc-windows-msvc, and the request to drop that was closed as not planned. Windows ARM64 support must be verified per dependency, not inferred from the Rust tier table.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "curated": true,
+      "audit_trail": "curated by stage-06 agent from verified stage-05 claims"
+    },
+    {
+      "id": "contra-023",
+      "topic": "Meaning of 'Tier 2' across Node.js and Rust",
+      "claim_a": {
+        "id": "claim-dea93afc635151d8",
+        "text": "Node.js Tier 2 platforms have full test coverage and test failures block releases, but binary releases may be delayed by infrastructure issues.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-1d872d8e2b0e9f0b",
+        "text": "Rust Tier 2 targets are guaranteed to build but the test suite is not executed, so produced binaries might not work.",
+        "source": "https://blog.rust-lang.org/2025/10/30/Rust-1.91.0/",
+        "credibility": 72
+      },
+      "strategy_tried": "definitional distinction",
+      "resolved": true,
+      "resolution": "'Tier 2' is not comparable across projects: Node.js Tier 2 (Windows arm64) still runs the full test suite and blocks releases on failures, whereas Rust Tier 2 runs no tests. Tier labels must be quoted with their project-specific definition in any support matrix.",
+      "confidence": 0.9,
+      "label": "inferred",
+      "curated": true,
+      "audit_trail": "curated by stage-06 agent from verified stage-05 claims"
+    },
+    {
+      "id": "contra-024",
+      "topic": "Invoking .cmd/.bat from Node without a shell",
+      "claim_a": {
+        "id": "claim-6c82748b44980d97",
+        "text": "Node.js documents invoking .bat/.cmd via spawn with the shell option as not recommended (DEP0190), offering exec or spawning cmd.exe with the script as argument instead.",
+        "source": "https://nodejs.org/api/child_process.html",
+        "credibility": 72
+      },
+      "claim_b": {
+        "id": "claim-db9de6ae1ae89018",
+        "text": "Since the CVE-2024-27980 fix, Node.js errors with EINVAL when a .bat or .cmd file is passed to spawn/spawnSync without the shell option.",
+        "source": "https://nodejs.org/en/blog/vulnerability/april-2024-security-releases-2",
+        "credibility": 58
+      },
+      "strategy_tried": "recency (2026 API docs supersede the 2024 advisory's shell:true workaround)",
+      "resolved": true,
+      "resolution": "The 2024 advisory suggested { shell: true } for sanitized input; current docs deprecate that pattern (DEP0190). Every documented route to a .cmd/.bat goes through cmd.exe. A 'no shell' tooling contract therefore cannot invoke npm.cmd/npx.cmd/flutter.bat directly; it must resolve real executables (node.exe plus the package's JS entry, cargo.exe, dart.exe) or treat cmd.exe /c as an explicit, argument-validated exception.",
+      "confidence": 0.8,
+      "label": "verified",
+      "curated": true,
+      "audit_trail": "curated by stage-06 agent from verified stage-05 claims"
+    },
+    {
+      "id": "contra-025",
+      "topic": "Minimum Windows version for Tauri 2 apps",
+      "claim_a": {
+        "id": "claim-3acc04346fa6fca8",
+        "text": "Tauri 2 prerequisites list Windows 7 and later as a supported system.",
+        "source": "https://v2.tauri.app/start/prerequisites/",
+        "credibility": 62
+      },
+      "claim_b": {
+        "id": "claim-7bfb2199ebb48a68",
+        "text": "The Rust windows-msvc targets require Windows 10 or higher for client installs (Windows Server 2016+ for servers).",
+        "source": "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+        "credibility": 52
+      },
+      "strategy_tried": "unresolved by authority (score gap 10 < 20) and recency (both current); reconciled by scope as an inference",
+      "resolved": true,
+      "resolution": "Inference: binaries built with current stable Rust *-windows-msvc targets have a Windows 10 floor, so a scaffold on a current toolchain should declare Windows 10+ regardless of Tauri's broader Windows 7 statement. Not checked by building/running on Windows 7 in this run.",
+      "confidence": 0.65,
+      "label": "inferred",
+      "curated": true,
+      "audit_trail": "curated by stage-06 agent from verified stage-05 claims"
+    },
+    {
+      "id": "contra-026",
+      "topic": "flutter_rust_bridge Windows support vs Windows ARM64 execution evidence",
+      "claim_a": {
+        "id": "claim-b6a749a455755411",
+        "text": "flutter_rust_bridge v2 claims support for Android, iOS, Windows, Linux, macOS and Web.",
+        "source": "https://github.com/fzyzcjy/flutter_rust_bridge",
+        "credibility": 80
+      },
+      "claim_b": {
+        "id": "claim-e358e77ef513deb4",
+        "text": "Flutter's only Windows SDK assumes an AMD64 host and runs on Windows Arm64 hosts under emulation; the issue to ship a native Arm64 SDK remains open at P3.",
+        "source": "https://github.com/flutter/flutter/issues/136417",
+        "credibility": 59
+      },
+      "strategy_tried": "unresolved (no source states FRB behavior on Windows ARM64; needs execution evidence)",
+      "resolved": false,
+      "resolution": "No retrieved source confirms flutter_rust_bridge codegen or Cargokit builds/runs on a Windows ARM64 host or for a Windows ARM64 target. 'Windows' in the README cannot be read as 'Windows ARM64'. Left open pending an actual windows-11-arm CI execution.",
+      "confidence": 0.0,
+      "label": "blocked",
+      "curated": true,
+      "audit_trail": "curated by stage-06 agent from verified stage-05 claims"
+    }
+  ],
+  "detection": {
+    "numeric_pairs": 0,
+    "semantic": {
+      "attempted": true,
+      "status": "blocked",
+      "pairs_checked": 1,
+      "reason": "no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable"
+    },
+    "claims_considered": 63,
+    "scope": "assess-cross-platform-hybrid-mobile-20260926-e157",
+    "manual_review": {
+      "status": "done",
+      "by": "stage-06 agent (in-session)",
+      "note": "manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)",
+      "curated_entries": 6
+    }
+  },
+  "resolved_claims": [
+    {
+      "topic": "Windows Arm64 Flutter: deployment target vs host SDK",
+      "position": "Both hold: Windows Arm64 is a supported Flutter *target*, but no native Windows Arm64 *host* SDK ships; on an Arm64 Windows machine the Flutter tool runs under x64 emulation. A scaffold contract must record 'Flutter host on win-arm64 = emulated x64 tooling' and must not claim native host support.",
+      "confidence": 0.85,
+      "strategy": "scope distinction (host tooling vs deployment target)",
+      "sources_used": [
+        "https://docs.flutter.dev/reference/supported-platforms",
+        "https://github.com/flutter/flutter/issues/136417"
+      ]
+    },
+    {
+      "topic": "Rust Tier 1 aarch64-pc-windows-msvc vs dependency toolchain needs",
+      "position": "Rust's Tier 1 guarantee covers rustc, cargo and std; it does not cover crates with C/assembly build scripts. ring (used via rustls/reqwest in Axum/Tauri stacks) additionally needs clang on aarch64-pc-windows-msvc, and the request to drop that was closed as not planned. Windows ARM64 support must be verified per dependency, not inferred from the Rust tier table.",
+      "confidence": 0.85,
+      "strategy": "scope distinction (compiler/std guarantee vs C-dependency build requirements)",
+      "sources_used": [
+        "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+        "https://github.com/briansmith/ring/blob/main/BUILDING.md"
+      ]
+    },
+    {
+      "topic": "Meaning of 'Tier 2' across Node.js and Rust",
+      "position": "'Tier 2' is not comparable across projects: Node.js Tier 2 (Windows arm64) still runs the full test suite and blocks releases on failures, whereas Rust Tier 2 runs no tests. Tier labels must be quoted with their project-specific definition in any support matrix.",
+      "confidence": 0.9,
+      "strategy": "definitional distinction",
+      "sources_used": [
+        "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "https://blog.rust-lang.org/2025/10/30/Rust-1.91.0/"
+      ]
+    },
+    {
+      "topic": "Invoking .cmd/.bat from Node without a shell",
+      "position": "The 2024 advisory suggested { shell: true } for sanitized input; current docs deprecate that pattern (DEP0190). Every documented route to a .cmd/.bat goes through cmd.exe. A 'no shell' tooling contract therefore cannot invoke npm.cmd/npx.cmd/flutter.bat directly; it must resolve real executables (node.exe plus the package's JS entry, cargo.exe, dart.exe) or treat cmd.exe /c as an explicit, argument-validated exception.",
+      "confidence": 0.8,
+      "strategy": "recency (2026 API docs supersede the 2024 advisory's shell:true workaround)",
+      "sources_used": [
+        "https://nodejs.org/api/child_process.html",
+        "https://nodejs.org/en/blog/vulnerability/april-2024-security-releases-2"
+      ]
+    },
+    {
+      "topic": "Minimum Windows version for Tauri 2 apps",
+      "position": "Inference: binaries built with current stable Rust *-windows-msvc targets have a Windows 10 floor, so a scaffold on a current toolchain should declare Windows 10+ regardless of Tauri's broader Windows 7 statement. Not checked by building/running on Windows 7 in this run.",
+      "confidence": 0.65,
+      "strategy": "unresolved by authority (score gap 10 < 20) and recency (both current); reconciled by scope as an inference",
+      "sources_used": [
+        "https://v2.tauri.app/start/prerequisites/",
+        "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html"
+      ]
+    }
+  ],
+  "unresolved_claims": [
+    {
+      "topic": "flutter_rust_bridge Windows support vs Windows ARM64 execution evidence",
+      "reason": "No retrieved source confirms flutter_rust_bridge codegen or Cargokit builds/runs on a Windows ARM64 host or for a Windows ARM64 target. 'Windows' in the README cannot be read as 'Windows ARM64'. Left open pending an actual windows-11-arm CI execution."
+    }
+  ],
+  "rejected_candidates": [
+    {
+      "id": "contra-001",
+      "topic": "lists tier windows",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-b7e356ef286321c2",
+        "text": "The rustc book lists aarch64-pc-windows-msvc and x86_64-pc-windows-msvc among Tier 1 targets.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support.html",
+        "credibility": 84
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-002",
+      "topic": "platform tier",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-0d543e7a6ac8f822",
+        "text": "Tier 1 with host tools means rustc and cargo run natively on the target and are tested, allowing use as a development platform, not just a compilation target.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support.html",
+        "credibility": 84
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-003",
+      "topic": "arm64 windows",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-49d6e10fe5b28049",
+        "text": "Flutter Windows build output paths include the target architecture, e.g. build\\windows\\arm64\\runner\\Release.",
+        "source": "https://docs.flutter.dev/release/breaking-changes/windows-build-architecture",
+        "credibility": 76
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-004",
+      "topic": "arm64 lists windows",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-0ac137be07012b6c",
+        "text": "Flutter's supported-platforms page lists Windows Arm64 as a deployment target.",
+        "source": "https://docs.flutter.dev/reference/supported-platforms",
+        "credibility": 74
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-005",
+      "topic": "tier windows",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-e63fc9e9480af5e7",
+        "text": "Rust 1.91.0 (2025-10-30) promoted aarch64-pc-windows-msvc to Tier 1.",
+        "source": "https://blog.rust-lang.org/2025/10/30/Rust-1.91.0/",
+        "credibility": 72
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-006",
+      "topic": "arm64 windows x64",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-e2392df0cbe902b5",
+        "text": "Dart marks Windows x64 and Arm64 as verified for developing and running Dart code.",
+        "source": "https://dart.dev/get-dart",
+        "credibility": 70
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-007",
+      "topic": "arm64 windows",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-170392ed0a294e71",
+        "text": "GitHub-hosted Windows arm64 runners are available under the labels windows-11-arm and windows-11-vs2026-arm for public and private repositories.",
+        "source": "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+        "credibility": 68
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-008",
+      "topic": "arm64 windows",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-a6aed02fc549d8f0",
+        "text": "ring's BUILDING.md requires both the VS 2022 C++ ARM64 build tools and clang components for aarch64-pc-windows-msvc.",
+        "source": "https://github.com/briansmith/ring/blob/main/BUILDING.md",
+        "credibility": 67
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-009",
+      "topic": "arm64 windows",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-e358e77ef513deb4",
+        "text": "Flutter's only Windows SDK assumes an AMD64 host and runs on Windows Arm64 hosts under emulation; the issue to ship a native Arm64 SDK remains open at P3.",
+        "source": "https://github.com/flutter/flutter/issues/136417",
+        "credibility": 59
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-010",
+      "topic": "tier windows",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-43dc45216c070515",
+        "text": "aarch64-pc-windows-msvc, i686-pc-windows-msvc and x86_64-pc-windows-msvc are Tier 1 with host tools.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+        "credibility": 52
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-011",
+      "topic": "arm64 windows",
+      "claim_a": {
+        "id": "claim-cfa5643050d8dac8",
+        "text": "Node.js lists Windows arm64 (Windows 10+) as a Tier 2 platform, while Windows x64 is Tier 1.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-506f21f395d1d8f6",
+        "text": "Tauri 2 documents building for ARM64 Windows with --target aarch64-pc-windows-msvc after installing the MSVC C++ ARM64 build tools component.",
+        "source": "https://v2.tauri.app/distribute/windows-installer/",
+        "credibility": 52
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-012",
+      "topic": "but test tier",
+      "claim_a": {
+        "id": "claim-dea93afc635151d8",
+        "text": "Node.js Tier 2 platforms have full test coverage and test failures block releases, but binary releases may be delayed by infrastructure issues.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-1d872d8e2b0e9f0b",
+        "text": "Rust Tier 2 targets are guaranteed to build but the test suite is not executed, so produced binaries might not work.",
+        "source": "https://blog.rust-lang.org/2025/10/30/Rust-1.91.0/",
+        "credibility": 72
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-013",
+      "topic": "but may",
+      "claim_a": {
+        "id": "claim-dea93afc635151d8",
+        "text": "Node.js Tier 2 platforms have full test coverage and test failures block releases, but binary releases may be delayed by infrastructure issues.",
+        "source": "https://github.com/nodejs/node/blob/main/BUILDING.md",
+        "credibility": 92
+      },
+      "claim_b": {
+        "id": "claim-dfe8df1e465b11f3",
+        "text": "Cross-compilation from a non-Windows host to a *-windows-msvc target may be possible but is not supported.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+        "credibility": 52
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-014",
+      "topic": "aarch64 msvc windows",
+      "claim_a": {
+        "id": "claim-b7e356ef286321c2",
+        "text": "The rustc book lists aarch64-pc-windows-msvc and x86_64-pc-windows-msvc among Tier 1 targets.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support.html",
+        "credibility": 84
+      },
+      "claim_b": {
+        "id": "claim-2921cb185791f17b",
+        "text": "The ring issue requesting that aarch64-pc-windows-msvc not require clang was closed as not planned on Feb 25, 2025.",
+        "source": "https://github.com/briansmith/ring/issues/2117",
+        "credibility": 76
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-015",
+      "topic": "lists windows",
+      "claim_a": {
+        "id": "claim-b7e356ef286321c2",
+        "text": "The rustc book lists aarch64-pc-windows-msvc and x86_64-pc-windows-msvc among Tier 1 targets.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support.html",
+        "credibility": 84
+      },
+      "claim_b": {
+        "id": "claim-0ac137be07012b6c",
+        "text": "Flutter's supported-platforms page lists Windows Arm64 as a deployment target.",
+        "source": "https://docs.flutter.dev/reference/supported-platforms",
+        "credibility": 74
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-016",
+      "topic": "aarch64 msvc tier",
+      "claim_a": {
+        "id": "claim-b7e356ef286321c2",
+        "text": "The rustc book lists aarch64-pc-windows-msvc and x86_64-pc-windows-msvc among Tier 1 targets.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support.html",
+        "credibility": 84
+      },
+      "claim_b": {
+        "id": "claim-e63fc9e9480af5e7",
+        "text": "Rust 1.91.0 (2025-10-30) promoted aarch64-pc-windows-msvc to Tier 1.",
+        "source": "https://blog.rust-lang.org/2025/10/30/Rust-1.91.0/",
+        "credibility": 72
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-017",
+      "topic": "targets tier",
+      "claim_a": {
+        "id": "claim-b7e356ef286321c2",
+        "text": "The rustc book lists aarch64-pc-windows-msvc and x86_64-pc-windows-msvc among Tier 1 targets.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support.html",
+        "credibility": 84
+      },
+      "claim_b": {
+        "id": "claim-1d872d8e2b0e9f0b",
+        "text": "Rust Tier 2 targets are guaranteed to build but the test suite is not executed, so produced binaries might not work.",
+        "source": "https://blog.rust-lang.org/2025/10/30/Rust-1.91.0/",
+        "credibility": 72
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-018",
+      "topic": "aarch64 msvc windows",
+      "claim_a": {
+        "id": "claim-b7e356ef286321c2",
+        "text": "The rustc book lists aarch64-pc-windows-msvc and x86_64-pc-windows-msvc among Tier 1 targets.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support.html",
+        "credibility": 84
+      },
+      "claim_b": {
+        "id": "claim-a6aed02fc549d8f0",
+        "text": "ring's BUILDING.md requires both the VS 2022 C++ ARM64 build tools and clang components for aarch64-pc-windows-msvc.",
+        "source": "https://github.com/briansmith/ring/blob/main/BUILDING.md",
+        "credibility": 67
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-019",
+      "topic": "aarch64 msvc tier",
+      "claim_a": {
+        "id": "claim-b7e356ef286321c2",
+        "text": "The rustc book lists aarch64-pc-windows-msvc and x86_64-pc-windows-msvc among Tier 1 targets.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support.html",
+        "credibility": 84
+      },
+      "claim_b": {
+        "id": "claim-43dc45216c070515",
+        "text": "aarch64-pc-windows-msvc, i686-pc-windows-msvc and x86_64-pc-windows-msvc are Tier 1 with host tools.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+        "credibility": 52
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    },
+    {
+      "id": "contra-020",
+      "topic": "msvc windows",
+      "claim_a": {
+        "id": "claim-b7e356ef286321c2",
+        "text": "The rustc book lists aarch64-pc-windows-msvc and x86_64-pc-windows-msvc among Tier 1 targets.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support.html",
+        "credibility": 84
+      },
+      "claim_b": {
+        "id": "claim-8a06541ab45d8307",
+        "text": "Architectural cross-compilation between Windows platforms is natively supported by the MSVC toolchain when appropriate VS Installer components are selected.",
+        "source": "https://doc.rust-lang.org/rustc/platform-support/windows-msvc.html",
+        "credibility": 52
+      },
+      "strategy_tried": "semantic (blocked) -> manual review",
+      "resolved": true,
+      "resolution": "Not a contradiction: candidate pair was generated by shared vocabulary (Windows/arm64/tier); the claims describe different projects or different scopes and are jointly true.",
+      "confidence": 0.85,
+      "label": "inferred",
+      "audit_trail": "semantic check not run: no OpenAI-compatible gateway reachable (kbd_complete exit 3): kbd-model-resolve.sh not found; semantic path unavailable | manual review in-session by the stage-06 agent (automated semantic judge unavailable: no OpenAI-compatible gateway)"
+    }
+  ]
+}

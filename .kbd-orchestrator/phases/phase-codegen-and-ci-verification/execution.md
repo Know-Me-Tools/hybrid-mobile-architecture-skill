@@ -6,7 +6,7 @@
 ## Backend selection
 
 `hybrid`: OpenSpec (`openspec/changes/2026-07-15-c1*/`) provides per-change
-traceability; the dispatch harness (`.kbd-orchestrator/dispatch/dispatch.sh`) runs
+traceability; the dispatch harness (`node scripts/dispatch.mjs`) runs
 each change with claude/codex in an isolated git worktree, per the plan's harness
 assignments. No opencode lanes this phase (prior scorecard: 0/2).
 

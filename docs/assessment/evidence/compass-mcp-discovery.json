@@ -1,0 +1,1026 @@
+{
+  "protocol": "2026-07-28",
+  "responses": [
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "resultType": "complete",
+        "supportedVersions": [
+          "2026-07-28"
+        ],
+        "capabilities": {
+          "experimental": {},
+          "resources": {
+            "subscribe": false,
+            "listChanged": false
+          },
+          "tools": {
+            "listChanged": false
+          }
+        },
+        "ttlMs": 0,
+        "cacheScope": "private",
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "compass",
+            "version": "0.3.28"
+          }
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "result": {
+        "resultType": "complete",
+        "tools": [
+          {
+            "name": "search_symbols",
+            "description": "Search Compass code symbols with the trusted FTS5 index.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "symbols": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 20
+                },
+                "source": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "root": {
+                  "type": "string"
+                },
+                "include_heuristic": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "max_depth": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8
+                },
+                "max_nodes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 500
+                },
+                "max_edges": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1000
+                },
+                "max_paths": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 100
+                },
+                "max_candidates": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 20
+                },
+                "max_source_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1048576
+                },
+                "max_response_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8388608
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "query"
+              ]
+            }
+          },
+          {
+            "name": "get_callers",
+            "description": "Return one-hop callers and route bindings for a symbol.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "symbols": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 20
+                },
+                "source": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "root": {
+                  "type": "string"
+                },
+                "include_heuristic": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "max_depth": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8
+                },
+                "max_nodes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 500
+                },
+                "max_edges": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1000
+                },
+                "max_paths": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 100
+                },
+                "max_candidates": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 20
+                },
+                "max_source_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1048576
+                },
+                "max_response_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8388608
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "symbol"
+              ]
+            }
+          },
+          {
+            "name": "get_callees",
+            "description": "Return one-hop callees for a symbol.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "symbols": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 20
+                },
+                "source": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "root": {
+                  "type": "string"
+                },
+                "include_heuristic": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "max_depth": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8
+                },
+                "max_nodes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 500
+                },
+                "max_edges": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1000
+                },
+                "max_paths": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 100
+                },
+                "max_candidates": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 20
+                },
+                "max_source_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1048576
+                },
+                "max_response_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8388608
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "symbol"
+              ]
+            }
+          },
+          {
+            "name": "get_impact",
+            "description": "Return the bounded transitive impact radius for a symbol.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "symbols": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 20
+                },
+                "source": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "root": {
+                  "type": "string"
+                },
+                "include_heuristic": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "max_depth": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8
+                },
+                "max_nodes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 500
+                },
+                "max_edges": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1000
+                },
+                "max_paths": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 100
+                },
+                "max_candidates": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 20
+                },
+                "max_source_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1048576
+                },
+                "max_response_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8388608
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "symbol"
+              ]
+            }
+          },
+          {
+            "name": "explore_code",
+            "description": "Return related symbols, connecting paths, and verified source grouped by file.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "symbols": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 20
+                },
+                "source": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "root": {
+                  "type": "string"
+                },
+                "include_heuristic": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "max_depth": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8
+                },
+                "max_nodes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 500
+                },
+                "max_edges": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1000
+                },
+                "max_paths": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 100
+                },
+                "max_candidates": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 20
+                },
+                "max_source_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1048576
+                },
+                "max_response_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8388608
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "symbols"
+              ]
+            }
+          },
+          {
+            "name": "get_node",
+            "description": "Return the trusted evidence trail between two code-graph nodes.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "symbol": {
+                  "type": "string"
+                },
+                "symbols": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 20
+                },
+                "source": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "root": {
+                  "type": "string"
+                },
+                "include_heuristic": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "max_depth": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8
+                },
+                "max_nodes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 500
+                },
+                "max_edges": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1000
+                },
+                "max_paths": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 100
+                },
+                "max_candidates": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 20
+                },
+                "max_source_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1048576
+                },
+                "max_response_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 8388608
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "source",
+                "target"
+              ]
+            }
+          },
+          {
+            "name": "query_graph",
+            "description": "Run bounded structured discovery for natural-language questions; explicit legacy traversal fields preserve compatibility text context.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "question": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "description": "Natural language question or keyword search"
+                },
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "bfs",
+                    "dfs"
+                  ],
+                  "description": "Explicit legacy mode; selects compatibility traversal"
+                },
+                "depth": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6,
+                  "description": "Explicit legacy traversal depth (1-6)"
+                },
+                "token_budget": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Explicit legacy text token budget"
+                },
+                "context_filter": {
+                  "type": "array",
+                  "maxItems": 32,
+                  "items": {
+                    "type": "string",
+                    "maxLength": 1024
+                  },
+                  "description": "Optional explicit edge-context filter, e.g. ['call', 'field']"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "auto",
+                    "incoming",
+                    "outgoing",
+                    "both"
+                  ],
+                  "description": "Discovery edge direction; omitted uses bounded inference"
+                },
+                "relation_contexts": {
+                  "type": "array",
+                  "maxItems": 32,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  },
+                  "description": "Canonical discovery relationship contexts"
+                },
+                "scope": {
+                  "type": "array",
+                  "maxItems": 32,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "community",
+                          "source",
+                          "package",
+                          "node"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1024
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  "description": "Repeatable OR discovery scopes"
+                },
+                "traversal": {
+                  "type": "string",
+                  "enum": [
+                    "bfs",
+                    "dfs"
+                  ],
+                  "description": "Bounded discovery traversal order; omitted uses bfs"
+                },
+                "include_heuristic": {
+                  "type": "boolean"
+                },
+                "max_depth": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8
+                },
+                "max_seeds": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3
+                },
+                "max_candidates": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 256
+                },
+                "max_nodes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 500
+                },
+                "max_edges": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                "max_expanded_relationships": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000
+                },
+                "max_response_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 8388608
+                },
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 30000
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "question"
+              ]
+            },
+            "_meta": {
+              "compass/deprecatedTextMode": true,
+              "compass/deprecatedSince": "0.4.0"
+            }
+          },
+          {
+            "name": "get_neighbors",
+            "description": "DEPRECATED text result: get direct neighbors of a node with edge details; use typed navigation tools for machine-readable evidence.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "relation_filter": {
+                  "type": "string",
+                  "description": "Optional: filter by relation type"
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "label"
+              ]
+            },
+            "_meta": {
+              "compass/deprecated": true,
+              "compass/deprecatedSince": "0.4.0",
+              "compass/deprecationReason": "legacy text result; use a typed navigation result"
+            }
+          },
+          {
+            "name": "get_community",
+            "description": "DEPRECATED text result: get nodes in a community; a typed replacement is pending.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "community_id": {
+                  "type": "integer",
+                  "description": "Community ID (0-indexed by size)"
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "community_id"
+              ]
+            },
+            "_meta": {
+              "compass/deprecated": true,
+              "compass/deprecatedSince": "0.4.0",
+              "compass/deprecationReason": "legacy text result; use a typed navigation result"
+            }
+          },
+          {
+            "name": "god_nodes",
+            "description": "DEPRECATED text result: return the most connected nodes; a typed replacement is pending.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "top_n": {
+                  "type": "integer",
+                  "default": 10
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              }
+            },
+            "_meta": {
+              "compass/deprecated": true,
+              "compass/deprecatedSince": "0.4.0",
+              "compass/deprecationReason": "legacy text result; use a typed navigation result"
+            }
+          },
+          {
+            "name": "graph_stats",
+            "description": "DEPRECATED text result: return graph summary statistics; a typed replacement is pending.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              }
+            },
+            "_meta": {
+              "compass/deprecated": true,
+              "compass/deprecatedSince": "0.4.0",
+              "compass/deprecationReason": "legacy text result; use a typed navigation result"
+            }
+          },
+          {
+            "name": "shortest_path",
+            "description": "DEPRECATED text result: find a shortest path; use get_node for typed directed evidence.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string",
+                  "description": "Source concept label or keyword"
+                },
+                "target": {
+                  "type": "string",
+                  "description": "Target concept label or keyword"
+                },
+                "max_hops": {
+                  "type": "integer",
+                  "default": 8,
+                  "description": "Maximum hops to consider"
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "source",
+                "target"
+              ]
+            },
+            "_meta": {
+              "compass/deprecated": true,
+              "compass/deprecatedSince": "0.4.0",
+              "compass/deprecationReason": "legacy text result; use a typed navigation result"
+            }
+          },
+          {
+            "name": "list_prs",
+            "description": "DEPRECATED text result: list open GitHub PRs with CI, review, and graph-impact context; a typed replacement is pending.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "base": {
+                  "type": "string",
+                  "description": "Base branch to filter PRs by (auto-detected if omitted)"
+                },
+                "repo": {
+                  "type": "string",
+                  "description": "GitHub repo (owner/repo). Defaults to current repo."
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              }
+            },
+            "_meta": {
+              "compass/deprecated": true,
+              "compass/deprecatedSince": "0.4.0",
+              "compass/deprecationReason": "legacy text result; use a typed navigation result"
+            }
+          },
+          {
+            "name": "get_pr_impact",
+            "description": "DEPRECATED text result: get graph impact for a pull request; use get_impact for typed symbol impact or await the typed PR replacement.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "pr_number": {
+                  "type": "integer",
+                  "description": "PR number to analyse"
+                },
+                "repo": {
+                  "type": "string",
+                  "description": "GitHub repo (owner/repo). Defaults to current repo."
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "pr_number"
+              ]
+            },
+            "_meta": {
+              "compass/deprecated": true,
+              "compass/deprecatedSince": "0.4.0",
+              "compass/deprecationReason": "legacy text result; use a typed navigation result"
+            }
+          },
+          {
+            "name": "triage_prs",
+            "description": "DEPRECATED text result: triage actionable open pull requests; a typed replacement is pending.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "base": {
+                  "type": "string",
+                  "description": "Base branch to filter PRs by (auto-detected if omitted)"
+                },
+                "repo": {
+                  "type": "string",
+                  "description": "GitHub repo (owner/repo). Defaults to current repo."
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              }
+            },
+            "_meta": {
+              "compass/deprecated": true,
+              "compass/deprecatedSince": "0.4.0",
+              "compass/deprecationReason": "legacy text result; use a typed navigation result"
+            }
+          },
+          {
+            "name": "review_pull_request",
+            "description": "Analyze exact local target and pull-request revisions with the canonical Compass PR Intelligence report. Git objects and matching history realizations must already exist; the tool never fetches or executes source.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "base": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "description": "Exact local target revision"
+                },
+                "head": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096,
+                  "description": "Exact local pull-request head revision"
+                },
+                "fingerprint": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$",
+                  "description": "Optional extraction fingerprint required at both revisions"
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "base",
+                "head"
+              ]
+            }
+          },
+          {
+            "name": "pr_readiness",
+            "description": "Compose the additive compass.pr-readiness/1 envelope for exact local revisions. It references the unchanged canonical PR report digest and uses only bounded local evidence.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "base": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "head": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "fingerprint": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "base",
+                "head"
+              ]
+            }
+          },
+          {
+            "name": "task_context",
+            "description": "Compose a bounded, verified compass.task-context/2 packet after exact target resolution. The typed framework context reports pack versions, routes, render direction, boundaries, configuration dependencies, provenance, ambiguity, and truncation. Ambiguous fuzzy candidates are never selected.",
+            "inputSchema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "intent": {
+                  "type": "string",
+                  "enum": [
+                    "explain",
+                    "modify",
+                    "debug",
+                    "test"
+                  ]
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 16384
+                },
+                "max_depth": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "max_nodes": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "max_edges": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "max_paths": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "max_candidates": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "max_source_bytes": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "max_response_bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 67108864
+                },
+                "max_knowledge_items": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "agent_overlay": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "description": "Exact configured Agent Graph overlay ID; requires agent_revision"
+                },
+                "agent_revision": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$",
+                  "description": "Exact immutable Overlay Revision; requires agent_overlay"
+                },
+                "agent_profile": {
+                  "type": "string",
+                  "enum": [
+                    "augment",
+                    "curated"
+                  ]
+                },
+                "project_path": {
+                  "type": "string",
+                  "description": "Project directory containing compass-out/graph.json. Optional — defaults to the graph this server was started with."
+                }
+              },
+              "required": [
+                "intent",
+                "target"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

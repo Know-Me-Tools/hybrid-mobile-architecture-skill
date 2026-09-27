@@ -56,7 +56,7 @@ One global Tokio runtime per process. CPU-bound work (GGUF loading, inference fo
 
 ## Required tool versions
 
-| Tool | Required (four-pillar bootstrap — `bash scripts/check-env.sh --install`) |
+| Tool | Required (four-pillar bootstrap — `node scripts/check-env.mjs --install`) |
 |---|---|
 | Rust + Cargo | 1.97.1 (+ wasm32-unknown-unknown target) — SurrealDB 3.2's `fastnum` transitive dependency requires rustc ≥1.94; the wasm32 target first compiled cleanly on 1.96 (see `references/rust/wasm-targets.md`) |
 | Flutter SDK | **beta channel**, latest (ships the Dart MCP server) |
@@ -64,18 +64,18 @@ One global Tokio runtime per process. CPU-bound work (GGUF loading, inference fo
 | Node.js | 26.5.0 (current release — pin, do not use `--lts`) |
 | bun | latest |
 | pnpm | latest |
-| TypeScript | latest (7.x, Go-native compiler — no version pin) |
+| TypeScript | 7.0.2 (pinned native compiler) |
 | Tauri CLI | 2.10+ |
 | flutter_rust_bridge_codegen | 2.12+ (must match the workspace's frb crate version) |
-| OpenSpec | 1.10.0+ (`@fission-ai/openspec` — NEVER the bare `openspec` npm package, which is squatted). After any `openspec update`, run `scripts/normalize-vendored-skills.sh` — the CLI strips the repo-local `metadata.internal: true` from vendored mirrors on every run. |
+| OpenSpec | 1.10.0+ (`@fission-ai/openspec` — NEVER the bare `openspec` npm package, which is squatted). After any `openspec update`, run `scripts/normalize-vendored-skills.mjs` — the CLI strips the repo-local `metadata.internal: true` from vendored mirrors on every run. |
 | Prometheus Skill System | package 1.7.0+ and control-plane contract 2.0.0+ ([canonical repository](https://github.com/Prometheus-AGS/prometheus-skill-system)) — verify with `prometheus --version`, `prometheus doctor --json`, and `pk doctor --json` |
 
 Check or install everything at once:
 
 ```bash
-bash scripts/check-env.sh                  # check-only
-bash scripts/check-env.sh --install        # remediate normal-cost items
-bash scripts/check-env.sh --install --full # + long ops (Flutter upgrade, full skill-system install)
+node scripts/check-env.mjs                  # check-only
+node scripts/check-env.mjs --install        # remediate normal-cost items
+node scripts/check-env.mjs --install --full # + long ops (Flutter upgrade, full skill-system install)
 ```
 
 ## Scaffolding commands
@@ -84,25 +84,25 @@ Always use the provided scripts; do not hand-roll project structure.
 
 ```bash
 # Full hybrid project (Flutter mobile + Tauri desktop + shared Rust)
-bash scripts/scaffold-hybrid.sh <project-name>
+node scripts/scaffold-hybrid.mjs <project-name>
 
 # Single surface
-bash scripts/scaffold-flutter.sh <project-name>
-bash scripts/scaffold-tauri.sh <project-name>
-bash scripts/scaffold-rust-core.sh <project-name>
+node scripts/scaffold-flutter.mjs <project-name>
+node scripts/scaffold-tauri.mjs <project-name>
+node scripts/scaffold-rust-core.mjs <project-name>
 
-# Add authentication to an existing scaffolded project
-bash scripts/add-auth.sh supabase flutter ./<mobile-dir>
-bash scripts/add-auth.sh kratos tauri ./<desktop-dir>
+# Generate an auth integration proposal for an adopted project
+knowme-builder add auth supabase --path ./<project-dir>
+knowme-builder add auth kratos --path ./<project-dir>
 
-# Add a feature module
-bash scripts/new-feature.sh <feature-name> flutter ./<mobile-dir>
-bash scripts/new-feature.sh <feature-name> tauri ./<desktop-dir>
+# Generate a feature proposal (wire and verify it before claiming completion)
+knowme-builder add feature <feature-name> --path ./<project-dir>
+knowme-builder add feature <feature-name> --path ./<project-dir>
 
 # Audit architecture compliance
-bash scripts/audit.sh flutter ./<mobile-dir>
-bash scripts/audit.sh tauri ./<desktop-dir>
-bash scripts/audit.sh rust ./rust/gen_ui_core
+node scripts/audit.mjs flutter ./<mobile-dir>
+node scripts/audit.mjs tauri ./<desktop-dir>
+node scripts/audit.mjs rust ./rust/gen_ui_core
 ```
 
 ## Development Philosophy: Speed AND Correctness

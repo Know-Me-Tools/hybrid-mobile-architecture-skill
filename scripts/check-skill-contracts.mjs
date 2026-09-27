@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import { access, readFile, readdir } from "node:fs/promises";
 import { relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = resolve(new URL("..", import.meta.url).pathname);
+const root = fileURLToPath(new URL("..", import.meta.url));
 const manifest = JSON.parse(await readFile(resolve(root, "builder.manifest.json"), "utf8"));
 const evalLines = (await readFile(resolve(root, "evals/builder-skills.jsonl"), "utf8"))
   .trim()
@@ -93,7 +94,7 @@ if (JSON.stringify(skillDirectories) !== JSON.stringify(declared)) {
 //
 // These are written by an EXTERNAL generator (`openspec update`), not by this
 // pack. `metadata.internal: true` is a repo-local invariant the OpenSpec CLI has
-// no notion of, so it strips the key on every run; `scripts/normalize-vendored-skills.sh`
+// no notion of, so it strips the key on every run; `scripts/normalize-vendored-skills.mjs`
 // re-applies it. See openspec/changes/2026-08-22-c300-openspec-mirror-repair/design.md.
 //
 // Each managed harness is asserted INDIVIDUALLY. A union count across harnesses
@@ -107,10 +108,10 @@ if (JSON.stringify(skillDirectories) !== JSON.stringify(declared)) {
 //            its own openspec-* copies were stale duplicates the CLI refuses to
 //            overwrite and asks to have deleted
 export const INTERNAL_SKILL_HARNESSES = {
-  ".agents": { "openspec-": 10, "source-command-opsx-": 10 },
-  ".claude": { "openspec-": 10, "source-command-opsx-": 0 },
-  ".kimi-code": { "openspec-": 10, "source-command-opsx-": 0 },
-  ".opencode": { "openspec-": 10, "source-command-opsx-": 0 },
+  ".agents": { "openspec-": 12, "source-command-opsx-": 10 },
+  ".claude": { "openspec-": 12, "source-command-opsx-": 0 },
+  ".kimi-code": { "openspec-": 12, "source-command-opsx-": 0 },
+  ".opencode": { "openspec-": 12, "source-command-opsx-": 0 },
 };
 
 for (const [harness, expected] of Object.entries(INTERNAL_SKILL_HARNESSES)) {

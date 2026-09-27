@@ -1,0 +1,70 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "same-model-fallback-weaker-guarantee",
+  "scope": "Portable runtime, harness installer, runtime build emission, native helper wrappers and tools/platform-native. Findings describe the reviewed pre-fix snapshot; other agents are applying corrections.",
+  "sources": [
+    "https://code.claude.com/docs/en/hooks#exec-form-and-shell-form"
+  ],
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "runtime/src/install-harness-package.mts",
+      "line": 71,
+      "claim": "Uninstall removes preexisting skills because ownership is recorded for the whole collection from one directory check.",
+      "evidence": "Lines 103-106 check only .agents/skills/<packageId> and set a harness boolean. Line 71 removes every publicSkills entry whenever that boolean is true. A preexisting manifest-listed sibling skill is therefore removed when the packageId directory was initially absent; copied skill files also lack edit protection.",
+      "suggested_fix": "Track each installed skill file per actual harness destination, preserve preexisting files, and compare ownership hashes before removal. Test preexisting sibling skills and post-install user edits."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "runtime/src/install-harness-package.mts",
+      "line": 73,
+      "claim": "CLI-managed MCP servers edited or replaced after installation are deleted during uninstall.",
+      "evidence": "Claude/Codex removal is gated only by receipt.mcpAdded[name], while lines 117-118 save only true. No current-definition comparison precedes mcp remove. The OpenCode branch performs such a comparison, but the other two harnesses do not.",
+      "suggested_fix": "Persist the installed definition and compare it with current configuration before removal, or preserve CLI-managed entries with an explicit diagnostic when ownership cannot be established."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "runtime/src/install-harness-package.mts",
+      "line": 96,
+      "claim": "Claude installation silently ignores the requested revision while recording it in the receipt.",
+      "evidence": "--ref is accepted and saved in receipt.ref, but the Claude marketplace add branch passes only source and scope; existing marketplace update also receives no revision. The portableSource revision handling applies only to skills-based installations.",
+      "suggested_fix": "Resolve and verify the requested revision before Claude installation or reject unsupported --ref combinations before any mutations."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "runtime/src/install-harness-package.mts",
+      "line": 97,
+      "claim": "Failed inventory probes are treated as proof that a plugin or marketplace is newly owned.",
+      "evidence": "probe permits nonzero status; marketplace and plugin branches ignore that status and treat unparseable output as absence. An idempotent successful add after an unsuccessful list can mark a preexisting resource owned, enabling its later removal.",
+      "suggested_fix": "Require successful, recognized inventory responses before ownership decisions; abort or preserve unknown ownership when inventory cannot be read."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "tools/platform-native/src/main.rs",
+      "line": 43,
+      "claim": "The APK verifier certifies ARM64 using archive directory names without checking the ELF architecture.",
+      "evidence": "The only architecture condition is pieces[1] == arm64-v8a. The ELF tool receives only -d, which validates dynamic entries without rejecting a valid x86_64 ELF. Such libraries under the two required arm64-v8a filenames reach the ARM64 PASS output.",
+      "suggested_fix": "Validate each library's ELF class and machine as ELF64/AArch64; add a fixture containing valid non-ARM64 ELF bytes under arm64-v8a paths."
+    },
+    {
+      "severity": "WARNING",
+      "file": "runtime/src/portable/platform.mts",
+      "line": 79,
+      "claim": "Portable installer subprocess failures lose their original exit codes.",
+      "evidence": "run throws a plain Error for nonzero child status and main always sets process.exitCode = 1. The native-helpers/common ToolError path preserves statuses, but installer operations using this runtime do not.",
+      "suggested_fix": "Carry child status in a typed error and preserve it in main; verify with a fixture command that exits 23."
+    }
+  ],
+  "checked_classes": [
+    "Harness schema: current official Claude Code documentation explicitly supports command plus args as direct exec form; this is not a defect.",
+    "Converted native helper execution: inspected helpers use native process argument arrays; no direct Bash or Python invocation was found in the scoped helper sources.",
+    "Review is not Windows x64/ARM64 execution evidence, complete runtime certification, or cross-model verification."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

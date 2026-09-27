@@ -1,4 +1,9 @@
 # TJ-ARCH-MOB-001 compliant
+# Generated manifests and embedded templates are hashed byte-for-byte. Keep text
+# at LF on every host so Windows checkouts produce the same package and upgrade
+# digests as Linux and macOS; binary files remain binary under text=auto.
+* text=auto eol=lf
+
 # Append-only session/knowledge logs: concurrent sessions each append their own
 # entries, so a "conflict" here is never a real disagreement — both sides are
 # always correct and both must survive. `merge=union` keeps every line from both

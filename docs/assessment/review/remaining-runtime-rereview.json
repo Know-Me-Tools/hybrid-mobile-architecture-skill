@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "same-model-fallback-weaker-guarantee",
+  "scope": "Source re-review of corrections to remaining-runtime-findings.json: refiner verification/ship guards, wiki binary and history preservation, and deployment CI triggers. Earlier journal and runtime receipts remain separately scoped. No production workflow, publication, promotion, wiki consolidation or cleanup was executed by this reviewer.",
+  "findings": [],
+  "checked_classes": [
+    "Premature verification: verify now persists approved/unverified state before work, requires a typed nonempty replay command, and records verified only after the replay succeeds.",
+    "Historical false verification: ship requires verified status, replayed=true, a timestamp and a recorded replay argument array, rejecting earlier metadata-only verification states.",
+    "Binary preservation: opaque files use original Buffer bytes; supported text is decoded strictly and control bytes force opaque handling. Wiki markdown and events reject invalid UTF-8 before destination promotion.",
+    "History collisions: preserved wiki variants now include their complete wiki-relative path beneath each source namespace, separating same-source nested files with matching basenames.",
+    "CI coverage: deployment pull-request and push filters include runtime/** and the emitted scripts/ci-deployment.mjs entrypoint.",
+    "Silent failure and unsafe fallback: no remaining defect identified in the reviewed corrections; the earlier gate, process-execution and vendor-adapter observations remain as scoped in the initial receipt.",
+    "Limits: this source re-review does not establish complete staged-consumer installation, platform runtime support, production CI success, semantic migrations or distinct-model verification. Root's execution suite and staged smoke remain separate evidence."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

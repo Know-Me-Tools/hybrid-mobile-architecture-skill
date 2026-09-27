@@ -4,7 +4,7 @@
 #
 # Rules:
 #   - Versions live HERE and only here. Authority docs must state these same
-#     values; `bash scripts/audit.sh doc-consistency` fails CI on drift.
+#     values; `node scripts/audit.mjs doc-consistency` fails CI on drift.
 #   - When bumping a version: update this file first, then every authority doc,
 #     then re-run the audit. (A generated-docs pipeline can replace the manual
 #     step later; the audit gate is what prevents rot either way.)
@@ -21,17 +21,20 @@
 # rust/rust-toolchain.toml.
 rust = "1.97.1"
 node = "26.5.0"         # Current release — latest phones/tools over LTS conservatism
-flutter = "3.47.0-0.1.pre" # latest beta; ships Dart 3.13.0-282.1.beta + the Dart MCP server
+flutter = "3.47.5"      # current stable; ships Dart 3.13.4
 typescript = "7.0.2"    # Go-native compiler; latest stable dist-tag, never a nightly dev build
+skills_cli = "1.7.0"     # exact agentskills.io discovery/install CLI used by package CI
 bun = "1.3.14"
 pnpm = "11.15.0"
 
 [frameworks]
 tauri_cli = "2.11.4"
-# The frb CRATE and the Dart PACKAGE must be the same version. 2.12.0 is the
-# latest published on pub.dev; the 2.13.0-beta line is not yet validated here.
-# Do not raise this without bumping rust/Cargo.toml and mobile/pubspec.yaml
-# together and re-running codegen.
+tauri_driver = "2.0.5"         # exact stable WebDriver server used for packaged Windows UI certification
+msedgedriver_tool_rev = "8c4b34f51b45f5cf08013366d703de464ab871d1" # pinned Rust installer for matching EdgeDriver
+# The runtime crate, Dart package and Cargo-installed codegen CLI must use the
+# same version. The 2.13.0-beta line is not yet validated here. Do not raise
+# this without bumping rust/Cargo.toml and mobile/pubspec.yaml together and
+# re-running codegen.
 flutter_rust_bridge = "2.12.0"
 # Latest coherent set that compiles with Freezed today: flutter_riverpod 3.3.1,
 # riverpod_annotation 4.0.2, riverpod_sqflite 0.4.2, riverpod_generator 4.0.3.
@@ -47,7 +50,7 @@ openspec = "1.10.0"             # @fission-ai/openspec — never the squatted ba
                                 # follows the tool. NOTE: 1.10.0 migrates .kimi -> .kimi-code
                                 # and strips `metadata.internal: true` on every run, because
                                 # `internal` is a repo-local invariant the CLI has no notion of.
-                                # Always run scripts/normalize-vendored-skills.sh afterwards.
+                                # Always run scripts/normalize-vendored-skills.mjs afterwards.
 
 [android_build]
 # Android toolchain moves faster than the Flutter pin; these are the versions
@@ -63,7 +66,7 @@ litert_lm_android = "0.14.0"    # com.google.ai.edge.litertlm:litertlm-android
 # device coverage is not a product constraint. Every increase must update the
 # generated manifests AND docs/platform-support.md, and be verified by a
 # production build on a current physical device.
-dart = "3.13.0-0"
+dart = "3.13.4"
 android_min_sdk = "29"          # Android 10
 android_abi = "arm64-v8a"
 ios_deployment_target = "16.4"  # MLX-Swift + Metal feature floor

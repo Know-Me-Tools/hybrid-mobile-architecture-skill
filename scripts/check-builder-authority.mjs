@@ -32,8 +32,19 @@ if (!/^2\.0\.0-(alpha|beta)\.\d+$|^2\.0\.0$/.test(manifest.package.version)) {
 if (new Set(manifest.skills).size !== manifest.skills.length) {
   fail("duplicate skill identifiers in builder.manifest.json");
 }
-if (manifest.supportedHarnesses.length !== 4) {
-  fail("exactly four supported harnesses are required");
+const requiredHarnesses = [
+  "claude-code",
+  "codex",
+  "opencode",
+  "kimi-code",
+  "minimax-code",
+  "zed",
+];
+if (
+  manifest.supportedHarnesses.length !== requiredHarnesses.length ||
+  requiredHarnesses.some((harness) => !manifest.supportedHarnesses.includes(harness))
+) {
+  fail(`supported harnesses must be exactly: ${requiredHarnesses.join(", ")}`);
 }
 if (manifest.distribution?.skillSourceRoot !== "skills") {
   fail("skills must be the canonical public source root");

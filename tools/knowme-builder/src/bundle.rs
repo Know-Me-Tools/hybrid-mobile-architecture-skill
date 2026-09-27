@@ -1,7 +1,7 @@
 use std::path::{Component, Path};
 
 use anyhow::{Context, Result, bail};
-use include_dir::{Dir, include_dir};
+use include_dir::{Dir, DirEntry, include_dir};
 
 use crate::{
     cli::Profile,
@@ -17,6 +17,7 @@ const UAR_CONTRACT_JSON: &str = include_str!("../../../compatibility/uar-runtime
 const ACTIVATION_MANIFEST_JSON: &str = include_str!("../../../templates/activation-manifest.json");
 
 pub fn manifest() -> Result<BuilderManifest> {
+    validate_embedded_source_tree(&TEMPLATES)?;
     let manifest: BuilderManifest =
         serde_json::from_str(MANIFEST_JSON).context("embedded Builder manifest is invalid")?;
     if manifest.schema_version != 1 {
@@ -33,6 +34,37 @@ pub fn manifest() -> Result<BuilderManifest> {
         );
     }
     Ok(manifest)
+}
+
+fn validate_embedded_source_tree(root: &Dir<'_>) -> Result<()> {
+    fn visit(dir: &Dir<'_>) -> Result<()> {
+        for entry in dir.entries() {
+            if let DirEntry::Dir(child) = entry {
+                let name = child
+                    .path()
+                    .file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap_or_default();
+                if is_generated_output_directory(name) {
+                    bail!(
+                        "embedded template source contains generated dependency/build output: {}",
+                        child.path().display()
+                    );
+                }
+                visit(child)?;
+            }
+        }
+        Ok(())
+    }
+
+    visit(root)
+}
+
+fn is_generated_output_directory(name: &str) -> bool {
+    matches!(
+        name,
+        "node_modules" | "target" | "dist" | "build" | ".dart_tool" | ".gradle" | "Pods"
+    )
 }
 
 pub fn profile(manifest: &BuilderManifest, profile: Profile) -> Result<&ProfileManifest> {
@@ -78,13 +110,13 @@ pub fn validate_relative_path(path: &Path) -> Result<()> {
 mod tests {
     use std::path::Path;
 
-    use super::{manifest, validate_relative_path};
+    use super::{is_generated_output_directory, manifest, validate_relative_path};
 
     #[test]
     fn embedded_manifest_matches_crate_version() {
         let manifest = manifest().expect("manifest");
-        assert_eq!(manifest.skills.len(), 29);
-        assert_eq!(manifest.supported_harnesses.len(), 4);
+        assert_eq!(manifest.skills.len(), 35);
+        assert_eq!(manifest.supported_harnesses.len(), 6);
     }
 
     #[test]
@@ -92,5 +124,21 @@ mod tests {
         assert!(validate_relative_path(Path::new("../secret")).is_err());
         assert!(validate_relative_path(Path::new("/tmp/file")).is_err());
         assert!(validate_relative_path(Path::new("src/main.rs")).is_ok());
+    }
+
+    #[test]
+    fn classifies_generated_output_directories() {
+        for name in [
+            "node_modules",
+            "target",
+            "dist",
+            "build",
+            ".dart_tool",
+            ".gradle",
+            "Pods",
+        ] {
+            assert!(is_generated_output_directory(name), "{name}");
+        }
+        assert!(!is_generated_output_directory("src"));
     }
 }

@@ -1,0 +1,40 @@
+{
+  "verdict": "BLOCK",
+  "judge_model": "gpt-6-astra",
+  "producer_model": "gpt-6-astra",
+  "cross_model_check": "same-model-collision",
+  "isolation_mode": "harness-native",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "docs/assessment/generated-application-certification.md",
+      "line": 69,
+      "claim": "The candidate still lacks the native execution evidence required to satisfy the phase acceptance criteria, so it cannot be accepted or release-certified at the current head.",
+      "evidence": "Acceptance tasks 4.3 and 4.6 remain unchecked, the packet known_state says the final current-head matrix is still running, and lines 69-74 explicitly leave the GitHub Actions run, Windows x64/ARM64 execution, Android/iOS relaunch persistence, and final review pending.",
+      "suggested_fix": "Wait for the committed current-head matrix, require every native job to pass, record the immutable run URL and per-target receipts, then rerun this final adversarial review against that exact commit."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/install-harness-package.mjs",
+      "line": 261,
+      "claim": "A copied-harness install that selects an external --source or --ref silently mixes that source's skills with prompts, plugins, activation metadata, and the native CLI from the installer's local package revision.",
+      "evidence": "Lines 151-179 resolve and validate portableRoot and lines 208-217 copy skills from it, but lines 261-270 copy Codex/OpenCode resources from packageRoot and lines 305-311 build and copy the CLI from packageRoot; matching only package id/version at lines 176-178 does not prove byte or revision identity.",
+      "suggested_fix": "Resolve every source-controlled resource and the CLI manifest from portableRoot, or reject external sources for modes that cannot honor them; add a test using two same-version payloads with different adapter/CLI bytes and a pinned ref."
+    },
+    {
+      "severity": "WARNING",
+      "file": "runtime/src/native-helpers/record-progress.mts",
+      "line": 12,
+      "claim": "The --status value bypasses both secret detection and repository-path redaction even though it is persisted to the public/private wiki records and event logs.",
+      "evidence": "Line 12 builds the secret-scanned text from title, summary, evidence, and next only, and lines 35-37 redact paths from those same four fields only; status is accepted as arbitrary text at lines 7-10 and is written into content and event payloads at lines 41-44.",
+      "suggested_fix": "Restrict status to a documented slug/enum, or include it in the same secret scan and path-redaction pipeline before constructing either record."
+    }
+  ],
+  "checked_classes": [],
+  "mode": "diff",
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

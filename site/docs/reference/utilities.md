@@ -6,9 +6,10 @@ description: Exhaustive catalog of KnowMe Builder CLI workflows, compatibility s
 
 # Utilities and automation
 
-The Rust CLI is the supported application mutation boundary. Shell utilities
-either bootstrap external tools, verify the package, or preserve compatibility
-with the pre-2.0 interface.
+The Rust CLI is the supported application mutation boundary. Portable Node
+`.mjs` utilities bootstrap external tools, verify the package, and preserve
+compatibility with the pre-2.0 interface. Native binary inspection remains in
+the Rust helper.
 
 ## Public CLI utilities
 
@@ -28,14 +29,14 @@ with the pre-2.0 interface.
 
 | Script | Purpose | Preferred 2.0 path |
 |---|---|---|
-| `add-auth.sh` | Add an authentication proposal | `knowme-builder add auth` |
-| `new-feature.sh` | Add a feature proposal | `knowme-builder add feature` |
-| `scaffold-hybrid.sh` | Legacy full hybrid scaffold entry point | `knowme-builder new --profile sovereign-hybrid` |
-| `scaffold-flutter.sh` | Legacy Flutter scaffold | `knowme-builder new --profile flutter-mobile` |
-| `scaffold-tauri.sh` | Legacy Tauri scaffold | `knowme-builder new --profile tauri-desktop` |
-| `scaffold-rust-core.sh` | Legacy Rust workspace scaffold | Use a profile or maintained Rust templates through the CLI |
-| `scaffold-packages.sh` | Legacy shared-package generation | `knowme-builder add module` where applicable |
-| `add-project-skills.sh` | Install project-local skill copies and legacy hooks | `knowme-builder skills install` |
+| `add-auth.mjs` | Add an authentication proposal | `knowme-builder add auth` |
+| `new-feature.mjs` | Add a feature proposal | `knowme-builder add feature` |
+| `scaffold-hybrid.mjs` | Legacy full hybrid scaffold entry point | `knowme-builder new --profile sovereign-hybrid` |
+| `scaffold-flutter.mjs` | Legacy Flutter scaffold | `knowme-builder new --profile flutter-mobile` |
+| `scaffold-tauri.mjs` | Legacy Tauri scaffold | `knowme-builder new --profile tauri-desktop` |
+| `scaffold-rust-core.mjs` | Legacy Rust workspace scaffold | Use a profile or maintained Rust templates through the CLI |
+| `scaffold-packages.mjs` | Legacy shared-package generation | `knowme-builder add module` where applicable |
+| `add-project-skills.mjs` | Install project-local skill copies and legacy hooks | `knowme-builder skills install` |
 
 Compatibility wrappers exist so older automation fails gradually and receives a
 deprecation notice. New documentation and automation should use the CLI.
@@ -44,12 +45,13 @@ deprecation notice. New documentation and automation should use the CLI.
 
 | Script | Purpose | When to run |
 |---|---|---|
-| `check-env.sh` | Check or install the four pinned toolchain pillars | Before generation and after toolchain changes |
-| `install-flutter.sh` | Install/switch the pinned Flutter beta, optionally through FVM | When Flutter is absent or on the wrong channel |
-| `install-harness-package.sh` | Receipt-based Git-URL install, update, check, or uninstall for Claude Code, Codex, and OpenCode | Initial setup and every Builder upgrade |
-| `install-global-harnesses.sh` | Compatibility wrapper for `install-harness-package.sh` | Existing automation; accepts the same options |
+| `check-env.mjs` | Check or install the four pinned toolchain pillars | Before generation and after toolchain changes |
+| `install-flutter.mjs` | Install/switch the pinned Flutter release, optionally through FVM | When Flutter is absent or on the wrong channel |
+| `install-harness-package.mjs` | Receipt-based Git-URL install, update, check, or uninstall for Claude Code, Codex, OpenCode, Kimi Code, MiniMax Code CLI, and Zed | Initial setup and every Builder upgrade |
+| `install-tauri-webdriver.mjs` | Install the pinned native Rust Tauri/Edge WebDriver utilities on Windows | Before packaged desktop UI certification |
+| `install-global-harnesses.mjs` | Compatibility wrapper for `install-harness-package.mjs` | Existing automation; accepts the same options |
 | `merge-zed-context-servers.mjs` | Non-destructively add Dart/shadcn context servers to Zed | Auxiliary integration; not part of the default harness install |
-| `patch-cargokit-ios.sh` | Apply the maintained iOS Cargokit compatibility patch | Only when the selected Flutter/Rust bridge baseline requires it |
+| `patch-cargokit-ios.mjs` | Apply the maintained iOS Cargokit compatibility patch | Only when the selected Flutter/Rust bridge baseline requires it |
 
 ## Generation utilities
 
@@ -59,10 +61,10 @@ deprecation notice. New documentation and automation should use the CLI.
 | `generate-command-contract.mjs` | Rust registration, Tauri permissions, TypeScript/Dart bindings, tests | Command manifest under `assets/templates/command-contract` |
 | `generate-skill-metadata.mjs` | `agents/openai.yaml` for every skill | Canonical `SKILL.md` frontmatter |
 | `generate-skill-evals.mjs` | Positive, negative, near-miss, and trace evaluation data | Canonical skills and evaluation policy |
-| `gen-design-tokens.sh` | Tailwind/CSS and Flutter token outputs | `assets/templates/design-tokens/tokens.toml` |
+| `gen-design-tokens.mjs` | Tailwind/CSS and Flutter token outputs | `assets/templates/design-tokens/tokens.toml` |
 | `sync-skill-resources.mjs` | Self-contained reference bundles within public skills | Repository-level reference documents |
-| `sync-harness-skills.sh` | 29-skill scaffold projection and six repository harness trees | Canonical `skills/` source |
-| `site/scripts/generate-skill-reference.mjs` | 29 public skill reference pages | Canonical skills plus `docs/catalog/skill-guidance.json` |
+| `sync-harness-skills.mjs` | 35-skill project projection and six repository harness trees | Canonical `skills/` source |
+| `site/scripts/generate-skill-reference.mjs` | 36 public skill reference pages | Canonical skills plus `docs/catalog/skill-guidance.json` |
 | `site/scripts/generate-model-routing.mjs` | Dated public model-routing table | Prompting model registry |
 
 Generated files are checked into the repository for review and distribution,
@@ -72,16 +74,19 @@ but their source manifests remain authoritative.
 
 | Script | Checks |
 |---|---|
-| `audit.sh` | Flutter, Tauri, Rust, documentation consistency, generator purity, or all detected surfaces |
+| `audit.mjs` | Flutter, Tauri, Rust, documentation consistency, generator purity, or all detected surfaces |
 | `check-builder-authority.mjs` | Manifest schema, declared skills/templates/targets, version coherence, and release completeness |
 | `check-prometheus-boundary.mjs` | Builder does not duplicate Prometheus lifecycle or mutation authority |
 | `check-runtime-security.mjs` | Raw MCP, identity, tool governance, tenant, and runtime boundary invariants |
 | `check-skill-contracts.mjs` | Agent Skills metadata, reference reachability, evaluation coverage, and skill declarations |
-| `check-git-url-discovery.sh` | Exactly 30 public skills by default and 50 with internal authoring helpers enabled |
-| `test-harness-installer.sh` | Clean-home install, update, check, receipt, preservation, and uninstall ownership |
+| `check-git-url-discovery.mjs` | Exactly 36 public skills and 22 explicit full-depth authoring helpers |
+| `test-harness-installer.mjs` | Clean-home install, update, check, receipt, preservation, and uninstall ownership |
 | `test-opencode-plugin.mjs` | Bounded advisory routing and dependency-free OpenCode plugin loading |
-| `verify-scaffold.sh` | Scratch generation, expected tree, placeholders, manifests, and compatibility shape |
-| `verify-tauri-boot.sh` | Bounded Tauri launch and ready-state evidence |
+| `verify-scaffold.mjs` | Scratch generation, expected tree, placeholders, manifests, and compatibility shape |
+| `verify-tauri-boot.mjs` | Bounded Tauri launch and ready-state evidence |
+| `verify-tauri-ui-restart.mjs` | Packaged Tauri UI create/invoke/persist/relaunch/read proof through native WebDriver |
+| `verify-flutter-ios-restart.mjs` | Two-launch Flutter UI/Rust FFI/SQLite persistence proof on iOS simulator or an existing Android device |
+| `mark-generated-sources.mjs` | Add or verify the architecture marker on FRB, Riverpod, and generated Rust bridge sources |
 | `site/scripts/sanitize.mjs` | Machine paths, private data, credentials, raw evidence, and unsupported public claims |
 | `site/scripts/validate-prompting.mjs` | Prompting schemas, harness records, and recipe integrity |
 | `site/scripts/test-prompting-fixtures.mjs` | Positive and negative prompting fixtures |
@@ -96,10 +101,10 @@ but their source manifests remain authoritative.
 
 | Script | Purpose | Publication rule |
 |---|---|---|
-| `consolidate-prometheus-wikis.py` | Consolidate internal Prometheus knowledge during maintenance | Raw wiki material is not public site input |
-| `worktree-consolidation-inventory.py` | Inventory divergent worktrees before safe consolidation | Report first; do not overwrite dirty worktrees |
-| `lib-knowme-builder.sh` | Locate/run the CLI and print wrapper deprecations | Internal shell library |
-| `lib-versions.sh` | Read pinned values from `versions.toml` | Internal shell library; scripts must not duplicate pins |
+| `consolidate-prometheus-wikis.mjs` | Consolidate internal Prometheus knowledge during maintenance | Raw wiki material is not public site input |
+| `worktree-consolidation-inventory.mjs` | Inventory divergent worktrees before safe consolidation | Report first; do not overwrite dirty worktrees |
+| `ci-versions.mjs` | Export exact CI tool pins from `versions.toml` | GitHub Actions toolchain setup |
+| `check-portable-runtime.mjs` | Reject first-party shell/Python and unsafe process-launch patterns | Release gate |
 
 ## Maintained template utilities
 
@@ -120,7 +125,7 @@ but their source manifests remain authoritative.
 | Workflow | Responsibility |
 |---|---|
 | `production-convergence.yml` | Builder CLI, manifests, skills, profiles, security, generation, and installation gates |
-| `scaffold-ci.yml` | Legacy and profile scaffold compatibility |
+| `scaffold-ci.yml` | Package gates plus web, Windows x64/ARM64 Tauri UI, Android ARM64, and iOS simulator certification |
 | `docs-pages.yml` | Frozen Docusaurus build, validation, and GitHub Pages publication |
 | `deployment-catalog-ci.yml` | Deployment catalog correctness |
 | `deployment-publish.yml` | Build and publish immutable deployment artifacts |

@@ -60,7 +60,7 @@ shorthand for that family, not a path.
 - Local inference is a **per-device** choice, never one “mobile” engine. See
   [Inference lanes](./inference-lanes).
 - Every version pin lives in `versions.toml` and reaches generated code through
-  `scripts/lib-versions.sh`. A version literal inlined in a scaffolder is invisible
+  `scripts/portable/versions.mjs`. A version literal inlined in a scaffolder is invisible
   to the drift audit.
 
 ## Continue reading

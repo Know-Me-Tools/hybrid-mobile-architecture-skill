@@ -1,0 +1,8 @@
+{
+  "name": "hma-maintainers",
+  "version": "1.0.0",
+  "description": "Maintain portable hybrid architecture tooling and verifiably runnable greenfield, brownfield and continually upgradeable outputs",
+  "agents": [
+    "./agents"
+  ]
+}

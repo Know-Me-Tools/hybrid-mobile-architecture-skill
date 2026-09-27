@@ -1,4 +1,4 @@
-# Rendered by scripts/render-supervisor-plist.sh --format systemd.
+# Rendered by scripts/render-supervisor-plist.mjs --format systemd.
 # Install to ~/.config/systemd/user/@@LABEL@@.service
 [Unit]
 Description=@@DESCRIPTION@@

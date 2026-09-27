@@ -2,7 +2,7 @@
 > TJ-ARCH-MOB-001 · The UI/UX skill stack that turns generic AI output into intentional
 > design. Read before any frontend work on either surface. Project-local skill templates
 > live in `templates/project-skills/` and are emitted into every scaffolded project's
-> `.claude/skills/` by `scripts/add-project-skills.sh`.
+> `.claude/skills/` by `scripts/add-project-skills.mjs`.
 
 UI/UX skills are **mandatory, not optional** (CLAUDE.md, Development Philosophy). They are
 the difference between stock-template output and design that looks like a real product.
@@ -60,10 +60,10 @@ The skills cross-link with `[[name]]` references so activating one surfaces the 
 - **Directive descriptions** — every template description starts with `ALWAYS invoke when…`
   and lists trigger words, per the skill-authoring convention.
 - **Name == folder** — the frontmatter `name` matches the directory name (required).
-- **`UserPromptSubmit` hook** (`.claude/hooks/skill-activation.py`) — matches prompt words
+- **`UserPromptSubmit` hook** (`.claude/hooks/skill-activation.mjs`) — matches prompt words
   to skills and appends a directive reminder via `additionalContext`. Additive, never
   blocks. Raises activation from ~50% to ~84–100% (assessment §3.4, cited studies).
-- **`PostToolUse` hook** (`.claude/hooks/a11y-reminder.py`) — after a UI file edit, reminds
+- **`PostToolUse` hook** (`.claude/hooks/a11y-reminder.mjs`) — after a UI file edit, reminds
   to run `a11y-gate`. Advisory (non-blocking); it does not judge the code.
 
 Both hooks are wired by `templates/project-skills/settings.hooks.json`, merged into the
@@ -73,8 +73,8 @@ scaffolded project's `.claude/settings.json` by the emitter script.
 
 ## Emitting into a project
 
-`scripts/scaffold-hybrid.sh` (and the single-surface scaffolds) call
-`scripts/add-project-skills.sh <project-dir>`, which:
+`scripts/scaffold-hybrid.mjs` (and the single-surface scaffolds) call
+`scripts/add-project-skills.mjs <project-dir>`, which:
 
 1. Copies the 5 skill directories into `<project>/.claude/skills/`.
 2. Copies the two hook scripts into `<project>/.claude/hooks/` (executable).

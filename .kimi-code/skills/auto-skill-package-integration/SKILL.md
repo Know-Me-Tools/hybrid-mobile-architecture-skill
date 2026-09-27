@@ -70,7 +70,7 @@ Keep this in the same durable store as the package records, not in memory.
 ## Verification
 
 ```bash
-bash scripts/verify-skill-manifest.sh <detected-package-root>
+node scripts/verify-skill-manifest.mjs <detected-package-root>
 ```
 
 A detected package that cannot pass this is a finding to report, not a package

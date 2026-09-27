@@ -41,8 +41,8 @@ Reusable generator behavior is now covered by profile fixtures that regenerate
 on every push:
 
 ```bash
-bash scripts/verify-scaffold.sh            # scaffold, diff against ci/expected-tree.txt
-bash scripts/verify-scaffold.sh --update   # after an INTENTIONAL scaffold change
+node scripts/verify-scaffold.mjs            # scaffold, diff against ci/expected-tree.txt
+node scripts/verify-scaffold.mjs --update   # after an INTENTIONAL scaffold change
 ```
 
 The check compares structure — paths, workspace members, inference features, lane

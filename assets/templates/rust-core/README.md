@@ -1,5 +1,5 @@
 # gen_ui_core Rust Core Template
-> Use `scripts/scaffold-rust-core.sh` to generate this structure
+> Use `scripts/scaffold-rust-core.mjs` to generate this structure
 
 ## Complete module implementation checklist
 

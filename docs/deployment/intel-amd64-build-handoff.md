@@ -44,8 +44,8 @@ git pull --ff-only origin main
 git status --short
 docker buildx inspect --bootstrap
 
-bash deploy/scripts/validate-catalog.sh
-bash deploy/scripts/validate-gitops.sh
+node deploy/scripts/validate-catalog.mjs
+node deploy/scripts/validate-gitops.mjs
 actionlint .github/workflows/*.yml
 
 docker buildx bake -f deploy/docker-bake.hcl knowme-web \
@@ -77,7 +77,7 @@ until docker exec prometheus-postgres18-verification pg_isready -U flint -d flin
   sleep 2
 done
 
-bash deploy/scripts/verify-postgres.sh prometheus-postgres18-verification
+node deploy/scripts/verify-postgres.mjs prometheus-postgres18-verification
 docker stop prometheus-postgres18-verification
 docker rm prometheus-postgres18-verification
 ```

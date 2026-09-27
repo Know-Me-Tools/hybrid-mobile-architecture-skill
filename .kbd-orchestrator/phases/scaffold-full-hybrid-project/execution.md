@@ -52,7 +52,7 @@ position signals). Bare `/opsx:apply` is NOT used (no KBD awareness).
 
 ## Dispatch driver
 
-`.kbd-orchestrator/dispatch/dispatch.sh <change-id> <harness> <model>` — creates the
+`node scripts/dispatch.mjs <change-id> <harness> <model>` — creates the
 worktree, seeds the per-change prompt (preamble + change pointer), invokes the harness
 non-interactively, logs to `.kbd-orchestrator/dispatch/logs/<change-id>.log`, and expects
 `<change-id>.done.md` on completion.

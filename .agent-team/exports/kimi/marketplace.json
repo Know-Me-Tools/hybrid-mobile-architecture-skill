@@ -1,0 +1,10 @@
+{
+  "version": "2",
+  "plugins": [
+    {
+      "id": "hma-maintainers",
+      "displayName": "hma-maintainers",
+      "source": "./plugins/hma-maintainers"
+    }
+  ]
+}

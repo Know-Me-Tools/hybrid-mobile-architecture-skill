@@ -3,7 +3,9 @@
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
-const root = resolve(new URL("..", import.meta.url).pathname);
+import { fileURLToPath } from "node:url";
+
+const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const skillsRoot = join(root, "skills");
 const check = process.argv.includes("--check");
 

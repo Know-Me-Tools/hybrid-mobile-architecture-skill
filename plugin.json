@@ -1,7 +1,7 @@
 {
   "name": "hybrid-mobile-architecture",
   "displayName": "KnowMe Builder",
-  "version": "2.0.0-alpha.3",
+  "version": "2.0.0-alpha.4",
   "description": "Versioned, non-destructive application generator and instruction pack for governed agentic applications.",
   "author": {
     "name": "Travis James",
@@ -123,6 +123,10 @@
       "path": "assets/templates/profiles"
     },
     {
+      "name": "runnable-baselines",
+      "path": "assets/templates/baselines"
+    },
+    {
       "name": "command-contract",
       "path": "assets/templates/command-contract"
     },
@@ -142,6 +146,8 @@
     "claude-code",
     "codex",
     "opencode",
-    "kimi-code"
+    "kimi-code",
+    "minimax-code",
+    "zed"
   ]
 }

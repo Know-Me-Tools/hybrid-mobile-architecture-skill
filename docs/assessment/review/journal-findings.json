@@ -1,0 +1,25 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "same-model-fallback-weaker-guarantee",
+  "scope": "Initial review snapshot of new tools/knowme-builder upgrade journal, before requested corrections. Not a final re-review.",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "tools/knowme-builder/src/engine.rs",
+      "line": 916,
+      "claim": "Metadata edited after parsing can be silently overwritten because the preflight snapshot is reread after planning.",
+      "evidence": "Project and generated lock are parsed near lines 794-805; planned serialized metadata derives from those objects. The final loop obtains a fresh fs::read as PlannedWrite.before. A concurrent edit between these reads becomes the accepted before value and is overwritten with serialization from the older parsed data, defeating apply's changed-after-preflight check.",
+      "suggested_fix": "Keep the original raw metadata used for parsing, validate that complete metadata read-set under the apply lock even when no metadata rewrite is needed, and use original bytes as snapshots."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "tools/knowme-builder/src/upgrade_journal.rs",
+      "line": 116,
+      "claim": "Apply can write a journal that its own loader rejects because duplicate and reserved target paths are validated only on load.",
+      "evidence": "load rejects duplicate entries and journal/lock paths, but apply constructs entries from PlannedWrite without those checks. Duplicate or reserved managed rows in generated.lock can therefore mutate files and create unrecoverable state; a reserved target can replace the recovery journal or coordination lock itself.",
+      "suggested_fix": "Share canonical path, duplicate and reserved-target validation between apply and load; validate the entire plan before saving a journal or changing a managed file."
+    }
+  ]
+}

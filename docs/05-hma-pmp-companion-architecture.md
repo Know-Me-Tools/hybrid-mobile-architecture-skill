@@ -278,7 +278,7 @@ repo must satisfy four conditions:
 4. **The `install.sh` or `bootstrap.sh` (if any) must be
    idempotent** — the Companion re-runs install on upgrade.
 
-This document adds a `scripts/verify-skill-manifest.sh` (see
+This document adds a `scripts/verify-skill-manifest.mjs` (see
 §10) that gates condition 3.
 
 ### 3.1 The install path (what the Companion does)
@@ -345,7 +345,7 @@ surface over this:
 - **Remove** — `rm -rf` the clone (with a confirmation)
 - **View** — read the marketplace.json, plugin.json, and the
   SKILL.md frontmatter, render in the UI
-- **Validate** — run `scripts/verify-skill-manifest.sh` against
+- **Validate** — run `scripts/verify-skill-manifest.mjs` against
   the package and show the result
 
 ### 4.1 The data model (PEM 3.x)
@@ -696,13 +696,13 @@ that needs to touch a `hooks/hooks.json` file.
 
 ### 6.2 The HMA-side install
 
-`scripts/install-hooks-reliability.sh` (new script in the HMA
+`scripts/install-hooks-reliability.mjs` (new script in the HMA
 repo) installs the 9 fixes into a target project's
 `hooks/hooks.json`, `shared/scripts/`, and `shared/scripts/generated/`:
 
 ```bash
 #!/usr/bin/env bash
-# scripts/install-hooks-reliability.sh
+# scripts/install-hooks-reliability.mjs
 # Apply the 9 hook-reliability fixes to a target project.
 # Idempotent. Re-run after upgrading.
 set -euo pipefail
@@ -717,7 +717,7 @@ prescription into a one-line install.
 
 ### 6.3 The verification
 
-`scripts/verify-hooks-reliability.sh` (new) is the inverse:
+`scripts/verify-hooks-reliability.mjs` (new) is the inverse:
 it checks that a project's hook chain satisfies the 9 fixes
 and fails with a per-fix message if not. The Companion's
 "doctor" command runs this against every installed package
@@ -921,7 +921,7 @@ This document was reviewed twice:
      in §10.
    - **R3: "What if the user installs a malicious skill
      package?"** → the Companion runs
-     `scripts/verify-skill-manifest.sh` from the package on
+     `scripts/verify-skill-manifest.mjs` from the package on
      install. The script checks: SKILL.md frontmatter is
      valid YAML, `description` < 1024 chars, no `curl ... |
      bash` patterns in the body, no `@radix-ui/*` (the
@@ -969,7 +969,7 @@ trust it.
    `distribution.packageSkill`), `skills/<name>/SKILL.md`
    exists and its frontmatter `name` equals its directory
    name; no skill directory may be left undeclared. Enforced
-   by `scripts/verify-skill-manifest.sh`.
+   by `scripts/verify-skill-manifest.mjs`.
 4. **Idempotent install** — the install path is
    `git clone` (idempotent) or `git pull --ff-only
    --reset-hard <sha>` (idempotent). No global state
@@ -979,9 +979,9 @@ trust it.
 
 | Script | Purpose | Status |
 |---|---|---|
-| `scripts/verify-skill-manifest.sh` | Validates the skill manifest matches the directory tree | **new in v0.2.0** |
-| `scripts/install-hooks-reliability.sh` | Applies the 9 hook-reliability fixes to a target project | **new in v0.2.0** |
-| `scripts/verify-hooks-reliability.sh` | Checks that a project's hook chain satisfies the 9 fixes | **new in v0.2.0** |
+| `scripts/verify-skill-manifest.mjs` | Validates the skill manifest matches the directory tree | **new in v0.2.0** |
+| `scripts/install-hooks-reliability.mjs` | Applies the 9 hook-reliability fixes to a target project | **new in v0.2.0** |
+| `scripts/verify-hooks-reliability.mjs` | Checks that a project's hook chain satisfies the 9 fixes | **new in v0.2.0** |
 | `scripts/install-hma-as-marketplace.sh` | Registers this HMA repo as a Claude Code marketplace | **new in v0.2.0** |
 | `scripts/check-prerequisites.sh` | Already exists; add a `connected-skill-packages` sub-check | **update** |
 
@@ -1001,7 +1001,7 @@ The mirror targets are the six harness directories —
 `.agents/skills/`, `.claude/skills/`, `.codex/skills/`,
 `.kimi/skills/`, `.kimi-code/skills/`, `.opencode/skills/` —
 plus `templates/project-skills/`. They are **generated, not
-hand-written**: run `bash scripts/sync-harness-skills.sh` to
+hand-written**: run `node scripts/sync-harness-skills.mjs` to
 write them and `--check` to fail on drift. The mirror set is
 driven by `builder.manifest.json` `skills[]`, so a skill that
 is not declared there ships to nobody.
@@ -1058,9 +1058,9 @@ Constitution) gets an HMA-specific section that codifies
 the new rules:
 
 - "Before installing a new skill package, run
-  `bash scripts/verify-skill-manifest.sh`"
+  `node scripts/verify-skill-manifest.mjs`"
 - "After modifying `hooks/hooks.json`, run
-  `bash scripts/verify-hooks-reliability.sh`"
+  `node scripts/verify-hooks-reliability.mjs`"
 - "When the Companion detects a bug, the
   `realtime-skill-refiner` skill is the entry point"
 - "All new HMA skills must be mirrored to
@@ -1079,14 +1079,14 @@ a verifiable checkpoint.
 
 ### Phase A1 — HMA git-install contract (2 days)
 
-- [ ] Write `scripts/verify-skill-manifest.sh` (the install
+- [ ] Write `scripts/verify-skill-manifest.mjs` (the install
       contract check)
 - [ ] Write `scripts/install-hma-as-marketplace.sh` (the
       registration helper)
 - [ ] Update `plugin.json` with the 5 new skills
 - [ ] Update `marketplace.json` summary and categories
 - [ ] Add a `connected-skill-packages.test.md` test fixture
-- [ ] Verify: `bash scripts/verify-skill-manifest.sh` exits 0
+- [ ] Verify: `node scripts/verify-skill-manifest.mjs` exits 0
       on the HMA repo
 
 ### Phase A2 — New skills (3-4 days, one per skill)
@@ -1098,7 +1098,7 @@ For each of the 5 new skills:
       `templates/activation-manifest.json`
 - [ ] Mirror to `.agents/`, `.claude/`, `.codex/`, `.kimi/`,
       `.kimi-code/`, `.opencode/`, `templates/project-skills/`
-      via `scripts/sync-harness-skills.sh` (`--check` fails on drift)
+      via `scripts/sync-harness-skills.mjs` (`--check` fails on drift)
 - [ ] Write any helper scripts
 - [ ] Update the skill inventory in this doc (§5.7)
 - [ ] Verify: each skill loads in Claude Code and
@@ -1106,15 +1106,15 @@ For each of the 5 new skills:
 
 ### Phase A3 — Hook-reliability fixes (1 day)
 
-- [ ] Write `scripts/install-hooks-reliability.sh` (apply
+- [ ] Write `scripts/install-hooks-reliability.mjs` (apply
       the 9 fixes to a target project)
-- [ ] Write `scripts/verify-hooks-reliability.sh` (the
+- [ ] Write `scripts/verify-hooks-reliability.mjs` (the
       inverse check)
 - [ ] Apply the 9 fixes to the HMA repo's own
       `.claude/settings.json` if any hooks are defined
 - [ ] Document the install pattern in
       `skills/claude-hooks-reliability/SKILL.md`
-- [ ] Verify: `bash scripts/verify-hooks-reliability.sh .`
+- [ ] Verify: `node scripts/verify-hooks-reliability.mjs .`
       exits 0
 
 ### Phase A4 — HMA-side install of Companion (1 day)

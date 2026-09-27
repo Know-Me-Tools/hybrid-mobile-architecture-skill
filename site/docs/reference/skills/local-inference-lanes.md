@@ -161,9 +161,9 @@ Compiling proves nothing about a local lane. The device gates are the real
 evidence:
 
 ```bash
-bash scripts/android/build.sh
-bash scripts/android/verify-native-inference-gates.sh   # arm64-only APK, required .so present
-bash scripts/android/verify-device-runtime-gates.sh     # no JNI/dlopen failure in logcat
+node scripts/android/build.mjs
+node scripts/android/verify-native-inference-gates.mjs   # arm64-only APK, required .so present
+node scripts/android/verify-device-runtime-gates.mjs     # no JNI/dlopen failure in logcat
 ```
 
 Per-lane host checks are still worth running, because a feature-gated module that
