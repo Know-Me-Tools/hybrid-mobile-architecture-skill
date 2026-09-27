@@ -150,7 +150,7 @@ jobs:
 
   flutter-native:
     name: Flutter FFI, Android ARM64, and iOS simulator
-    runs-on: macos-15-intel
+    runs-on: macos-15
     needs: package-gates
     timeout-minutes: 120
     steps:
@@ -168,7 +168,7 @@ jobs:
         with:
           toolchain: ${{ steps.versions.outputs.rust }}
           components: clippy
-          targets: x86_64-apple-ios,aarch64-linux-android
+          targets: aarch64-apple-ios-sim,aarch64-linux-android
       - uses: Swatinem/rust-cache@v2
       - uses: subosito/flutter-action@v2
         with:
@@ -176,7 +176,7 @@ jobs:
           channel: stable
           cache: true
       - name: Generate runnable Flutter application
-        run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-flutter" --profile flutter-mobile --mode runnable --verify-ffi --target x86_64-apple-ios --target aarch64-linux-android && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-flutter"
+        run: cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- new "${{ runner.temp }}/cert-flutter" --profile flutter-mobile --mode runnable --verify-ffi --target aarch64-apple-ios-sim --target aarch64-linux-android && cargo run --locked --manifest-path tools/knowme-builder/Cargo.toml -- add feature "CI Notes" --path "${{ runner.temp }}/cert-flutter"
       - name: Install exact bridge code generator
         run: cargo install flutter_rust_bridge_codegen --version "=${{ steps.versions.outputs.flutter_rust_bridge }}" --locked
       - name: Generate bridge and Riverpod outputs
@@ -201,8 +201,8 @@ jobs:
       - name: Execute Android ARM64 FFI persistence across application relaunch
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
-          target: google_apis
-          arch: x86_64
+          api-level: 30
+          target: default
+          arch: arm64-v8a
           profile: pixel_5
           script: node scripts/verify-flutter-ios-restart.mjs "${{ runner.temp }}/cert-flutter/mobile" emulator-5554 "${{ runner.temp }}/cert-flutter/mobile/build/app/outputs/flutter-apk/app-debug.apk"
