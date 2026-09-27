@@ -1,14 +1,13 @@
 # Conversion and suitability assessment
 
-The conversion, migration engine, and runnable baseline implementation have a
-complete base-candidate matrix at commit
-`626f0e598c7318f40505090cab4c5ddd8dd638f0`. Local macOS ARM64 evidence covers
+The conversion, migration engine, and runnable baseline implementation are complete at corrective candidate commit
+`e7ce27b0790bf2f3dc30a460c7474b649e8e1e96`. Local macOS ARM64 evidence covers
 the web, Tauri, Flutter bridge/codegen, Android package, and iOS simulator build
 paths. The exact-head native matrix passes web/brownfield, Windows x64, Windows
 ARM64, Flutter iOS/Android, package, migration, and portability gates. The final
-independent review found two Android evidence defects. Both are corrected
-locally; exact-head native CI and the independent rereview remain the final
-certification gates.
+independent review found two Android evidence defects. Both are corrected, the
+exact-head native matrix passes, and the independent cross-model rereview
+passes with zero findings.
 
 ## Delivered
 
@@ -80,12 +79,12 @@ omitted edges).
 Read these limitations with the [research receipt](../research/portable-tooling-20260926/receipt.json)
 and [tool setup record](../portability/project-tools.md).
 
-The last complete base-candidate GitHub Actions matrix is
-[run 36292024517](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517).
+The exact-head corrective GitHub Actions matrix is
+[run 36322460747](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747).
 All jobs pass, including the pinned Flutter 3.47.5 iOS relaunch proof, Android
 ARM64 package inspection, Android x86_64 instrumentation relaunch proof, and
 packaged Windows UI restart proofs on x64 and ARM64. Final certification still
-requires the corrected strict Android restart flow to pass exact-head CI and a
-retained independent adversarial and anti-theater rereview.
+is retained with the independent adversarial receipt and passing strict
+anti-theater result. The corrected strict Android restart flow passes exact-head CI.
 Physical-device-only inference and live PostgreSQL remain separate capability
 claims and are not implied by baseline certification.

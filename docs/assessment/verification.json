@@ -3,7 +3,7 @@
   "date": "2026-09-27",
   "scope": "Portable tooling, greenfield and brownfield project evolution, runnable baseline certification, and full/mini distribution readiness",
   "branch": "codex/hma-final-certification",
-  "baselineCommit": "626f0e598c7318f40505090cab4c5ddd8dd638f0",
+  "baselineCommit": "e7ce27b0790bf2f3dc30a460c7474b649e8e1e96",
   "host": {
     "os": "macOS",
     "architecture": "arm64",
@@ -66,10 +66,10 @@
       ],
       "rust": "1.97.1",
       "nativeExecution": true,
-      "run": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517",
+      "run": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747",
       "jobs": {
-        "x64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517/job/108543950157",
-        "arm64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517/job/108543950209"
+        "x64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964646",
+        "arm64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964696"
       }
     },
     {
@@ -116,8 +116,8 @@
     {
       "name": "OpenSpec",
       "result": "pass",
-      "command": "openspec validate portable-tooling-and-project-evolution --strict",
-      "note": "Strict validation passes; task 24 is closed by the exact-head native matrix and task 28 closes after the final independent review"
+      "command": "openspec validate portable-tool-runtime --type spec --strict && openspec validate project-evolution --type spec --strict",
+      "note": "Change archived after 28/28 tasks; both affected main specifications pass strict validation"
     },
     {
       "name": "committed consumer proof",
@@ -132,8 +132,8 @@
     {
       "name": "generated application native matrix",
       "result": "pass",
-      "commit": "626f0e598c7318f40505090cab4c5ddd8dd638f0",
-      "run": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517",
+      "commit": "e7ce27b0790bf2f3dc30a460c7474b649e8e1e96",
+      "run": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747",
       "passed": [
         "package and migration gates",
         "web Axum/SQLite browser restart",
@@ -148,18 +148,18 @@
       "pending": [],
       "attempt": 3,
       "jobs": {
-        "package": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517/job/108543815286",
-        "webBrownfield": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517/job/108543950153",
-        "windowsX64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517/job/108543950157",
-        "windowsArm64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517/job/108543950209",
-        "flutterIosAndroidBuild": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517/job/108543950201",
-        "androidRuntime": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517/job/108545855995"
+        "package": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628798469",
+        "webBrownfield": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964680",
+        "windowsX64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964646",
+        "windowsArm64": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964696",
+        "flutterIosAndroidBuild": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108628964715",
+        "androidRuntime": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747/job/108631592998"
       }
     }
   ],
   "reviews": {
     "mandate": "adversarial-review",
-    "status": "blocked-findings-remediated-locally-exact-head-ci-pending",
+    "status": "pass",
     "receipts": [
       "review/plan-findings.json",
       "review/native-findings.json",
@@ -167,16 +167,23 @@
       "review/journal-rereview.json",
       "review/remaining-runtime-rereview.json",
       ".kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-round-1.json",
-      ".kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-final.json"
+      ".kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-final.json",
+      ".kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-final-rereview.json",
+      ".kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-final-rereview-2.json"
     ],
     "initialFindingsPreserved": true,
     "crossModelIndependenceVerified": true,
     "finalFindingCounts": {
-      "critical": 2,
+      "critical": 0,
       "warning": 0,
       "suggestion": 0
     },
-    "remediation": "strict Android second-run verification and debug-APK claim correction pass local tests; exact-head CI and rereview pending"
+    "remediation": "strict Android restart correction and corrected exact-head receipt passed independent rereview",
+    "antiTheater": {
+      "result": "pass",
+      "score": 0,
+      "strictness": "strict"
+    }
   },
   "research": {
     "sources": 30,
@@ -199,8 +206,6 @@
     "allHarnessConnectionsVerified": false
   },
   "pending": [
-    "Exact-head native matrix for the strict Android restart correction",
-    "Final independent adversarial and anti-theater rereview",
     "Publication into full and mini source repositories (outside this change)",
     "User-scope installation verification for all six harnesses (outside this change)"
   ]

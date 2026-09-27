@@ -2,38 +2,37 @@
 
 ## Verification state
 
-- Change: `portable-tooling-and-project-evolution`
-- Candidate commit: `626f0e598c7318f40505090cab4c5ddd8dd638f0`
-- OpenSpec status: **27 of 28 tasks complete**
-- Overall verdict: **PARTIAL — final review findings are remediated locally; exact-head native CI and independent rereview remain**
-- Pending task: **28**
+- Change: `portable-tooling-and-project-evolution` (archived as `2026-09-27-portable-tooling-and-project-evolution`)
+- Candidate commit: `e7ce27b0790bf2f3dc30a460c7474b649e8e1e96`
+- OpenSpec status: **28 of 28 tasks complete**
+- Overall verdict: **PASS — implementation, native execution, cross-model review, and strict anti-theater evidence pass**
+- Pending tasks: **none**
 
 This report maps the change tasks, requirements, and scenarios to current implementation,
 tests, and retained evidence. It does not promote source generation, cross-target
 installation, compilation, or a locally available simulator to native execution evidence.
-Task 24 is closed by the terminal successful base-candidate native matrix. Task 28 remains
-open until the strict Android restart correction passes exact-head native CI and the final
-independent certification rereview passes its anti-theater gate.
+Task 24 is closed by the successful corrective exact-head native matrix. Task 28 is
+closed by the distinct-model PASS receipt and strict anti-theater score of 0.0.
 
 ## Direct verification at the candidate commit
 
 | Check | Result |
 |---|---|
-| `openspec validate portable-tooling-and-project-evolution --strict --json` | Pass; one change validated with no issues |
-| `openspec instructions apply --change portable-tooling-and-project-evolution --json` | 28 tasks total; 27 complete; task 28 remaining |
+| Pre-archive `openspec validate portable-tooling-and-project-evolution --strict --json` | Pass; one change validated with no issues |
+| Final `openspec instructions apply --change portable-tooling-and-project-evolution --json` | 28 tasks total; 28 complete; none remaining |
 | `npm test` in `runtime/` | Pass; 30 tests, 0 failures |
 | `cargo test --locked --manifest-path tools/knowme-builder/Cargo.toml` | Pass; 18 unit tests and 27 CLI tests, 0 failures |
 
 The native workflow's release authority is `.github/workflows/scaffold-ci.yml`.
-[Run 36292024517](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517)
-passed every job at the candidate commit; the final review remains separate evidence.
+[Run 36322460747](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747)
+passed every job at the candidate commit; the final cross-model review and anti-theater receipt are retained separately.
 
 ## Task evidence map
 
 | Task | Status | Concrete evidence |
 |---|---|---|
 | 1. Inspect source, consumers, and scaffold/upgrade contracts | Pass | Source and consumer inventory in `docs/assessment/portable-tooling-audit.md:3-33`; scaffold and evolution baseline in `docs/assessment/scaffold-audit.md:3-54`. |
-| 2. Initialize OpenSpec for supported tools | Pass | Initialization scope and limitations in `docs/portability/project-tools.md:6-17`; preserved change artifacts under `openspec/changes/portable-tooling-and-project-evolution/`. |
+| 2. Initialize OpenSpec for supported tools | Pass | Initialization scope and limitations in `docs/portability/project-tools.md:6-17`; preserved change artifacts under `openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/`. |
 | 3. Build Compass graph and Program IR | Pass | Final candidate graph metrics and partial-publication limitation in `docs/portability/project-tools.md:19-32`; configuration in `.compass/config.toml:1-28`. |
 | 4. Install maintenance-team definitions with explicit ownership | Pass | Four-role ownership ledger in `.agent-team/state.json:4-101`; installation and scope statement in `docs/portability/project-tools.md:46-57`. |
 | 5. Independently review the plan and resolve compiler identity | Pass | Initial warning, registry resolution, and anti-theater result in `docs/assessment/review/plan-findings.json:1-30`; resolution recorded in `docs/assessment/portable-tooling-plan.md:26-28`. |
@@ -55,11 +54,11 @@ passed every job at the candidate commit; the final review remains separate evid
 | 21. Integrate capability additions into project architecture | Pass | Planned application-owned registry and descriptor writes in `tools/knowme-builder/src/engine.rs:51-223`; multi-surface integration and upgrade survival in `tools/knowme-builder/tests/cli.rs:365-425`. |
 | 22. Complete runnable baseline applications and persisted slice | Pass | Fresh hybrid generation coverage in `tools/knowme-builder/tests/cli.rs:281-304`; shared Rust notes domain in `assets/templates/baselines/web/rust/gen_ui_notes/src/lib.rs:2-20`; Tauri boundary in `assets/templates/baselines/tauri/desktop/src-tauri/src/main.rs:8-50`; Flutter FFI boundary in `assets/templates/baselines/flutter/rust/gen_ui_ffi/src/api/notes.rs:15-46`. Local build/run results are retained in `docs/assessment/generated-application-certification.md:15-30`. |
 | 23. Verify bridge/codegen and architectural boundaries | Pass | Flutter bridge/provider generation and Rust/Flutter checks in `.github/workflows/scaffold-ci.yml:184-196`; deterministic architecture-marker tests in `runtime/tests/native-helpers.test.mjs:60-74`; current runtime suite passes. |
-| 24. Build and execute claimed targets on native runners | Pass | Exact-head [run 36292024517](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36292024517) passed Windows x64 and ARM64 packaged UI relaunch, iOS simulator relaunch, Android ARM64 APK inspection, and Android x86_64 instrumentation relaunch. |
+| 24. Build and execute claimed targets on native runners | Pass | Exact-head [run 36322460747](https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747) passed Windows x64 and ARM64 packaged UI relaunch, iOS simulator relaunch, Android ARM64 APK inspection, and Android x86_64 instrumentation relaunch. |
 | 25. Rebuild/run migrated historical and brownfield fixtures | Pass, with native repetition covered by task 24 | Local historical and brownfield results in `docs/assessment/generated-application-certification.md:24-25`; brownfield build/run and byte preservation in `.github/workflows/scaffold-ci.yml:82-90`; historical migration/build/run gate in `.github/workflows/scaffold-ci.yml:146-155`. |
 | 26. Stage identical full/mini payloads | Pass | Variant-independent payload construction and hashing in `runtime/src/stage-skill-package.mts:8-58`; identical hash/file-list and isolated install assertions in `runtime/tests/staged-package.test.mjs:10-30`; current runtime suite passes. |
 | 27. Independently review runtime and recovery | Pass | Initial blocking findings and resolved rereviews in `docs/assessment/review/runtime-findings.json:1-60`, `runtime-rereview.json:1-3`, `journal-findings.json:1-24`, `journal-rereview.json:1-3`, `remaining-runtime-findings.json:1-40`, and `remaining-runtime-rereview.json:1-3`. |
-| 28. Complete generated-application certification review | **Pending** | The cross-model review recorded two critical findings in `.kbd-orchestrator/phases/portable-tooling-and-project-evolution/review/portable-tooling-and-project-evolution/findings-final.json`; both are remediated locally, with exact-head CI and rereview pending. |
+| 28. Complete generated-application certification review | Pass | The retained cross-model BLOCK receipts drove the strict Android correction and exact-head rerun; `findings-final-rereview-2.json` records PASS with zero findings and the strict anti-theater gate scores 0.0. |
 
 ## Requirement and scenario evidence map
 
@@ -67,7 +66,7 @@ passed every job at the candidate commit; the final review remains separate evid
 
 #### R1. First-party portable execution — implemented and locally verified
 
-Contract: `openspec/changes/portable-tooling-and-project-evolution/specs/portable-tool-runtime/spec.md:8-14`.
+Contract: `openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/specs/portable-tool-runtime/spec.md:8-14`.
 
 - Shipped TypeScript compiler/runtime contract: `runtime/package.json:6-18` and
   `runtime/tsconfig.json:2-7`.
@@ -86,7 +85,7 @@ portable-tooling run is identified, with its exact commit, in
 
 #### R2. Honest platform evidence — implemented and locally verified
 
-Contract: `openspec/changes/portable-tooling-and-project-evolution/specs/portable-tool-runtime/spec.md:16-21`.
+Contract: `openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/specs/portable-tool-runtime/spec.md:16-21`.
 
 - Target installation, host-native support, SDK availability, build, and execution are
   represented separately in `tools/knowme-builder/src/native.rs:9-85,101-164`.
@@ -99,7 +98,7 @@ both MSVC targets and requires a failed result containing the Windows-runner lim
 
 #### R3. Reproducible package payload — implemented and locally verified
 
-Contract: `openspec/changes/portable-tooling-and-project-evolution/specs/portable-tool-runtime/spec.md:23-28`.
+Contract: `openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/specs/portable-tool-runtime/spec.md:23-28`.
 
 - Full and mini variants consume the same collected byte map in
   `runtime/src/stage-skill-package.mts:8-58`.
@@ -114,7 +113,7 @@ identical in `runtime/tests/staged-package.test.mjs:10-30`.
 
 #### R4. Non-destructive brownfield integration — implemented and locally verified
 
-Contract: `openspec/changes/portable-tooling-and-project-evolution/specs/project-evolution/spec.md:9-14`.
+Contract: `openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/specs/project-evolution/spec.md:9-14`.
 
 - Adoption partitions actual profile surfaces into detected and missing lists, retains a
   skeleton/unverified status, and records incremental integration steps in
@@ -129,7 +128,7 @@ preserves the user file and a repeated apply is unchanged in
 
 #### R5. Continuous versioned upgrades — implemented and locally verified
 
-Contract: `openspec/changes/portable-tooling-and-project-evolution/specs/project-evolution/spec.md:16-37`.
+Contract: `openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/specs/project-evolution/spec.md:16-37`.
 
 - Explicit migration operations and compatibility checks:
   `tools/knowme-builder/src/migrations.rs:25-70,180-341`.
@@ -161,13 +160,13 @@ in `tools/knowme-builder/tests/cli.rs:1099-1151`.
 
 #### R6. Verified runnable baselines — implementation and native execution verified
 
-Contract: `openspec/changes/portable-tooling-and-project-evolution/specs/project-evolution/spec.md:39-44`.
+Contract: `openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/specs/project-evolution/spec.md:39-44`.
 
 - Runnable profiles emit web, Tauri, Flutter/FFI, and shared Rust boundaries with a persisted
   notes slice; representative source locations are listed under task 22.
 - Fresh-output build, codegen, architecture, and runtime gates are defined in
   `.github/workflows/scaffold-ci.yml:60-211`.
-- Host-specific execution claims are supported by run 36292024517. Task 28 remains the
+- Host-specific execution claims are supported by run 36322460747. Task 28 remains the
   independent certification gate.
 
 **Scenario 10: Missing native prerequisites — covered.** `new --mode runnable` accepts
@@ -179,7 +178,7 @@ destination remains absent in `tools/knowme-builder/tests/cli.rs:145-167`.
 ## Design coherence
 
 The implementation follows the reviewed boundary in
-`openspec/changes/portable-tooling-and-project-evolution/design.md:5-10`: Node owns portable
+`openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/design.md:5-10`: Node owns portable
 hook and orchestration behavior; Rust owns native diagnostics, generation, adoption, and
 evolution. One Rust generator remains authoritative. Generated ownership and rendering inputs
 are explicit, upgrade plans are validated before managed application writes, and recovery is
@@ -195,11 +194,11 @@ The synchronized main specifications in `openspec/specs/portable-tool-runtime/sp
 and `openspec/specs/project-evolution/spec.md:1-46` preserve the six requirements and ten
 scenarios from the change deltas. Strict validation passes.
 
-## Remaining archive gates
+## Archive result
 
-1. Run the corrected strict Android restart path on the exact branch head.
-2. Complete and retain the independent adversarial/anti-theater rereview.
-3. Mark task 28 complete only if that review reports no critical finding.
-4. Run the final strict OpenSpec verification and archive the change.
-
-Until the independent review is accepted, the correct OpenSpec verification verdict is **PARTIAL**.
+All implementation and certification gates pass. The delta requirements were already
+synchronized into the main specifications, and the completed change is archived under
+`openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/`.
+Strict validation passes for both affected main specifications. Repository-wide strict
+validation still reports unrelated legacy changes without deltas and older placeholder
+purpose sections; those pre-existing items are outside this change.

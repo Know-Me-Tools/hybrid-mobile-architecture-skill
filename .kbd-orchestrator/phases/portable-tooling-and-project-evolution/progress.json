@@ -1,0 +1,68 @@
+{
+  "phase": "portable-tooling-and-project-evolution",
+  "status": "complete",
+  "parentPhase": null,
+  "childPhases": [],
+  "childPointer": null,
+  "activeChange": null,
+  "assessment_complete": true,
+  "analysis_complete": true,
+  "spec_complete": true,
+  "plan_complete": true,
+  "execute_complete": true,
+  "reflect_complete": true,
+  "implementation_total": 28,
+  "implementation_completed": 28,
+  "changes_total": 1,
+  "changes_completed": 1,
+  "completion": {
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 28,
+      "total": 28,
+      "status": "COMPLETE"
+    },
+    "evidence": {
+      "status": "VERIFIED",
+      "summary": "Local Node and Rust gates plus exact-head native CI pass for greenfield, brownfield, migration, Windows x64/ARM64, iOS, Android ARM64 build, and strict Android x86_64 restart execution.",
+      "blockers": []
+    },
+    "certification": {
+      "status": "COMPLETE",
+      "summary": "Distinct gpt-5.5 judge reviewed gpt-6-astra output and returned PASS with zero findings; strict anti-theater gate passed at score 0.0.",
+      "blockers": []
+    },
+    "publication": {
+      "status": "PUBLISHED",
+      "summary": "Implementation merged in PR #19; final certification correction and archived OpenSpec/KBD receipts published through PR #20.",
+      "blockers": []
+    }
+  },
+  "changes": [
+    {
+      "id": "portable-tooling-and-project-evolution",
+      "status": "ARCHIVED",
+      "implementation_status": "COMPLETE",
+      "certification_status": "VERIFIED",
+      "backend": "openspec",
+      "specPath": "openspec/changes/archive/2026-09-27-portable-tooling-and-project-evolution/",
+      "tasks_done": 28,
+      "tasks_total": 28,
+      "exactHead": "e7ce27b0790bf2f3dc30a460c7474b649e8e1e96",
+      "nativeRun": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/actions/runs/36322460747",
+      "pullRequests": [
+        "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/pull/19",
+        "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill/pull/20"
+      ]
+    }
+  ],
+  "completed_changes": [
+    "portable-tooling-and-project-evolution"
+  ],
+  "blocked_changes": [],
+  "sourceTool": "codex",
+  "createdBy": "kbd-evolve/evolve-assess",
+  "last_updated_by": "codex",
+  "last_updated": "2026-09-27T13:50:00Z",
+  "updatedAt": "2026-09-27T13:50:00Z"
+}

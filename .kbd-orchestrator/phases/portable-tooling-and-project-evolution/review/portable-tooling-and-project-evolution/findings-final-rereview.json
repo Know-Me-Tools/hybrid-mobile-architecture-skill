@@ -1,0 +1,18 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "gpt-6-astra",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "docs/assessment/generated-application-certification.md",
+      "line": 83,
+      "claim": "The certification receipt still presents the pre-fix base-candidate run as exact-head release evidence and says the strict Android restart correction is pending, so it does not certify the corrective source head.",
+      "evidence": "The current receipt diff changes the section to `## Exact-head release evidence` but every listed job links to run `36292024517`, while the same hunk states `Final adversarial findings: ... both source corrections pass local Node, Rust, and scaffold checks, with exact-head CI and independent rereview pending`; the packet's `resolution_evidence.exact_head_ci` identifies the actual corrective head as `e7ce27b0790bf2f3dc30a460c7474b649e8e1e96` with successful run `36322460747`, including `Android x86_64 emulator execution for ARM64 build source`.",
+      "suggested_fix": "Update the certification receipt to reference successful run `36322460747` at head `e7ce27b0790bf2f3dc30a460c7474b649e8e1e96` for all exact-head native jobs, especially the strict Android x86_64 instrumentation job, and remove the stale claim that exact-head CI remains pending."
+    }
+  ]
+}

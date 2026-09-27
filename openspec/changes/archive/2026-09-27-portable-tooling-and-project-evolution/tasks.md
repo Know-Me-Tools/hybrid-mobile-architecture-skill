@@ -36,4 +36,4 @@
 - [x] Rebuild/run migrated historical and brownfield fixtures.
 - [x] Stage identical full/mini payloads and verify hashes/install behavior.
 - [x] Independently review the converted runtime and managed-file recovery; preserve initial and resolved findings.
-- [ ] Complete generated-application certification review with native runner evidence.
+- [x] Complete generated-application certification review with native runner evidence.
