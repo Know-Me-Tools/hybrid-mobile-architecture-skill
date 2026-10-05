@@ -1,6 +1,10 @@
 # Update Log
 
 ## 2026-10-05
+* **Ingest**: [Karpathy session c9eff40faad1](/karpathy-session-c9eff40faad19048.md)
+* **Ingest**: [Karpathy session 2f0d26ef907b](/karpathy-session-2f0d26ef907ba74a.md)
+* **Ingest**: [Karpathy session 632b10f5b86a](/karpathy-session-632b10f5b86afe4c.md)
+* **Ingest**: [Karpathy session 3be6991d568f](/karpathy-session-3be6991d568f6be8.md)
 * **Ingest**: [Karpathy session 2ffd3e68effb](/karpathy-session-2ffd3e68effb99c0.md)
 * **Ingest**: [Karpathy session bc96e29fb354](/karpathy-session-bc96e29fb3549112.md)
 * **Ingest**: [Karpathy session be94d1a76500](/karpathy-session-be94d1a765008971.md)
