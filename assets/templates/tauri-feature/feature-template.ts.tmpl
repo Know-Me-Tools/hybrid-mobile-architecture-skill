@@ -59,7 +59,7 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import type { {FeatureName}Filters } from '../types'
 
 // This store owns CLIENT-SIDE state only.
-// Server/async/entity data lives in Prometheus Entity Management 3.x via entities/{featureName}Entities.ts
+// Server/async/entity data lives in Prometheus Entity Management 4.2.0 via entities/{featureName}Entities.ts
 
 interface {FeatureName}ClientState {
   selectedId: string | null
@@ -93,7 +93,7 @@ export const use{FeatureName}Store = create<{FeatureName}ClientState & {FeatureN
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FILE: src/features/{featureName}/entities/{featureName}Entities.ts
-// (Normalized server/async/entity state: Prometheus Entity Management 3.x)
+// (Normalized server/async/entity state: Prometheus Entity Management 4.2.0)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {

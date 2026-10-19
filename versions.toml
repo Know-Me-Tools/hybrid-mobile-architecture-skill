@@ -43,6 +43,7 @@ riverpod = "3.3.1"
 vite = "8.1.5"
 react = "19.2.7"
 zustand = "5.0.14"
+prometheus_entity_management = "4.2.0" # React/core compatibility alias and maintained entity packages in generated shells
 openspec = "1.10.0"             # @fission-ai/openspec — never the squatted bare package.
                                 # Adopted 2026-08-22 (c300): the pin sat at 1.6.0 while the
                                 # installed CLI had moved to 1.10.0, so `openspec update` wrote

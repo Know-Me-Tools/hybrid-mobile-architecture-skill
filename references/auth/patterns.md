@@ -241,7 +241,7 @@ export const useAuthStore = create<AuthState & AuthActions>()((set) => ({
   },
 }));
 
-// Prometheus Entity Management 3.x for normalized Supabase entity state.
+// Prometheus Entity Management 4.2.0 for normalized Supabase entity state.
 // Register the Supabase transport once during app startup.
 export function useUserProfile(userId: string) {
   const profiles = useEntities<UserProfile>('UserProfile', {

@@ -214,10 +214,10 @@ npm run tauri build
   - React: Component → Hook → Store → `[Rust invoke() / external API]`
 - Use `@riverpod` codegen annotations exclusively — never manual `Provider(...)` declarations.
 - React visual components import **only hooks**; no direct store imports and no `invoke()` calls.
-- React server/async/entity state uses `@prometheus-ags/prometheus-entity-management` 3.x. Never add TanStack Query.
+- React server/async/entity state uses `@prometheus-ags/prometheus-entity-management` 4.2.0. Never add TanStack Query.
 - Prefer shadcn/ui components over raw HTML controls in React; prefer shadcn_flutter equivalents in Flutter.
 - Assistant UI is mandatory for React chat/thread/composer behavior; do not hand-roll a chat transcript or composer when its primitives apply.
-- Durable chat uses Prometheus Entity Management 3.x over PGlite in browsers and typed Rust commands over pglite-oxide on Tauri. Zustand owns transient interaction state only.
+- Durable chat uses Prometheus Entity Management 4.2.0 over PGlite in browsers and typed Rust commands over pglite-oxide on Tauri. Zustand owns transient interaction state only.
 - Flat 2.0 is binding: no visible borders, divider lines, outlines used as decoration, or layout shadows. Separate regions only with background-color changes in light and dark themes.
 
 ## Project-level MCP servers and skills (all 4 harnesses)

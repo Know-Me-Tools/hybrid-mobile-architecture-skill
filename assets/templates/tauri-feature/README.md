@@ -6,7 +6,7 @@ Use `scripts/new-feature.mjs <n> tauri` to scaffold this structure.
 features/<feature-name>/
   api/<feature>Api.ts          ← Rust invoke() wrappers (stores call these)
   stores/<feature>Store.ts     ← Zustand: client-side state (UI, selection, streaming)
-  entities/<feature>Entities.ts ← Prometheus Entity Management 3.x: normalized server/entity state
+  entities/<feature>Entities.ts ← Prometheus Entity Management 4.2.0: normalized server/entity state
   hooks/use<Feature>.ts        ← Composed hook: what components import
   components/<Feature>*.tsx    ← React components (import only hooks)
   types.ts                     ← Feature-local TypeScript types
