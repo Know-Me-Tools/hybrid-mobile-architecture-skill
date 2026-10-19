@@ -67,7 +67,14 @@ pub(crate) const ALPHA3_TO_ALPHA4: Migration = Migration {
     plan_json: include_str!("migration_plans/alpha3-alpha4-sovereign-hybrid.json"),
 };
 
-pub(crate) const REGISTRY: &[Migration] = &[ALPHA3_TO_ALPHA4];
+pub(crate) const ALPHA4_TO_ALPHA5: Migration = Migration {
+    id: "builder-2.0.0-alpha.4-to-alpha.5",
+    from_version: "2.0.0-alpha.4",
+    to_version: "2.0.0-alpha.5",
+    plan_json: include_str!("migration_plans/alpha4-alpha5-sovereign-hybrid.json"),
+};
+
+pub(crate) const REGISTRY: &[Migration] = &[ALPHA3_TO_ALPHA4, ALPHA4_TO_ALPHA5];
 
 /// Resolve exact, supported release transitions. No implicit semver range or
 /// downgrade is accepted, and inconsistent applied-ID state is never repaired.
@@ -116,6 +123,7 @@ pub(crate) fn resolve(
 /// Parse and prove that a migration's checked-in plan accounts for every
 /// Builder-owned source and target record exactly once. The returned plan is
 /// safe for the engine to execute directly; no implicit reconciliation remains.
+#[cfg(test)]
 pub(crate) fn validated_plan(
     migration: &Migration,
     profile: &str,
@@ -123,12 +131,33 @@ pub(crate) fn validated_plan(
     historical: &[GeneratedFile],
     desired: &[GeneratedFile],
 ) -> Result<MigrationPlan> {
-    let plan: MigrationPlan = serde_json::from_str(migration.plan_json)
-        .with_context(|| format!("invalid checked-in migration plan for {}", migration.id))?;
-    validate_plan(
-        migration,
-        profile,
-        generation_mode,
+    validated_chain_plan(&[migration], profile, generation_mode, historical, desired)
+}
+
+/// Compose a resolved chain into one source-to-target plan and prove it against
+/// the persisted and rendered inventories. Only the chain endpoints can be
+/// rendered, so every edge is identity- and shape-checked before composition and
+/// each intermediate path must be produced by one edge and consumed by the next.
+pub(crate) fn validated_chain_plan(
+    chain: &[&Migration],
+    profile: &str,
+    generation_mode: &str,
+    historical: &[GeneratedFile],
+    desired: &[GeneratedFile],
+) -> Result<MigrationPlan> {
+    let (Some(first), Some(last)) = (chain.first(), chain.last()) else {
+        bail!("semantic migration requires at least one operation plan");
+    };
+    let mut plans = chain
+        .iter()
+        .map(|migration| parse_edge(migration, profile, generation_mode));
+    let mut plan = plans.next().expect("non-empty chain")?;
+    for next in plans {
+        plan = compose(plan, next?)?;
+    }
+    validate_inventory(
+        first.from_version,
+        last.to_version,
         historical,
         desired,
         &plan,
@@ -136,14 +165,107 @@ pub(crate) fn validated_plan(
     Ok(plan)
 }
 
-fn validate_plan(
+fn compose(first: MigrationPlan, second: MigrationPlan) -> Result<MigrationPlan> {
+    let mut consumed = BTreeMap::new();
+    let mut added_later = Vec::new();
+    for operation in second.operations {
+        let Some(key) = operation
+            .from
+            .as_deref()
+            .map(canonical_plan_path)
+            .transpose()?
+        else {
+            added_later.push(operation);
+            continue;
+        };
+        if let Some(duplicate) = consumed.insert(key, operation) {
+            bail!(
+                "migration plan {} has duplicate source path: {}",
+                second.id,
+                duplicate.from.unwrap_or_default()
+            );
+        }
+    }
+    let mut operations = Vec::new();
+    for operation in first.operations {
+        let Some(to) = operation.to.as_deref() else {
+            operations.push(operation);
+            continue;
+        };
+        let next = consumed
+            .remove(&canonical_plan_path(to)?)
+            .with_context(|| {
+                format!(
+                    "migration {} does not account for intermediate path {to}",
+                    second.id
+                )
+            })?;
+        if operation.after_source_digest != next.before_source_digest {
+            bail!(
+                "intermediate digest mismatch for {to} between {} and {}",
+                first.id,
+                second.id
+            );
+        }
+        operations.extend(compose_operation(operation, next)?);
+    }
+    if let Some(path) = consumed.keys().next() {
+        bail!(
+            "migration {} source {path} is not produced by {}",
+            second.id,
+            first.id
+        );
+    }
+    operations.extend(added_later);
+    Ok(MigrationPlan {
+        schema_version: first.schema_version,
+        id: format!("{}+{}", first.id, second.id),
+        from_version: first.from_version,
+        to_version: second.to_version,
+        profile: first.profile,
+        generation_mode: first.generation_mode,
+        operations,
+    })
+}
+
+/// Fold two consecutive operations on one path. A file added and then removed
+/// within the chain disappears; any pairing that cannot be expressed as one
+/// operation fails closed instead of guessing.
+fn compose_operation(
+    first: MigrationOperation,
+    second: MigrationOperation,
+) -> Result<Option<MigrationOperation>> {
+    use OperationKind::{Preserve, Remove};
+
+    if second.kind == Remove {
+        return Ok(first.from.is_some().then_some(MigrationOperation {
+            kind: Remove,
+            to: None,
+            after_source_digest: None,
+            ..first
+        }));
+    }
+    let kind = match (first.kind, second.kind) {
+        (kind, Preserve) | (Preserve, kind) => kind,
+        (first_kind, second_kind) => {
+            bail!("unsupported migration composition: {first_kind:?} then {second_kind:?}")
+        }
+    };
+    Ok(Some(MigrationOperation {
+        kind,
+        to: second.to,
+        after_source_digest: second.after_source_digest,
+        ..first
+    }))
+}
+
+fn parse_edge(
     migration: &Migration,
     profile: &str,
     generation_mode: &str,
-    historical: &[GeneratedFile],
-    desired: &[GeneratedFile],
-    plan: &MigrationPlan,
-) -> Result<()> {
+) -> Result<MigrationPlan> {
+    let plan: MigrationPlan = serde_json::from_str(migration.plan_json)
+        .with_context(|| format!("invalid checked-in migration plan for {}", migration.id))?;
     if plan.schema_version != 1 {
         bail!(
             "unsupported migration plan schema {} for {}",
@@ -171,9 +293,21 @@ fn validate_plan(
     if plan.operations.is_empty() {
         bail!("migration plan {} has no operations", migration.id);
     }
+    for (index, operation) in plan.operations.iter().enumerate() {
+        validate_operation_shape(operation, index)?;
+    }
+    Ok(plan)
+}
 
-    let historical = builder_inventory(historical, migration.from_version, "historical")?;
-    let desired = builder_inventory(desired, migration.to_version, "desired")?;
+fn validate_inventory(
+    from_version: &str,
+    to_version: &str,
+    historical: &[GeneratedFile],
+    desired: &[GeneratedFile],
+    plan: &MigrationPlan,
+) -> Result<()> {
+    let historical = builder_inventory(historical, from_version, "historical")?;
+    let desired = builder_inventory(desired, to_version, "desired")?;
     let mut planned_from = BTreeMap::new();
     let mut planned_to = BTreeMap::new();
 
@@ -373,6 +507,15 @@ mod tests {
     fn exact_registered_transition_and_repeated_target() {
         let chain = resolve("2.0.0-alpha.3", "2.0.0-alpha.4", &[]).unwrap();
         assert_eq!(chain, vec![&ALPHA3_TO_ALPHA4]);
+        let chain = resolve("2.0.0-alpha.3", "2.0.0-alpha.5", &[]).unwrap();
+        assert_eq!(chain, vec![&ALPHA3_TO_ALPHA4, &ALPHA4_TO_ALPHA5]);
+        let chain = resolve(
+            "2.0.0-alpha.4",
+            "2.0.0-alpha.5",
+            &[ALPHA3_TO_ALPHA4.id.into()],
+        )
+        .unwrap();
+        assert_eq!(chain, vec![&ALPHA4_TO_ALPHA5]);
         assert!(
             resolve(
                 "2.0.0-alpha.4",
@@ -382,6 +525,33 @@ mod tests {
             .unwrap()
             .is_empty()
         );
+    }
+
+    #[test]
+    fn chained_operations_fold_or_fail_closed() {
+        let op = |kind, from: Option<&str>, to: Option<&str>| MigrationOperation {
+            kind,
+            from: from.map(str::to_owned),
+            to: to.map(str::to_owned),
+            before_source_digest: from.map(|_| "a".repeat(64)),
+            after_source_digest: to.map(|_| "b".repeat(64)),
+        };
+        let added = op(OperationKind::Add, None, Some("x"));
+        let removed = op(OperationKind::Remove, Some("x"), None);
+        assert_eq!(compose_operation(added, removed).unwrap(), None);
+
+        let renamed = op(OperationKind::Rename, Some("x"), Some("y"));
+        let preserved = op(OperationKind::Preserve, Some("y"), Some("y"));
+        let folded = compose_operation(renamed, preserved).unwrap().unwrap();
+        assert_eq!(folded.kind, OperationKind::Rename);
+        assert_eq!(
+            (folded.from.as_deref(), folded.to.as_deref()),
+            (Some("x"), Some("y"))
+        );
+
+        let updated = op(OperationKind::Update, Some("x"), Some("x"));
+        let updated_again = op(OperationKind::Update, Some("x"), Some("x"));
+        assert!(compose_operation(updated, updated_again).is_err());
     }
 
     #[test]

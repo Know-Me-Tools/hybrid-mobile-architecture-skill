@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "sourceRef": "main",
+  "sourceCommit": "8640ef7",
+  "command": "knowme-builder new output --profile sovereign-hybrid --mode runnable",
+  "fixtureName": "output"
+}

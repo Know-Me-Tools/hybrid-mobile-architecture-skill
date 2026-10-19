@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "packageVersion": "2.0.0-alpha.4",
+  "packageVersion": "2.0.0-alpha.5",
   "generatedFrom": "builder.manifest.json",
   "harnesses": [
     "claude-code",

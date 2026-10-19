@@ -2,6 +2,23 @@
 
 All notable changes to the hybrid-mobile-architecture skill.
 
+## [2.0.0-alpha.5] — 2026-10-19
+
+### Changed
+- Prometheus Entity Management pinned to 4.2.0 across baselines, references and skills.
+- OpenSpec harness mirrors refreshed for OpenSpec 1.10.0.
+- `knowme-builder upgrade` composes multi-step migration chains, so `2.0.0-alpha.3`
+  projects upgrade directly to the current release.
+
+### Added
+- `builder-2.0.0-alpha.4-to-alpha.5` migration (generated output unchanged; every
+  builder-owned file is preserved).
+
+### Fixed
+- `builder-2.0.0-alpha.3-to-alpha.4` plan digests for `desktop/package.json` and
+  `desktop/package-lock.json`, which no longer matched the PEM 4.2.0 baseline and
+  made every alpha.3 upgrade fail.
+
 ## [1.0.0] — 2026-03-25
 
 ### Added

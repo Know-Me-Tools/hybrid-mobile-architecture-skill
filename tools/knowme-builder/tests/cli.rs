@@ -337,8 +337,9 @@ fn tagged_alpha3_output_migrates_atomically_and_is_idempotent() {
     let state = fs::read_to_string(project.join(".knowme-builder/project.toml")).expect("state");
     let lock =
         fs::read_to_string(project.join(".knowme-builder/generated.lock.json")).expect("lock");
-    assert!(state.contains("2.0.0-alpha.4"));
+    assert!(state.contains("2.0.0-alpha.5"));
     assert!(lock.contains("builder-2.0.0-alpha.3-to-alpha.4"));
+    assert!(lock.contains("builder-2.0.0-alpha.4-to-alpha.5"));
     assert!(!project.join("rust/src/lib.rs").exists());
     assert!(project.join("rust/gen_ui_notes/src/lib.rs").is_file());
     assert!(project.join("mobile/lib/main.dart").is_file());
@@ -359,6 +360,44 @@ fn tagged_alpha3_output_migrates_atomically_and_is_idempotent() {
     );
     assert!(project.join("rust/src/lib.rs").is_file());
     assert!(!project.join("rust/gen_ui_notes/src/lib.rs").exists());
+}
+
+#[test]
+fn alpha4_output_migrates_to_current_and_rolls_back() {
+    let temp = tempdir().expect("tempdir");
+    let project = temp.path().join("alpha4-project");
+    copy_tree(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/upgrades/alpha4-sovereign-hybrid")
+            .as_path(),
+        &project,
+    );
+    let path = project.to_str().expect("path");
+    builder()
+        .args(["upgrade", path, "--apply", "--app-name", "output"])
+        .assert()
+        .success();
+    let state = fs::read_to_string(project.join(".knowme-builder/project.toml")).expect("state");
+    let lock =
+        fs::read_to_string(project.join(".knowme-builder/generated.lock.json")).expect("lock");
+    assert!(state.contains("2.0.0-alpha.5"));
+    assert!(lock.contains("builder-2.0.0-alpha.4-to-alpha.5"));
+    assert!(!lock.contains("builder-2.0.0-alpha.3-to-alpha.4"));
+
+    builder()
+        .args(["--json", "upgrade", path, "--apply"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"changed\": false"));
+    builder()
+        .args(["upgrade", path, "--rollback"])
+        .assert()
+        .success();
+    assert!(
+        fs::read_to_string(project.join(".knowme-builder/project.toml"))
+            .expect("rolled back state")
+            .contains("2.0.0-alpha.4")
+    );
 }
 
 #[test]

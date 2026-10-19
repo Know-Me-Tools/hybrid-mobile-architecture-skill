@@ -1,6 +1,6 @@
 # Global harness installation
 
-KnowMe Builder `2.0.0-alpha.4` exposes 36 public Agent Skills. The package
+KnowMe Builder `2.0.0-alpha.5` exposes 36 public Agent Skills. The package
 contains the `hybrid-mobile-architecture` routing skill and 35 independently
 installable companion skills.
 

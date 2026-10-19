@@ -1,6 +1,6 @@
 # KnowMe Builder
 
-**Version 2.0.0-alpha.4 · governed agentic application generator and skill pack**
+**Version 2.0.0-alpha.5 · governed agentic application generator and skill pack**
 
 KnowMe Builder creates and adopts Flutter, Tauri/React, Axum, and Rust
 applications without treating the consumer repository as disposable generator
@@ -175,7 +175,7 @@ rendering name across directory moves. Legacy state without that identity needs
 explicit migration. Managed-file upgrades preserve original bytes and output
 hashes in a recovery journal; rollback refuses to overwrite later user edits.
 An interrupted apply requires rollback before retrying. Explicit migration IDs
-cover the supported `2.0.0-alpha.3` to `2.0.0-alpha.4` transition, including
+cover the supported `2.0.0-alpha.3` → `2.0.0-alpha.4` → `2.0.0-alpha.5` transitions, including
 added, removed and renamed files, dependency manifests and regenerated bridge
 outputs. Unsupported histories fail with a migration diagnostic. Application
 database migrations remain a separately reviewed operation.

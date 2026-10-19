@@ -1,0 +1,1582 @@
+{
+  "schemaVersion": 1,
+  "builderVersion": "2.0.0-alpha.4",
+  "files": [
+    {
+      "path": "README.md",
+      "templateId": "profiles/sovereign-hybrid/runnable/README.md",
+      "sourceDigest": "46c93fe3477c3361607ca50453a9bf8b170c21018e3e4a6a02968ae235a0021b",
+      "lastInstalledDigest": "c5d694910ce6abc5f7f354c1fd4c57b287870a7922d046dd43e019ba0df97ac9",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": ".gitignore",
+      "templateId": "baselines/flutter/.gitignore",
+      "sourceDigest": "c9cab9274ca5323b5a134a72e691ea628cc846048410f05310df5188144ca71a",
+      "lastInstalledDigest": "c9cab9274ca5323b5a134a72e691ea628cc846048410f05310df5188144ca71a",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "BASELINE-MOBILE.md",
+      "templateId": "baselines/flutter/BASELINE-MOBILE.md",
+      "sourceDigest": "0120ecdd391ad2b66d1d5e74e62a79af3b3f03491c1558dfdc493034764bb630",
+      "lastInstalledDigest": "0120ecdd391ad2b66d1d5e74e62a79af3b3f03491c1558dfdc493034764bb630",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/analysis_options.yaml",
+      "templateId": "baselines/flutter/mobile/analysis_options.yaml",
+      "sourceDigest": "9b440b9fa8202785af3c410a47c850db5399e332846cb2022e9a3d07152edd56",
+      "lastInstalledDigest": "9b440b9fa8202785af3c410a47c850db5399e332846cb2022e9a3d07152edd56",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/.gitignore",
+      "templateId": "baselines/flutter/mobile/android/.gitignore",
+      "sourceDigest": "b027c9de1011765c015e5819bf857c0d75bfcd0886fb01721c091159012e50f1",
+      "lastInstalledDigest": "b027c9de1011765c015e5819bf857c0d75bfcd0886fb01721c091159012e50f1",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/build.gradle.kts",
+      "templateId": "baselines/flutter/mobile/android/app/build.gradle.kts",
+      "sourceDigest": "4d061198e210b1dc27df1fc035f18c4ce6c6130d6a70eedb49e2d57591589fac",
+      "lastInstalledDigest": "4687666fda24c60c55756d182c67d843927aa5d69c2cbb8d149e9c2b2e9c4a3e",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/androidTest/kotlin/org/example/baseline_mobile/MainActivityTest.kt",
+      "templateId": "baselines/flutter/mobile/android/app/src/androidTest/kotlin/org/example/baseline_mobile/MainActivityTest.kt",
+      "sourceDigest": "0c1aba07afa334770e1fab1977a423cdddfa80084a87167aa7dc4d8e32d1cba8",
+      "lastInstalledDigest": "3a369905d1c17f637988337a9caf2f91eb1ec360a6446e38e6745949626b3bc8",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/debug/AndroidManifest.xml",
+      "templateId": "baselines/flutter/mobile/android/app/src/debug/AndroidManifest.xml",
+      "sourceDigest": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b",
+      "lastInstalledDigest": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/AndroidManifest.xml",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/AndroidManifest.xml",
+      "sourceDigest": "9394d5680098515268bcbb8169f0f31aff66d14e9e4648a59150976bed9eadc4",
+      "lastInstalledDigest": "6ec36407d9a86c18a67195de28e3f80d1fecd8d60556691e6250fbdeddb3f569",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/kotlin/org/example/baseline_mobile/MainActivity.kt",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/kotlin/org/example/baseline_mobile/MainActivity.kt",
+      "sourceDigest": "7cac81cbe03cee8f1a0c317ae7fea759e884944d0e96655aefed05131a620227",
+      "lastInstalledDigest": "955137ed5fb0cfcdf46ad7ccf9ec62511914474e743c6e14dc9684eb93f21a02",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/res/drawable/launch_background.xml",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/res/drawable/launch_background.xml",
+      "sourceDigest": "94433756fe10005ddd6fc55cc5c0b1e9f3c10b66a08ceac795ece6713d34e28a",
+      "lastInstalledDigest": "94433756fe10005ddd6fc55cc5c0b1e9f3c10b66a08ceac795ece6713d34e28a",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/res/drawable-v21/launch_background.xml",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/res/drawable-v21/launch_background.xml",
+      "sourceDigest": "7ca6d5cec2169c5a98661a119db23a6f3399c8fef2256ff04f3a642831282478",
+      "lastInstalledDigest": "7ca6d5cec2169c5a98661a119db23a6f3399c8fef2256ff04f3a642831282478",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "sourceDigest": "6a7c8f0d703e3682108f9662f813302236240d3f8f638bb391e32bfb96055fef",
+      "lastInstalledDigest": "6a7c8f0d703e3682108f9662f813302236240d3f8f638bb391e32bfb96055fef",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "sourceDigest": "c7c0c0189145e4e32a401c61c9bdc615754b0264e7afae24e834bb81049eaf81",
+      "lastInstalledDigest": "c7c0c0189145e4e32a401c61c9bdc615754b0264e7afae24e834bb81049eaf81",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "sourceDigest": "e14aa40904929bf313fded22cf7e7ffcbf1d1aac4263b5ef1be8bfce650397aa",
+      "lastInstalledDigest": "e14aa40904929bf313fded22cf7e7ffcbf1d1aac4263b5ef1be8bfce650397aa",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "sourceDigest": "4d470bf22d5c17d84edc5f82516d1ba8a1c09559cd761cefb792f86d9f52b540",
+      "lastInstalledDigest": "4d470bf22d5c17d84edc5f82516d1ba8a1c09559cd761cefb792f86d9f52b540",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "sourceDigest": "3c34e1f298d0c9ea3455d46db6b7759c8211a49e9ec6e44b635fc5c87dfb4180",
+      "lastInstalledDigest": "3c34e1f298d0c9ea3455d46db6b7759c8211a49e9ec6e44b635fc5c87dfb4180",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/res/values/styles.xml",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/res/values/styles.xml",
+      "sourceDigest": "937d7c82f539c72eb94fd3a3773f29b3d3fef1997213c92cb632298cedf4bda9",
+      "lastInstalledDigest": "937d7c82f539c72eb94fd3a3773f29b3d3fef1997213c92cb632298cedf4bda9",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/main/res/values-night/styles.xml",
+      "templateId": "baselines/flutter/mobile/android/app/src/main/res/values-night/styles.xml",
+      "sourceDigest": "8c5bad5152f217e837519f9c15211d19f39bd45f5f67faf6dd81cb4b299e518f",
+      "lastInstalledDigest": "8c5bad5152f217e837519f9c15211d19f39bd45f5f67faf6dd81cb4b299e518f",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/app/src/profile/AndroidManifest.xml",
+      "templateId": "baselines/flutter/mobile/android/app/src/profile/AndroidManifest.xml",
+      "sourceDigest": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b",
+      "lastInstalledDigest": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/baseline_mobile_android.iml",
+      "templateId": "baselines/flutter/mobile/android/baseline_mobile_android.iml",
+      "sourceDigest": "90d961bc4ccb4b0ae3f75ce495c273f08745a55c50bd213e259723fc341d0193",
+      "lastInstalledDigest": "90d961bc4ccb4b0ae3f75ce495c273f08745a55c50bd213e259723fc341d0193",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/build.gradle.kts",
+      "templateId": "baselines/flutter/mobile/android/build.gradle.kts",
+      "sourceDigest": "6a26dba2cb8dfba1e74f540b0d17a89d96c1301d3c3bfda14348bed257fddcba",
+      "lastInstalledDigest": "6a26dba2cb8dfba1e74f540b0d17a89d96c1301d3c3bfda14348bed257fddcba",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/gradle/wrapper/gradle-wrapper.properties",
+      "templateId": "baselines/flutter/mobile/android/gradle/wrapper/gradle-wrapper.properties",
+      "sourceDigest": "b690d26223576fe4e63889fad9a00df81945cb870b9476cc5a563152a1a88a74",
+      "lastInstalledDigest": "b690d26223576fe4e63889fad9a00df81945cb870b9476cc5a563152a1a88a74",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/gradle.properties",
+      "templateId": "baselines/flutter/mobile/android/gradle.properties",
+      "sourceDigest": "0f82b18017fba6bb5ce3aa4b2d1a00c9382fc8aae7b1d9326e44b18abd66d80b",
+      "lastInstalledDigest": "0f82b18017fba6bb5ce3aa4b2d1a00c9382fc8aae7b1d9326e44b18abd66d80b",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/gradlew",
+      "templateId": "baselines/flutter/mobile/android/gradlew",
+      "sourceDigest": "ec56c02543666d92d9ac5ae7fcc48f88ce4de0deb8b7f9b39928ca46f68c1b2b",
+      "lastInstalledDigest": "ec56c02543666d92d9ac5ae7fcc48f88ce4de0deb8b7f9b39928ca46f68c1b2b",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/gradlew.bat",
+      "templateId": "baselines/flutter/mobile/android/gradlew.bat",
+      "sourceDigest": "f4f428c5626b3d90cef3bd4e7fd3ad3ea5760442db8c09d586b5bfe031dbe5e3",
+      "lastInstalledDigest": "f4f428c5626b3d90cef3bd4e7fd3ad3ea5760442db8c09d586b5bfe031dbe5e3",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/android/settings.gradle.kts",
+      "templateId": "baselines/flutter/mobile/android/settings.gradle.kts",
+      "sourceDigest": "016759283e88ade6eba92910583feeef88b962839b957aa414296afd2952d122",
+      "lastInstalledDigest": "016759283e88ade6eba92910583feeef88b962839b957aa414296afd2952d122",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/assets/capabilities/index.json",
+      "templateId": "baselines/flutter/mobile/assets/capabilities/index.json",
+      "sourceDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660",
+      "lastInstalledDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/flutter_rust_bridge.yaml",
+      "templateId": "baselines/flutter/mobile/flutter_rust_bridge.yaml",
+      "sourceDigest": "5170b87283f11e50a9839036f2bced6768ef8433f66692e6fb60c2a0c18803e0",
+      "lastInstalledDigest": "5170b87283f11e50a9839036f2bced6768ef8433f66692e6fb60c2a0c18803e0",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/integration_test/notes_test.dart",
+      "templateId": "baselines/flutter/mobile/integration_test/notes_test.dart",
+      "sourceDigest": "7f41a07b5b03a4aac817ddf8df00fdbf623a889e79f6f427e716908c5e1a1c2d",
+      "lastInstalledDigest": "bafe244fcaf7876465b113224303de94bb54d8b45c0afec81c6f25c9a97abcc0",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/.gitignore",
+      "templateId": "baselines/flutter/mobile/ios/.gitignore",
+      "sourceDigest": "37380775aeb2499662b7aca80f4ac4c95ae827c3ba2bfa179aa3e9af4812c623",
+      "lastInstalledDigest": "37380775aeb2499662b7aca80f4ac4c95ae827c3ba2bfa179aa3e9af4812c623",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Flutter/AppFrameworkInfo.plist",
+      "templateId": "baselines/flutter/mobile/ios/Flutter/AppFrameworkInfo.plist",
+      "sourceDigest": "da12038f9b2688a8a26160fea2609fa8fcb11421448c109f09c0f573efe7698d",
+      "lastInstalledDigest": "da12038f9b2688a8a26160fea2609fa8fcb11421448c109f09c0f573efe7698d",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Flutter/Debug.xcconfig",
+      "templateId": "baselines/flutter/mobile/ios/Flutter/Debug.xcconfig",
+      "sourceDigest": "690b8a8b1ae15ddd29b241429963e971bbc6720ab22f154cf8cf6b085b6d4925",
+      "lastInstalledDigest": "690b8a8b1ae15ddd29b241429963e971bbc6720ab22f154cf8cf6b085b6d4925",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Flutter/Release.xcconfig",
+      "templateId": "baselines/flutter/mobile/ios/Flutter/Release.xcconfig",
+      "sourceDigest": "75abb819a9de1e0e41c835e7307bc64a506cac25a9a5c0b0d8253fa1c3d5d422",
+      "lastInstalledDigest": "75abb819a9de1e0e41c835e7307bc64a506cac25a9a5c0b0d8253fa1c3d5d422",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Podfile",
+      "templateId": "baselines/flutter/mobile/ios/Podfile",
+      "sourceDigest": "f58e643b37a91401e0ab83570b844718ddb78b14cc062a4bdee5934a29b86fd8",
+      "lastInstalledDigest": "f58e643b37a91401e0ab83570b844718ddb78b14cc062a4bdee5934a29b86fd8",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/AppDelegate.swift",
+      "templateId": "baselines/flutter/mobile/ios/Runner/AppDelegate.swift",
+      "sourceDigest": "451c6d9ba0a2b3ff43092ea349c60fa79a91f1158b915eb29dbdd357cb95d7b8",
+      "lastInstalledDigest": "451c6d9ba0a2b3ff43092ea349c60fa79a91f1158b915eb29dbdd357cb95d7b8",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "sourceDigest": "3b1e214f466ffedff74baa5598ad5c4421130eea6bc8d57b8fe23435e8280ae4",
+      "lastInstalledDigest": "3b1e214f466ffedff74baa5598ad5c4421130eea6bc8d57b8fe23435e8280ae4",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png",
+      "sourceDigest": "7770183009e914112de7d8ef1d235a6a30c5834424858e0d2f8253f6b8d31926",
+      "lastInstalledDigest": "7770183009e914112de7d8ef1d235a6a30c5834424858e0d2f8253f6b8d31926",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png",
+      "sourceDigest": "cab10a0d391ec5bc09ef50ce49e8ad401cee7ef03707ec0923a222c5c2b3d212",
+      "lastInstalledDigest": "cab10a0d391ec5bc09ef50ce49e8ad401cee7ef03707ec0923a222c5c2b3d212",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png",
+      "sourceDigest": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b",
+      "lastInstalledDigest": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png",
+      "sourceDigest": "c6e6d3b215ae744a9c391f4c4d44157eff5e739d6ad6c39f9bfa5df66dddd267",
+      "lastInstalledDigest": "c6e6d3b215ae744a9c391f4c4d44157eff5e739d6ad6c39f9bfa5df66dddd267",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png",
+      "sourceDigest": "5dee24dc104ac76dc162e42ae0beb163d426bf365562ee28ba7b3ad368559a60",
+      "lastInstalledDigest": "5dee24dc104ac76dc162e42ae0beb163d426bf365562ee28ba7b3ad368559a60",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png",
+      "sourceDigest": "a9b21eb6f4271385655a8771f76e29eef8c1107d7879cbcfc567e6619d1f716a",
+      "lastInstalledDigest": "a9b21eb6f4271385655a8771f76e29eef8c1107d7879cbcfc567e6619d1f716a",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png",
+      "sourceDigest": "e677d701ffe4af7bc2935098d6b3984cc9ab7ace573e6900955a5535b12410cf",
+      "lastInstalledDigest": "e677d701ffe4af7bc2935098d6b3984cc9ab7ace573e6900955a5535b12410cf",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png",
+      "sourceDigest": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b",
+      "lastInstalledDigest": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png",
+      "sourceDigest": "7c61c42fc7b657d9cf314d32a4ec458f0647c3aaf360be1b9377857266ec2499",
+      "lastInstalledDigest": "7c61c42fc7b657d9cf314d32a4ec458f0647c3aaf360be1b9377857266ec2499",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png",
+      "sourceDigest": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e",
+      "lastInstalledDigest": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png",
+      "sourceDigest": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e",
+      "lastInstalledDigest": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png",
+      "sourceDigest": "4209a49e44a92ec40a327d3455eb1b1c153ee83d75de1c2be0a12ab18b2ff9de",
+      "lastInstalledDigest": "4209a49e44a92ec40a327d3455eb1b1c153ee83d75de1c2be0a12ab18b2ff9de",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png",
+      "sourceDigest": "836c918cb613249eba0483a6b02fa3df3c1c0a89a315ee4d3b88509b83c7ab73",
+      "lastInstalledDigest": "836c918cb613249eba0483a6b02fa3df3c1c0a89a315ee4d3b88509b83c7ab73",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png",
+      "sourceDigest": "41c7d42f6e61f8fe7f30b1ffa2256aecbc9682be06d18c4a3062043e1a2e547c",
+      "lastInstalledDigest": "41c7d42f6e61f8fe7f30b1ffa2256aecbc9682be06d18c4a3062043e1a2e547c",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png",
+      "sourceDigest": "5d7e5bdf01b93802bc973345b3a78c038907147625035952a08a115a563b7f81",
+      "lastInstalledDigest": "5d7e5bdf01b93802bc973345b3a78c038907147625035952a08a115a563b7f81",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
+      "sourceDigest": "ccc7950fd5f5b82067c85f667940a9d59189151460761ece8098ca78daa19469",
+      "lastInstalledDigest": "ccc7950fd5f5b82067c85f667940a9d59189151460761ece8098ca78daa19469",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png",
+      "sourceDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "lastInstalledDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png",
+      "sourceDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "lastInstalledDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png",
+      "sourceDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "lastInstalledDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md",
+      "sourceDigest": "a985b626c4f7546a8ba392d135e9226c3547c8e2b46895f5f2bdf40d7b14ef9f",
+      "lastInstalledDigest": "a985b626c4f7546a8ba392d135e9226c3547c8e2b46895f5f2bdf40d7b14ef9f",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Base.lproj/LaunchScreen.storyboard",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Base.lproj/LaunchScreen.storyboard",
+      "sourceDigest": "857e61203b3deafb05766d8fcda898b86a7cb6f3d5e385ecc9926c4d698215e9",
+      "lastInstalledDigest": "857e61203b3deafb05766d8fcda898b86a7cb6f3d5e385ecc9926c4d698215e9",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Base.lproj/Main.storyboard",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Base.lproj/Main.storyboard",
+      "sourceDigest": "fd367b6c43006d61b730f674970dd48b9f662c8f2264e52ffc1558102a2c9f2d",
+      "lastInstalledDigest": "fd367b6c43006d61b730f674970dd48b9f662c8f2264e52ffc1558102a2c9f2d",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Info.plist",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Info.plist",
+      "sourceDigest": "c11a49c3b33461da165594635f82954031e9103a7c9f33bb27d6fb9aee69344e",
+      "lastInstalledDigest": "ba1cacd28bb88263dc299268c41c5afb9b7c9c6fab6840cebfcdf6489f86b766",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/Runner-Bridging-Header.h",
+      "templateId": "baselines/flutter/mobile/ios/Runner/Runner-Bridging-Header.h",
+      "sourceDigest": "1a8d11d01d1cc92c650c9c9ed35299240052d4683a15a719a2315ef44185e074",
+      "lastInstalledDigest": "1a8d11d01d1cc92c650c9c9ed35299240052d4683a15a719a2315ef44185e074",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner/SceneDelegate.swift",
+      "templateId": "baselines/flutter/mobile/ios/Runner/SceneDelegate.swift",
+      "sourceDigest": "add68b905971dedfcc0d0b5b7118030de5925ba8c081ad9815463699e3a444ad",
+      "lastInstalledDigest": "add68b905971dedfcc0d0b5b7118030de5925ba8c081ad9815463699e3a444ad",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner.xcodeproj/project.pbxproj",
+      "templateId": "baselines/flutter/mobile/ios/Runner.xcodeproj/project.pbxproj",
+      "sourceDigest": "0b408b6e7ffe0f20aa6fef28780a3076e4d978d70ec7d4bc327c3611bb3a191c",
+      "lastInstalledDigest": "b717062ab50ec6e90445c709f425fe759e39ad7bdccef076730af855ef432d35",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "templateId": "baselines/flutter/mobile/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "sourceDigest": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f",
+      "lastInstalledDigest": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "templateId": "baselines/flutter/mobile/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "sourceDigest": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+      "lastInstalledDigest": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "templateId": "baselines/flutter/mobile/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "sourceDigest": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f",
+      "lastInstalledDigest": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
+      "templateId": "baselines/flutter/mobile/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
+      "sourceDigest": "9fbce429f56243561dd437a527136c9f9ed77165e3b271b923faf236cfcd0484",
+      "lastInstalledDigest": "9fbce429f56243561dd437a527136c9f9ed77165e3b271b923faf236cfcd0484",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner.xcworkspace/contents.xcworkspacedata",
+      "templateId": "baselines/flutter/mobile/ios/Runner.xcworkspace/contents.xcworkspacedata",
+      "sourceDigest": "46c3c9702ff7c5584e11c954d943cfb6e07fb26e3fbd072ddbc0f388aa352de1",
+      "lastInstalledDigest": "46c3c9702ff7c5584e11c954d943cfb6e07fb26e3fbd072ddbc0f388aa352de1",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "templateId": "baselines/flutter/mobile/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "sourceDigest": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+      "lastInstalledDigest": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "templateId": "baselines/flutter/mobile/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "sourceDigest": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f",
+      "lastInstalledDigest": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/ios/RunnerTests/RunnerTests.swift",
+      "templateId": "baselines/flutter/mobile/ios/RunnerTests/RunnerTests.swift",
+      "sourceDigest": "5e8f4908dacea6f29b2a790e4d38bf5fded69096063f9a27a2f21584d62b30c0",
+      "lastInstalledDigest": "5e8f4908dacea6f29b2a790e4d38bf5fded69096063f9a27a2f21584d62b30c0",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/bridge/generated/api/notes.dart",
+      "templateId": "baselines/flutter/mobile/lib/bridge/generated/api/notes.dart",
+      "sourceDigest": "99eaa35374cc9eea4493de9f6b6eff09b198299c5fad77edf0341d73fae16749",
+      "lastInstalledDigest": "99eaa35374cc9eea4493de9f6b6eff09b198299c5fad77edf0341d73fae16749",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/bridge/generated/frb_generated.dart",
+      "templateId": "baselines/flutter/mobile/lib/bridge/generated/frb_generated.dart",
+      "sourceDigest": "f87591473d610ab548be70ce817e7f88572322712da6fb8377b62d4f8902fb30",
+      "lastInstalledDigest": "f87591473d610ab548be70ce817e7f88572322712da6fb8377b62d4f8902fb30",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/bridge/generated/frb_generated.io.dart",
+      "templateId": "baselines/flutter/mobile/lib/bridge/generated/frb_generated.io.dart",
+      "sourceDigest": "1a77914208fdc0288ac490c814bac9a8c4f30e47b13b4c908123faa38cd0ac93",
+      "lastInstalledDigest": "1a77914208fdc0288ac490c814bac9a8c4f30e47b13b4c908123faa38cd0ac93",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/bridge/generated/frb_generated.web.dart",
+      "templateId": "baselines/flutter/mobile/lib/bridge/generated/frb_generated.web.dart",
+      "sourceDigest": "915fed37a54723ebaf9af24856636990e9995f9db5740b053ed3bf4f55bf1c76",
+      "lastInstalledDigest": "915fed37a54723ebaf9af24856636990e9995f9db5740b053ed3bf4f55bf1c76",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/features/notes/data/rust_capability_repository.dart",
+      "templateId": "baselines/flutter/mobile/lib/features/notes/data/rust_capability_repository.dart",
+      "sourceDigest": "aec648592a423e48707ac26a81d5320fbc0ef27c4c3b56515d93a0a10ddf5bf6",
+      "lastInstalledDigest": "aec648592a423e48707ac26a81d5320fbc0ef27c4c3b56515d93a0a10ddf5bf6",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/features/notes/data/rust_note_repository.dart",
+      "templateId": "baselines/flutter/mobile/lib/features/notes/data/rust_note_repository.dart",
+      "sourceDigest": "82d5006898136948f05801484f428c17e7e92df8028b61a7ebdf582d8d0c1810",
+      "lastInstalledDigest": "82d5006898136948f05801484f428c17e7e92df8028b61a7ebdf582d8d0c1810",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/features/notes/domain/capability.dart",
+      "templateId": "baselines/flutter/mobile/lib/features/notes/domain/capability.dart",
+      "sourceDigest": "1ead66a417f3865c87f92ed83b3c11b92ae39717f5d021fa0bbe7e64b35b367a",
+      "lastInstalledDigest": "1ead66a417f3865c87f92ed83b3c11b92ae39717f5d021fa0bbe7e64b35b367a",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/features/notes/domain/note.dart",
+      "templateId": "baselines/flutter/mobile/lib/features/notes/domain/note.dart",
+      "sourceDigest": "59d4ab88b4524a17727b6e93bda07701059fbe44b728b96d5a4084f91b72b600",
+      "lastInstalledDigest": "59d4ab88b4524a17727b6e93bda07701059fbe44b728b96d5a4084f91b72b600",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/features/notes/presentation/providers/capabilities.dart",
+      "templateId": "baselines/flutter/mobile/lib/features/notes/presentation/providers/capabilities.dart",
+      "sourceDigest": "e1578df8ef3dd44059141fb2c46d6fd6db71279e851c064284e1f4bdb5a142c1",
+      "lastInstalledDigest": "e1578df8ef3dd44059141fb2c46d6fd6db71279e851c064284e1f4bdb5a142c1",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/features/notes/presentation/providers/capabilities.g.dart",
+      "templateId": "baselines/flutter/mobile/lib/features/notes/presentation/providers/capabilities.g.dart",
+      "sourceDigest": "6f8b4ee059a745a7028a570b505619f947df132bdc90814466e4c2d3769b8945",
+      "lastInstalledDigest": "6f8b4ee059a745a7028a570b505619f947df132bdc90814466e4c2d3769b8945",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/features/notes/presentation/providers/notes.dart",
+      "templateId": "baselines/flutter/mobile/lib/features/notes/presentation/providers/notes.dart",
+      "sourceDigest": "299cbf8ba65b28e036629a5e30d6d34fc2ee89596fab3dd9608afd72ef719df1",
+      "lastInstalledDigest": "299cbf8ba65b28e036629a5e30d6d34fc2ee89596fab3dd9608afd72ef719df1",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/features/notes/presentation/providers/notes.g.dart",
+      "templateId": "baselines/flutter/mobile/lib/features/notes/presentation/providers/notes.g.dart",
+      "sourceDigest": "c3975d434c7c8c6c522c672d488568a412ea63d032eb673746340b238d8f4a68",
+      "lastInstalledDigest": "c3975d434c7c8c6c522c672d488568a412ea63d032eb673746340b238d8f4a68",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/features/notes/presentation/screens/notes_screen.dart",
+      "templateId": "baselines/flutter/mobile/lib/features/notes/presentation/screens/notes_screen.dart",
+      "sourceDigest": "1cba3e71dbc8f465e540957e01b586d57e69d6a4619b0c2378eeac9986a5446c",
+      "lastInstalledDigest": "1cba3e71dbc8f465e540957e01b586d57e69d6a4619b0c2378eeac9986a5446c",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/lib/main.dart",
+      "templateId": "baselines/flutter/mobile/lib/main.dart",
+      "sourceDigest": "e3c1a1038560d4f43c2e1333d342e9edc80951bbcf07d9cbd3a84eb98094f35e",
+      "lastInstalledDigest": "e3c1a1038560d4f43c2e1333d342e9edc80951bbcf07d9cbd3a84eb98094f35e",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/pubspec.lock",
+      "templateId": "baselines/flutter/mobile/pubspec.lock",
+      "sourceDigest": "9e01db999aa34d6c39dac7a2aa5c3496bfb8d5ce3e0c53dc8dbc077791ecfc01",
+      "lastInstalledDigest": "9e01db999aa34d6c39dac7a2aa5c3496bfb8d5ce3e0c53dc8dbc077791ecfc01",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/pubspec.yaml",
+      "templateId": "baselines/flutter/mobile/pubspec.yaml",
+      "sourceDigest": "bbb519432b85580309d71ee0b601b7a021a49f41883dd97567f4ab4d249dcfff",
+      "lastInstalledDigest": "092bbf0933e5b52f650bed758d5b2f97d4d6c8612e12d70014407537a6a47d62",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/.gitignore",
+      "templateId": "baselines/flutter/mobile/rust_builder/.gitignore",
+      "sourceDigest": "178d01444a4a93e2715a5006213c636aff80f6c693c86500c8277b6718e06d2b",
+      "lastInstalledDigest": "178d01444a4a93e2715a5006213c636aff80f6c693c86500c8277b6718e06d2b",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/README.md",
+      "templateId": "baselines/flutter/mobile/rust_builder/README.md",
+      "sourceDigest": "e4c2fff2644831a970493b1e4c0b23c81e40f3e315db910ad3e4c0151b70ae3d",
+      "lastInstalledDigest": "e4c2fff2644831a970493b1e4c0b23c81e40f3e315db910ad3e4c0151b70ae3d",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/UPSTREAM.md",
+      "templateId": "baselines/flutter/mobile/rust_builder/UPSTREAM.md",
+      "sourceDigest": "1d25a7ba4310930b2eb620db964a913afb05f2686126a4d2bfe8114cfd3c7ccb",
+      "lastInstalledDigest": "1d25a7ba4310930b2eb620db964a913afb05f2686126a4d2bfe8114cfd3c7ccb",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/android/.gitignore",
+      "templateId": "baselines/flutter/mobile/rust_builder/android/.gitignore",
+      "sourceDigest": "419c1e3c95573dbbc3676451a01808dcd07953c55aff02fff27e201703af725c",
+      "lastInstalledDigest": "419c1e3c95573dbbc3676451a01808dcd07953c55aff02fff27e201703af725c",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/android/build.gradle",
+      "templateId": "baselines/flutter/mobile/rust_builder/android/build.gradle",
+      "sourceDigest": "d75b0085ab24676dd6746e2ff17746d71b6c6302df42efa49d98d563fb059acf",
+      "lastInstalledDigest": "d75b0085ab24676dd6746e2ff17746d71b6c6302df42efa49d98d563fb059acf",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/android/settings.gradle",
+      "templateId": "baselines/flutter/mobile/rust_builder/android/settings.gradle",
+      "sourceDigest": "4a26cda2f66e46ab856e4a6a82cc8dee81da379aaceb2a33ee88fb0b3b91a4fa",
+      "lastInstalledDigest": "4a26cda2f66e46ab856e4a6a82cc8dee81da379aaceb2a33ee88fb0b3b91a4fa",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/android/src/main/AndroidManifest.xml",
+      "templateId": "baselines/flutter/mobile/rust_builder/android/src/main/AndroidManifest.xml",
+      "sourceDigest": "b79dadd69fa1c5dbcf9e0dda2f0b6903c7e78358c793c37df9e49d01ca84acb6",
+      "lastInstalledDigest": "b79dadd69fa1c5dbcf9e0dda2f0b6903c7e78358c793c37df9e49d01ca84acb6",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/.gitignore",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/.gitignore",
+      "sourceDigest": "ca39177a5e71fc3d705e49e3f2a86cc6beb4ebc86a5b3f0bd2eb101d57bded0a",
+      "lastInstalledDigest": "ca39177a5e71fc3d705e49e3f2a86cc6beb4ebc86a5b3f0bd2eb101d57bded0a",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/LICENSE",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/LICENSE",
+      "sourceDigest": "8b6ab9f32559167fe8cbda3f9a3da7bb80cc050c23f4d879ae62a37e61ea9930",
+      "lastInstalledDigest": "8b6ab9f32559167fe8cbda3f9a3da7bb80cc050c23f4d879ae62a37e61ea9930",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/README",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/README",
+      "sourceDigest": "e17ab38d8143d8eec21535554837e099c58e4bd6a88be41d92acac46809bffdb",
+      "lastInstalledDigest": "e17ab38d8143d8eec21535554837e099c58e4bd6a88be41d92acac46809bffdb",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_pod.sh",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_pod.sh",
+      "sourceDigest": "52149a052087bd2a746ed25430c984333dd5a6d0abab118f3f5634980f210ea9",
+      "lastInstalledDigest": "52149a052087bd2a746ed25430c984333dd5a6d0abab118f3f5634980f210ea9",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/README.md",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/README.md",
+      "sourceDigest": "610c79f3c40e1807d4731cf9f530d4d1218be4ba9b97dda87a01d02ff5295dbb",
+      "lastInstalledDigest": "610c79f3c40e1807d4731cf9f530d4d1218be4ba9b97dda87a01d02ff5295dbb",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/analysis_options.yaml",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/analysis_options.yaml",
+      "sourceDigest": "6cb5ec6808a5fd2a2acc4a866cff8761f34efa536f691219251f93688ffa8f53",
+      "lastInstalledDigest": "6cb5ec6808a5fd2a2acc4a866cff8761f34efa536f691219251f93688ffa8f53",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/bin/build_tool.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/bin/build_tool.dart",
+      "sourceDigest": "12b0b44884ee36164b2f71111efc859b1fb0b5d690bb68c8213074e9dfe38e90",
+      "lastInstalledDigest": "12b0b44884ee36164b2f71111efc859b1fb0b5d690bb68c8213074e9dfe38e90",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/build_tool.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/build_tool.dart",
+      "sourceDigest": "363b9137fcffb4d0a2b15b869cd6e8ebacf7ec13a36b8b3ae808304f12c17684",
+      "lastInstalledDigest": "363b9137fcffb4d0a2b15b869cd6e8ebacf7ec13a36b8b3ae808304f12c17684",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/android_environment.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/android_environment.dart",
+      "sourceDigest": "59fffcd7d3a60df93d52b14fd2052660036404c73678ecb792d18cca7ed5498c",
+      "lastInstalledDigest": "59fffcd7d3a60df93d52b14fd2052660036404c73678ecb792d18cca7ed5498c",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/artifacts_provider.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/artifacts_provider.dart",
+      "sourceDigest": "46ef875c9191acfb3f06625bf0d3e2d5da5f6fb12bd36f9bb59f20d2edfadc0d",
+      "lastInstalledDigest": "46ef875c9191acfb3f06625bf0d3e2d5da5f6fb12bd36f9bb59f20d2edfadc0d",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/build_cmake.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/build_cmake.dart",
+      "sourceDigest": "4eb4b5f884d3688421876b8713456f68c51fbbdf4ff56ae059109fdc5897fb4b",
+      "lastInstalledDigest": "4eb4b5f884d3688421876b8713456f68c51fbbdf4ff56ae059109fdc5897fb4b",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/build_gradle.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/build_gradle.dart",
+      "sourceDigest": "6ba441ff0c579ae4a85a756ff978b6f724821bb2fefd49c124a7363ee1b6df49",
+      "lastInstalledDigest": "6ba441ff0c579ae4a85a756ff978b6f724821bb2fefd49c124a7363ee1b6df49",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/build_pod.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/build_pod.dart",
+      "sourceDigest": "1d5ef0e0d44eb8edf2f980d7a331342db02ade05a5c767dedab09bef43b53077",
+      "lastInstalledDigest": "1d5ef0e0d44eb8edf2f980d7a331342db02ade05a5c767dedab09bef43b53077",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/build_tool.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/build_tool.dart",
+      "sourceDigest": "8f93b6df784f67375568775de72641a3e32e25cdca89a798bf603615ef1e9d55",
+      "lastInstalledDigest": "8f93b6df784f67375568775de72641a3e32e25cdca89a798bf603615ef1e9d55",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/builder.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/builder.dart",
+      "sourceDigest": "83d1297e4124f3c85a74f0f0245195431bf9eaf2b31b4dca006752f989ac1737",
+      "lastInstalledDigest": "83d1297e4124f3c85a74f0f0245195431bf9eaf2b31b4dca006752f989ac1737",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/cargo.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/cargo.dart",
+      "sourceDigest": "dbd19f431dc2a3347b64b23c06929e88d0ae0077b173e70016648b20b5e67741",
+      "lastInstalledDigest": "dbd19f431dc2a3347b64b23c06929e88d0ae0077b173e70016648b20b5e67741",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/crate_hash.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/crate_hash.dart",
+      "sourceDigest": "4fbe239a8d42faede8c23b57721159980ea57bba21f5f003abc3bec6bf352f68",
+      "lastInstalledDigest": "4fbe239a8d42faede8c23b57721159980ea57bba21f5f003abc3bec6bf352f68",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/dedup_archive.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/dedup_archive.dart",
+      "sourceDigest": "14d9ddf30f90a60e2f5cafb7d12a1c148f058f95ee6e68e4ffa036d4403b46f0",
+      "lastInstalledDigest": "14d9ddf30f90a60e2f5cafb7d12a1c148f058f95ee6e68e4ffa036d4403b46f0",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/environment.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/environment.dart",
+      "sourceDigest": "c5ebb73b34e185377ffcc051ba86d61fa6777ce789c6904d6af59f6c40e3bc4c",
+      "lastInstalledDigest": "c5ebb73b34e185377ffcc051ba86d61fa6777ce789c6904d6af59f6c40e3bc4c",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/logging.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/logging.dart",
+      "sourceDigest": "a9040b71b546027bc22fdee1f4367f8bbabc1a2c9ed89f8e821bc3565e97f3d0",
+      "lastInstalledDigest": "a9040b71b546027bc22fdee1f4367f8bbabc1a2c9ed89f8e821bc3565e97f3d0",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/options.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/options.dart",
+      "sourceDigest": "06131081da126dcb0f3142b376c93c575e3e96fa8e835c59f64caaf3c7c92cb0",
+      "lastInstalledDigest": "06131081da126dcb0f3142b376c93c575e3e96fa8e835c59f64caaf3c7c92cb0",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/precompile_binaries.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/precompile_binaries.dart",
+      "sourceDigest": "3148e241cb33c663b58b4ad6e80c98e7ac91ef6f8dc155b6c155fbe256a80578",
+      "lastInstalledDigest": "3148e241cb33c663b58b4ad6e80c98e7ac91ef6f8dc155b6c155fbe256a80578",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/rustup.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/rustup.dart",
+      "sourceDigest": "a9d57e8df0428c94a8d02fbe56bdb686c10c220edc9cf1d2d63f1bf8377269cb",
+      "lastInstalledDigest": "a9d57e8df0428c94a8d02fbe56bdb686c10c220edc9cf1d2d63f1bf8377269cb",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/target.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/target.dart",
+      "sourceDigest": "409938b6217ee23b3f642d2d4e0466ef47b2888877059d8275bd289ab124dc95",
+      "lastInstalledDigest": "409938b6217ee23b3f642d2d4e0466ef47b2888877059d8275bd289ab124dc95",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/util.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/util.dart",
+      "sourceDigest": "7baa9fff80a3da72383698f1205b17c96e8acb5b7499413072ba70a371852a0a",
+      "lastInstalledDigest": "7baa9fff80a3da72383698f1205b17c96e8acb5b7499413072ba70a371852a0a",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/lib/src/verify_binaries.dart",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/lib/src/verify_binaries.dart",
+      "sourceDigest": "1f26883a2cc42ce868512f7633cfc145753340cfc4f8012b5507dcbee23361d1",
+      "lastInstalledDigest": "1f26883a2cc42ce868512f7633cfc145753340cfc4f8012b5507dcbee23361d1",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/pubspec.lock",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/pubspec.lock",
+      "sourceDigest": "d16c36cbd3089b521fab03a8ced72e46f768021438486835233a1f655913372a",
+      "lastInstalledDigest": "d16c36cbd3089b521fab03a8ced72e46f768021438486835233a1f655913372a",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/build_tool/pubspec.yaml",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/build_tool/pubspec.yaml",
+      "sourceDigest": "b49e13fa7bd97fc05b9ff40eb58ae749981c1b7f1ca81b7ef54db542c1c04d3f",
+      "lastInstalledDigest": "b49e13fa7bd97fc05b9ff40eb58ae749981c1b7f1ca81b7ef54db542c1c04d3f",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/cmake/cargokit.cmake",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/cmake/cargokit.cmake",
+      "sourceDigest": "020a2c9a86f8266b51ef8ee5612471c74a421ff498c8ec6d76910126fb701cea",
+      "lastInstalledDigest": "020a2c9a86f8266b51ef8ee5612471c74a421ff498c8ec6d76910126fb701cea",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/cmake/resolve_symlinks.ps1",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/cmake/resolve_symlinks.ps1",
+      "sourceDigest": "5a14a8bbea2ff777a761d47e223cac0a1f52747fd188eb495402ef3c8a0dd60f",
+      "lastInstalledDigest": "5a14a8bbea2ff777a761d47e223cac0a1f52747fd188eb495402ef3c8a0dd60f",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/gradle/plugin.gradle",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/gradle/plugin.gradle",
+      "sourceDigest": "85db1161a8fc3bf9f4a06bd3aaf968751c442b6a0fe9d5e858a5e5e37ec5dcf6",
+      "lastInstalledDigest": "85db1161a8fc3bf9f4a06bd3aaf968751c442b6a0fe9d5e858a5e5e37ec5dcf6",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/run_build_tool.cmd",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/run_build_tool.cmd",
+      "sourceDigest": "52c0a2f95055e2b275d996af807c96f4b0cf73f99e153b0c5ccd3e1779f667db",
+      "lastInstalledDigest": "52c0a2f95055e2b275d996af807c96f4b0cf73f99e153b0c5ccd3e1779f667db",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/cargokit/run_build_tool.sh",
+      "templateId": "baselines/flutter/mobile/rust_builder/cargokit/run_build_tool.sh",
+      "sourceDigest": "babfe8e93dce2d0ee88eb3a62a3936b2f09efba58c10e5e8446a80094a3d91b6",
+      "lastInstalledDigest": "babfe8e93dce2d0ee88eb3a62a3936b2f09efba58c10e5e8446a80094a3d91b6",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/ios/Classes/dummy_file.c",
+      "templateId": "baselines/flutter/mobile/rust_builder/ios/Classes/dummy_file.c",
+      "sourceDigest": "c3e36cb59b0192acfc1250123da4930f94eec8afc95405294a3dc974f1576953",
+      "lastInstalledDigest": "c3e36cb59b0192acfc1250123da4930f94eec8afc95405294a3dc974f1576953",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/ios/gen_ui_ffi.podspec",
+      "templateId": "baselines/flutter/mobile/rust_builder/ios/gen_ui_ffi.podspec",
+      "sourceDigest": "4ca92a1e3ededef5bd4e30720b79027fd3963a1f53398295f97eddc9e5da1b43",
+      "lastInstalledDigest": "4ca92a1e3ededef5bd4e30720b79027fd3963a1f53398295f97eddc9e5da1b43",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/linux/CMakeLists.txt",
+      "templateId": "baselines/flutter/mobile/rust_builder/linux/CMakeLists.txt",
+      "sourceDigest": "9a72484b045492acd5e5be027e7f69f770be4950d776dd017c0830fccd6f3bf8",
+      "lastInstalledDigest": "9a72484b045492acd5e5be027e7f69f770be4950d776dd017c0830fccd6f3bf8",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/macos/Classes/dummy_file.c",
+      "templateId": "baselines/flutter/mobile/rust_builder/macos/Classes/dummy_file.c",
+      "sourceDigest": "c3e36cb59b0192acfc1250123da4930f94eec8afc95405294a3dc974f1576953",
+      "lastInstalledDigest": "c3e36cb59b0192acfc1250123da4930f94eec8afc95405294a3dc974f1576953",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/macos/gen_ui_ffi.podspec",
+      "templateId": "baselines/flutter/mobile/rust_builder/macos/gen_ui_ffi.podspec",
+      "sourceDigest": "c100992b0e8cb8acbb7c9c61c72adae2fb1443a7f752769f011fe26d47f6f35e",
+      "lastInstalledDigest": "c100992b0e8cb8acbb7c9c61c72adae2fb1443a7f752769f011fe26d47f6f35e",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/pubspec.yaml",
+      "templateId": "baselines/flutter/mobile/rust_builder/pubspec.yaml",
+      "sourceDigest": "a6deca15aa63ebff993863c9ffbe5ba4f3dbde90b7ace24cf28de22723421967",
+      "lastInstalledDigest": "a6deca15aa63ebff993863c9ffbe5ba4f3dbde90b7ace24cf28de22723421967",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/windows/.gitignore",
+      "templateId": "baselines/flutter/mobile/rust_builder/windows/.gitignore",
+      "sourceDigest": "e967a837f76ce8dea7119be2fbc10ab1fc75845c9245f9af8a994151b1353b05",
+      "lastInstalledDigest": "e967a837f76ce8dea7119be2fbc10ab1fc75845c9245f9af8a994151b1353b05",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/rust_builder/windows/CMakeLists.txt",
+      "templateId": "baselines/flutter/mobile/rust_builder/windows/CMakeLists.txt",
+      "sourceDigest": "bf9bd291c39f2d68ccaf591e41c55f8ff92aed094e2a050dfe5d60a91ff19d15",
+      "lastInstalledDigest": "bf9bd291c39f2d68ccaf591e41c55f8ff92aed094e2a050dfe5d60a91ff19d15",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/test/note_test.dart",
+      "templateId": "baselines/flutter/mobile/test/note_test.dart",
+      "sourceDigest": "97c89cccbac4d8846a6331e8ba4f3e93a8c1aba996c75df13fee15873f6c1938",
+      "lastInstalledDigest": "914344d5dc6404006a59ff2dbbdd9b69bcaa8f99842f74e6ca9bb4d6170b14f2",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "mobile/test_driver/integration_test.dart",
+      "templateId": "baselines/flutter/mobile/test_driver/integration_test.dart",
+      "sourceDigest": "23f636e362e0e947b668ea4b87ad9a1293490582418e997b9a1eed33069111bb",
+      "lastInstalledDigest": "23f636e362e0e947b668ea4b87ad9a1293490582418e997b9a1eed33069111bb",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/Cargo.lock",
+      "templateId": "baselines/flutter/rust/Cargo.lock",
+      "sourceDigest": "668b84f936440815b588973b4e1e394c283d9f225df8c93b7e6b6d1596e30c09",
+      "lastInstalledDigest": "668b84f936440815b588973b4e1e394c283d9f225df8c93b7e6b6d1596e30c09",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/Cargo.toml",
+      "templateId": "baselines/flutter/rust/Cargo.toml",
+      "sourceDigest": "2e51e9185f1a3c073ee324f458f2fedc2be1a6264bfa45b1f449c6658cdb234d",
+      "lastInstalledDigest": "2e51e9185f1a3c073ee324f458f2fedc2be1a6264bfa45b1f449c6658cdb234d",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/capabilities/index.json",
+      "templateId": "baselines/flutter/rust/capabilities/index.json",
+      "sourceDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660",
+      "lastInstalledDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_db/Cargo.toml",
+      "templateId": "baselines/flutter/rust/gen_ui_db/Cargo.toml",
+      "sourceDigest": "a33db1997aa1aded0c7898707b38044c426040b3013c0a61bea70753f04a2389",
+      "lastInstalledDigest": "a33db1997aa1aded0c7898707b38044c426040b3013c0a61bea70753f04a2389",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_db/src/lib.rs",
+      "templateId": "baselines/flutter/rust/gen_ui_db/src/lib.rs",
+      "sourceDigest": "20e9b6cc7c26c18b41182f3be4a53b3fe3669af32e17ac279f3de0c3aa2df5e9",
+      "lastInstalledDigest": "20e9b6cc7c26c18b41182f3be4a53b3fe3669af32e17ac279f3de0c3aa2df5e9",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_ffi/Cargo.lock",
+      "templateId": "baselines/flutter/rust/gen_ui_ffi/Cargo.lock",
+      "sourceDigest": "00decf8bb51d599a544609dd88a0ffa4ed6b6be86d474881557c20731e6738db",
+      "lastInstalledDigest": "00decf8bb51d599a544609dd88a0ffa4ed6b6be86d474881557c20731e6738db",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_ffi/Cargo.toml",
+      "templateId": "baselines/flutter/rust/gen_ui_ffi/Cargo.toml",
+      "sourceDigest": "7e7144d91ad1febd417fa347249fd7fa8f23da510a7a9fe50a56ab8aafc32387",
+      "lastInstalledDigest": "7e7144d91ad1febd417fa347249fd7fa8f23da510a7a9fe50a56ab8aafc32387",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_ffi/src/api/mod.rs",
+      "templateId": "baselines/flutter/rust/gen_ui_ffi/src/api/mod.rs",
+      "sourceDigest": "db3c4ff1fd1c2185307e0d776f64d179c981ed28a9b413198cb386c0fb5878d6",
+      "lastInstalledDigest": "db3c4ff1fd1c2185307e0d776f64d179c981ed28a9b413198cb386c0fb5878d6",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_ffi/src/api/notes.rs",
+      "templateId": "baselines/flutter/rust/gen_ui_ffi/src/api/notes.rs",
+      "sourceDigest": "b261ff203cd00df6d90585bd04908d13bdc5d133b1f3e98b04bcabcac0195436",
+      "lastInstalledDigest": "b261ff203cd00df6d90585bd04908d13bdc5d133b1f3e98b04bcabcac0195436",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_ffi/src/frb_generated.rs",
+      "templateId": "baselines/flutter/rust/gen_ui_ffi/src/frb_generated.rs",
+      "sourceDigest": "597901ddd320b9f9cf8ee1d2c4e921b25945ae1ba0fb7f942f18e1e0ce94f8a9",
+      "lastInstalledDigest": "597901ddd320b9f9cf8ee1d2c4e921b25945ae1ba0fb7f942f18e1e0ce94f8a9",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_ffi/src/lib.rs",
+      "templateId": "baselines/flutter/rust/gen_ui_ffi/src/lib.rs",
+      "sourceDigest": "5dd79846f7135d67db4b2f3f793668a16f2bcf3370ec56181f0435689efd828e",
+      "lastInstalledDigest": "5dd79846f7135d67db4b2f3f793668a16f2bcf3370ec56181f0435689efd828e",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_notes/Cargo.toml",
+      "templateId": "baselines/flutter/rust/gen_ui_notes/Cargo.toml",
+      "sourceDigest": "bd874ecacaf8a4cea76f73e9f11eaee2c05a7696f4aa0fb7482e0c4301262e3d",
+      "lastInstalledDigest": "bd874ecacaf8a4cea76f73e9f11eaee2c05a7696f4aa0fb7482e0c4301262e3d",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_notes/examples/notes.rs",
+      "templateId": "baselines/flutter/rust/gen_ui_notes/examples/notes.rs",
+      "sourceDigest": "f830c561439e72cc13d677b95362bd463cf77487959f58253fcfc14bd29a1d76",
+      "lastInstalledDigest": "f830c561439e72cc13d677b95362bd463cf77487959f58253fcfc14bd29a1d76",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_notes/src/lib.rs",
+      "templateId": "baselines/flutter/rust/gen_ui_notes/src/lib.rs",
+      "sourceDigest": "bad233fccb2bc563fcaaaf2b67d0d778eb4aae0c4b2e51a84a383945bd60a897",
+      "lastInstalledDigest": "bad233fccb2bc563fcaaaf2b67d0d778eb4aae0c4b2e51a84a383945bd60a897",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_notes/tests/it.rs",
+      "templateId": "baselines/flutter/rust/gen_ui_notes/tests/it.rs",
+      "sourceDigest": "8854a6b8da320559a2d0944d71012e168e571f7daa05efce5c3eb8b651d062f1",
+      "lastInstalledDigest": "8854a6b8da320559a2d0944d71012e168e571f7daa05efce5c3eb8b651d062f1",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_types/Cargo.toml",
+      "templateId": "baselines/flutter/rust/gen_ui_types/Cargo.toml",
+      "sourceDigest": "8eb55207b6435a2754cb605f53a3e31e07a3d603c694c5dd26f31fa2656b58a9",
+      "lastInstalledDigest": "8eb55207b6435a2754cb605f53a3e31e07a3d603c694c5dd26f31fa2656b58a9",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/gen_ui_types/src/lib.rs",
+      "templateId": "baselines/flutter/rust/gen_ui_types/src/lib.rs",
+      "sourceDigest": "99a42df744412ead73d0e8758601e3ce0ed81c800509de8a1a03143c456d5d50",
+      "lastInstalledDigest": "99a42df744412ead73d0e8758601e3ce0ed81c800509de8a1a03143c456d5d50",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust/rust-toolchain.toml",
+      "templateId": "baselines/flutter/rust/rust-toolchain.toml",
+      "sourceDigest": "e7155b5437585c3c3acc3053b08c6936020e9e93cc343e47e7e25f0033418e84",
+      "lastInstalledDigest": "e7155b5437585c3c3acc3053b08c6936020e9e93cc343e47e7e25f0033418e84",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "rust-toolchain.toml",
+      "templateId": "baselines/flutter/rust-toolchain.toml",
+      "sourceDigest": "e7155b5437585c3c3acc3053b08c6936020e9e93cc343e47e7e25f0033418e84",
+      "lastInstalledDigest": "e7155b5437585c3c3acc3053b08c6936020e9e93cc343e47e7e25f0033418e84",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "BASELINE-DESKTOP.md",
+      "templateId": "baselines/tauri/BASELINE-DESKTOP.md",
+      "sourceDigest": "0f0e7813b499fe7c53ec116952bafcf2dd2677b5d745f45c5bcef0b21cf97c81",
+      "lastInstalledDigest": "0f0e7813b499fe7c53ec116952bafcf2dd2677b5d745f45c5bcef0b21cf97c81",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/index.html",
+      "templateId": "baselines/tauri/desktop/index.html",
+      "sourceDigest": "9f85f50f1179e18795c4516a2a260c3d913b21ac03396b59be101bce766376e0",
+      "lastInstalledDigest": "9f85f50f1179e18795c4516a2a260c3d913b21ac03396b59be101bce766376e0",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/package-lock.json",
+      "templateId": "baselines/tauri/desktop/package-lock.json",
+      "sourceDigest": "327b42b9b4b9172270fa0cda9787a86791467592511c1b57059a06da6dda5aec",
+      "lastInstalledDigest": "cc7672c996f73f82309c1b5f6d1fdd38ec4cf0861b89c19f8e36af8d07e37156",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/package.json",
+      "templateId": "baselines/tauri/desktop/package.json",
+      "sourceDigest": "56bb23d79703b5ab59151defb87a7aed53d061cc151e0500c415d539256cfc19",
+      "lastInstalledDigest": "e6c1d496dcfd5e5d0997c6db7fb8803747aca57a1f06493c0e5f1dfbff83b44c",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/public/capabilities/index.json",
+      "templateId": "baselines/tauri/desktop/public/capabilities/index.json",
+      "sourceDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660",
+      "lastInstalledDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/scripts/build.mjs",
+      "templateId": "baselines/tauri/desktop/scripts/build.mjs",
+      "sourceDigest": "f08fad0d854dfd79bcfab7ff42f2026bdb81a722b513e8ae1aa92032bba6d272",
+      "lastInstalledDigest": "f08fad0d854dfd79bcfab7ff42f2026bdb81a722b513e8ae1aa92032bba6d272",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src/features/notes/api/notes.ts",
+      "templateId": "baselines/tauri/desktop/src/features/notes/api/notes.ts",
+      "sourceDigest": "71d1c9633b38f476dcbbf61223fbf53bf301855767db76c288673ed39101b73c",
+      "lastInstalledDigest": "71d1c9633b38f476dcbbf61223fbf53bf301855767db76c288673ed39101b73c",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src/features/notes/components/NotesScreen.tsx",
+      "templateId": "baselines/tauri/desktop/src/features/notes/components/NotesScreen.tsx",
+      "sourceDigest": "87d8e1c463a5414e2154a27e426d905c2d0d681426f6fddad6637b48df19b834",
+      "lastInstalledDigest": "87d8e1c463a5414e2154a27e426d905c2d0d681426f6fddad6637b48df19b834",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src/features/notes/entities/useNoteEntities.ts",
+      "templateId": "baselines/tauri/desktop/src/features/notes/entities/useNoteEntities.ts",
+      "sourceDigest": "f0a5e98ef286114cbc0a7274521bedad8b581c2f154a5ce217487b64cfe48154",
+      "lastInstalledDigest": "f0a5e98ef286114cbc0a7274521bedad8b581c2f154a5ce217487b64cfe48154",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src/features/notes/hooks/useNotes.ts",
+      "templateId": "baselines/tauri/desktop/src/features/notes/hooks/useNotes.ts",
+      "sourceDigest": "1c38062c907ec56b2b8166adcbfa6c9a8f411a28852ecf774314e38c0231f579",
+      "lastInstalledDigest": "1c38062c907ec56b2b8166adcbfa6c9a8f411a28852ecf774314e38c0231f579",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src/features/notes/stores/notes.ts",
+      "templateId": "baselines/tauri/desktop/src/features/notes/stores/notes.ts",
+      "sourceDigest": "dd904348c5f4bd56131402d4a8f068277088206d7f82b050703c52675ae91815",
+      "lastInstalledDigest": "dd904348c5f4bd56131402d4a8f068277088206d7f82b050703c52675ae91815",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src/features/notes/types.ts",
+      "templateId": "baselines/tauri/desktop/src/features/notes/types.ts",
+      "sourceDigest": "a987cb39c6ae672c6e4844a766ba163ec3aa3f550ecbf67cdc376e71b96779c4",
+      "lastInstalledDigest": "a987cb39c6ae672c6e4844a766ba163ec3aa3f550ecbf67cdc376e71b96779c4",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src/main.tsx",
+      "templateId": "baselines/tauri/desktop/src/main.tsx",
+      "sourceDigest": "0a5f5a329a67302722c2e196950dc9bf819e2c58e98d5a4c5d7b6046f69bf7e5",
+      "lastInstalledDigest": "0a5f5a329a67302722c2e196950dc9bf819e2c58e98d5a4c5d7b6046f69bf7e5",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src/style.css",
+      "templateId": "baselines/tauri/desktop/src/style.css",
+      "sourceDigest": "63aca3c4e1be06a65562e73c2339f90ec753a32d3275175da457a5a77f67c0d7",
+      "lastInstalledDigest": "63aca3c4e1be06a65562e73c2339f90ec753a32d3275175da457a5a77f67c0d7",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src/vite-env.d.ts",
+      "templateId": "baselines/tauri/desktop/src/vite-env.d.ts",
+      "sourceDigest": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
+      "lastInstalledDigest": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/Cargo.lock",
+      "templateId": "baselines/tauri/desktop/src-tauri/Cargo.lock",
+      "sourceDigest": "3a285f9c819e966841906ea63bbc52c33ba7b7225307a477861e0cdc976203c3",
+      "lastInstalledDigest": "75d3d8cf12cbece0250a2a9f28604105eb5a7cdd784983a7225190d6f6e0498b",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/Cargo.toml",
+      "templateId": "baselines/tauri/desktop/src-tauri/Cargo.toml",
+      "sourceDigest": "db50fb65e74411e84781fc31964c0b2624df004c0eb90b2be1d4ea6ac74b40e6",
+      "lastInstalledDigest": "3962624275eb3caa1a4b3b64e62476778de657489e3e42ac10bb20b6be4c34c5",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/build.rs",
+      "templateId": "baselines/tauri/desktop/src-tauri/build.rs",
+      "sourceDigest": "f6f6fc07a76828d76d6eee0cedae2bd6d356859c3e20f92751f12ff6b17d20a8",
+      "lastInstalledDigest": "f6f6fc07a76828d76d6eee0cedae2bd6d356859c3e20f92751f12ff6b17d20a8",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/capabilities/default.json",
+      "templateId": "baselines/tauri/desktop/src-tauri/capabilities/default.json",
+      "sourceDigest": "8bb551db3cb238db82ac2dee384639ced97c7cdcbc33079825f37aa087c7c1ac",
+      "lastInstalledDigest": "8bb551db3cb238db82ac2dee384639ced97c7cdcbc33079825f37aa087c7c1ac",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/128x128.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/128x128.png",
+      "sourceDigest": "84755aecd2b8cdcc3d985fa57025d60d3b5468731b410d9b534ce245f0f1c2e9",
+      "lastInstalledDigest": "84755aecd2b8cdcc3d985fa57025d60d3b5468731b410d9b534ce245f0f1c2e9",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/128x128@2x.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/128x128@2x.png",
+      "sourceDigest": "e3ad902e447447e1ef460140e2e653a4a391d24189f8d8a7c9b141f9d00b3be0",
+      "lastInstalledDigest": "e3ad902e447447e1ef460140e2e653a4a391d24189f8d8a7c9b141f9d00b3be0",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/32x32.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/32x32.png",
+      "sourceDigest": "dfd9657cc785d6bde1bbc24d9eb549f52220718894875dd8f9be0f05fc301af4",
+      "lastInstalledDigest": "dfd9657cc785d6bde1bbc24d9eb549f52220718894875dd8f9be0f05fc301af4",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/64x64.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/64x64.png",
+      "sourceDigest": "19171c47d63a030078038d19fdcf82cca498c12e92e741680231829508a8ff8f",
+      "lastInstalledDigest": "19171c47d63a030078038d19fdcf82cca498c12e92e741680231829508a8ff8f",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/Square107x107Logo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/Square107x107Logo.png",
+      "sourceDigest": "775be6a58ae9a8d9b14351cf206cc4d3c6208a38405e27220316a2100cf33303",
+      "lastInstalledDigest": "775be6a58ae9a8d9b14351cf206cc4d3c6208a38405e27220316a2100cf33303",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/Square142x142Logo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/Square142x142Logo.png",
+      "sourceDigest": "8ed160de3c399061a1e841c9284bc3748cf7c60f36eade77b8de83eb192d3442",
+      "lastInstalledDigest": "8ed160de3c399061a1e841c9284bc3748cf7c60f36eade77b8de83eb192d3442",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/Square150x150Logo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/Square150x150Logo.png",
+      "sourceDigest": "a4f28a1367c6d6631ea37cc9a416d9727f8b249e6f3d345996643db79e7051cc",
+      "lastInstalledDigest": "a4f28a1367c6d6631ea37cc9a416d9727f8b249e6f3d345996643db79e7051cc",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/Square284x284Logo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/Square284x284Logo.png",
+      "sourceDigest": "9f40239c75f0270bd7301b20778ca5aa66e74763c2c38306e90fa6dffaba97e6",
+      "lastInstalledDigest": "9f40239c75f0270bd7301b20778ca5aa66e74763c2c38306e90fa6dffaba97e6",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/Square30x30Logo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/Square30x30Logo.png",
+      "sourceDigest": "d2c46a53c3b5dcb094c3dbeb083fc6f23fec9431804e98f152f952a12c929497",
+      "lastInstalledDigest": "d2c46a53c3b5dcb094c3dbeb083fc6f23fec9431804e98f152f952a12c929497",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/Square310x310Logo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/Square310x310Logo.png",
+      "sourceDigest": "b5c0b7fc63c2c7f1e6e61313881b96ced3d74bc7baa2bab6d326ecd0a75828ff",
+      "lastInstalledDigest": "b5c0b7fc63c2c7f1e6e61313881b96ced3d74bc7baa2bab6d326ecd0a75828ff",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/Square44x44Logo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/Square44x44Logo.png",
+      "sourceDigest": "2f5f0702ea7fd2cc6799eef73027585177bf4ad4e37ba5083c48cd103449da18",
+      "lastInstalledDigest": "2f5f0702ea7fd2cc6799eef73027585177bf4ad4e37ba5083c48cd103449da18",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/Square71x71Logo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/Square71x71Logo.png",
+      "sourceDigest": "bb6e888cc14bfac0d7799324eed55d9db47c55d3043e333b71e740f04dfa9095",
+      "lastInstalledDigest": "bb6e888cc14bfac0d7799324eed55d9db47c55d3043e333b71e740f04dfa9095",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/Square89x89Logo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/Square89x89Logo.png",
+      "sourceDigest": "0e955595aea357adee1ebd9a06ef0814b84626a3b1b64e618a841385cafd37aa",
+      "lastInstalledDigest": "0e955595aea357adee1ebd9a06ef0814b84626a3b1b64e618a841385cafd37aa",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/StoreLogo.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/StoreLogo.png",
+      "sourceDigest": "afed05197bcec51f88a0bb97bcac6740b6f3c84be0a8af6eace2d256adaf4235",
+      "lastInstalledDigest": "afed05197bcec51f88a0bb97bcac6740b6f3c84be0a8af6eace2d256adaf4235",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/icon.icns",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/icon.icns",
+      "sourceDigest": "a0028072da0f04b4f7d76b3fa03090b068fccdb087cfa89bfc40894354530421",
+      "lastInstalledDigest": "a0028072da0f04b4f7d76b3fa03090b068fccdb087cfa89bfc40894354530421",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/icon.ico",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/icon.ico",
+      "sourceDigest": "04925cbb5ac84692c8fdb461ddce94bc05171a0c9ded61e09f0181ca018dc102",
+      "lastInstalledDigest": "04925cbb5ac84692c8fdb461ddce94bc05171a0c9ded61e09f0181ca018dc102",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/icons/icon.png",
+      "templateId": "baselines/tauri/desktop/src-tauri/icons/icon.png",
+      "sourceDigest": "bba326b5f9c8e63b9cf83abb8c9c8aba6b981541ca672c313111bda877ebdc0e",
+      "lastInstalledDigest": "bba326b5f9c8e63b9cf83abb8c9c8aba6b981541ca672c313111bda877ebdc0e",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/src/main.rs",
+      "templateId": "baselines/tauri/desktop/src-tauri/src/main.rs",
+      "sourceDigest": "e86adc1d0c9960abdfbf7f8012b2321864e23f48baa6bdcde93419339cb4514e",
+      "lastInstalledDigest": "e86adc1d0c9960abdfbf7f8012b2321864e23f48baa6bdcde93419339cb4514e",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/tauri.conf.json",
+      "templateId": "baselines/tauri/desktop/src-tauri/tauri.conf.json",
+      "sourceDigest": "2b9a5bc63bafa88e856912236b6236f501af1928ff3c6b00fc62416ca2f4fd99",
+      "lastInstalledDigest": "1fdf1db10eb677d2136556690b46f4756d45ec3830e64cf7bd9167baebb069b2",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/tsconfig.json",
+      "templateId": "baselines/tauri/desktop/tsconfig.json",
+      "sourceDigest": "4b1fcc68dcc293b9d94d66513060ae4ef6ca862b55e6532c69133818f3d36308",
+      "lastInstalledDigest": "4b1fcc68dcc293b9d94d66513060ae4ef6ca862b55e6532c69133818f3d36308",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/vite.config.ts",
+      "templateId": "baselines/tauri/desktop/vite.config.ts",
+      "sourceDigest": "d11bc1804f1836555374ce83f01d2ed1e68d435a82b10cd58c7b8771d9a5a578",
+      "lastInstalledDigest": "d11bc1804f1836555374ce83f01d2ed1e68d435a82b10cd58c7b8771d9a5a578",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "path": "desktop/src-tauri/command-manifest.json",
+      "templateId": "command-contract/commands.json",
+      "sourceDigest": "48cf359b10ca68fcd9a62778fd0b3682f98134b5c1cb4aea796bbeeef68d6588",
+      "lastInstalledDigest": "48cf359b10ca68fcd9a62778fd0b3682f98134b5c1cb4aea796bbeeef68d6588",
+      "ownership": "builder",
+      "version": "2.0.0-alpha.4"
+    }
+  ]
+}

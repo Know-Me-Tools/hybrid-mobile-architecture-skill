@@ -9,8 +9,9 @@ await main(() => {
     if (!existsSync(join(root, 'builder.manifest.json')))
         throw new Error('Not a Builder package root');
     const excluded = new Set(['.git', 'node_modules', 'target', 'vendor', 'compass-out', 'dist', 'build', '.worktrees', 'worktrees']);
-    const thirdPartyScript = (path) => path.startsWith('assets/templates/baselines/flutter/mobile/rust_builder/cargokit/') ||
-        path === 'assets/templates/baselines/flutter/mobile/android/gradlew';
+    const thirdPartyScript = (path) => 
+    // Vendored Gradle wrapper and cargokit, plus byte-identical copies in the upgrade fixture.
+    ['assets/templates/baselines/flutter/', 'tools/knowme-builder/tests/fixtures/upgrades/alpha4-sovereign-hybrid/'].some(root => path.startsWith(`${root}mobile/rust_builder/cargokit/`) || path === `${root}mobile/android/gradlew`);
     const violations = [];
     let checked = 0;
     function walk(directory, prefix = '') {
