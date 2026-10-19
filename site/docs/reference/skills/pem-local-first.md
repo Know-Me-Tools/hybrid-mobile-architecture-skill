@@ -2,7 +2,7 @@
 title: pem-local-first
 sidebar_label: pem-local-first
 sidebar_position: 15
-description: "ALWAYS invoke when wiring client entity/server state on any surface — adding an entity type, registering a transport, persisting conversations, hydrating from PGlite/pglite-oxide/SQLite, showing optimistic writes, or whenever TanStack Query/SWR/Apollo-cache is about to be suggested (it is prohibited — Prometheus Entity Management 3.x owns this layer). Triggers on entity, entities, PEM, prometheus-entity-management, entity transport, registerEntityTransport, useEntities, entity graph, TanStack Query, react-query, SWR, query cache, stale-while-revalidate, optimistic update, PGlite, pglite-oxide, persistence adapter, durable conversation, conversation store, hydrate, normalized state."
+description: "ALWAYS invoke when wiring client entity/server state on any surface — adding an entity type, registering a transport, persisting conversations, hydrating from PGlite/pglite-oxide/SQLite, showing optimistic writes, or whenever TanStack Query/SWR/Apollo-cache is about to be suggested (it is prohibited — Prometheus Entity Management 4.2.0 owns this layer). Triggers on entity, entities, PEM, prometheus-entity-management, entity transport, registerEntityTransport, useEntities, entity graph, TanStack Query, react-query, SWR, query cache, stale-while-revalidate, optimistic update, PGlite, pglite-oxide, persistence adapter, durable conversation, conversation store, hydrate, normalized state."
 ---
 
 # pem-local-first
@@ -11,7 +11,7 @@ description: "ALWAYS invoke when wiring client entity/server state on any surfac
 
 ## What it is for
 
-ALWAYS invoke when wiring client entity/server state on any surface — adding an entity type, registering a transport, persisting conversations, hydrating from PGlite/pglite-oxide/SQLite, showing optimistic writes, or whenever TanStack Query/SWR/Apollo-cache is about to be suggested (it is prohibited — Prometheus Entity Management 3.x owns this layer). Triggers on entity, entities, PEM, prometheus-entity-management, entity transport, registerEntityTransport, useEntities, entity graph, TanStack Query, react-query, SWR, query cache, stale-while-revalidate, optimistic update, PGlite, pglite-oxide, persistence adapter, durable conversation, conversation store, hydrate, normalized state.
+ALWAYS invoke when wiring client entity/server state on any surface — adding an entity type, registering a transport, persisting conversations, hydrating from PGlite/pglite-oxide/SQLite, showing optimistic writes, or whenever TanStack Query/SWR/Apollo-cache is about to be suggested (it is prohibited — Prometheus Entity Management 4.2.0 owns this layer). Triggers on entity, entities, PEM, prometheus-entity-management, entity transport, registerEntityTransport, useEntities, entity graph, TanStack Query, react-query, SWR, query cache, stale-while-revalidate, optimistic update, PGlite, pglite-oxide, persistence adapter, durable conversation, conversation store, hydrate, normalized state.
 
 ## Why it is designed this way
 
