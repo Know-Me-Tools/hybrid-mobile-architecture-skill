@@ -98,7 +98,7 @@ clarifies flow; data-viz treated as part of the design system.
 
 - Components import only hooks. No direct store imports, no `invoke()`/`listen()` in a
   component or hook — those live only in Zustand stores.
-- Server/async/entity data via `@prometheus-ags/prometheus-entity-management` 3.x; client/UI state via Zustand; shareable state (tab,
+- Server/async/entity data via `@prometheus-ags/prometheus-entity-management` 4.2.0; client/UI state via Zustand; shareable state (tab,
   filter, sort) in the URL.
 
 ## Related skills
