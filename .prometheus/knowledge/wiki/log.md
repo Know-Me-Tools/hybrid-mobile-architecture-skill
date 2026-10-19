@@ -22,8 +22,18 @@
 * **Ingest**: [Karpathy session ac6e1506d00d](/karpathy-session-ac6e1506d00dae2c.md)
 * **Ingest**: [Karpathy session 0a64a6def712](/karpathy-session-0a64a6def7126314.md)
 * **Ingest**: [Karpathy session 813210288b26](/karpathy-session-813210288b2690ed.md)
+## 2026-08-25
+* **Ingest**: [Karpathy session 32586e82728e](/karpathy-session-32586e82728ec999.md)
+* **Ingest**: [Karpathy session 2c4d3341fe5f](/karpathy-session-2c4d3341fe5fbf7f.md)
 
 ## 2026-08-24
+* **Creation**: [HMA companion consumer integration completion metadata](/hma-companion-consumer-integration-completion-metadata.md)
+* **Ingest**: [Karpathy session 90ba335ce088](/karpathy-session-90ba335ce088b619.md)
+* **Creation**: [HMA companion consumer integration completion record](/hma-companion-consumer-integration-completion-record.md)
+* **Ingest**: [Karpathy session 86fd0ed86bb7](/karpathy-session-86fd0ed86bb794ed.md)
+* **Ingest**: [Karpathy session 90208543f893](/karpathy-session-90208543f893da85.md)
+* **Creation**: [HMA companion consumer integration completion metadata](/hma-companion-consumer-integration-completion-metadata.md)
+* **Ingest**: [Karpathy session 14f56ef21111](/karpathy-session-14f56ef2111156e8.md)
 * **Ingest**: [Karpathy session 808e0c7b0567](/karpathy-session-808e0c7b05678e03.md)
 * **Ingest**: [Karpathy session c7ad8cec58f9](/karpathy-session-c7ad8cec58f9a26c.md)
 * **Creation**: [HMA companion consumer integration executor completion record](/hma-companion-consumer-integration-executor-completion-record.md)

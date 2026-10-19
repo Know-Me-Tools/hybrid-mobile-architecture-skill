@@ -225,7 +225,7 @@ Widget (ConsumerWidget) → @riverpod provider → Repository/Service (via FFI) 
 - `ContentBlock` mutations happen only via `ChatNotifier.streamBlock()` — never direct state assignment
 - `ref.watch` in build/provider bodies; `ref.read` in callbacks
 
-### Tauri + React 19 (Zustand 5 + Prometheus Entity Management 3.x)
+### Tauri + React 19 (Zustand 5 + Prometheus Entity Management 4.2.0)
 
 ```
 Component → Hook → Store → [Rust invoke() / external API]
@@ -235,7 +235,7 @@ Component → Hook → Store → [Rust invoke() / external API]
 - **Hooks** compose from Zustand stores and Prometheus Entity Management hooks. No `invoke()` calls.
 - **Stores** are the only layer that calls `invoke()` / `listen()`.
 - **Zustand** owns client-side state (UI, selection, filters, streaming).
-- **`@prometheus-ags/prometheus-entity-management` 3.x** owns normalized server/async/entity state, transport deduplication, mutations, and cross-view reactivity. Do not add TanStack Query.
+- **`@prometheus-ags/prometheus-entity-management` 4.2.0** owns normalized server/async/entity state, transport deduplication, mutations, and cross-view reactivity. Do not add TanStack Query.
 - **TanStack Router** handles routing with `beforeLoad` auth guards.
 - **Visual components prefer shadcn/ui** over raw HTML controls so behavior and styling stay consistent.
 - **Assistant UI owns React chat behavior**: thread, composer, streaming lifecycle, thread list, attachments, and message actions. Do not hand-roll substitutes.
@@ -485,7 +485,7 @@ All generated files must include `// TJ-ARCH-MOB-001 compliant` at the top.
 | `references/flutter/patterns.md` | Any Flutter work — Riverpod, clean arch, FFI wiring, shadcn_flutter, GoRouter |
 | `references/flutter/auth.md` | Flutter Kratos/Supabase implementation |
 | `references/flutter/testing.md` | Riverpod test, widget tests, golden tests |
-| `references/tauri/patterns.md` | Any Tauri/React work — Zustand, Prometheus Entity Management 3.x, TanStack Router/Table, IPC, layer contract |
+| `references/tauri/patterns.md` | Any Tauri/React work — Zustand, Prometheus Entity Management 4.2.0, TanStack Router/Table, IPC, layer contract |
 | `references/tauri/auth.md` | React Kratos/Supabase implementation |
 | `references/tauri/eslint-config.md` | ESLint 9 flat config, tsconfig strict, Prettier, Vitest setup |
 | `references/tauri/testing.md` | Vitest, RTL, layer contract enforcement tests |

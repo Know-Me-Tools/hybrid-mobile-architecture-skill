@@ -126,7 +126,7 @@ recovery evidence. See `references/project-evolution.md` for current limitations
 
 ### 2d. Audit
 - Check architecture compliance against TJ-ARCH-MOB-001
-- Verify state management patterns (Riverpod / Zustand + Prometheus Entity Management 3.x)
+- Verify state management patterns (Riverpod / Zustand + Prometheus Entity Management 4.2.0)
 - Verify clean architecture boundaries (no direct store→API calls in components)
 
 ---
@@ -155,7 +155,7 @@ Read `references/flutter/patterns.md` for the full Riverpod architecture.
 - ContentBlock mutations happen only via `ChatNotifier.streamBlock()` — never direct state assignment
 - Feature modules own their providers; cross-feature deps go through the domain layer
 
-### Tauri + React 19 state management (Zustand 5 + Prometheus Entity Management 3.x)
+### Tauri + React 19 state management (Zustand 5 + Prometheus Entity Management 4.2.0)
 
 Read `references/tauri/patterns.md` for the full React architecture.
 
@@ -171,8 +171,8 @@ Component → Hook → Store → [Rust IPC / API]
 - Use `@tauri-apps/plugin-store` for Zustand persistence when state must survive restarts
 - Rust-side state extension via the Tauri Zustand plugin for shared state crossing the IPC boundary
 
-**Prometheus Entity Management 3.x (server/async/entity state):**
-- Always use `@prometheus-ags/prometheus-entity-management` 3.x instead of TanStack Query
+**Prometheus Entity Management 4.2.0 (server/async/entity state):**
+- Use `@prometheus-ags/entity-graph-react` 4.2.0 for new code; the generated baseline's `@prometheus-ags/prometheus-entity-management` 4.2.0 is a compatibility alias
 - Register each entity transport once, then read through `useEntities`, `useEntityQuery`, or `useEntity`
 - Perform graph-aware writes with `useEntityMutation`; normalized entities update every subscribed view
 - Never call `fetch`/`invoke` directly from a component
@@ -189,7 +189,7 @@ Component → Hook → Store → [Rust IPC / API]
 
 **shadcn-equivalent (React):** Prefer `shadcn/ui` components over raw HTML controls with Tailwind 4. Run `npx shadcn@latest init` during scaffold.
 
-**React chat:** Use Assistant UI for thread, composer, thread-list, streaming, attachment, and message-action behavior. Persist normalized conversation entities with Prometheus Entity Management 3.x: PGlite on web and pglite-oxide through Rust on Tauri. Zustand is transient UI state only. Apply the Flat 2.0 contract—no visible borders, divider lines, or layout shadows.
+**React chat:** Use Assistant UI for thread, composer, thread-list, streaming, attachment, and message-action behavior. Persist normalized conversation entities with Prometheus Entity Management 4.2.0: PGlite on web and pglite-oxide through Rust on Tauri. Zustand is transient UI state only. Apply the Flat 2.0 contract—no visible borders, divider lines, or layout shadows.
 
 **shadcn-equivalent (Flutter):** Use `shadcn_flutter` package — see `references/flutter/patterns.md`.
 
@@ -265,7 +265,7 @@ When adding a new ContentBlock type, always do all 7 steps in `references/rust/n
 | `references/flutter/patterns.md` | Any Flutter work — Riverpod, clean arch, shadcn_flutter, FFI wiring |
 | `references/flutter/auth.md` | Flutter Kratos/Supabase — full implementation including GoRouter guards |
 | `references/flutter/testing.md` | Flutter testing — Riverpod test, widget tests, golden tests |
-| `references/tauri/patterns.md` | Any Tauri/React work — Zustand, Prometheus Entity Management 3.x, TanStack Router/Table, IPC, layer contract |
+| `references/tauri/patterns.md` | Any Tauri/React work — Zustand, Prometheus Entity Management 4.2.0, TanStack Router/Table, IPC, layer contract |
 | `references/tauri/auth.md` | React Kratos/Supabase — full store + Prometheus Entity Management + component |
 | `references/tauri/eslint-config.md` | ESLint 9 flat config, tsconfig strict, Prettier, Vitest setup |
 | `references/tauri/testing.md` | Vitest, React Testing Library, layer contract enforcement tests |

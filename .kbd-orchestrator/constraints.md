@@ -9,7 +9,7 @@
 - **NEVER import a Zustand store or call `invoke()` directly from a React visual component.** React follows Component → Hook → Store → Rust/external API.
 - **NEVER call APIs, services, or FFI directly from a Flutter widget.** Flutter follows Widget → generated Riverpod provider → Repository/Service → Rust FFI.
 - **NEVER use manual `Provider(...)` declarations in Flutter.** Use `@riverpod` code generation exclusively.
-- **NEVER introduce TanStack Query.** Use `@prometheus-ags/prometheus-entity-management` 3.x for React server, async, and normalized entity state; Zustand owns transient client UI state.
+- **NEVER introduce TanStack Query.** Use `@prometheus-ags/prometheus-entity-management` 4.2.0 for React server, async, and normalized entity state; Zustand owns transient client UI state.
 - **NEVER expose service credentials, BYOK values, private keys, tokens, or passwords to client bundles or committed configuration.** Use environment references, platform keychains, vaults, or cloud secret managers.
 - **NEVER skip a step in the seven-step ContentBlock guide** at `references/rust/new-block-type.md`. Do not add a fallback that hides a missing variant.
 - **NEVER create direct feature-to-feature dependencies.** Cross-feature behavior goes through `app/`, `shared/`, or explicit domain interfaces.
@@ -22,7 +22,7 @@
 ## WARNING (flag and verify)
 
 - **Adding or updating dependencies** — verify the current supported version, platform compatibility, license, and responsible scaffold/template.
-- **Changing state management** — Flutter uses Riverpod codegen; React uses Prometheus Entity Management 3.x plus Zustand. Any deviation requires an explicit architectural decision.
+- **Changing state management** — Flutter uses Riverpod codegen; React uses Prometheus Entity Management 4.2.0 plus Zustand. Any deviation requires an explicit architectural decision.
 - **Modifying `scripts/`, `assets/templates/`, or `templates/project-skills/`** — downstream projects consume these outputs; propagate fixes to the responsible generator and exercise a scratch scaffold.
 - **Placing business logic in UI code** — treat this as an architectural violation even if the feature appears to work.
 - **Changing ContentBlock or protocol contracts** — update Rust, Dart/FRB, TypeScript, Flutter, React, persistence, and public-boundary verification together.

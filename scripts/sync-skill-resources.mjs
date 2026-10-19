@@ -9,16 +9,26 @@ const checkOnly = process.argv.includes("--check");
 
 const mappings = [
   ["references", "skills/hybrid-mobile-architecture/references"],
-  ["references/sync/client-rag.md", "skills/client-rag/references/client-rag.md"],
+  ["references/sync", "skills/client-rag/references"],
   ["references/rust/new-block-type.md", "skills/content-block-ui/references/rust/new-block-type.md"],
   ["references/generator-placeholders.md", "skills/dependency-pin-discipline/references/generator-placeholders.md"],
   ["references/sync/peer-crdt.md", "skills/peer-profile-sync/references/peer-crdt.md"],
+  ["references/sync/doctrine.md", "skills/peer-profile-sync/references/doctrine.md"],
+  ["references/sync/client-rag.md", "skills/peer-profile-sync/references/client-rag.md"],
+  ["references/sync/decisions.md", "skills/peer-profile-sync/references/decisions.md"],
+  ["references/sync/partial-replication.md", "skills/peer-profile-sync/references/partial-replication.md"],
   ["references/sync/decisions.md", "skills/pem-local-first/references/decisions.md"],
+  ["references/sync/client-rag.md", "skills/pem-local-first/references/client-rag.md"],
+  ["references/sync/peer-crdt.md", "skills/pem-local-first/references/peer-crdt.md"],
+  ["references/sync/doctrine.md", "skills/pem-local-first/references/doctrine.md"],
+  ["references/sync/partial-replication.md", "skills/pem-local-first/references/partial-replication.md"],
   ["references/tauri/patterns.md", "skills/pem-local-first/references/tauri-patterns.md"],
   ["references/rust/patterns.md", "skills/pem-local-first/references/rust-patterns.md"],
   ["references/sync/doctrine.md", "skills/sync-doctrine/references/doctrine.md"],
   ["references/sync/partial-replication.md", "skills/sync-doctrine/references/partial-replication.md"],
   ["references/sync/decisions.md", "skills/sync-doctrine/references/decisions.md"],
+  ["references/sync/client-rag.md", "skills/sync-doctrine/references/client-rag.md"],
+  ["references/sync/peer-crdt.md", "skills/sync-doctrine/references/peer-crdt.md"],
 ];
 
 async function files(path) {

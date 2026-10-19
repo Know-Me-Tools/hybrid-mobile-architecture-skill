@@ -1,5 +1,5 @@
 # Tauri + React 19 Patterns Reference
-> Tauri 2.10+ · React 19 · Vite 8 · Zustand 5 · Prometheus Entity Management 3.x · TanStack Router/Table · shadcn/ui · Tailwind 4
+> Tauri 2.10+ · React 19 · Vite 8 · Zustand 5 · Prometheus Entity Management 4.2.0 · TanStack Router/Table · shadcn/ui · Tailwind 4
 
 ## Package versions (package.json — current March 2026)
 
@@ -12,7 +12,7 @@
     "@tauri-apps/plugin-shell": "^2.0.0",
     "@tauri-apps/plugin-store": "^2.0.0",
     "zustand": "^5.0.0",
-    "@prometheus-ags/prometheus-entity-management": "^3.0.0-alpha.0",
+    "@prometheus-ags/entity-graph-react": "4.2.0",
     "@tanstack/react-router": "^1.0.0",
     "@tanstack/react-table": "^8.0.0",
     "@tanstack/react-virtual": "^3.0.0",
@@ -85,7 +85,7 @@ Component → Hook → Store → [Rust IPC invoke() / external API]
 **Hooks** compose from stores and Prometheus Entity Management hooks. Never call `invoke()` in hooks.
 **Stores** call `invoke()` / `emit()` and manage all side effects.
 
-`@prometheus-ags/prometheus-entity-management` 3.x is the required normalized server/async/entity-state layer. Do not add TanStack Query. Register transports once at the store/runtime boundary, read entities through `useEntities` / `useEntityQuery` / `useEntity`, and perform graph-aware writes through `useEntityMutation`.
+`@prometheus-ags/entity-graph-react` 4.2.0 is the maintained normalized server/async/entity-state layer. Do not add TanStack Query. Register transports once at the store/runtime boundary, read entities through `useEntities` / `useEntityQuery` / `useEntity`, and perform graph-aware writes through `useEntityMutation`.
 
 For chat, Assistant UI owns thread/composer/thread-list behavior and Shadcn UI owns general interaction primitives. Conversation, message, block, citation, attachment, draft, and append-only protocol-event entities are normalized by Prometheus Entity Management. PGlite persists them in the browser; typed Tauri commands persist the same logical model in pglite-oxide. Zustand may assemble an in-flight stream and track selection/drafts, but it is not the durable conversation database. All chat surfaces follow Flat 2.0: no visible borders, divider lines, or layout shadows; adjacent regions differ by background color.
 

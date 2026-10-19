@@ -75,7 +75,7 @@ component libraries before judging fidelity.
 Visual fidelity does not authorize fake data paths:
 
 - React visual components import feature hooks, not stores/transports.
-- Prometheus Entity Management 3.x owns durable/reactive entities and mutations.
+- Prometheus Entity Management 4.2.0 owns durable/reactive entities and mutations.
 - Zustand owns transient interaction state only.
 - Web persistence uses PGlite; Tauri persistence uses pglite-oxide through Rust commands;
   Flutter uses the platform repository behind Rust FFI.

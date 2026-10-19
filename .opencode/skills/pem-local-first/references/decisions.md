@@ -48,7 +48,7 @@ decision reviewed against payload size and privacy class.
 
 ## ADR-LFS-4 — Entity/server state layer: PEM only (resolves OD-7)
 
-**Decision.** `@prometheus-ags/prometheus-entity-management` 3.x is the only
+**Decision.** `@prometheus-ags/prometheus-entity-management` 4.2.0 is the only
 client entity/server-state layer. TanStack Query (and TanStack DB) are
 prohibited in scaffolded projects — the sync plane owns staleness,
 deduplication, and revalidation, which is precisely the layer a query cache
