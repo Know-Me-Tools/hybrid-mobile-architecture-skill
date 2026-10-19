@@ -1225,17 +1225,14 @@ fn migrate_project(
         BUILDER_VERSION,
         &lock.applied_migrations,
     )?;
-    let [migration] = chain.as_slice() else {
-        bail!("semantic migration requires exactly one concrete operation plan");
-    };
     let migration_ids = chain
         .iter()
         .map(|migration| migration.id.to_owned())
         .collect::<Vec<_>>();
     let app_name = rendering_identity(&project, args.app_name)?;
     let (rendered, mut desired_lock) = render_current_profile(&project, &app_name)?;
-    let plan = crate::migrations::validated_plan(
-        migration,
+    let plan = crate::migrations::validated_chain_plan(
+        &chain,
         project.profile.as_str(),
         project.generation_mode.as_str(),
         &lock.files,

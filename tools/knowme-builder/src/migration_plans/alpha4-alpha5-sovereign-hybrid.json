@@ -1,0 +1,1389 @@
+{
+  "schemaVersion": 1,
+  "id": "builder-2.0.0-alpha.4-to-alpha.5",
+  "fromVersion": "2.0.0-alpha.4",
+  "toVersion": "2.0.0-alpha.5",
+  "profile": "sovereign-hybrid",
+  "generationMode": "runnable",
+  "operations": [
+    {
+      "kind": "preserve",
+      "from": ".gitignore",
+      "to": ".gitignore",
+      "beforeSourceDigest": "c9cab9274ca5323b5a134a72e691ea628cc846048410f05310df5188144ca71a",
+      "afterSourceDigest": "c9cab9274ca5323b5a134a72e691ea628cc846048410f05310df5188144ca71a"
+    },
+    {
+      "kind": "preserve",
+      "from": "BASELINE-DESKTOP.md",
+      "to": "BASELINE-DESKTOP.md",
+      "beforeSourceDigest": "0f0e7813b499fe7c53ec116952bafcf2dd2677b5d745f45c5bcef0b21cf97c81",
+      "afterSourceDigest": "0f0e7813b499fe7c53ec116952bafcf2dd2677b5d745f45c5bcef0b21cf97c81"
+    },
+    {
+      "kind": "preserve",
+      "from": "BASELINE-MOBILE.md",
+      "to": "BASELINE-MOBILE.md",
+      "beforeSourceDigest": "0120ecdd391ad2b66d1d5e74e62a79af3b3f03491c1558dfdc493034764bb630",
+      "afterSourceDigest": "0120ecdd391ad2b66d1d5e74e62a79af3b3f03491c1558dfdc493034764bb630"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/index.html",
+      "to": "desktop/index.html",
+      "beforeSourceDigest": "9f85f50f1179e18795c4516a2a260c3d913b21ac03396b59be101bce766376e0",
+      "afterSourceDigest": "9f85f50f1179e18795c4516a2a260c3d913b21ac03396b59be101bce766376e0"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/package-lock.json",
+      "to": "desktop/package-lock.json",
+      "beforeSourceDigest": "327b42b9b4b9172270fa0cda9787a86791467592511c1b57059a06da6dda5aec",
+      "afterSourceDigest": "327b42b9b4b9172270fa0cda9787a86791467592511c1b57059a06da6dda5aec"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/package.json",
+      "to": "desktop/package.json",
+      "beforeSourceDigest": "56bb23d79703b5ab59151defb87a7aed53d061cc151e0500c415d539256cfc19",
+      "afterSourceDigest": "56bb23d79703b5ab59151defb87a7aed53d061cc151e0500c415d539256cfc19"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/public/capabilities/index.json",
+      "to": "desktop/public/capabilities/index.json",
+      "beforeSourceDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660",
+      "afterSourceDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/scripts/build.mjs",
+      "to": "desktop/scripts/build.mjs",
+      "beforeSourceDigest": "f08fad0d854dfd79bcfab7ff42f2026bdb81a722b513e8ae1aa92032bba6d272",
+      "afterSourceDigest": "f08fad0d854dfd79bcfab7ff42f2026bdb81a722b513e8ae1aa92032bba6d272"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/build.rs",
+      "to": "desktop/src-tauri/build.rs",
+      "beforeSourceDigest": "f6f6fc07a76828d76d6eee0cedae2bd6d356859c3e20f92751f12ff6b17d20a8",
+      "afterSourceDigest": "f6f6fc07a76828d76d6eee0cedae2bd6d356859c3e20f92751f12ff6b17d20a8"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/capabilities/default.json",
+      "to": "desktop/src-tauri/capabilities/default.json",
+      "beforeSourceDigest": "8bb551db3cb238db82ac2dee384639ced97c7cdcbc33079825f37aa087c7c1ac",
+      "afterSourceDigest": "8bb551db3cb238db82ac2dee384639ced97c7cdcbc33079825f37aa087c7c1ac"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/Cargo.lock",
+      "to": "desktop/src-tauri/Cargo.lock",
+      "beforeSourceDigest": "3a285f9c819e966841906ea63bbc52c33ba7b7225307a477861e0cdc976203c3",
+      "afterSourceDigest": "3a285f9c819e966841906ea63bbc52c33ba7b7225307a477861e0cdc976203c3"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/Cargo.toml",
+      "to": "desktop/src-tauri/Cargo.toml",
+      "beforeSourceDigest": "db50fb65e74411e84781fc31964c0b2624df004c0eb90b2be1d4ea6ac74b40e6",
+      "afterSourceDigest": "db50fb65e74411e84781fc31964c0b2624df004c0eb90b2be1d4ea6ac74b40e6"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/command-manifest.json",
+      "to": "desktop/src-tauri/command-manifest.json",
+      "beforeSourceDigest": "48cf359b10ca68fcd9a62778fd0b3682f98134b5c1cb4aea796bbeeef68d6588",
+      "afterSourceDigest": "48cf359b10ca68fcd9a62778fd0b3682f98134b5c1cb4aea796bbeeef68d6588"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/128x128.png",
+      "to": "desktop/src-tauri/icons/128x128.png",
+      "beforeSourceDigest": "84755aecd2b8cdcc3d985fa57025d60d3b5468731b410d9b534ce245f0f1c2e9",
+      "afterSourceDigest": "84755aecd2b8cdcc3d985fa57025d60d3b5468731b410d9b534ce245f0f1c2e9"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/128x128@2x.png",
+      "to": "desktop/src-tauri/icons/128x128@2x.png",
+      "beforeSourceDigest": "e3ad902e447447e1ef460140e2e653a4a391d24189f8d8a7c9b141f9d00b3be0",
+      "afterSourceDigest": "e3ad902e447447e1ef460140e2e653a4a391d24189f8d8a7c9b141f9d00b3be0"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/32x32.png",
+      "to": "desktop/src-tauri/icons/32x32.png",
+      "beforeSourceDigest": "dfd9657cc785d6bde1bbc24d9eb549f52220718894875dd8f9be0f05fc301af4",
+      "afterSourceDigest": "dfd9657cc785d6bde1bbc24d9eb549f52220718894875dd8f9be0f05fc301af4"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/64x64.png",
+      "to": "desktop/src-tauri/icons/64x64.png",
+      "beforeSourceDigest": "19171c47d63a030078038d19fdcf82cca498c12e92e741680231829508a8ff8f",
+      "afterSourceDigest": "19171c47d63a030078038d19fdcf82cca498c12e92e741680231829508a8ff8f"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/icon.icns",
+      "to": "desktop/src-tauri/icons/icon.icns",
+      "beforeSourceDigest": "a0028072da0f04b4f7d76b3fa03090b068fccdb087cfa89bfc40894354530421",
+      "afterSourceDigest": "a0028072da0f04b4f7d76b3fa03090b068fccdb087cfa89bfc40894354530421"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/icon.ico",
+      "to": "desktop/src-tauri/icons/icon.ico",
+      "beforeSourceDigest": "04925cbb5ac84692c8fdb461ddce94bc05171a0c9ded61e09f0181ca018dc102",
+      "afterSourceDigest": "04925cbb5ac84692c8fdb461ddce94bc05171a0c9ded61e09f0181ca018dc102"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/icon.png",
+      "to": "desktop/src-tauri/icons/icon.png",
+      "beforeSourceDigest": "bba326b5f9c8e63b9cf83abb8c9c8aba6b981541ca672c313111bda877ebdc0e",
+      "afterSourceDigest": "bba326b5f9c8e63b9cf83abb8c9c8aba6b981541ca672c313111bda877ebdc0e"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/Square107x107Logo.png",
+      "to": "desktop/src-tauri/icons/Square107x107Logo.png",
+      "beforeSourceDigest": "775be6a58ae9a8d9b14351cf206cc4d3c6208a38405e27220316a2100cf33303",
+      "afterSourceDigest": "775be6a58ae9a8d9b14351cf206cc4d3c6208a38405e27220316a2100cf33303"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/Square142x142Logo.png",
+      "to": "desktop/src-tauri/icons/Square142x142Logo.png",
+      "beforeSourceDigest": "8ed160de3c399061a1e841c9284bc3748cf7c60f36eade77b8de83eb192d3442",
+      "afterSourceDigest": "8ed160de3c399061a1e841c9284bc3748cf7c60f36eade77b8de83eb192d3442"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/Square150x150Logo.png",
+      "to": "desktop/src-tauri/icons/Square150x150Logo.png",
+      "beforeSourceDigest": "a4f28a1367c6d6631ea37cc9a416d9727f8b249e6f3d345996643db79e7051cc",
+      "afterSourceDigest": "a4f28a1367c6d6631ea37cc9a416d9727f8b249e6f3d345996643db79e7051cc"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/Square284x284Logo.png",
+      "to": "desktop/src-tauri/icons/Square284x284Logo.png",
+      "beforeSourceDigest": "9f40239c75f0270bd7301b20778ca5aa66e74763c2c38306e90fa6dffaba97e6",
+      "afterSourceDigest": "9f40239c75f0270bd7301b20778ca5aa66e74763c2c38306e90fa6dffaba97e6"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/Square30x30Logo.png",
+      "to": "desktop/src-tauri/icons/Square30x30Logo.png",
+      "beforeSourceDigest": "d2c46a53c3b5dcb094c3dbeb083fc6f23fec9431804e98f152f952a12c929497",
+      "afterSourceDigest": "d2c46a53c3b5dcb094c3dbeb083fc6f23fec9431804e98f152f952a12c929497"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/Square310x310Logo.png",
+      "to": "desktop/src-tauri/icons/Square310x310Logo.png",
+      "beforeSourceDigest": "b5c0b7fc63c2c7f1e6e61313881b96ced3d74bc7baa2bab6d326ecd0a75828ff",
+      "afterSourceDigest": "b5c0b7fc63c2c7f1e6e61313881b96ced3d74bc7baa2bab6d326ecd0a75828ff"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/Square44x44Logo.png",
+      "to": "desktop/src-tauri/icons/Square44x44Logo.png",
+      "beforeSourceDigest": "2f5f0702ea7fd2cc6799eef73027585177bf4ad4e37ba5083c48cd103449da18",
+      "afterSourceDigest": "2f5f0702ea7fd2cc6799eef73027585177bf4ad4e37ba5083c48cd103449da18"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/Square71x71Logo.png",
+      "to": "desktop/src-tauri/icons/Square71x71Logo.png",
+      "beforeSourceDigest": "bb6e888cc14bfac0d7799324eed55d9db47c55d3043e333b71e740f04dfa9095",
+      "afterSourceDigest": "bb6e888cc14bfac0d7799324eed55d9db47c55d3043e333b71e740f04dfa9095"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/Square89x89Logo.png",
+      "to": "desktop/src-tauri/icons/Square89x89Logo.png",
+      "beforeSourceDigest": "0e955595aea357adee1ebd9a06ef0814b84626a3b1b64e618a841385cafd37aa",
+      "afterSourceDigest": "0e955595aea357adee1ebd9a06ef0814b84626a3b1b64e618a841385cafd37aa"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/icons/StoreLogo.png",
+      "to": "desktop/src-tauri/icons/StoreLogo.png",
+      "beforeSourceDigest": "afed05197bcec51f88a0bb97bcac6740b6f3c84be0a8af6eace2d256adaf4235",
+      "afterSourceDigest": "afed05197bcec51f88a0bb97bcac6740b6f3c84be0a8af6eace2d256adaf4235"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/src/main.rs",
+      "to": "desktop/src-tauri/src/main.rs",
+      "beforeSourceDigest": "e86adc1d0c9960abdfbf7f8012b2321864e23f48baa6bdcde93419339cb4514e",
+      "afterSourceDigest": "e86adc1d0c9960abdfbf7f8012b2321864e23f48baa6bdcde93419339cb4514e"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src-tauri/tauri.conf.json",
+      "to": "desktop/src-tauri/tauri.conf.json",
+      "beforeSourceDigest": "2b9a5bc63bafa88e856912236b6236f501af1928ff3c6b00fc62416ca2f4fd99",
+      "afterSourceDigest": "2b9a5bc63bafa88e856912236b6236f501af1928ff3c6b00fc62416ca2f4fd99"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src/features/notes/api/notes.ts",
+      "to": "desktop/src/features/notes/api/notes.ts",
+      "beforeSourceDigest": "71d1c9633b38f476dcbbf61223fbf53bf301855767db76c288673ed39101b73c",
+      "afterSourceDigest": "71d1c9633b38f476dcbbf61223fbf53bf301855767db76c288673ed39101b73c"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src/features/notes/components/NotesScreen.tsx",
+      "to": "desktop/src/features/notes/components/NotesScreen.tsx",
+      "beforeSourceDigest": "87d8e1c463a5414e2154a27e426d905c2d0d681426f6fddad6637b48df19b834",
+      "afterSourceDigest": "87d8e1c463a5414e2154a27e426d905c2d0d681426f6fddad6637b48df19b834"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src/features/notes/entities/useNoteEntities.ts",
+      "to": "desktop/src/features/notes/entities/useNoteEntities.ts",
+      "beforeSourceDigest": "f0a5e98ef286114cbc0a7274521bedad8b581c2f154a5ce217487b64cfe48154",
+      "afterSourceDigest": "f0a5e98ef286114cbc0a7274521bedad8b581c2f154a5ce217487b64cfe48154"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src/features/notes/hooks/useNotes.ts",
+      "to": "desktop/src/features/notes/hooks/useNotes.ts",
+      "beforeSourceDigest": "1c38062c907ec56b2b8166adcbfa6c9a8f411a28852ecf774314e38c0231f579",
+      "afterSourceDigest": "1c38062c907ec56b2b8166adcbfa6c9a8f411a28852ecf774314e38c0231f579"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src/features/notes/stores/notes.ts",
+      "to": "desktop/src/features/notes/stores/notes.ts",
+      "beforeSourceDigest": "dd904348c5f4bd56131402d4a8f068277088206d7f82b050703c52675ae91815",
+      "afterSourceDigest": "dd904348c5f4bd56131402d4a8f068277088206d7f82b050703c52675ae91815"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src/features/notes/types.ts",
+      "to": "desktop/src/features/notes/types.ts",
+      "beforeSourceDigest": "a987cb39c6ae672c6e4844a766ba163ec3aa3f550ecbf67cdc376e71b96779c4",
+      "afterSourceDigest": "a987cb39c6ae672c6e4844a766ba163ec3aa3f550ecbf67cdc376e71b96779c4"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src/main.tsx",
+      "to": "desktop/src/main.tsx",
+      "beforeSourceDigest": "0a5f5a329a67302722c2e196950dc9bf819e2c58e98d5a4c5d7b6046f69bf7e5",
+      "afterSourceDigest": "0a5f5a329a67302722c2e196950dc9bf819e2c58e98d5a4c5d7b6046f69bf7e5"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src/style.css",
+      "to": "desktop/src/style.css",
+      "beforeSourceDigest": "63aca3c4e1be06a65562e73c2339f90ec753a32d3275175da457a5a77f67c0d7",
+      "afterSourceDigest": "63aca3c4e1be06a65562e73c2339f90ec753a32d3275175da457a5a77f67c0d7"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/src/vite-env.d.ts",
+      "to": "desktop/src/vite-env.d.ts",
+      "beforeSourceDigest": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
+      "afterSourceDigest": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/tsconfig.json",
+      "to": "desktop/tsconfig.json",
+      "beforeSourceDigest": "4b1fcc68dcc293b9d94d66513060ae4ef6ca862b55e6532c69133818f3d36308",
+      "afterSourceDigest": "4b1fcc68dcc293b9d94d66513060ae4ef6ca862b55e6532c69133818f3d36308"
+    },
+    {
+      "kind": "preserve",
+      "from": "desktop/vite.config.ts",
+      "to": "desktop/vite.config.ts",
+      "beforeSourceDigest": "d11bc1804f1836555374ce83f01d2ed1e68d435a82b10cd58c7b8771d9a5a578",
+      "afterSourceDigest": "d11bc1804f1836555374ce83f01d2ed1e68d435a82b10cd58c7b8771d9a5a578"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/analysis_options.yaml",
+      "to": "mobile/analysis_options.yaml",
+      "beforeSourceDigest": "9b440b9fa8202785af3c410a47c850db5399e332846cb2022e9a3d07152edd56",
+      "afterSourceDigest": "9b440b9fa8202785af3c410a47c850db5399e332846cb2022e9a3d07152edd56"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/.gitignore",
+      "to": "mobile/android/.gitignore",
+      "beforeSourceDigest": "b027c9de1011765c015e5819bf857c0d75bfcd0886fb01721c091159012e50f1",
+      "afterSourceDigest": "b027c9de1011765c015e5819bf857c0d75bfcd0886fb01721c091159012e50f1"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/build.gradle.kts",
+      "to": "mobile/android/app/build.gradle.kts",
+      "beforeSourceDigest": "4d061198e210b1dc27df1fc035f18c4ce6c6130d6a70eedb49e2d57591589fac",
+      "afterSourceDigest": "4d061198e210b1dc27df1fc035f18c4ce6c6130d6a70eedb49e2d57591589fac"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/androidTest/kotlin/org/example/baseline_mobile/MainActivityTest.kt",
+      "to": "mobile/android/app/src/androidTest/kotlin/org/example/baseline_mobile/MainActivityTest.kt",
+      "beforeSourceDigest": "0c1aba07afa334770e1fab1977a423cdddfa80084a87167aa7dc4d8e32d1cba8",
+      "afterSourceDigest": "0c1aba07afa334770e1fab1977a423cdddfa80084a87167aa7dc4d8e32d1cba8"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/debug/AndroidManifest.xml",
+      "to": "mobile/android/app/src/debug/AndroidManifest.xml",
+      "beforeSourceDigest": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b",
+      "afterSourceDigest": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/AndroidManifest.xml",
+      "to": "mobile/android/app/src/main/AndroidManifest.xml",
+      "beforeSourceDigest": "9394d5680098515268bcbb8169f0f31aff66d14e9e4648a59150976bed9eadc4",
+      "afterSourceDigest": "9394d5680098515268bcbb8169f0f31aff66d14e9e4648a59150976bed9eadc4"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/kotlin/org/example/baseline_mobile/MainActivity.kt",
+      "to": "mobile/android/app/src/main/kotlin/org/example/baseline_mobile/MainActivity.kt",
+      "beforeSourceDigest": "7cac81cbe03cee8f1a0c317ae7fea759e884944d0e96655aefed05131a620227",
+      "afterSourceDigest": "7cac81cbe03cee8f1a0c317ae7fea759e884944d0e96655aefed05131a620227"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/res/drawable-v21/launch_background.xml",
+      "to": "mobile/android/app/src/main/res/drawable-v21/launch_background.xml",
+      "beforeSourceDigest": "7ca6d5cec2169c5a98661a119db23a6f3399c8fef2256ff04f3a642831282478",
+      "afterSourceDigest": "7ca6d5cec2169c5a98661a119db23a6f3399c8fef2256ff04f3a642831282478"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/res/drawable/launch_background.xml",
+      "to": "mobile/android/app/src/main/res/drawable/launch_background.xml",
+      "beforeSourceDigest": "94433756fe10005ddd6fc55cc5c0b1e9f3c10b66a08ceac795ece6713d34e28a",
+      "afterSourceDigest": "94433756fe10005ddd6fc55cc5c0b1e9f3c10b66a08ceac795ece6713d34e28a"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "to": "mobile/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "beforeSourceDigest": "6a7c8f0d703e3682108f9662f813302236240d3f8f638bb391e32bfb96055fef",
+      "afterSourceDigest": "6a7c8f0d703e3682108f9662f813302236240d3f8f638bb391e32bfb96055fef"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "to": "mobile/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "beforeSourceDigest": "c7c0c0189145e4e32a401c61c9bdc615754b0264e7afae24e834bb81049eaf81",
+      "afterSourceDigest": "c7c0c0189145e4e32a401c61c9bdc615754b0264e7afae24e834bb81049eaf81"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "to": "mobile/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "beforeSourceDigest": "e14aa40904929bf313fded22cf7e7ffcbf1d1aac4263b5ef1be8bfce650397aa",
+      "afterSourceDigest": "e14aa40904929bf313fded22cf7e7ffcbf1d1aac4263b5ef1be8bfce650397aa"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "to": "mobile/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "beforeSourceDigest": "4d470bf22d5c17d84edc5f82516d1ba8a1c09559cd761cefb792f86d9f52b540",
+      "afterSourceDigest": "4d470bf22d5c17d84edc5f82516d1ba8a1c09559cd761cefb792f86d9f52b540"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "to": "mobile/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "beforeSourceDigest": "3c34e1f298d0c9ea3455d46db6b7759c8211a49e9ec6e44b635fc5c87dfb4180",
+      "afterSourceDigest": "3c34e1f298d0c9ea3455d46db6b7759c8211a49e9ec6e44b635fc5c87dfb4180"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/res/values-night/styles.xml",
+      "to": "mobile/android/app/src/main/res/values-night/styles.xml",
+      "beforeSourceDigest": "8c5bad5152f217e837519f9c15211d19f39bd45f5f67faf6dd81cb4b299e518f",
+      "afterSourceDigest": "8c5bad5152f217e837519f9c15211d19f39bd45f5f67faf6dd81cb4b299e518f"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/main/res/values/styles.xml",
+      "to": "mobile/android/app/src/main/res/values/styles.xml",
+      "beforeSourceDigest": "937d7c82f539c72eb94fd3a3773f29b3d3fef1997213c92cb632298cedf4bda9",
+      "afterSourceDigest": "937d7c82f539c72eb94fd3a3773f29b3d3fef1997213c92cb632298cedf4bda9"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/app/src/profile/AndroidManifest.xml",
+      "to": "mobile/android/app/src/profile/AndroidManifest.xml",
+      "beforeSourceDigest": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b",
+      "afterSourceDigest": "30b0832ed8b92dfbd6ae2abfa939ccf26333d37600056b1572bd4a397a18a74b"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/baseline_mobile_android.iml",
+      "to": "mobile/android/baseline_mobile_android.iml",
+      "beforeSourceDigest": "90d961bc4ccb4b0ae3f75ce495c273f08745a55c50bd213e259723fc341d0193",
+      "afterSourceDigest": "90d961bc4ccb4b0ae3f75ce495c273f08745a55c50bd213e259723fc341d0193"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/build.gradle.kts",
+      "to": "mobile/android/build.gradle.kts",
+      "beforeSourceDigest": "6a26dba2cb8dfba1e74f540b0d17a89d96c1301d3c3bfda14348bed257fddcba",
+      "afterSourceDigest": "6a26dba2cb8dfba1e74f540b0d17a89d96c1301d3c3bfda14348bed257fddcba"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/gradle.properties",
+      "to": "mobile/android/gradle.properties",
+      "beforeSourceDigest": "0f82b18017fba6bb5ce3aa4b2d1a00c9382fc8aae7b1d9326e44b18abd66d80b",
+      "afterSourceDigest": "0f82b18017fba6bb5ce3aa4b2d1a00c9382fc8aae7b1d9326e44b18abd66d80b"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/gradle/wrapper/gradle-wrapper.properties",
+      "to": "mobile/android/gradle/wrapper/gradle-wrapper.properties",
+      "beforeSourceDigest": "b690d26223576fe4e63889fad9a00df81945cb870b9476cc5a563152a1a88a74",
+      "afterSourceDigest": "b690d26223576fe4e63889fad9a00df81945cb870b9476cc5a563152a1a88a74"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/gradlew",
+      "to": "mobile/android/gradlew",
+      "beforeSourceDigest": "ec56c02543666d92d9ac5ae7fcc48f88ce4de0deb8b7f9b39928ca46f68c1b2b",
+      "afterSourceDigest": "ec56c02543666d92d9ac5ae7fcc48f88ce4de0deb8b7f9b39928ca46f68c1b2b"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/gradlew.bat",
+      "to": "mobile/android/gradlew.bat",
+      "beforeSourceDigest": "f4f428c5626b3d90cef3bd4e7fd3ad3ea5760442db8c09d586b5bfe031dbe5e3",
+      "afterSourceDigest": "f4f428c5626b3d90cef3bd4e7fd3ad3ea5760442db8c09d586b5bfe031dbe5e3"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/android/settings.gradle.kts",
+      "to": "mobile/android/settings.gradle.kts",
+      "beforeSourceDigest": "016759283e88ade6eba92910583feeef88b962839b957aa414296afd2952d122",
+      "afterSourceDigest": "016759283e88ade6eba92910583feeef88b962839b957aa414296afd2952d122"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/assets/capabilities/index.json",
+      "to": "mobile/assets/capabilities/index.json",
+      "beforeSourceDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660",
+      "afterSourceDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/flutter_rust_bridge.yaml",
+      "to": "mobile/flutter_rust_bridge.yaml",
+      "beforeSourceDigest": "5170b87283f11e50a9839036f2bced6768ef8433f66692e6fb60c2a0c18803e0",
+      "afterSourceDigest": "5170b87283f11e50a9839036f2bced6768ef8433f66692e6fb60c2a0c18803e0"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/integration_test/notes_test.dart",
+      "to": "mobile/integration_test/notes_test.dart",
+      "beforeSourceDigest": "7f41a07b5b03a4aac817ddf8df00fdbf623a889e79f6f427e716908c5e1a1c2d",
+      "afterSourceDigest": "7f41a07b5b03a4aac817ddf8df00fdbf623a889e79f6f427e716908c5e1a1c2d"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/.gitignore",
+      "to": "mobile/ios/.gitignore",
+      "beforeSourceDigest": "37380775aeb2499662b7aca80f4ac4c95ae827c3ba2bfa179aa3e9af4812c623",
+      "afterSourceDigest": "37380775aeb2499662b7aca80f4ac4c95ae827c3ba2bfa179aa3e9af4812c623"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Flutter/AppFrameworkInfo.plist",
+      "to": "mobile/ios/Flutter/AppFrameworkInfo.plist",
+      "beforeSourceDigest": "da12038f9b2688a8a26160fea2609fa8fcb11421448c109f09c0f573efe7698d",
+      "afterSourceDigest": "da12038f9b2688a8a26160fea2609fa8fcb11421448c109f09c0f573efe7698d"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Flutter/Debug.xcconfig",
+      "to": "mobile/ios/Flutter/Debug.xcconfig",
+      "beforeSourceDigest": "690b8a8b1ae15ddd29b241429963e971bbc6720ab22f154cf8cf6b085b6d4925",
+      "afterSourceDigest": "690b8a8b1ae15ddd29b241429963e971bbc6720ab22f154cf8cf6b085b6d4925"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Flutter/Release.xcconfig",
+      "to": "mobile/ios/Flutter/Release.xcconfig",
+      "beforeSourceDigest": "75abb819a9de1e0e41c835e7307bc64a506cac25a9a5c0b0d8253fa1c3d5d422",
+      "afterSourceDigest": "75abb819a9de1e0e41c835e7307bc64a506cac25a9a5c0b0d8253fa1c3d5d422"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Podfile",
+      "to": "mobile/ios/Podfile",
+      "beforeSourceDigest": "f58e643b37a91401e0ab83570b844718ddb78b14cc062a4bdee5934a29b86fd8",
+      "afterSourceDigest": "f58e643b37a91401e0ab83570b844718ddb78b14cc062a4bdee5934a29b86fd8"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner.xcodeproj/project.pbxproj",
+      "to": "mobile/ios/Runner.xcodeproj/project.pbxproj",
+      "beforeSourceDigest": "0b408b6e7ffe0f20aa6fef28780a3076e4d978d70ec7d4bc327c3611bb3a191c",
+      "afterSourceDigest": "0b408b6e7ffe0f20aa6fef28780a3076e4d978d70ec7d4bc327c3611bb3a191c"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "to": "mobile/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "beforeSourceDigest": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f",
+      "afterSourceDigest": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "to": "mobile/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "beforeSourceDigest": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+      "afterSourceDigest": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "to": "mobile/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "beforeSourceDigest": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f",
+      "afterSourceDigest": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
+      "to": "mobile/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
+      "beforeSourceDigest": "9fbce429f56243561dd437a527136c9f9ed77165e3b271b923faf236cfcd0484",
+      "afterSourceDigest": "9fbce429f56243561dd437a527136c9f9ed77165e3b271b923faf236cfcd0484"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner.xcworkspace/contents.xcworkspacedata",
+      "to": "mobile/ios/Runner.xcworkspace/contents.xcworkspacedata",
+      "beforeSourceDigest": "46c3c9702ff7c5584e11c954d943cfb6e07fb26e3fbd072ddbc0f388aa352de1",
+      "afterSourceDigest": "46c3c9702ff7c5584e11c954d943cfb6e07fb26e3fbd072ddbc0f388aa352de1"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "to": "mobile/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "beforeSourceDigest": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+      "afterSourceDigest": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "to": "mobile/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+      "beforeSourceDigest": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f",
+      "afterSourceDigest": "11b247bc6796892d67c9a821d18604db4dd6a880981b34f38460b9866e6b247f"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/AppDelegate.swift",
+      "to": "mobile/ios/Runner/AppDelegate.swift",
+      "beforeSourceDigest": "451c6d9ba0a2b3ff43092ea349c60fa79a91f1158b915eb29dbdd357cb95d7b8",
+      "afterSourceDigest": "451c6d9ba0a2b3ff43092ea349c60fa79a91f1158b915eb29dbdd357cb95d7b8"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "beforeSourceDigest": "3b1e214f466ffedff74baa5598ad5c4421130eea6bc8d57b8fe23435e8280ae4",
+      "afterSourceDigest": "3b1e214f466ffedff74baa5598ad5c4421130eea6bc8d57b8fe23435e8280ae4"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png",
+      "beforeSourceDigest": "7770183009e914112de7d8ef1d235a6a30c5834424858e0d2f8253f6b8d31926",
+      "afterSourceDigest": "7770183009e914112de7d8ef1d235a6a30c5834424858e0d2f8253f6b8d31926"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png",
+      "beforeSourceDigest": "cab10a0d391ec5bc09ef50ce49e8ad401cee7ef03707ec0923a222c5c2b3d212",
+      "afterSourceDigest": "cab10a0d391ec5bc09ef50ce49e8ad401cee7ef03707ec0923a222c5c2b3d212"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png",
+      "beforeSourceDigest": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b",
+      "afterSourceDigest": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png",
+      "beforeSourceDigest": "c6e6d3b215ae744a9c391f4c4d44157eff5e739d6ad6c39f9bfa5df66dddd267",
+      "afterSourceDigest": "c6e6d3b215ae744a9c391f4c4d44157eff5e739d6ad6c39f9bfa5df66dddd267"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png",
+      "beforeSourceDigest": "5dee24dc104ac76dc162e42ae0beb163d426bf365562ee28ba7b3ad368559a60",
+      "afterSourceDigest": "5dee24dc104ac76dc162e42ae0beb163d426bf365562ee28ba7b3ad368559a60"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png",
+      "beforeSourceDigest": "a9b21eb6f4271385655a8771f76e29eef8c1107d7879cbcfc567e6619d1f716a",
+      "afterSourceDigest": "a9b21eb6f4271385655a8771f76e29eef8c1107d7879cbcfc567e6619d1f716a"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png",
+      "beforeSourceDigest": "e677d701ffe4af7bc2935098d6b3984cc9ab7ace573e6900955a5535b12410cf",
+      "afterSourceDigest": "e677d701ffe4af7bc2935098d6b3984cc9ab7ace573e6900955a5535b12410cf"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png",
+      "beforeSourceDigest": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b",
+      "afterSourceDigest": "b9ad02cf6576a04d1b6806ac02a2431481b448dd0c2e505ce25842d1f7c4730b"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png",
+      "beforeSourceDigest": "7c61c42fc7b657d9cf314d32a4ec458f0647c3aaf360be1b9377857266ec2499",
+      "afterSourceDigest": "7c61c42fc7b657d9cf314d32a4ec458f0647c3aaf360be1b9377857266ec2499"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png",
+      "beforeSourceDigest": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e",
+      "afterSourceDigest": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png",
+      "beforeSourceDigest": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e",
+      "afterSourceDigest": "19be171481dc71a0b2803ebcd01dd8b0c5fd5778dee34c0a3cabc948c225f24e"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png",
+      "beforeSourceDigest": "4209a49e44a92ec40a327d3455eb1b1c153ee83d75de1c2be0a12ab18b2ff9de",
+      "afterSourceDigest": "4209a49e44a92ec40a327d3455eb1b1c153ee83d75de1c2be0a12ab18b2ff9de"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png",
+      "beforeSourceDigest": "836c918cb613249eba0483a6b02fa3df3c1c0a89a315ee4d3b88509b83c7ab73",
+      "afterSourceDigest": "836c918cb613249eba0483a6b02fa3df3c1c0a89a315ee4d3b88509b83c7ab73"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png",
+      "beforeSourceDigest": "41c7d42f6e61f8fe7f30b1ffa2256aecbc9682be06d18c4a3062043e1a2e547c",
+      "afterSourceDigest": "41c7d42f6e61f8fe7f30b1ffa2256aecbc9682be06d18c4a3062043e1a2e547c"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png",
+      "beforeSourceDigest": "5d7e5bdf01b93802bc973345b3a78c038907147625035952a08a115a563b7f81",
+      "afterSourceDigest": "5d7e5bdf01b93802bc973345b3a78c038907147625035952a08a115a563b7f81"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
+      "to": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
+      "beforeSourceDigest": "ccc7950fd5f5b82067c85f667940a9d59189151460761ece8098ca78daa19469",
+      "afterSourceDigest": "ccc7950fd5f5b82067c85f667940a9d59189151460761ece8098ca78daa19469"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png",
+      "beforeSourceDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "afterSourceDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png",
+      "beforeSourceDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "afterSourceDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png",
+      "to": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png",
+      "beforeSourceDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20",
+      "afterSourceDigest": "93ae7d494fad0fb30cbf3ae746a39c4bc7a0f8bbf87fbb587a3f3c01f3c5ce20"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md",
+      "to": "mobile/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md",
+      "beforeSourceDigest": "a985b626c4f7546a8ba392d135e9226c3547c8e2b46895f5f2bdf40d7b14ef9f",
+      "afterSourceDigest": "a985b626c4f7546a8ba392d135e9226c3547c8e2b46895f5f2bdf40d7b14ef9f"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Base.lproj/LaunchScreen.storyboard",
+      "to": "mobile/ios/Runner/Base.lproj/LaunchScreen.storyboard",
+      "beforeSourceDigest": "857e61203b3deafb05766d8fcda898b86a7cb6f3d5e385ecc9926c4d698215e9",
+      "afterSourceDigest": "857e61203b3deafb05766d8fcda898b86a7cb6f3d5e385ecc9926c4d698215e9"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Base.lproj/Main.storyboard",
+      "to": "mobile/ios/Runner/Base.lproj/Main.storyboard",
+      "beforeSourceDigest": "fd367b6c43006d61b730f674970dd48b9f662c8f2264e52ffc1558102a2c9f2d",
+      "afterSourceDigest": "fd367b6c43006d61b730f674970dd48b9f662c8f2264e52ffc1558102a2c9f2d"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Info.plist",
+      "to": "mobile/ios/Runner/Info.plist",
+      "beforeSourceDigest": "c11a49c3b33461da165594635f82954031e9103a7c9f33bb27d6fb9aee69344e",
+      "afterSourceDigest": "c11a49c3b33461da165594635f82954031e9103a7c9f33bb27d6fb9aee69344e"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/Runner-Bridging-Header.h",
+      "to": "mobile/ios/Runner/Runner-Bridging-Header.h",
+      "beforeSourceDigest": "1a8d11d01d1cc92c650c9c9ed35299240052d4683a15a719a2315ef44185e074",
+      "afterSourceDigest": "1a8d11d01d1cc92c650c9c9ed35299240052d4683a15a719a2315ef44185e074"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/Runner/SceneDelegate.swift",
+      "to": "mobile/ios/Runner/SceneDelegate.swift",
+      "beforeSourceDigest": "add68b905971dedfcc0d0b5b7118030de5925ba8c081ad9815463699e3a444ad",
+      "afterSourceDigest": "add68b905971dedfcc0d0b5b7118030de5925ba8c081ad9815463699e3a444ad"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/ios/RunnerTests/RunnerTests.swift",
+      "to": "mobile/ios/RunnerTests/RunnerTests.swift",
+      "beforeSourceDigest": "5e8f4908dacea6f29b2a790e4d38bf5fded69096063f9a27a2f21584d62b30c0",
+      "afterSourceDigest": "5e8f4908dacea6f29b2a790e4d38bf5fded69096063f9a27a2f21584d62b30c0"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/bridge/generated/api/notes.dart",
+      "to": "mobile/lib/bridge/generated/api/notes.dart",
+      "beforeSourceDigest": "99eaa35374cc9eea4493de9f6b6eff09b198299c5fad77edf0341d73fae16749",
+      "afterSourceDigest": "99eaa35374cc9eea4493de9f6b6eff09b198299c5fad77edf0341d73fae16749"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/bridge/generated/frb_generated.dart",
+      "to": "mobile/lib/bridge/generated/frb_generated.dart",
+      "beforeSourceDigest": "f87591473d610ab548be70ce817e7f88572322712da6fb8377b62d4f8902fb30",
+      "afterSourceDigest": "f87591473d610ab548be70ce817e7f88572322712da6fb8377b62d4f8902fb30"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/bridge/generated/frb_generated.io.dart",
+      "to": "mobile/lib/bridge/generated/frb_generated.io.dart",
+      "beforeSourceDigest": "1a77914208fdc0288ac490c814bac9a8c4f30e47b13b4c908123faa38cd0ac93",
+      "afterSourceDigest": "1a77914208fdc0288ac490c814bac9a8c4f30e47b13b4c908123faa38cd0ac93"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/bridge/generated/frb_generated.web.dart",
+      "to": "mobile/lib/bridge/generated/frb_generated.web.dart",
+      "beforeSourceDigest": "915fed37a54723ebaf9af24856636990e9995f9db5740b053ed3bf4f55bf1c76",
+      "afterSourceDigest": "915fed37a54723ebaf9af24856636990e9995f9db5740b053ed3bf4f55bf1c76"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/features/notes/data/rust_capability_repository.dart",
+      "to": "mobile/lib/features/notes/data/rust_capability_repository.dart",
+      "beforeSourceDigest": "aec648592a423e48707ac26a81d5320fbc0ef27c4c3b56515d93a0a10ddf5bf6",
+      "afterSourceDigest": "aec648592a423e48707ac26a81d5320fbc0ef27c4c3b56515d93a0a10ddf5bf6"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/features/notes/data/rust_note_repository.dart",
+      "to": "mobile/lib/features/notes/data/rust_note_repository.dart",
+      "beforeSourceDigest": "82d5006898136948f05801484f428c17e7e92df8028b61a7ebdf582d8d0c1810",
+      "afterSourceDigest": "82d5006898136948f05801484f428c17e7e92df8028b61a7ebdf582d8d0c1810"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/features/notes/domain/capability.dart",
+      "to": "mobile/lib/features/notes/domain/capability.dart",
+      "beforeSourceDigest": "1ead66a417f3865c87f92ed83b3c11b92ae39717f5d021fa0bbe7e64b35b367a",
+      "afterSourceDigest": "1ead66a417f3865c87f92ed83b3c11b92ae39717f5d021fa0bbe7e64b35b367a"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/features/notes/domain/note.dart",
+      "to": "mobile/lib/features/notes/domain/note.dart",
+      "beforeSourceDigest": "59d4ab88b4524a17727b6e93bda07701059fbe44b728b96d5a4084f91b72b600",
+      "afterSourceDigest": "59d4ab88b4524a17727b6e93bda07701059fbe44b728b96d5a4084f91b72b600"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/features/notes/presentation/providers/capabilities.dart",
+      "to": "mobile/lib/features/notes/presentation/providers/capabilities.dart",
+      "beforeSourceDigest": "e1578df8ef3dd44059141fb2c46d6fd6db71279e851c064284e1f4bdb5a142c1",
+      "afterSourceDigest": "e1578df8ef3dd44059141fb2c46d6fd6db71279e851c064284e1f4bdb5a142c1"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/features/notes/presentation/providers/capabilities.g.dart",
+      "to": "mobile/lib/features/notes/presentation/providers/capabilities.g.dart",
+      "beforeSourceDigest": "6f8b4ee059a745a7028a570b505619f947df132bdc90814466e4c2d3769b8945",
+      "afterSourceDigest": "6f8b4ee059a745a7028a570b505619f947df132bdc90814466e4c2d3769b8945"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/features/notes/presentation/providers/notes.dart",
+      "to": "mobile/lib/features/notes/presentation/providers/notes.dart",
+      "beforeSourceDigest": "299cbf8ba65b28e036629a5e30d6d34fc2ee89596fab3dd9608afd72ef719df1",
+      "afterSourceDigest": "299cbf8ba65b28e036629a5e30d6d34fc2ee89596fab3dd9608afd72ef719df1"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/features/notes/presentation/providers/notes.g.dart",
+      "to": "mobile/lib/features/notes/presentation/providers/notes.g.dart",
+      "beforeSourceDigest": "c3975d434c7c8c6c522c672d488568a412ea63d032eb673746340b238d8f4a68",
+      "afterSourceDigest": "c3975d434c7c8c6c522c672d488568a412ea63d032eb673746340b238d8f4a68"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/features/notes/presentation/screens/notes_screen.dart",
+      "to": "mobile/lib/features/notes/presentation/screens/notes_screen.dart",
+      "beforeSourceDigest": "1cba3e71dbc8f465e540957e01b586d57e69d6a4619b0c2378eeac9986a5446c",
+      "afterSourceDigest": "1cba3e71dbc8f465e540957e01b586d57e69d6a4619b0c2378eeac9986a5446c"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/lib/main.dart",
+      "to": "mobile/lib/main.dart",
+      "beforeSourceDigest": "e3c1a1038560d4f43c2e1333d342e9edc80951bbcf07d9cbd3a84eb98094f35e",
+      "afterSourceDigest": "e3c1a1038560d4f43c2e1333d342e9edc80951bbcf07d9cbd3a84eb98094f35e"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/pubspec.lock",
+      "to": "mobile/pubspec.lock",
+      "beforeSourceDigest": "9e01db999aa34d6c39dac7a2aa5c3496bfb8d5ce3e0c53dc8dbc077791ecfc01",
+      "afterSourceDigest": "9e01db999aa34d6c39dac7a2aa5c3496bfb8d5ce3e0c53dc8dbc077791ecfc01"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/pubspec.yaml",
+      "to": "mobile/pubspec.yaml",
+      "beforeSourceDigest": "bbb519432b85580309d71ee0b601b7a021a49f41883dd97567f4ab4d249dcfff",
+      "afterSourceDigest": "bbb519432b85580309d71ee0b601b7a021a49f41883dd97567f4ab4d249dcfff"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/.gitignore",
+      "to": "mobile/rust_builder/.gitignore",
+      "beforeSourceDigest": "178d01444a4a93e2715a5006213c636aff80f6c693c86500c8277b6718e06d2b",
+      "afterSourceDigest": "178d01444a4a93e2715a5006213c636aff80f6c693c86500c8277b6718e06d2b"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/android/.gitignore",
+      "to": "mobile/rust_builder/android/.gitignore",
+      "beforeSourceDigest": "419c1e3c95573dbbc3676451a01808dcd07953c55aff02fff27e201703af725c",
+      "afterSourceDigest": "419c1e3c95573dbbc3676451a01808dcd07953c55aff02fff27e201703af725c"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/android/build.gradle",
+      "to": "mobile/rust_builder/android/build.gradle",
+      "beforeSourceDigest": "d75b0085ab24676dd6746e2ff17746d71b6c6302df42efa49d98d563fb059acf",
+      "afterSourceDigest": "d75b0085ab24676dd6746e2ff17746d71b6c6302df42efa49d98d563fb059acf"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/android/settings.gradle",
+      "to": "mobile/rust_builder/android/settings.gradle",
+      "beforeSourceDigest": "4a26cda2f66e46ab856e4a6a82cc8dee81da379aaceb2a33ee88fb0b3b91a4fa",
+      "afterSourceDigest": "4a26cda2f66e46ab856e4a6a82cc8dee81da379aaceb2a33ee88fb0b3b91a4fa"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/android/src/main/AndroidManifest.xml",
+      "to": "mobile/rust_builder/android/src/main/AndroidManifest.xml",
+      "beforeSourceDigest": "b79dadd69fa1c5dbcf9e0dda2f0b6903c7e78358c793c37df9e49d01ca84acb6",
+      "afterSourceDigest": "b79dadd69fa1c5dbcf9e0dda2f0b6903c7e78358c793c37df9e49d01ca84acb6"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/.gitignore",
+      "to": "mobile/rust_builder/cargokit/.gitignore",
+      "beforeSourceDigest": "ca39177a5e71fc3d705e49e3f2a86cc6beb4ebc86a5b3f0bd2eb101d57bded0a",
+      "afterSourceDigest": "ca39177a5e71fc3d705e49e3f2a86cc6beb4ebc86a5b3f0bd2eb101d57bded0a"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_pod.sh",
+      "to": "mobile/rust_builder/cargokit/build_pod.sh",
+      "beforeSourceDigest": "52149a052087bd2a746ed25430c984333dd5a6d0abab118f3f5634980f210ea9",
+      "afterSourceDigest": "52149a052087bd2a746ed25430c984333dd5a6d0abab118f3f5634980f210ea9"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/analysis_options.yaml",
+      "to": "mobile/rust_builder/cargokit/build_tool/analysis_options.yaml",
+      "beforeSourceDigest": "6cb5ec6808a5fd2a2acc4a866cff8761f34efa536f691219251f93688ffa8f53",
+      "afterSourceDigest": "6cb5ec6808a5fd2a2acc4a866cff8761f34efa536f691219251f93688ffa8f53"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/bin/build_tool.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/bin/build_tool.dart",
+      "beforeSourceDigest": "12b0b44884ee36164b2f71111efc859b1fb0b5d690bb68c8213074e9dfe38e90",
+      "afterSourceDigest": "12b0b44884ee36164b2f71111efc859b1fb0b5d690bb68c8213074e9dfe38e90"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/build_tool.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/build_tool.dart",
+      "beforeSourceDigest": "363b9137fcffb4d0a2b15b869cd6e8ebacf7ec13a36b8b3ae808304f12c17684",
+      "afterSourceDigest": "363b9137fcffb4d0a2b15b869cd6e8ebacf7ec13a36b8b3ae808304f12c17684"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/android_environment.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/android_environment.dart",
+      "beforeSourceDigest": "59fffcd7d3a60df93d52b14fd2052660036404c73678ecb792d18cca7ed5498c",
+      "afterSourceDigest": "59fffcd7d3a60df93d52b14fd2052660036404c73678ecb792d18cca7ed5498c"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/artifacts_provider.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/artifacts_provider.dart",
+      "beforeSourceDigest": "46ef875c9191acfb3f06625bf0d3e2d5da5f6fb12bd36f9bb59f20d2edfadc0d",
+      "afterSourceDigest": "46ef875c9191acfb3f06625bf0d3e2d5da5f6fb12bd36f9bb59f20d2edfadc0d"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/build_cmake.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/build_cmake.dart",
+      "beforeSourceDigest": "4eb4b5f884d3688421876b8713456f68c51fbbdf4ff56ae059109fdc5897fb4b",
+      "afterSourceDigest": "4eb4b5f884d3688421876b8713456f68c51fbbdf4ff56ae059109fdc5897fb4b"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/build_gradle.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/build_gradle.dart",
+      "beforeSourceDigest": "6ba441ff0c579ae4a85a756ff978b6f724821bb2fefd49c124a7363ee1b6df49",
+      "afterSourceDigest": "6ba441ff0c579ae4a85a756ff978b6f724821bb2fefd49c124a7363ee1b6df49"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/build_pod.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/build_pod.dart",
+      "beforeSourceDigest": "1d5ef0e0d44eb8edf2f980d7a331342db02ade05a5c767dedab09bef43b53077",
+      "afterSourceDigest": "1d5ef0e0d44eb8edf2f980d7a331342db02ade05a5c767dedab09bef43b53077"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/build_tool.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/build_tool.dart",
+      "beforeSourceDigest": "8f93b6df784f67375568775de72641a3e32e25cdca89a798bf603615ef1e9d55",
+      "afterSourceDigest": "8f93b6df784f67375568775de72641a3e32e25cdca89a798bf603615ef1e9d55"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/builder.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/builder.dart",
+      "beforeSourceDigest": "83d1297e4124f3c85a74f0f0245195431bf9eaf2b31b4dca006752f989ac1737",
+      "afterSourceDigest": "83d1297e4124f3c85a74f0f0245195431bf9eaf2b31b4dca006752f989ac1737"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/cargo.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/cargo.dart",
+      "beforeSourceDigest": "dbd19f431dc2a3347b64b23c06929e88d0ae0077b173e70016648b20b5e67741",
+      "afterSourceDigest": "dbd19f431dc2a3347b64b23c06929e88d0ae0077b173e70016648b20b5e67741"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/crate_hash.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/crate_hash.dart",
+      "beforeSourceDigest": "4fbe239a8d42faede8c23b57721159980ea57bba21f5f003abc3bec6bf352f68",
+      "afterSourceDigest": "4fbe239a8d42faede8c23b57721159980ea57bba21f5f003abc3bec6bf352f68"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/dedup_archive.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/dedup_archive.dart",
+      "beforeSourceDigest": "14d9ddf30f90a60e2f5cafb7d12a1c148f058f95ee6e68e4ffa036d4403b46f0",
+      "afterSourceDigest": "14d9ddf30f90a60e2f5cafb7d12a1c148f058f95ee6e68e4ffa036d4403b46f0"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/environment.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/environment.dart",
+      "beforeSourceDigest": "c5ebb73b34e185377ffcc051ba86d61fa6777ce789c6904d6af59f6c40e3bc4c",
+      "afterSourceDigest": "c5ebb73b34e185377ffcc051ba86d61fa6777ce789c6904d6af59f6c40e3bc4c"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/logging.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/logging.dart",
+      "beforeSourceDigest": "a9040b71b546027bc22fdee1f4367f8bbabc1a2c9ed89f8e821bc3565e97f3d0",
+      "afterSourceDigest": "a9040b71b546027bc22fdee1f4367f8bbabc1a2c9ed89f8e821bc3565e97f3d0"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/options.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/options.dart",
+      "beforeSourceDigest": "06131081da126dcb0f3142b376c93c575e3e96fa8e835c59f64caaf3c7c92cb0",
+      "afterSourceDigest": "06131081da126dcb0f3142b376c93c575e3e96fa8e835c59f64caaf3c7c92cb0"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/precompile_binaries.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/precompile_binaries.dart",
+      "beforeSourceDigest": "3148e241cb33c663b58b4ad6e80c98e7ac91ef6f8dc155b6c155fbe256a80578",
+      "afterSourceDigest": "3148e241cb33c663b58b4ad6e80c98e7ac91ef6f8dc155b6c155fbe256a80578"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/rustup.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/rustup.dart",
+      "beforeSourceDigest": "a9d57e8df0428c94a8d02fbe56bdb686c10c220edc9cf1d2d63f1bf8377269cb",
+      "afterSourceDigest": "a9d57e8df0428c94a8d02fbe56bdb686c10c220edc9cf1d2d63f1bf8377269cb"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/target.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/target.dart",
+      "beforeSourceDigest": "409938b6217ee23b3f642d2d4e0466ef47b2888877059d8275bd289ab124dc95",
+      "afterSourceDigest": "409938b6217ee23b3f642d2d4e0466ef47b2888877059d8275bd289ab124dc95"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/util.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/util.dart",
+      "beforeSourceDigest": "7baa9fff80a3da72383698f1205b17c96e8acb5b7499413072ba70a371852a0a",
+      "afterSourceDigest": "7baa9fff80a3da72383698f1205b17c96e8acb5b7499413072ba70a371852a0a"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/lib/src/verify_binaries.dart",
+      "to": "mobile/rust_builder/cargokit/build_tool/lib/src/verify_binaries.dart",
+      "beforeSourceDigest": "1f26883a2cc42ce868512f7633cfc145753340cfc4f8012b5507dcbee23361d1",
+      "afterSourceDigest": "1f26883a2cc42ce868512f7633cfc145753340cfc4f8012b5507dcbee23361d1"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/pubspec.lock",
+      "to": "mobile/rust_builder/cargokit/build_tool/pubspec.lock",
+      "beforeSourceDigest": "d16c36cbd3089b521fab03a8ced72e46f768021438486835233a1f655913372a",
+      "afterSourceDigest": "d16c36cbd3089b521fab03a8ced72e46f768021438486835233a1f655913372a"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/pubspec.yaml",
+      "to": "mobile/rust_builder/cargokit/build_tool/pubspec.yaml",
+      "beforeSourceDigest": "b49e13fa7bd97fc05b9ff40eb58ae749981c1b7f1ca81b7ef54db542c1c04d3f",
+      "afterSourceDigest": "b49e13fa7bd97fc05b9ff40eb58ae749981c1b7f1ca81b7ef54db542c1c04d3f"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/build_tool/README.md",
+      "to": "mobile/rust_builder/cargokit/build_tool/README.md",
+      "beforeSourceDigest": "610c79f3c40e1807d4731cf9f530d4d1218be4ba9b97dda87a01d02ff5295dbb",
+      "afterSourceDigest": "610c79f3c40e1807d4731cf9f530d4d1218be4ba9b97dda87a01d02ff5295dbb"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/cmake/cargokit.cmake",
+      "to": "mobile/rust_builder/cargokit/cmake/cargokit.cmake",
+      "beforeSourceDigest": "020a2c9a86f8266b51ef8ee5612471c74a421ff498c8ec6d76910126fb701cea",
+      "afterSourceDigest": "020a2c9a86f8266b51ef8ee5612471c74a421ff498c8ec6d76910126fb701cea"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/cmake/resolve_symlinks.ps1",
+      "to": "mobile/rust_builder/cargokit/cmake/resolve_symlinks.ps1",
+      "beforeSourceDigest": "5a14a8bbea2ff777a761d47e223cac0a1f52747fd188eb495402ef3c8a0dd60f",
+      "afterSourceDigest": "5a14a8bbea2ff777a761d47e223cac0a1f52747fd188eb495402ef3c8a0dd60f"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/gradle/plugin.gradle",
+      "to": "mobile/rust_builder/cargokit/gradle/plugin.gradle",
+      "beforeSourceDigest": "85db1161a8fc3bf9f4a06bd3aaf968751c442b6a0fe9d5e858a5e5e37ec5dcf6",
+      "afterSourceDigest": "85db1161a8fc3bf9f4a06bd3aaf968751c442b6a0fe9d5e858a5e5e37ec5dcf6"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/LICENSE",
+      "to": "mobile/rust_builder/cargokit/LICENSE",
+      "beforeSourceDigest": "8b6ab9f32559167fe8cbda3f9a3da7bb80cc050c23f4d879ae62a37e61ea9930",
+      "afterSourceDigest": "8b6ab9f32559167fe8cbda3f9a3da7bb80cc050c23f4d879ae62a37e61ea9930"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/README",
+      "to": "mobile/rust_builder/cargokit/README",
+      "beforeSourceDigest": "e17ab38d8143d8eec21535554837e099c58e4bd6a88be41d92acac46809bffdb",
+      "afterSourceDigest": "e17ab38d8143d8eec21535554837e099c58e4bd6a88be41d92acac46809bffdb"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/run_build_tool.cmd",
+      "to": "mobile/rust_builder/cargokit/run_build_tool.cmd",
+      "beforeSourceDigest": "52c0a2f95055e2b275d996af807c96f4b0cf73f99e153b0c5ccd3e1779f667db",
+      "afterSourceDigest": "52c0a2f95055e2b275d996af807c96f4b0cf73f99e153b0c5ccd3e1779f667db"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/cargokit/run_build_tool.sh",
+      "to": "mobile/rust_builder/cargokit/run_build_tool.sh",
+      "beforeSourceDigest": "babfe8e93dce2d0ee88eb3a62a3936b2f09efba58c10e5e8446a80094a3d91b6",
+      "afterSourceDigest": "babfe8e93dce2d0ee88eb3a62a3936b2f09efba58c10e5e8446a80094a3d91b6"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/ios/Classes/dummy_file.c",
+      "to": "mobile/rust_builder/ios/Classes/dummy_file.c",
+      "beforeSourceDigest": "c3e36cb59b0192acfc1250123da4930f94eec8afc95405294a3dc974f1576953",
+      "afterSourceDigest": "c3e36cb59b0192acfc1250123da4930f94eec8afc95405294a3dc974f1576953"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/ios/gen_ui_ffi.podspec",
+      "to": "mobile/rust_builder/ios/gen_ui_ffi.podspec",
+      "beforeSourceDigest": "4ca92a1e3ededef5bd4e30720b79027fd3963a1f53398295f97eddc9e5da1b43",
+      "afterSourceDigest": "4ca92a1e3ededef5bd4e30720b79027fd3963a1f53398295f97eddc9e5da1b43"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/linux/CMakeLists.txt",
+      "to": "mobile/rust_builder/linux/CMakeLists.txt",
+      "beforeSourceDigest": "9a72484b045492acd5e5be027e7f69f770be4950d776dd017c0830fccd6f3bf8",
+      "afterSourceDigest": "9a72484b045492acd5e5be027e7f69f770be4950d776dd017c0830fccd6f3bf8"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/macos/Classes/dummy_file.c",
+      "to": "mobile/rust_builder/macos/Classes/dummy_file.c",
+      "beforeSourceDigest": "c3e36cb59b0192acfc1250123da4930f94eec8afc95405294a3dc974f1576953",
+      "afterSourceDigest": "c3e36cb59b0192acfc1250123da4930f94eec8afc95405294a3dc974f1576953"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/macos/gen_ui_ffi.podspec",
+      "to": "mobile/rust_builder/macos/gen_ui_ffi.podspec",
+      "beforeSourceDigest": "c100992b0e8cb8acbb7c9c61c72adae2fb1443a7f752769f011fe26d47f6f35e",
+      "afterSourceDigest": "c100992b0e8cb8acbb7c9c61c72adae2fb1443a7f752769f011fe26d47f6f35e"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/pubspec.yaml",
+      "to": "mobile/rust_builder/pubspec.yaml",
+      "beforeSourceDigest": "a6deca15aa63ebff993863c9ffbe5ba4f3dbde90b7ace24cf28de22723421967",
+      "afterSourceDigest": "a6deca15aa63ebff993863c9ffbe5ba4f3dbde90b7ace24cf28de22723421967"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/README.md",
+      "to": "mobile/rust_builder/README.md",
+      "beforeSourceDigest": "e4c2fff2644831a970493b1e4c0b23c81e40f3e315db910ad3e4c0151b70ae3d",
+      "afterSourceDigest": "e4c2fff2644831a970493b1e4c0b23c81e40f3e315db910ad3e4c0151b70ae3d"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/UPSTREAM.md",
+      "to": "mobile/rust_builder/UPSTREAM.md",
+      "beforeSourceDigest": "1d25a7ba4310930b2eb620db964a913afb05f2686126a4d2bfe8114cfd3c7ccb",
+      "afterSourceDigest": "1d25a7ba4310930b2eb620db964a913afb05f2686126a4d2bfe8114cfd3c7ccb"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/windows/.gitignore",
+      "to": "mobile/rust_builder/windows/.gitignore",
+      "beforeSourceDigest": "e967a837f76ce8dea7119be2fbc10ab1fc75845c9245f9af8a994151b1353b05",
+      "afterSourceDigest": "e967a837f76ce8dea7119be2fbc10ab1fc75845c9245f9af8a994151b1353b05"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/rust_builder/windows/CMakeLists.txt",
+      "to": "mobile/rust_builder/windows/CMakeLists.txt",
+      "beforeSourceDigest": "bf9bd291c39f2d68ccaf591e41c55f8ff92aed094e2a050dfe5d60a91ff19d15",
+      "afterSourceDigest": "bf9bd291c39f2d68ccaf591e41c55f8ff92aed094e2a050dfe5d60a91ff19d15"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/test_driver/integration_test.dart",
+      "to": "mobile/test_driver/integration_test.dart",
+      "beforeSourceDigest": "23f636e362e0e947b668ea4b87ad9a1293490582418e997b9a1eed33069111bb",
+      "afterSourceDigest": "23f636e362e0e947b668ea4b87ad9a1293490582418e997b9a1eed33069111bb"
+    },
+    {
+      "kind": "preserve",
+      "from": "mobile/test/note_test.dart",
+      "to": "mobile/test/note_test.dart",
+      "beforeSourceDigest": "97c89cccbac4d8846a6331e8ba4f3e93a8c1aba996c75df13fee15873f6c1938",
+      "afterSourceDigest": "97c89cccbac4d8846a6331e8ba4f3e93a8c1aba996c75df13fee15873f6c1938"
+    },
+    {
+      "kind": "preserve",
+      "from": "README.md",
+      "to": "README.md",
+      "beforeSourceDigest": "46c93fe3477c3361607ca50453a9bf8b170c21018e3e4a6a02968ae235a0021b",
+      "afterSourceDigest": "46c93fe3477c3361607ca50453a9bf8b170c21018e3e4a6a02968ae235a0021b"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust-toolchain.toml",
+      "to": "rust-toolchain.toml",
+      "beforeSourceDigest": "e7155b5437585c3c3acc3053b08c6936020e9e93cc343e47e7e25f0033418e84",
+      "afterSourceDigest": "e7155b5437585c3c3acc3053b08c6936020e9e93cc343e47e7e25f0033418e84"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/capabilities/index.json",
+      "to": "rust/capabilities/index.json",
+      "beforeSourceDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660",
+      "afterSourceDigest": "e6ded68fcc878863f2a75196dcc22040d996567ea255a5010a1790a91ec97660"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/Cargo.lock",
+      "to": "rust/Cargo.lock",
+      "beforeSourceDigest": "668b84f936440815b588973b4e1e394c283d9f225df8c93b7e6b6d1596e30c09",
+      "afterSourceDigest": "668b84f936440815b588973b4e1e394c283d9f225df8c93b7e6b6d1596e30c09"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/Cargo.toml",
+      "to": "rust/Cargo.toml",
+      "beforeSourceDigest": "2e51e9185f1a3c073ee324f458f2fedc2be1a6264bfa45b1f449c6658cdb234d",
+      "afterSourceDigest": "2e51e9185f1a3c073ee324f458f2fedc2be1a6264bfa45b1f449c6658cdb234d"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_db/Cargo.toml",
+      "to": "rust/gen_ui_db/Cargo.toml",
+      "beforeSourceDigest": "a33db1997aa1aded0c7898707b38044c426040b3013c0a61bea70753f04a2389",
+      "afterSourceDigest": "a33db1997aa1aded0c7898707b38044c426040b3013c0a61bea70753f04a2389"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_db/src/lib.rs",
+      "to": "rust/gen_ui_db/src/lib.rs",
+      "beforeSourceDigest": "20e9b6cc7c26c18b41182f3be4a53b3fe3669af32e17ac279f3de0c3aa2df5e9",
+      "afterSourceDigest": "20e9b6cc7c26c18b41182f3be4a53b3fe3669af32e17ac279f3de0c3aa2df5e9"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_ffi/Cargo.lock",
+      "to": "rust/gen_ui_ffi/Cargo.lock",
+      "beforeSourceDigest": "00decf8bb51d599a544609dd88a0ffa4ed6b6be86d474881557c20731e6738db",
+      "afterSourceDigest": "00decf8bb51d599a544609dd88a0ffa4ed6b6be86d474881557c20731e6738db"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_ffi/Cargo.toml",
+      "to": "rust/gen_ui_ffi/Cargo.toml",
+      "beforeSourceDigest": "7e7144d91ad1febd417fa347249fd7fa8f23da510a7a9fe50a56ab8aafc32387",
+      "afterSourceDigest": "7e7144d91ad1febd417fa347249fd7fa8f23da510a7a9fe50a56ab8aafc32387"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_ffi/src/api/mod.rs",
+      "to": "rust/gen_ui_ffi/src/api/mod.rs",
+      "beforeSourceDigest": "db3c4ff1fd1c2185307e0d776f64d179c981ed28a9b413198cb386c0fb5878d6",
+      "afterSourceDigest": "db3c4ff1fd1c2185307e0d776f64d179c981ed28a9b413198cb386c0fb5878d6"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_ffi/src/api/notes.rs",
+      "to": "rust/gen_ui_ffi/src/api/notes.rs",
+      "beforeSourceDigest": "b261ff203cd00df6d90585bd04908d13bdc5d133b1f3e98b04bcabcac0195436",
+      "afterSourceDigest": "b261ff203cd00df6d90585bd04908d13bdc5d133b1f3e98b04bcabcac0195436"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_ffi/src/frb_generated.rs",
+      "to": "rust/gen_ui_ffi/src/frb_generated.rs",
+      "beforeSourceDigest": "597901ddd320b9f9cf8ee1d2c4e921b25945ae1ba0fb7f942f18e1e0ce94f8a9",
+      "afterSourceDigest": "597901ddd320b9f9cf8ee1d2c4e921b25945ae1ba0fb7f942f18e1e0ce94f8a9"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_ffi/src/lib.rs",
+      "to": "rust/gen_ui_ffi/src/lib.rs",
+      "beforeSourceDigest": "5dd79846f7135d67db4b2f3f793668a16f2bcf3370ec56181f0435689efd828e",
+      "afterSourceDigest": "5dd79846f7135d67db4b2f3f793668a16f2bcf3370ec56181f0435689efd828e"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_notes/Cargo.toml",
+      "to": "rust/gen_ui_notes/Cargo.toml",
+      "beforeSourceDigest": "bd874ecacaf8a4cea76f73e9f11eaee2c05a7696f4aa0fb7482e0c4301262e3d",
+      "afterSourceDigest": "bd874ecacaf8a4cea76f73e9f11eaee2c05a7696f4aa0fb7482e0c4301262e3d"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_notes/examples/notes.rs",
+      "to": "rust/gen_ui_notes/examples/notes.rs",
+      "beforeSourceDigest": "f830c561439e72cc13d677b95362bd463cf77487959f58253fcfc14bd29a1d76",
+      "afterSourceDigest": "f830c561439e72cc13d677b95362bd463cf77487959f58253fcfc14bd29a1d76"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_notes/src/lib.rs",
+      "to": "rust/gen_ui_notes/src/lib.rs",
+      "beforeSourceDigest": "bad233fccb2bc563fcaaaf2b67d0d778eb4aae0c4b2e51a84a383945bd60a897",
+      "afterSourceDigest": "bad233fccb2bc563fcaaaf2b67d0d778eb4aae0c4b2e51a84a383945bd60a897"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_notes/tests/it.rs",
+      "to": "rust/gen_ui_notes/tests/it.rs",
+      "beforeSourceDigest": "8854a6b8da320559a2d0944d71012e168e571f7daa05efce5c3eb8b651d062f1",
+      "afterSourceDigest": "8854a6b8da320559a2d0944d71012e168e571f7daa05efce5c3eb8b651d062f1"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_types/Cargo.toml",
+      "to": "rust/gen_ui_types/Cargo.toml",
+      "beforeSourceDigest": "8eb55207b6435a2754cb605f53a3e31e07a3d603c694c5dd26f31fa2656b58a9",
+      "afterSourceDigest": "8eb55207b6435a2754cb605f53a3e31e07a3d603c694c5dd26f31fa2656b58a9"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/gen_ui_types/src/lib.rs",
+      "to": "rust/gen_ui_types/src/lib.rs",
+      "beforeSourceDigest": "99a42df744412ead73d0e8758601e3ce0ed81c800509de8a1a03143c456d5d50",
+      "afterSourceDigest": "99a42df744412ead73d0e8758601e3ce0ed81c800509de8a1a03143c456d5d50"
+    },
+    {
+      "kind": "preserve",
+      "from": "rust/rust-toolchain.toml",
+      "to": "rust/rust-toolchain.toml",
+      "beforeSourceDigest": "e7155b5437585c3c3acc3053b08c6936020e9e93cc343e47e7e25f0033418e84",
+      "afterSourceDigest": "e7155b5437585c3c3acc3053b08c6936020e9e93cc343e47e7e25f0033418e84"
+    }
+  ]
+}

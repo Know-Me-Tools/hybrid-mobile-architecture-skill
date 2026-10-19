@@ -858,7 +858,7 @@ rust/rust-toolchain.toml
 skills-lock.json
 
 ## builder metadata
-builderVersion = "2.0.0-alpha.4"
+builderVersion = "2.0.0-alpha.5"
 generationMode = "runnable"
 profile = "sovereign-hybrid"
 requiredPrometheusContract = "2.0.0"

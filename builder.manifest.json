@@ -4,7 +4,7 @@
   "package": {
     "id": "hybrid-mobile-architecture",
     "displayName": "KnowMe Builder",
-    "version": "2.0.0-alpha.4",
+    "version": "2.0.0-alpha.5",
     "description": "Versioned, non-destructive application generator and instruction pack for governed agentic applications.",
     "license": "MIT",
     "homepage": "https://github.com/Know-Me-Tools/hybrid-mobile-architecture-skill",

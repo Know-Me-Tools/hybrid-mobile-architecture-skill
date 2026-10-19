@@ -18,7 +18,7 @@
       "from": "desktop/package.json",
       "to": "desktop/package.json",
       "beforeSourceDigest": "2dbf0be7c7de837c9d3901107c2a8c4f636c568ee826ec382d07dc26fa246f69",
-      "afterSourceDigest": "21ed007f258409e6b90171745bb1fb374eda74328ceb6796d045c75f884ff5d8"
+      "afterSourceDigest": "56bb23d79703b5ab59151defb87a7aed53d061cc151e0500c415d539256cfc19"
     },
     {
       "kind": "preserve",
@@ -104,7 +104,7 @@
     {
       "kind": "add",
       "to": "desktop/package-lock.json",
-      "afterSourceDigest": "0efc034d38669265774d277d438e5f65bfe37f8f54913c23a139d49e92230332"
+      "afterSourceDigest": "327b42b9b4b9172270fa0cda9787a86791467592511c1b57059a06da6dda5aec"
     },
     {
       "kind": "add",

@@ -1,0 +1,229 @@
+{
+  "builder": {
+    "digest": "b87d7f7cd4909b23f9d09158022587ac8e9f8f9d6abefc9a750e3b0372e812f1",
+    "id": "hybrid-mobile-architecture",
+    "version": "2.0.0-alpha.4"
+  },
+  "openSpec": {
+    "source": "external",
+    "version": "1.6.0"
+  },
+  "prometheus": {
+    "contractDigest": "38728866beacafc7acbccc21f877080a9d72570a034e1e7c99ac0ffa34976bce",
+    "contractVersion": "2.0.0",
+    "source": "external:prometheus-skill-pack"
+  },
+  "schemaVersion": 1,
+  "skills": [
+    {
+      "digest": "1cc71602fc7ddeac78144d59e1430d2f2794dbea07941c713f0d166f250d70e0",
+      "id": "a11y-gate",
+      "source": "builder:skills/a11y-gate",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "be644faadad9acae69a1110f7bd4a503f6c5f8f813d0633a67d8affcdb194eb3",
+      "id": "build-branded-docusaurus",
+      "source": "builder:skills/build-branded-docusaurus",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "c4765b256fbc9874dd2c65921722ea520bb8096c8ddc76e66471824631d3db0d",
+      "id": "client-rag",
+      "source": "builder:skills/client-rag",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "735433e04e71a6ec2dd1be75ab0ba3d9e66e11763da6f4536d52d827822cc96b",
+      "id": "content-block-ui",
+      "source": "builder:skills/content-block-ui",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "e9806eb8f6a446609a62b68a77ea29c9970ab8e299e10765cf8ab76fe75ad52f",
+      "id": "dependency-pin-discipline",
+      "source": "builder:skills/dependency-pin-discipline",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "603c229e9175196988b42e366aef88116bb0e8026dca6ff4e1c56bf9a4105a3c",
+      "id": "deploy-hybrid-agentic-stack",
+      "source": "builder:skills/deploy-hybrid-agentic-stack",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "1769e51211c5900b4cc33dfbdd7e58509e9a9fec9062c1e89bca9a3dfcb49d7b",
+      "id": "flutter-golden-ui",
+      "source": "builder:skills/flutter-golden-ui",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "fa5281dce1534a05176d21b32ae0fb58746c78e6f866705f9b051198c6d19f0c",
+      "id": "hybrid-design-tokens",
+      "source": "builder:skills/hybrid-design-tokens",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "1694eb31f97e483b880b0ec8045632ea44efddc8f24c73af741ebf8199fab5b7",
+      "id": "hybrid-runtime-verification",
+      "source": "builder:skills/hybrid-runtime-verification",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "0782577c94e2749b97fb8c170e314a4d60ceca695ba341eead68493e35f111f2",
+      "id": "karpathy-progress-memory",
+      "source": "builder:skills/karpathy-progress-memory",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "7763881c57eef63b63d290faf17796a84a7e9d11b5ec1daa5ffd3f91c683f56d",
+      "id": "local-inference-lanes",
+      "source": "builder:skills/local-inference-lanes",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "cc8531a2a8bcd90b8f1641b9a30e67b2c5495908f4bc1eb395a2e81e21526be8",
+      "id": "mobile-navigation",
+      "source": "builder:skills/mobile-navigation",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "97579a9d6270175bf0fb00ed0b6370720691dd10eccbe23c506e427b02480eea",
+      "id": "orchestrate-prometheus-application",
+      "source": "builder:skills/orchestrate-prometheus-application",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "8f331b3d29ee8bf629013711347f1863879a0564345278415ce3a56f62d401b1",
+      "id": "peer-profile-sync",
+      "source": "builder:skills/peer-profile-sync",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "c5e3a68da9a2572b648a20cfa96f63345dcf52a48585cd359b6dcbc5c94ed602",
+      "id": "pem-local-first",
+      "source": "builder:skills/pem-local-first",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "e30ecd03f42f212cf17e53afb5efad6a4f2e5bcf43575a11e8de00e66edafae5",
+      "id": "reference-ui-fidelity",
+      "source": "builder:skills/reference-ui-fidelity",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "5f7b21493916876d49f8a5161d32f428de66e4a56a1b8b482e8975bab56b19b9",
+      "id": "sync-doctrine",
+      "source": "builder:skills/sync-doctrine",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "69c09f63b4e053e2c6230af72740dddd0d829a50c3451947fca07ab33640c556",
+      "id": "tauri-custom-titlebar",
+      "source": "builder:skills/tauri-custom-titlebar",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "1555b9cbf65e9d37c3f3af12e74700343326ff7fa206910f7e972e3d96fde2f6",
+      "id": "tauri-ui-review",
+      "source": "builder:skills/tauri-ui-review",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "4ff9eddc206557e27cb2c464dea048b194d4d5671dbd73548293e48523ef6531",
+      "id": "entity-graph-web-shell",
+      "source": "builder:skills/entity-graph-web-shell",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "5c99c1fdd1745e402762757dcb998cbf956b9eb5ea87ba31c5d00235ad01905d",
+      "id": "mini-app-module",
+      "source": "builder:skills/mini-app-module",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "6a58c81056cb5a8b753c9b6b66dfde6b0e20e730e4274f534a4cf94746550f5f",
+      "id": "axum-agent-gateway",
+      "source": "builder:skills/axum-agent-gateway",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "cc6a2f41f1279cfc7f9b2b61364faa16fec9db8cd149bee02c59950757d245d9",
+      "id": "legacy-app-embed",
+      "source": "builder:skills/legacy-app-embed",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "84ab4ddeb8abe3a56b0d863ca260ea9280b7e7485e8fb541ec1beff21af324fc",
+      "id": "a2ui-surface-contract",
+      "source": "builder:skills/a2ui-surface-contract",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "b5f7b998f51a81d5a4b9f70e664c7298d0bc01f9968b38fbb8d6b3b12f38e17a",
+      "id": "agui-event-contract",
+      "source": "builder:skills/agui-event-contract",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "77c7b0af996e127b82fa23f59c31189f02941f032c339b8a8a8a503d88addcc0",
+      "id": "agent-runtime-security",
+      "source": "builder:skills/agent-runtime-security",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "ab34c2075fca8d35513c0f5c8d6280a3f27235c0827e2cd43ca884727312c303",
+      "id": "anonymized-replica",
+      "source": "builder:skills/anonymized-replica",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "3b5a7b3d3b7fa7b7029c49d4ce24799429361fc5eba2433d65dc761e0871f47d",
+      "id": "persona-scoped-agent",
+      "source": "builder:skills/persona-scoped-agent",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "5e33e07ca77c57f16a4981ec9a814155a25b878af4e0bebd7669bbdad28b573c",
+      "id": "domain-glossary-service",
+      "source": "builder:skills/domain-glossary-service",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "bb8564e1a477d45e6ad34312071c3a9024be1c93322b781ffd0a9d696ab86c64",
+      "id": "connected-skill-packages",
+      "source": "builder:skills/connected-skill-packages",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "3ad37495b02b6a68cc1aee124fbd8296f87111b0f49888f03bc8115a251d8fac",
+      "id": "tauri-tray-app",
+      "source": "builder:skills/tauri-tray-app",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "55c7c3cf4e5e14d92d36d367d7e11ead5fedd99e39bdbd5aebd2f73fd59018a5",
+      "id": "launchagent-supervisor",
+      "source": "builder:skills/launchagent-supervisor",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "e99415c85112e6034deb9166b5ec29d878bc7b1674d49e90bd62dd2625094c60",
+      "id": "realtime-skill-refiner",
+      "source": "builder:skills/realtime-skill-refiner",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "a9bd04070ff7d9bec784f4fa5446d82ace95f5b2a2c85cd746db001482a108c8",
+      "id": "claude-hooks-reliability",
+      "source": "builder:skills/claude-hooks-reliability",
+      "version": "2.0.0-alpha.4"
+    },
+    {
+      "digest": "145209ae1bad541c13a48696eec9af1297d2071301767d6486a734aa5034c0b5",
+      "id": "auto-skill-package-integration",
+      "source": "builder:skills/auto-skill-package-integration",
+      "version": "2.0.0-alpha.4"
+    }
+  ]
+}
