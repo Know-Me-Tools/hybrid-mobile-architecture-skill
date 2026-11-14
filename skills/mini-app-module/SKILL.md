@@ -13,6 +13,21 @@ Declare a stable module ID, version, routes, entity types, required
 capabilities, policy actions, event contracts, and optional migrations. The
 shell validates this manifest before mounting the module.
 
+## Seeding from a KnowDesign prototype
+
+A working htmx + Alpine prototype from KnowDesign ships `od-prototype.json`
+(routes, components, UI state, entities, token roles). Use it as the starting
+point for the manifest instead of reverse-engineering screens:
+
+- routes become the module's routes and its repository contract;
+- entities become entity types;
+- `HX-Trigger` events become event contracts;
+- token roles go to `hybrid-design-tokens`.
+
+The full field mapping is in `references/od-prototype-mapping.md`. The
+prototype carries no identity or policy, so capabilities and policy actions
+are always added by hand.
+
 ## Boundaries
 
 - Presentation depends on domain interfaces.
